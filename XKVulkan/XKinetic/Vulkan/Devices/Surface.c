@@ -5,6 +5,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
   XkResult result = XK_SUCCESS;
 
 #if defined(XK_PLATFORM_LINUX)
+	// Initialize Vulkan Wayland surface create info.
   const VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo = {
 		.sType 				= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
 		.pNext 				= VK_NULL_HANDLE,
@@ -13,6 +14,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		.surface 			= window->handle.wlSurface
 	};
 
+	// Create Vulkan Wayland surface.
 	VkResult vkResult = vkCreateWaylandSurfaceKHR(_xkVkContext.vkInstance, &vkWaylandSurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
 	if(vkResult != VK_SUCCESS) {
 		xkLogError("Failed to create Vulkan Wayland surface: %s", __xkVkGetErrorString(vkResult));
@@ -20,6 +22,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		goto _catch;
 	}  
 #elif defined(XK_PLATFORM_WIN32)
+	// Initialize Vulkan Win32 surface create info.
   const VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo = {
 		.sType 				= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
 		.pNext 				= VK_NULL_HANDLE,
@@ -28,6 +31,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		.hwnd 				= window.handle.handle
 	};
 
+	// Create Vulkan Win32 surface.
 	VkResult vkResult = vkCreateWin32SurfaceKHR(_xkVkContext.vkInstance, &vkWin32SurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
 	if(vkResult != VK_SUCCESS) {
 		xkLogError("Failed to create Vulkan Win32 surface: %s", __xkVkGetErrorString(vkResult));
@@ -41,5 +45,6 @@ _catch:
 }
 
 void __xkVkDestroySurface(VkSurfaceKHR vkSurface) {
+	// Destroy Vulkan surface.
 	vkDestroySurfaceKHR(_xkVkContext.vkInstance, vkSurface, VK_NULL_HANDLE);
 }

@@ -6,7 +6,7 @@ static uint32_t __xkVkScorePhysicalDevice(const VkPhysicalDevice);
 static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice, const VkSurfaceKHR);
 static VkPhysicalDevice __xkVkChoosePhysicalDevice(const VkPhysicalDevice*, const uint32_t);
 
-XkResult __xkVkPickPhysicalDevice() {
+XkResult __xkVkPickPhysicalDevice(void) {
   XkResult result = XK_SUCCESS;
 
   // Get Vulkan support physical device count.
@@ -129,33 +129,36 @@ static XkBool32 __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const pFa
     vkQueueProperties = vkQueueFamilyProperties[i];
 
     // Check Vulkan graphics queue.
-    if((vkQueueProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) && !pFamilyIndices->graphicsFind) {
+    if(vkQueueProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
       pFamilyIndices->graphics = i;
-      pFamilyIndices->graphicsFind = VK_TRUE;
+      pFamilyIndices->supportedQueues |= VK_QUEUE_GRAPHICS_BIT;
     }
 
     // Check Vulkan present queue.
     VkBool32 vkPresentQueueSupport = VK_FALSE;
     vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, i, vkSurface, &vkPresentQueueSupport);
-    if(vkPresentQueueSupport && !pFamilyIndices->presentFind) {
+    if(vkPresentQueueSupport) {
       pFamilyIndices->present = i;     
-      pFamilyIndices->presentFind = VK_TRUE;  
+      pFamilyIndices->supportPresentQueue = XK_TRUE;  
     }
  
       // Check Vulkan transfer queue.
-    if((vkQueueProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) && !pFamilyIndices->transferFind) {
+    if(vkQueueProperties.queueFlags & VK_QUEUE_TRANSFER_BIT) {
       pFamilyIndices->transfer = i;
-      pFamilyIndices->transferFind = VK_TRUE;  
+      pFamilyIndices->supportedQueues |= VK_QUEUE_TRANSFER_BIT;  
     }
 
     // Check Vulkan compute queue.
-    if((vkQueueProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) && !pFamilyIndices->computeFind) {
+    if(vkQueueProperties.queueFlags & VK_QUEUE_COMPUTE_BIT) {
       pFamilyIndices->compute = i;
-      pFamilyIndices->computeFind = VK_TRUE;  
+      pFamilyIndices->supportedQueues |= VK_QUEUE_COMPUTE_BIT;  
     }
 
     // If all Vulkan queues find, break loop.
-    if(pFamilyIndices->graphicsFind && pFamilyIndices->presentFind && pFamilyIndices->transferFind && pFamilyIndices->computeFind) {
+    if((pFamilyIndices->supportedQueues & VK_QUEUE_GRAPHICS_BIT) && 
+        pFamilyIndices->supportPresentQueue && 
+        (pFamilyIndices->supportedQueues & VK_QUEUE_TRANSFER_BIT) && 
+        (pFamilyIndices->supportedQueues & VK_QUEUE_COMPUTE_BIT)) {
       break;
     }
   }
@@ -263,8 +266,6 @@ static VkPhysicalDevice __xkVkChoosePhysicalDevice(const VkPhysicalDevice* vkPhy
         vkBestPhysicalDeviceScore = vkPhysicalDeviceScore;
         vkBestPhysicalDeviceIndex = i;
       }
-
-      break;
     }
   }
 

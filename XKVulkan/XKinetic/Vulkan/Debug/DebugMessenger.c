@@ -27,9 +27,10 @@ void __xkVkPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT* 
   };
 }
 
-XkResult __xkVkCreateDebugMessenger() {
+XkResult __xkVkCreateDebugMessenger(void) {
   XkResult result = XK_SUCCESS;
 
+  // Get Vulkan 'vkCreateDebugUtilsMessengerEXT' proc adderss.
   PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkCreateDebugUtilsMessengerEXT");
   if(!vkCreateDebugUtilsMessenger) {
     result = XK_ERROR_UNKNOWN;
@@ -37,9 +38,11 @@ XkResult __xkVkCreateDebugMessenger() {
     goto _catch;
   }
 
+  // Initialize Vulkan debug utils messenger create info.
   VkDebugUtilsMessengerCreateInfoEXT vkDebugUtilsMessengerCreateInfo;
   __xkVkPopulateDebugMessengerCreateInfo(&vkDebugUtilsMessengerCreateInfo);
 
+  // Create Vulkan debug utils messenger.
   VkResult vkResult = vkCreateDebugUtilsMessenger(_xkVkContext.vkInstance, &vkDebugUtilsMessengerCreateInfo, VK_NULL_HANDLE, &_xkVkContext.vkDebugMessenger);
   if(vkResult != VK_SUCCESS) {
      result = XK_ERROR_UNKNOWN;
@@ -51,13 +54,15 @@ _catch:
   return(result);  
 }
 
-void __xkVkDestroyDebugMessenger() {
+void __xkVkDestroyDebugMessenger(void) {
+    // Get Vulkan 'vkDestroyDebugUtilsMessengerEXT' proc adderss.
   PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessenger = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkDestroyDebugUtilsMessengerEXT");
   if(!vkDestroyDebugUtilsMessenger) {
     xkLogError("Vulkan: Failed to get instance proc address vkDestroyDebugUtilsMessengerEXT: %s", __xkVkGetErrorString(VK_ERROR_EXTENSION_NOT_PRESENT));
     return;
   }
 
+  // Destroy Vulkan debug utils messenger.
   vkDestroyDebugUtilsMessenger(_xkVkContext.vkInstance, _xkVkContext.vkDebugMessenger, VK_NULL_HANDLE);
 }
 #endif // XKVK_DEBUG

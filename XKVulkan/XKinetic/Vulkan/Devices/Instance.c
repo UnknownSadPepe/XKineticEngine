@@ -3,7 +3,7 @@
 static XkBool32 __xkVkCheckInstanceExtensionsSupport(void);
 static XkBool32 __xkVkCheckInstanceLayersSupport(void);
 
-XkResult __xkVkCreateInstance() {
+XkResult __xkVkCreateInstance(void) {
   XkResult result = XK_SUCCESS;
 
   // Check Vulkan instance extensions support.
@@ -62,7 +62,7 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroyInstance() {
+void __xkVkDestroyInstance(void) {
   // Destroy Vulkan instance.
   vkDestroyInstance(_xkVkContext.vkInstance, VK_NULL_HANDLE);
 }

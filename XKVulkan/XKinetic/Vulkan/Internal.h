@@ -58,10 +58,8 @@ typedef struct {
   uint32_t transfer;
   uint32_t compute;
 
-  VkBool32 graphicsFind;
-  VkBool32 presentFind;
-  VkBool32 transferFind;
-  VkBool32 computeFind;
+	VkQueueFlags supportedQueues;
+	XkBool32 supportPresentQueue;
 } __XkVkQueueFamilyIndices;
 
 typedef struct {
@@ -113,22 +111,22 @@ extern __XkVkContext _xkVkContext;
 
 XK_API_IMPORT XkChar8* __xkVkGetErrorString(VkResult); 
 
-XK_API_IMPORT XkResult __xkVkInitializeContext();
-XK_API_IMPORT void __xkVkTerminateContext();
+XK_API_IMPORT XkResult __xkVkInitializeContext(void);
+XK_API_IMPORT void __xkVkTerminateContext(void);
 
-XK_API_IMPORT XkResult __xkVkCreateInstance();
-XK_API_IMPORT void __xkVkDestroyInstance();
+XK_API_IMPORT XkResult __xkVkCreateInstance(void);
+XK_API_IMPORT void __xkVkDestroyInstance(void);
 
 #ifdef XKVK_DEBUG
 XK_API_IMPORT void __xkVkPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT*);
-XK_API_IMPORT XkResult __xkVkCreateDebugMessenger();
-XK_API_IMPORT void __xkVkDestroyDebugMessenger();
+XK_API_IMPORT XkResult __xkVkCreateDebugMessenger(void);
+XK_API_IMPORT void __xkVkDestroyDebugMessenger(void);
 #endif // XKVK_DEBUG
 
 XK_API_IMPORT XkResult __xkVkCreateSurface(VkSurfaceKHR*, XkWindow);
 XK_API_IMPORT void __xkVkDestroySurface(VkSurfaceKHR);
 
-XK_API_IMPORT XkResult __xkVkPickPhysicalDevice();
+XK_API_IMPORT XkResult __xkVkPickPhysicalDevice(void);
 
-XK_API_IMPORT XkResult __xkVkCreateLogicalDevice();
-XK_API_IMPORT void __xkVkDestroyLogicalDevice();
+XK_API_IMPORT XkResult __xkVkCreateLogicalDevice(void);
+XK_API_IMPORT void __xkVkDestroyLogicalDevice(void);
