@@ -105,6 +105,8 @@ typedef struct {
 	VkQueue vkGraphicsQueue;
 	VkQueue vkTransferQueue;
 	VkQueue vkComputeQueue;
+
+	VkCommandPool vkCommandPool;
 } __XkVkContext;
 
 extern __XkVkContext _xkVkContext;
@@ -130,3 +132,6 @@ XK_API_IMPORT XkResult __xkVkPickPhysicalDevice(void);
 
 XK_API_IMPORT XkResult __xkVkCreateLogicalDevice(void);
 XK_API_IMPORT void __xkVkDestroyLogicalDevice(void);
+
+XK_API_IMPORT XkResult __xkVkCreateCommandPool(void);
+XK_API_IMPORT void __xkVkDestroyCommandPool(void);

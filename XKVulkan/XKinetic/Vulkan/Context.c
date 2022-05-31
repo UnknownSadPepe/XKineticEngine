@@ -55,6 +55,13 @@ XkResult __xkVkInitializeContext() {
     goto _catch;
   }  
 
+  result = __xkVkCreateCommandPool();
+  if(result != XK_SUCCESS) {
+    xkLogError("Vulkan: Failed to create command pool: %d", result);
+    result = XK_ERROR_INITIALIZE_FAILED;
+    goto _catch;
+  } 
+
   _xkVkContext.initialized = XK_TRUE;
 
 _catch:
@@ -62,6 +69,7 @@ _catch:
 }
 
 void __xkVkTerminateContext() {
+  __xkVkDestroyCommandPool();
   __xkVkDestroyLogicalDevice();
   __xkVkDestroySurface(_xkVkContext.vkHelperSurface);
 #ifdef XKVK_DEBUG
