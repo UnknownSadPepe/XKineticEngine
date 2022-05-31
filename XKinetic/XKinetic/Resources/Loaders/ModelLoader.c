@@ -1,0 +1,50 @@
+#include "XKinetic/Resources/Loaders/ModelLoader.h"
+
+#define XK_MODEL_LOADER_PATH_MAX_SIZE 64
+
+struct XkModelLoader {
+  XkChar8 path[XK_MODEL_LOADER_PATH_MAX_SIZE];
+};
+
+XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkChar8* path) {
+  XkResult result = XK_SUCCESS;
+
+	*pLoader = xkAllocateMemory(sizeof(struct XkModelLoader));
+	if(!(*pLoader)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;
+	}
+
+	XkModelLoader loader = *pLoader;
+
+  xkNCopyString(loader->path, path, XK_MODEL_LOADER_PATH_MAX_SIZE);
+
+  // TODO: implementation.
+
+  
+
+_catch:
+  return(result);
+}
+
+void xkDestroyModelLoader(XkModelLoader loader) {
+  // TODO: implementation.
+  xkFreeMemory(loader);
+}
+
+XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkChar8* name) {
+  XkResult result = XK_SUCCESS;
+
+  // TODO: implementation.
+  pConfig->vertexCount = 0;
+  pConfig->vertices = XK_NULL;
+  pConfig->indexCount = 0;
+  pConfig->indices = XK_NULL;
+
+_catch:
+  return(result); 
+}
+
+void xkUnloadModel(XkModelLoader loader, XkModelConfig* const pConfig) {
+  // TODO: implementation.
+}
