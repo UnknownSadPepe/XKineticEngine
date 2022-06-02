@@ -3,168 +3,168 @@
 XkResult __xkVkCreateLogicalDevice(void) {
   XkResult result = XK_SUCCESS;
 
-  float vkQueuePriorities[1] = {1.0f};
+  float queuePriorities[1] = {1.0f};
 
-  uint32_t vkQueueCreateInfoCount = 0;
+  uint32_t queueCreateInfoCount = 0;
 
   VkDeviceQueueCreateInfo vkQueueCreateInfos[4] = {0};
 
   // Template Vulkan queue families.
-  uint32_t vkGraphicsQueueFamily = _xkVkContext.queueFamilyIndices.graphics;
-  uint32_t vkPresentQueueFamily = _xkVkContext.queueFamilyIndices.present;
-  uint32_t vkTransferQueueFamily = _xkVkContext.queueFamilyIndices.transfer;
-  uint32_t vkComputeQueueFamily = _xkVkContext.queueFamilyIndices.compute;
+  uint32_t graphicsQueueFamily = _xkVkContext.queueFamilyIndices.graphics;
+  uint32_t presentQueueFamily = _xkVkContext.queueFamilyIndices.present;
+  uint32_t transferQueueFamily = _xkVkContext.queueFamilyIndices.transfer;
+  uint32_t computeQueueFamily = _xkVkContext.queueFamilyIndices.compute;
 
   if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_GRAPHICS_BIT) {
 		const VkDeviceQueueCreateInfo vkGraphicsQueueCreateInfo = {
       .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
       .pNext = VK_NULL_HANDLE,
       .flags = 0,
-      .queueFamilyIndex = vkGraphicsQueueFamily,
+      .queueFamilyIndex = graphicsQueueFamily,
       .queueCount = 1,
-      .pQueuePriorities = vkQueuePriorities
+      .pQueuePriorities = queuePriorities
     };
-		vkQueueCreateInfos[vkQueueCreateInfoCount] = vkGraphicsQueueCreateInfo;
+		vkQueueCreateInfos[queueCreateInfoCount] = vkGraphicsQueueCreateInfo;
 
-    ++vkQueueCreateInfoCount;
+    ++queueCreateInfoCount;
 	} else {
-		vkGraphicsQueueFamily = 0;
+		graphicsQueueFamily = 0;
 	}
 
-  if(_xkVkContext.queueFamilyIndices.supportPresentQueue && vkPresentQueueFamily != vkGraphicsQueueFamily) {
+  if(_xkVkContext.queueFamilyIndices.supportPresentQueue && presentQueueFamily != graphicsQueueFamily) {
     const VkDeviceQueueCreateInfo vkPresentQueueCreateInfo = {
       .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
       .pNext = VK_NULL_HANDLE,
       .flags = 0,
-      .queueFamilyIndex = vkPresentQueueFamily,
+      .queueFamilyIndex = presentQueueFamily,
       .queueCount = 1,
-      .pQueuePriorities = vkQueuePriorities
+      .pQueuePriorities = queuePriorities
     };
-		vkQueueCreateInfos[vkQueueCreateInfoCount] = vkPresentQueueCreateInfo;
+		vkQueueCreateInfos[queueCreateInfoCount] = vkPresentQueueCreateInfo;
 
-    ++vkQueueCreateInfoCount;    
+    ++queueCreateInfoCount;    
   } else {
- 		vkPresentQueueFamily = 0;   
+ 		presentQueueFamily = 0;   
   }
 
-	if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_TRANSFER_BIT && vkTransferQueueFamily != vkGraphicsQueueFamily && vkTransferQueueFamily != vkPresentQueueFamily) {
+	if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_TRANSFER_BIT && transferQueueFamily != graphicsQueueFamily && transferQueueFamily != presentQueueFamily) {
 		const VkDeviceQueueCreateInfo vkTransferQueueCreateInfo = {
       .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
       .pNext = VK_NULL_HANDLE,
       .flags = 0,
-      .queueFamilyIndex = vkComputeQueueFamily,
+      .queueFamilyIndex = computeQueueFamily,
       .queueCount = 1,
-      .pQueuePriorities = vkQueuePriorities
+      .pQueuePriorities = queuePriorities
     };
-		vkQueueCreateInfos[vkQueueCreateInfoCount] = vkTransferQueueCreateInfo;
+		vkQueueCreateInfos[queueCreateInfoCount] = vkTransferQueueCreateInfo;
 
-    ++vkQueueCreateInfoCount;
+    ++queueCreateInfoCount;
 	} else {
-		vkTransferQueueFamily = vkGraphicsQueueFamily;
+		transferQueueFamily = graphicsQueueFamily;
 	}
 
-	if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_COMPUTE_BIT && vkComputeQueueFamily != vkGraphicsQueueFamily && vkComputeQueueFamily != vkPresentQueueFamily && vkComputeQueueFamily != vkTransferQueueFamily) {
+	if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_COMPUTE_BIT && computeQueueFamily != graphicsQueueFamily && computeQueueFamily != presentQueueFamily && computeQueueFamily != transferQueueFamily) {
 		const VkDeviceQueueCreateInfo vkComputeQueueCreateInfo = {
       .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
       .pNext = VK_NULL_HANDLE,
       .flags = 0,
-      .queueFamilyIndex = vkComputeQueueFamily,
+      .queueFamilyIndex = computeQueueFamily,
       .queueCount = 1,
-      .pQueuePriorities = vkQueuePriorities
+      .pQueuePriorities = queuePriorities
     };
-		vkQueueCreateInfos[vkQueueCreateInfoCount] = vkComputeQueueCreateInfo;
+		vkQueueCreateInfos[queueCreateInfoCount] = vkComputeQueueCreateInfo;
 
-    ++vkQueueCreateInfoCount;
+    ++queueCreateInfoCount;
 	} else {
-		vkComputeQueueFamily = vkGraphicsQueueFamily;
+		computeQueueFamily = graphicsQueueFamily;
 	}
 
   // Synchronize queue families.
-  _xkVkContext.queueFamilyIndices.graphics = vkGraphicsQueueFamily;
-  _xkVkContext.queueFamilyIndices.present = vkPresentQueueFamily;
-  _xkVkContext.queueFamilyIndices.transfer = vkTransferQueueFamily;
-  _xkVkContext.queueFamilyIndices.compute = vkComputeQueueFamily;
+  _xkVkContext.queueFamilyIndices.graphics = graphicsQueueFamily;
+  _xkVkContext.queueFamilyIndices.present = presentQueueFamily;
+  _xkVkContext.queueFamilyIndices.transfer = transferQueueFamily;
+  _xkVkContext.queueFamilyIndices.compute = computeQueueFamily;
 
-  VkPhysicalDeviceFeatures vkEnabledFeatures = {0};
+  VkPhysicalDeviceFeatures vkEnabledDeviceFeatures = {0};
 
 	// Enable sample rate shading filtering if supported.
 	if(_xkVkContext.vkDeviceFeatures.sampleRateShading) {
-		vkEnabledFeatures.sampleRateShading = VK_TRUE;
+		vkEnabledDeviceFeatures.sampleRateShading = VK_TRUE;
   }
 
   // Fill mode non solid is required for wireframe display.
 	if(_xkVkContext.vkDeviceFeatures.fillModeNonSolid) {
-		vkEnabledFeatures.fillModeNonSolid = VK_TRUE;
+		vkEnabledDeviceFeatures.fillModeNonSolid = VK_TRUE;
   }
 
 	// Wide lines must be present for line width > 1.0f.
 	if(_xkVkContext.vkDeviceFeatures.wideLines) {
-	  vkEnabledFeatures.wideLines = VK_TRUE;
+	  vkEnabledDeviceFeatures.wideLines = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support wireframe pipelines");
 	}
 
   // Enable sample anisotropy if supported.
 	if(_xkVkContext.vkDeviceFeatures.samplerAnisotropy) {
-		vkEnabledFeatures.samplerAnisotropy = VK_TRUE;
+		vkEnabledDeviceFeatures.samplerAnisotropy = VK_TRUE;
   } else {
 		xkLogWarning("Selected Vulkan GPU does not support sampler anisotropy");
   }
 
   // Select texture compression.
 	if (_xkVkContext.vkDeviceFeatures.textureCompressionBC) {
-		vkEnabledFeatures.textureCompressionBC = VK_TRUE;
+		vkEnabledDeviceFeatures.textureCompressionBC = VK_TRUE;
 	} else if (_xkVkContext.vkDeviceFeatures.textureCompressionASTC_LDR) {
-		vkEnabledFeatures.textureCompressionASTC_LDR = VK_TRUE;
+		vkEnabledDeviceFeatures.textureCompressionASTC_LDR = VK_TRUE;
 	} else if (_xkVkContext.vkDeviceFeatures.textureCompressionETC2) {
-		vkEnabledFeatures.textureCompressionETC2 = VK_TRUE;
+		vkEnabledDeviceFeatures.textureCompressionETC2 = VK_TRUE;
   }
 
   // Enable vertex pipeline stores nad atomic.
 	if (_xkVkContext.vkDeviceFeatures.vertexPipelineStoresAndAtomics) {
-		vkEnabledFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
+		vkEnabledDeviceFeatures.vertexPipelineStoresAndAtomics = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support vertex pipeline stores and atomics");
   }
 
   // Enable fragment stores nad atomic.
   if(_xkVkContext.vkDeviceFeatures.fragmentStoresAndAtomics) {
-		vkEnabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
+		vkEnabledDeviceFeatures.fragmentStoresAndAtomics = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support fragment stores and atomics");
   }
 
   // Enable shader storage extended formats.
 	if(_xkVkContext.vkDeviceFeatures.shaderStorageImageExtendedFormats) {
-		vkEnabledFeatures.shaderStorageImageExtendedFormats = VK_TRUE;
+		vkEnabledDeviceFeatures.shaderStorageImageExtendedFormats = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support shader storage extended formats");
   }
 
   // Enable shader storage write without format. 
 	if(_xkVkContext.vkDeviceFeatures.shaderStorageImageWriteWithoutFormat) {
-		vkEnabledFeatures.shaderStorageImageWriteWithoutFormat = VK_TRUE;
+		vkEnabledDeviceFeatures.shaderStorageImageWriteWithoutFormat = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support shader storage write without format");
   }
 
   // Support geometry shaders.
 	if(_xkVkContext.vkDeviceFeatures.geometryShader) {
-		vkEnabledFeatures.geometryShader = VK_TRUE;
+		vkEnabledDeviceFeatures.geometryShader = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support geometry shaders");
   }
 
   // Support tessellation shaders.
 	if(_xkVkContext.vkDeviceFeatures.tessellationShader) {
-		vkEnabledFeatures.tessellationShader = VK_TRUE;
+		vkEnabledDeviceFeatures.tessellationShader = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support tessellation shaders");
   }
 
   // Support multi viewports
 	if(_xkVkContext.vkDeviceFeatures.multiViewport) {
-		vkEnabledFeatures.multiViewport = VK_TRUE;
+		vkEnabledDeviceFeatures.multiViewport = VK_TRUE;
 	} else {
 		xkLogWarning("Selected Vulkan GPU does not support multi viewports");
   }
@@ -174,13 +174,13 @@ XkResult __xkVkCreateLogicalDevice(void) {
     .sType                      = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
     .pNext                      = VK_NULL_HANDLE,
     .flags                      = 0,
-    .queueCreateInfoCount       = vkQueueCreateInfoCount,
+    .queueCreateInfoCount       = queueCreateInfoCount,
     .pQueueCreateInfos          = vkQueueCreateInfos,
     .enabledLayerCount          = _xkVkInstanceLayerCount,
     .ppEnabledLayerNames        = _xkVkInstanceLayers,
     .enabledExtensionCount      = _xkVkDeviceExtensionCount,
     .ppEnabledExtensionNames    = _xkVkDeviceExtensions,
-    .pEnabledFeatures           = &vkEnabledFeatures
+    .pEnabledFeatures           = &vkEnabledDeviceFeatures
   };
 
   // Create Vulkan logical device.
@@ -207,4 +207,16 @@ void __xkVkDestroyLogicalDevice(void) {
 
   // Destroy Vulkan logical device.
   vkDestroyDevice(_xkVkContext.vkLogicalDevice, VK_NULL_HANDLE);
+}
+
+uint32_t __xkVkFindMemoryType(uint32_t typeFilter, const VkMemoryPropertyFlags vkRequiredProperties) {
+	for(uint32_t i = 0; i < _xkVkContext.vkDeviceMemoryProperties.memoryTypeCount; i++) {
+		uint32_t memoryTypeBits = 1 << i;
+
+		if (typeFilter & memoryTypeBits && (_xkVkContext.vkDeviceMemoryProperties.memoryTypes[i].propertyFlags & vkRequiredProperties) == vkRequiredProperties) {
+			return(i);
+		}
+	}
+
+  return(0);
 }

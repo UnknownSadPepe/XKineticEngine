@@ -26,7 +26,7 @@ XkResult __xkVkCreateInstance(void) {
     .pNext            = VK_NULL_HANDLE,
     .pEngineName      = "XKineticEngine",
     .engineVersion    = VK_MAKE_VERSION(0, 0, 1),
-    .apiVersion       = VK_API_VERSION_1_2
+    .apiVersion       = VK_API_VERSION_1_3
   };
 
 #ifdef XKVK_DEBUG
@@ -71,43 +71,43 @@ static XkBool32 __xkVkCheckInstanceExtensionsSupport(void) {
   XkBool32 result = XK_TRUE; 
 
   // Get Vulkan instance extension properties count.
-  uint32_t vkAvailableExtensionPropertiesCount = 0;
-  vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &vkAvailableExtensionPropertiesCount, VK_NULL_HANDLE);
-  if(vkAvailableExtensionPropertiesCount == 0) {
+  uint32_t availableExtensionPropertiesCount = 0;
+  vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &availableExtensionPropertiesCount, VK_NULL_HANDLE);
+  if(availableExtensionPropertiesCount == 0) {
     xkLogError("Failed to enumerate Vulkan instance extension properties");
     result = XK_FALSE;
     goto _catch;    
   }
 
   // Get Vulkan instance extension properties.
-  VkExtensionProperties* vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * vkAvailableExtensionPropertiesCount);
-  vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &vkAvailableExtensionPropertiesCount, vkAvailableExtensionProperties);
+  VkExtensionProperties* vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * availableExtensionPropertiesCount);
+  vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &availableExtensionPropertiesCount, vkAvailableExtensionProperties);
 
   // Template available Vulkan extension.
-  const char* vkAvailableExtension = XK_NULL;
+  const char* availableExtension = XK_NULL;
 
   // Template required Vulkan extension.
-  const char* vkRequiredExtension = XK_NULL;
+  const char* requiredExtension = XK_NULL;
 
   // Helper boolean value.
-  XkBool32 vkAvailableExtensionFind = XK_FALSE;
+  XkBool32 availableExtensionFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVkInstanceExtensionCount; i++) {
-    vkRequiredExtension = _xkVkInstanceExtensions[i];
-    vkAvailableExtensionFind = XK_FALSE;
+    requiredExtension = _xkVkInstanceExtensions[i];
+    availableExtensionFind = XK_FALSE;
 
-    for(uint32_t j = 0; j < vkAvailableExtensionPropertiesCount; j++) {
-      vkAvailableExtension = vkAvailableExtensionProperties[j].extensionName;
+    for(uint32_t j = 0; j < availableExtensionPropertiesCount; j++) {
+      availableExtension = vkAvailableExtensionProperties[j].extensionName;
 
       // Check Vulkan extension.
-      if(xkCompareString(vkRequiredExtension, vkAvailableExtension)) {
-        vkAvailableExtensionFind = XK_TRUE;
+      if(xkCompareString(requiredExtension, availableExtension)) {
+        availableExtensionFind = XK_TRUE;
         break;
       }
     }
 
     // If doesn't find available Vulkan extension.
-    if(!vkAvailableExtensionFind) {
+    if(!availableExtensionFind) {
       result = XK_FALSE;
       goto _catch;
     }
@@ -125,43 +125,43 @@ static XkBool32 __xkVkCheckInstanceLayersSupport(void) {
   XkBool32 result = XK_TRUE; 
 
   // Get Vulkan instance layer properties count.
-  uint32_t vkAvailableLayerPropertiesCount = 0;
-  vkEnumerateInstanceLayerProperties(&vkAvailableLayerPropertiesCount, VK_NULL_HANDLE);
-  if(vkAvailableLayerPropertiesCount == 0) {
+  uint32_t availableLayerPropertiesCount = 0;
+  vkEnumerateInstanceLayerProperties(&availableLayerPropertiesCount, VK_NULL_HANDLE);
+  if(availableLayerPropertiesCount == 0) {
     xkLogError("Failed to enumerate Vulkan instance layer properties");
     result = XK_FALSE;
     goto _catch;    
   }
 
   // Get Vulkan instance layer properties.
-  VkLayerProperties* vkAvailableLayerProperties = xkAllocateMemory(sizeof(VkLayerProperties) * vkAvailableLayerPropertiesCount);;
-  vkEnumerateInstanceLayerProperties(&vkAvailableLayerPropertiesCount, vkAvailableLayerProperties);
+  VkLayerProperties* vkAvailableLayerProperties = xkAllocateMemory(sizeof(VkLayerProperties) * availableLayerPropertiesCount);;
+  vkEnumerateInstanceLayerProperties(&availableLayerPropertiesCount, vkAvailableLayerProperties);
 
   // Template available Vulkan layer.
-  const char* vkAvailableLayer = XK_NULL;
+  const char* availableLayer = XK_NULL;
 
   // Template required Vulkan layer.
-  const char* vkRequiredLayer = XK_NULL;
+  const char* requiredLayer = XK_NULL;
 
   // Helper boolean value.
-  XkBool32 vkAvailableLayerFind = XK_FALSE;
+  XkBool32 availableLayerFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVkInstanceLayerCount; i++) {
-    vkRequiredLayer = _xkVkInstanceLayers[i];
-    vkAvailableLayerFind = XK_FALSE;
+    requiredLayer = _xkVkInstanceLayers[i];
+    availableLayerFind = XK_FALSE;
 
-    for(uint32_t j = 0; j < vkAvailableLayerPropertiesCount; j++) {
-      vkAvailableLayer = vkAvailableLayerProperties[j].layerName;
+    for(uint32_t j = 0; j < availableLayerPropertiesCount; j++) {
+      availableLayer = vkAvailableLayerProperties[j].layerName;
 
       // Check Vulkan layer.
-      if(xkCompareString(vkRequiredLayer, vkAvailableLayer)) {
-        vkAvailableLayerFind = XK_TRUE;
+      if(xkCompareString(requiredLayer, availableLayer)) {
+        availableLayerFind = XK_TRUE;
         break;
       }
     }
 
     // If doesn't find available Vulkan layer.
-    if(!vkAvailableLayerFind) {
+    if(!availableLayerFind) {
       result = XK_FALSE;
       goto _catch;
     }

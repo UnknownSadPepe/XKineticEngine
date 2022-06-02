@@ -69,17 +69,24 @@ typedef struct {
 } __XkVkSwapChainDetails;
 
 struct XkVkBuffer {
-	VkBuffer buffer;
-	VkDeviceMemory memory;
-	VkDeviceSize size;
+	VkBuffer vkBuffer;
+	VkDeviceMemory vkMemory;
+	VkDeviceSize vkSize;
 };
 
 struct XkVkTexture2D {
-	VkImage image;
-	VkDeviceMemory memory;
-	VkImageView imageView;
-	VkSampler sampler;
+	VkImage vkImage;
+	VkDeviceMemory vkMemory;
+	VkImageView vkImageView;
+	VkSampler vkSampler;
 };
+
+typedef struct {
+	VkImage vkImage;
+	VkDeviceMemory vkMemory;
+	VkImageView vkImageView;
+	VkSampler vkSampler;
+} XkVkImage;
 
 typedef struct {
 	XkBool32 initialized;
@@ -133,5 +140,40 @@ XK_API_IMPORT XkResult __xkVkPickPhysicalDevice(void);
 XK_API_IMPORT XkResult __xkVkCreateLogicalDevice(void);
 XK_API_IMPORT void __xkVkDestroyLogicalDevice(void);
 
+XK_API_IMPORT uint32_t __xkVkFindMemoryType(uint32_t, const VkMemoryPropertyFlags);
+
 XK_API_IMPORT XkResult __xkVkCreateCommandPool(void);
 XK_API_IMPORT void __xkVkDestroyCommandPool(void);
+
+XK_API_IMPORT XkResult __xkVkCreateSwapChain(VkSwapchainKHR*, VkSurfaceKHR, VkExtent2D* const, VkFormat* const, VkImage*, uint32_t* const);
+XK_API_IMPORT void __xkVkDestroySwapChain(VkSwapchainKHR);
+
+XK_API_IMPORT XkResult __xkVkCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescription*, const uint32_t, VkSubpassDescription*, const uint32_t, VkSubpassDependency*, const uint32_t);
+XK_API_IMPORT void __xkVkDestroyeRenderPass(VkRenderPass);
+
+XK_API_IMPORT XkResult __xkVkCreateFrameBuffer(VkFramebuffer*, VkRenderPass, const VkExtent2D, VkImageView*, const uint32_t);
+XK_API_IMPORT void __xkVkDestroyFrameBuffer(VkFramebuffer);
+
+XK_API_IMPORT XkResult __xkVkCreateCommandBuffer(VkCommandBuffer*, const VkCommandBufferLevel);
+XK_API_IMPORT void __xkVkDestroyCommandBuffer(VkCommandBuffer);
+
+XK_API_IMPORT XkResult __xkVkCreateSemaphore(VkSemaphore*);
+XK_API_IMPORT void __xkVkDestroySemaphore(VkSemaphore);
+
+XK_API_IMPORT XkResult __xkVkCreateFence(VkFence*);
+XK_API_IMPORT void __xkVkDestroyFence(VkFence);
+
+XK_API_IMPORT XkResult __xkVkCreateShader(VkShaderModule*, const uint32_t*, const size_t);
+XK_API_IMPORT void __xkVkDestroyShader(VkShaderModule);
+
+XK_API_IMPORT XkResult __xkVkCreateBuffer(VkBuffer* const, VkDeviceMemory* const, const VkDeviceSize, const VkBufferUsageFlags, const VkMemoryPropertyFlags, const void*);
+XK_API_IMPORT void __xkVkDestroyBuffer(VkBuffer, VkDeviceMemory);
+
+XK_API_IMPORT XkResult __xkVkCreateImage(VkImage* const, VkDeviceMemory* const, const VkImageType, const VkFormat, const VkExtent3D, const VkSampleCountFlagBits, const VkImageTiling, const VkImageUsageFlags, const VkMemoryPropertyFlags, const uint32_t);
+XK_API_IMPORT void __xkVkDestroyImage(VkImage, VkDeviceMemory);
+
+XK_API_IMPORT XkResult __xkVkCreateImageView(VkImageView* const, VkImage, const VkFormat, const VkImageAspectFlags, const uint32_t);
+XK_API_IMPORT void __xkVkDestroyImageView(VkImageView);
+
+XK_API_IMPORT XkResult __xkVkCreateSampler(VkSampler*, const VkFilter, const VkSamplerAddressMode, const VkBool32, const uint32_t);
+XK_API_IMPORT void __xkVkDestroySampler(VkSampler);

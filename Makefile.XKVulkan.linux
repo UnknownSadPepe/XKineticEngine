@@ -5,7 +5,7 @@ INC_DIR=-IXKVulkan/ -IXKCore/
 BUILD_DIR=Target/
 CC=gcc
 CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong -D__XKVULKAN_DLL_BUILD__ -D__XKVULKAN_DEBUG__
-LDFLAGS=-L$(BUILD_DIR) -lXKCore -lglfw -lvulkan -shared -Wl,-z,defs -Wl,-z,now -Wl,-z,relro -Wl,--gc-sections
+LDFLAGS=-L$(BUILD_DIR) -lXKCore -lvulkan -shared -Wl,-z,defs -Wl,-z,now -Wl,-z,relro -Wl,--gc-sections
 
 SRC=$(shell find $(SRC_DIR) -name '*.c')
 OBJ=$(patsubst $(SRC_DIR)%.c, $(BUILD_DIR)$(TARGET)/%.o, $(SRC))

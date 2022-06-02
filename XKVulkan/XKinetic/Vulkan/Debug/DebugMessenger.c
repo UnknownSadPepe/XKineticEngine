@@ -34,7 +34,7 @@ XkResult __xkVkCreateDebugMessenger(void) {
   PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkCreateDebugUtilsMessengerEXT");
   if(!vkCreateDebugUtilsMessenger) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Vulkan: Failed to get instance proc address vkCreateDebugUtilsMessengerEXT");
+    xkLogError("Vulkan: Failed to get instance proc address vkCreateDebugUtilsMessengerEXT: %s", __xkVkGetErrorString(VK_ERROR_EXTENSION_NOT_PRESENT));
     goto _catch;
   }
 
@@ -46,7 +46,7 @@ XkResult __xkVkCreateDebugMessenger(void) {
   VkResult vkResult = vkCreateDebugUtilsMessenger(_xkVkContext.vkInstance, &vkDebugUtilsMessengerCreateInfo, VK_NULL_HANDLE, &_xkVkContext.vkDebugMessenger);
   if(vkResult != VK_SUCCESS) {
      result = XK_ERROR_UNKNOWN;
-    xkLogError("Vulkan: Failed to create debug messenger");
+    xkLogError("Vulkan: Failed to create debug messenger: %s", __xkVkGetErrorString(vkResult));
     goto _catch;   
   }
 

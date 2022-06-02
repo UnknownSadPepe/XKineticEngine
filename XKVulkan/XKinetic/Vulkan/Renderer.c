@@ -10,6 +10,20 @@ struct XkVkRenderer {
 		XkFloat64 depth;
 		XkInt32 stencil;
 	} clearValue;
+
+	VkSurfaceKHR vkSurface;
+	VkSwapchainKHR vkSwapChain;
+	VkFormat vkSwapChainImageFormat;
+	VkExtent2D vkSwapChainExtent;
+	VkImage* vkSwapChainImages;
+	VkImageView* vkSwapChainImageViews;
+	uint32_t swapChainImageCount;
+	VkFramebuffer* vkSwapChainFrameBuffer;
+
+  VkSemaphore* vkAvailableSemaphores;
+  VkSemaphore* vkFinishedSemaphores;
+  VkFence* vkFlightFences;
+  uint32_t frameIndex;
 };
 
 XkChar8* __xkVkGetErrorString(VkResult error) {
@@ -56,11 +70,74 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 
 	renderer->config = *pConfig;
 
+	// Initialize Vulkan context.
 	result = __xkVkInitializeContext();
 	if(result != XK_SUCCESS) {
+		result = XK_ERROR_CREATE_FAILED;  
 		xkLogError("Failed to initialize Vulkan Context");
 		goto _catch;
 	}
+
+	// Create Vulkan renderer surface.
+	result = __xkVkCreateSurface(&renderer->vkSurface, window);
+  if(result != XK_SUCCESS) {
+    xkLogError("Failed to create Vulkan surface: %d", result);
+    result = XK_ERROR_CREATE_FAILED;  
+    goto _catch;
+  }  
+
+	// Create Vulkan renderer swap chain.
+	renderer->vkSwapChainImages =  xkAllocateMemory(sizeof(VkImage) * 2);
+	result = __xkVkCreateSwapChain(&renderer->vkSwapChain, renderer->vkSurface, &renderer->vkSwapChainExtent, &renderer->vkSwapChainImageFormat, renderer->vkSwapChainImages, &renderer->swapChainImageCount);
+  if(result != XK_SUCCESS) {
+    xkLogError("Failed to create Vulkan swap chain: %d", result);
+    result = XK_ERROR_CREATE_FAILED;  
+    goto _catch;
+  }
+
+	// Create Vulkan renderer swap chain image views.
+	renderer->vkSwapChainImageViews =  xkAllocateMemory(sizeof(VkImageView) * 2);
+	for(uint32_t i = 0; i < 2; i++) {
+		result = __xkVkCreateImageView(&renderer->vkSwapChainImageViews[i], renderer->vkSwapChainImages[i], renderer->vkSwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+		if(result != XK_SUCCESS) {
+    	xkLogError("Failed to create Vulkan swap chain image view: %d", result);
+    	result = XK_ERROR_CREATE_FAILED;  
+    	goto _catch;
+  	}
+	}
+
+	// Create Vulkan available semaphores.
+	renderer->vkAvailableSemaphores = xkAllocateMemory(sizeof(VkSemaphore) * 2);
+	for(uint32_t i = 0; i < 2; i++) {
+		result = __xkVkCreateSemaphore(&renderer->vkAvailableSemaphores[i]);
+		if(result != XK_SUCCESS) {
+    	xkLogError("Failed to create Vulkan semaphore: %d", result);
+    	result = XK_ERROR_CREATE_FAILED;  
+    	goto _catch;
+  	}		
+	}
+
+	// Create Vulkan finished semaphores.
+  renderer->vkFinishedSemaphores = xkAllocateMemory(sizeof(VkSemaphore) * 2);
+	for(uint32_t i = 0; i < 2; i++) {
+		result = __xkVkCreateSemaphore(&renderer->vkFinishedSemaphores[i]);
+		if(result != XK_SUCCESS) {
+    	xkLogError("Failed to create Vulkan semaphore: %d", result);
+    	result = XK_ERROR_CREATE_FAILED;  
+    	goto _catch;
+  	}		
+	}
+
+	// Create Vulkan fences.
+  renderer->vkFlightFences = xkAllocateMemory(sizeof(VkFence) * 2);
+	for(uint32_t i = 0; i < 2; i++) {
+		result = __xkVkCreateFence(&renderer->vkFlightFences[i]);
+		if(result != XK_SUCCESS) {
+    	xkLogError("Failed to create Vulkan fence: %d", result);
+    	result = XK_ERROR_CREATE_FAILED;  
+    	goto _catch;
+  	}		
+	}	
 
 	// TODO: implementation.
 
@@ -72,6 +149,33 @@ void xkVkDestroyRenderer(XkVkRenderer renderer) {
 	// TODO: implementation.
 	xkFreeMemory(renderer);
 	
+	// Destroy Vulkan flight fence.
+	for(uint32_t i = 0; i < 2; i++) {
+		__xkVkDestroySemaphore(renderer->vkFlightFences[i]);
+	}
+
+	// Destroy Vulkan available semaphores.
+	for(uint32_t i = 0; i < 2; i++) {
+		__xkVkDestroySemaphore(renderer->vkAvailableSemaphores[i]);
+	}
+
+	// Destroy Vulkan finished semaphores.
+	for(uint32_t i = 0; i < 2; i++) {
+		__xkVkDestroySemaphore(renderer->vkFinishedSemaphores[i]);
+	}
+
+	// Destroy Vulkan renderer swap chain image views.
+	for(uint32_t i = 0; i < 2; i++) {
+		__xkVkDestroyImageView(renderer->vkSwapChainImageViews[i]);
+	}
+
+	// Destroy Vulkan renderer swap chain.
+	__xkVkDestroySwapChain(renderer->vkSwapChain);
+
+	// Destroy Vulkan renderer surface.
+	__xkVkDestroySurface(renderer->vkSurface);
+
+	// Terminate Vulkan context.
 	__xkVkTerminateContext();
 }
 
@@ -137,7 +241,7 @@ XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, Xk
 
 	XkVkVertexBuffer buffer = *pBuffer;
 
-	buffer->size = (VkDeviceSize)size;
+	buffer->vkSize = (VkDeviceSize)size;
 
 	// TODO: implementation.
 
@@ -173,7 +277,7 @@ XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHa
 
 	XkVkIndexBuffer buffer = *pBuffer;
 
-	buffer->size = (VkDeviceSize)size;
+	buffer->vkSize = (VkDeviceSize)size;
 
 	// TODO: implementation.
 
@@ -209,7 +313,7 @@ XkResult xkVkCreateUniformBuffer(XkVkUniformBuffer* pBuffer, const XkSize size, 
 
 	XkVkUniformBuffer buffer = *pBuffer;
 
-	buffer->size = (VkDeviceSize)size;
+	buffer->vkSize = (VkDeviceSize)size;
 
 	// TODO: implementation.
 

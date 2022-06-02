@@ -124,4 +124,3 @@ XkBool32 __xkShouldWindowShowed(XkWindow window, const XkWindowShow show) {
 	}
 	return(XK_FALSE);
 }
-

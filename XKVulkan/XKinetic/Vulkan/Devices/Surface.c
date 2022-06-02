@@ -28,7 +28,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		.pNext 				= VK_NULL_HANDLE,
 		.flags 				= 0,
 		.hinstance 		= _xkPlatform.handle.instance,
-		.hwnd 				= window.handle.handle
+		.hwnd 				= window->handle.handle
 	};
 
 	// Create Vulkan Win32 surface.

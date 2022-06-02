@@ -10,22 +10,22 @@ XkResult __xkVkPickPhysicalDevice(void) {
   XkResult result = XK_SUCCESS;
 
   // Get Vulkan support physical device count.
-  uint32_t vkPhysicalDeviceCount = 0;
-  vkEnumeratePhysicalDevices(_xkVkContext.vkInstance, &vkPhysicalDeviceCount, VK_NULL_HANDLE);
-  if(vkPhysicalDeviceCount == 0) {
+  uint32_t physicalDeviceCount = 0;
+  vkEnumeratePhysicalDevices(_xkVkContext.vkInstance, &physicalDeviceCount, VK_NULL_HANDLE);
+  if(physicalDeviceCount == 0) {
     xkLogError("Failed to find GPUs with Vulkan support");
     result = XK_ERROR_UNKNOWN;
     goto _catch;
   }
 
-  xkLogDebug("Vulkan support %d physical devices", vkPhysicalDeviceCount);
+  xkLogDebug("Vulkan support %d physical devices", physicalDeviceCount);
 
   // Get Vulkan support physical devices.
-  VkPhysicalDevice* vkPhysicalDevices = xkAllocateMemory(sizeof(VkPhysicalDevice) * vkPhysicalDeviceCount);
-  vkEnumeratePhysicalDevices(_xkVkContext.vkInstance, &vkPhysicalDeviceCount, vkPhysicalDevices);
+  VkPhysicalDevice* vkPhysicalDevices = xkAllocateMemory(sizeof(VkPhysicalDevice) * physicalDeviceCount);
+  vkEnumeratePhysicalDevices(_xkVkContext.vkInstance, &physicalDeviceCount, vkPhysicalDevices);
 
   // Choose Vulkan physical device.
-  _xkVkContext.vkPhysicalDevice = __xkVkChoosePhysicalDevice(vkPhysicalDevices, vkPhysicalDeviceCount);
+  _xkVkContext.vkPhysicalDevice = __xkVkChoosePhysicalDevice(vkPhysicalDevices, physicalDeviceCount);
   if(_xkVkContext.vkPhysicalDevice == VK_NULL_HANDLE) {
     xkLogError("Failed to choose Vulkan physical device");
     result = XK_ERROR_UNKNOWN;
@@ -56,43 +56,43 @@ static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevic
   XkBool32 result = XK_TRUE; 
 
   // Get Vulkan device extension properties count.
-  uint32_t vkAvailableExtensionPropertiesCount = 0;
-  vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &vkAvailableExtensionPropertiesCount, VK_NULL_HANDLE);
-  if(vkAvailableExtensionPropertiesCount == 0) {
+  uint32_t availableExtensionPropertiesCount = 0;
+  vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &availableExtensionPropertiesCount, VK_NULL_HANDLE);
+  if(availableExtensionPropertiesCount == 0) {
     xkLogError("Failed to enumerate Vulkan Device extension properties");
     result = XK_FALSE;
     goto _catch;    
   }
 
   // Get Vulkan device extension properties.
-  VkExtensionProperties* vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * vkAvailableExtensionPropertiesCount);
-  vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &vkAvailableExtensionPropertiesCount, vkAvailableExtensionProperties);
+  VkExtensionProperties* vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * availableExtensionPropertiesCount);
+  vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &availableExtensionPropertiesCount, vkAvailableExtensionProperties);
 
   // Template available Vulkan extension.
-  const char* vkAvailableExtension = XK_NULL;
+  const char* availableExtension = XK_NULL;
 
   // Template required Vulkan extension.
-  const char* vkRequiredExtension = XK_NULL;
+  const char* requiredExtension = XK_NULL;
 
   // Helper boolean value.
-  XkBool32 vkAvailableExtensionFind = XK_FALSE;
+  XkBool32 availableExtensionFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVkDeviceExtensionCount; i++) {
-    vkRequiredExtension = _xkVkDeviceExtensions[i];
-    vkAvailableExtensionFind = XK_FALSE;
+    requiredExtension = _xkVkDeviceExtensions[i];
+    availableExtensionFind = XK_FALSE;
 
-    for(uint32_t j = 0; j < vkAvailableExtensionPropertiesCount; j++) {
-      vkAvailableExtension = vkAvailableExtensionProperties[j].extensionName;
+    for(uint32_t j = 0; j < availableExtensionPropertiesCount; j++) {
+      availableExtension = vkAvailableExtensionProperties[j].extensionName;
 
       // Check Vulkan extension.
-      if(xkCompareString(vkRequiredExtension, vkAvailableExtension)) {
-        vkAvailableExtensionFind = XK_TRUE;
+      if(xkCompareString(requiredExtension, availableExtension)) {
+        availableExtensionFind = XK_TRUE;
         break;
       }
     }
 
     // If doesn't find available Vulkan extension.
-    if(!vkAvailableExtensionFind) {
+    if(!availableExtensionFind) {
       result = XK_FALSE;
       goto _catch;
     }
@@ -110,22 +110,22 @@ static XkBool32 __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const pFa
   XkBool32 result = XK_TRUE; 
 
   // Get Vulkan queue family propesties count.
-  uint32_t vkQueueFamilyPropertiesCount = 0;
-  vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &vkQueueFamilyPropertiesCount, VK_NULL_HANDLE);
-  if(vkQueueFamilyPropertiesCount == 0) {
+  uint32_t queueFamilyPropertiesCount = 0;
+  vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyPropertiesCount, VK_NULL_HANDLE);
+  if(queueFamilyPropertiesCount == 0) {
     result = XK_FALSE;
     goto _catch;   
   }
 
   // Get Vulkan queue family propesties.
   VkQueueFamilyProperties vkQueueFamilyProperties[4];
-  vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &vkQueueFamilyPropertiesCount, vkQueueFamilyProperties);
+  vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyPropertiesCount, vkQueueFamilyProperties);
 
   // Template Vulkan queue properties.
   VkQueueFamilyProperties vkQueueProperties;
 
   // Check all Vulkan queues.
-  for(uint32_t i = 0; i < vkQueueFamilyPropertiesCount; i++) {
+  for(uint32_t i = 0; i < queueFamilyPropertiesCount; i++) {
     vkQueueProperties = vkQueueFamilyProperties[i];
 
     // Check Vulkan graphics queue.
@@ -213,9 +213,9 @@ static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDe
   // Check Vulkan surface formats support.
   // NOTE: Can be done as a separate function.
   {
-    uint32_t vkSurfaceFormatCount = 0;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &vkSurfaceFormatCount, VK_NULL_HANDLE);
-    if(vkSurfaceFormatCount == 0) {
+    uint32_t surfaceFormatCount = 0;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &surfaceFormatCount, VK_NULL_HANDLE);
+    if(surfaceFormatCount == 0) {
       result = XK_FALSE;
       goto _catch;
     }
@@ -224,9 +224,9 @@ static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDe
   // Check Vulkan present mode support.
   // NOTE: Can be done as a separate function.
   {
-    uint32_t vkPresentModeCount = 0;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, vkSurface, &vkPresentModeCount, VK_NULL_HANDLE);
-    if(vkPresentModeCount == 0) {
+    uint32_t presentModeCount = 0;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, vkSurface, &presentModeCount, VK_NULL_HANDLE);
+    if(presentModeCount == 0) {
       result = XK_FALSE;
       goto _catch;
     }
@@ -236,40 +236,40 @@ _catch:
   return(result);
 }
 
-static VkPhysicalDevice __xkVkChoosePhysicalDevice(const VkPhysicalDevice* vkPhysicalDevices, const uint32_t vkPhysicalDeviceCount) {
+static VkPhysicalDevice __xkVkChoosePhysicalDevice(const VkPhysicalDevice* vkPhysicalDevices, const uint32_t physicalDeviceCount) {
   // Template Vulkan physical device.
   VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
 
   // If Vulkan physical devices count equal 1, return first physical device.
-  if(vkPhysicalDeviceCount == 1) {
+  if(physicalDeviceCount == 1) {
     vkPhysicalDevice = vkPhysicalDevices[0];
     goto _catch;
   }
 
   // Template Vulkan physical device score.
-  uint32_t vkPhysicalDeviceScore = 0;
+  uint32_t physicalDeviceScore = 0;
 
   // Template index of best Vulkan physical device.
-  uint32_t vkBestPhysicalDeviceIndex = 0;
+  uint32_t bestPhysicalDeviceIndex = 0;
 
   // Template score of best Vulkan physical device.
-  uint32_t vkBestPhysicalDeviceScore = 0;
+  uint32_t bestPhysicalDeviceScore = 0;
 
-  for(uint32_t i = 0; i < vkPhysicalDeviceCount; i++) {
+  for(uint32_t i = 0; i < physicalDeviceCount; i++) {
     vkPhysicalDevice = vkPhysicalDevices[i];
 
     // Check Vulkan physical device suitable.
     if(__xkVkPhysicalDeviceSuitable(vkPhysicalDevice, _xkVkContext.vkHelperSurface)) {
       // Choose best Vulkan physical device.
-      vkPhysicalDeviceScore = __xkVkScorePhysicalDevice(vkPhysicalDevice);
-      if(vkBestPhysicalDeviceScore < vkPhysicalDeviceScore) {
-        vkBestPhysicalDeviceScore = vkPhysicalDeviceScore;
-        vkBestPhysicalDeviceIndex = i;
+      physicalDeviceScore = __xkVkScorePhysicalDevice(vkPhysicalDevice);
+      if(bestPhysicalDeviceScore < physicalDeviceScore) {
+        bestPhysicalDeviceScore = physicalDeviceScore;
+        bestPhysicalDeviceIndex = i;
       }
     }
   }
 
-  vkPhysicalDevice = vkPhysicalDevices[vkBestPhysicalDeviceIndex];
+  vkPhysicalDevice = vkPhysicalDevices[bestPhysicalDeviceIndex];
 
 _catch:
   return(vkPhysicalDevice);
