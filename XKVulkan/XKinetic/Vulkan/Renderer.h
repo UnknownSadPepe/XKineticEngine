@@ -6,7 +6,7 @@
 #include "XKinetic/Renderer/External.h"
 
 #ifdef XK_DEBUG
-	#define XK_VK_DEBUG
+	#define XKVULKAN_DEBUG
 #endif // XK_DEBUG
 
 typedef struct XkVkRenderer* XkVkRenderer;
@@ -38,17 +38,15 @@ XKVULKAN_API void xkVkDrawIndexed(XkVkRenderer, XkSize);
 XKVULKAN_API XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer*, const XkSize, XkHandle, XkVkRenderer);
 XKVULKAN_API void xkVkDestroyVertexBuffer(XkVkVertexBuffer);
 XKVULKAN_API void xkVkBindVertexBuffer(XkVkVertexBuffer);
-XKVULKAN_API void xkVkUnbindVertexBuffer(XkVkVertexBuffer);
 
 XKVULKAN_API XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer*, const XkSize, XkHandle, XkVkRenderer);
 XKVULKAN_API void xkVkDestroyIndexBuffer(XkVkIndexBuffer);
 XKVULKAN_API void xkVkBindIndexBuffer(XkVkIndexBuffer);
-XKVULKAN_API void xkVkUnbindIndexBuffer(XkVkIndexBuffer);
 
 XKVULKAN_API XkResult xkVkCreateUniformBuffer(XkVkUniformBuffer*, const XkSize, const XkSize, XkVkRenderer);
 XKVULKAN_API void xkVkDestroyUniformBuffer(XkVkUniformBuffer);
 XKVULKAN_API void xkVkSetUniformBuffer(XkVkUniformBuffer, XkHandle, XkSize);
 
-XKVULKAN_API XkResult xkVkCreateTexture2D(XkVkTexture2D*, XkHandle*, const XkSize, const XkSize, XkVkRenderer);
+XKVULKAN_API XkResult xkVkCreateTexture2D(XkVkTexture2D*, XkHandle, const XkSize, const XkSize, XkVkRenderer);
 XKVULKAN_API void xkVkDestroyTexture2D(XkVkTexture2D);
 

@@ -16,7 +16,11 @@ REM XKVulkan
 make -f "Makefile.XKVulkan.win32" clean
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
 
-REM XKVulkan
+REM XKDirectX12
+make -f "Makefile.XKDirectX12.win32" clean
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
+
+REM XKEditor
 make -f "Makefile.XKEditor.win32" clean
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
 

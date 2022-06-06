@@ -28,6 +28,19 @@ struct XkVkRenderer {
 	uint32_t frameIndex;
 };
 
+struct XkVkBuffer {
+	VkBuffer vkBuffer;
+	VkDeviceMemory vkMemory;
+	VkDeviceSize vkSize;
+};
+
+struct XkVkTexture2D {
+	VkImage vkImage;
+	VkDeviceMemory vkMemory;
+	VkImageView vkImageView;
+	VkSampler vkSampler;
+};
+
 XkChar8* __xkVkGetErrorString(VkResult error) {
 	switch(error) {
 		case VK_SUCCESS:												return "Success";
@@ -350,14 +363,6 @@ void xkVkBindVertexBuffer(XkVkVertexBuffer buffer) {
 	/// TODO: implementation.
 }
 
-void xkVkUnbindVertexBuffer(XkVkVertexBuffer buffer) {
-	/// TODO: implementation.
-}
-
-void xkVkSetVertexBuffer(XkVkIndexBuffer buffer, XkHandle data) {
-	/// TODO: implementation.
-}
-
 XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHandle data, XkVkRenderer renderer) {
 	XkResult result = XK_SUCCESS;
 
@@ -450,7 +455,7 @@ void xkVkSetUniformBuffer(XkVkUniformBuffer buffer, XkHandle data, XkSize offset
 	/// TODO: implementation.
 }
 
-XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle* data, const XkSize width, const XkSize height, XkVkRenderer renderer) {
+XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle data, const XkSize width, const XkSize height, XkVkRenderer renderer) {
 	XkResult result = XK_SUCCESS;
 
 	*pTexture = xkAllocateMemory(sizeof(struct XkVkTexture2D));

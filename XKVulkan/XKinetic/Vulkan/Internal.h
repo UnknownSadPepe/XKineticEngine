@@ -36,26 +36,6 @@ typedef struct {
 	VkPresentModeKHR vkPresentMode;
 } __XkVkSwapChainDetails;
 
-struct XkVkBuffer {
-	VkBuffer vkBuffer;
-	VkDeviceMemory vkMemory;
-	VkDeviceSize vkSize;
-};
-
-struct XkVkTexture2D {
-	VkImage vkImage;
-	VkDeviceMemory vkMemory;
-	VkImageView vkImageView;
-	VkSampler vkSampler;
-};
-
-typedef struct {
-	VkImage vkImage;
-	VkDeviceMemory vkMemory;
-	VkImageView vkImageView;
-	VkSampler vkSampler;
-} XkVkImage;
-
 typedef struct {
 	XkBool32 initialized;
 

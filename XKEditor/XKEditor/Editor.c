@@ -3,8 +3,6 @@
 #include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 
-#include "XKinetic/Core/LinearAllocator.h"
-
 #include "XKinetic/Resources/Loaders/ModelLoader.h"
 #include "XKinetic/Resources/Loaders/ShaderLoader.h"
 #include "XKinetic/Resources/Loaders/TextureLoader.h"
@@ -39,11 +37,8 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	result = xkLogInitialize();
 	if(result != XK_SUCCESS) goto _catch;
 
-	xkLogFatal("FATAL");
-	xkLogError("ERROR");
-
 	// Create shader loader.
-	/*result = xkCreateShaderLoader(&_xkApplication.shaderLoader, "resources/shaders/");
+	result = xkCreateShaderLoader(&_xkApplication.shaderLoader, "resources/shaders/");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to create shader loader");
 		goto _catch;
@@ -148,24 +143,20 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	xkDestroyTexture(_xkApplication.textureSystem, textureID);
 
 	// Unload texture.
-	xkUnloadTexture(_xkApplication.textureLoader, &textureConfig);*/
-
-	XkLinearAllocator linearAllocator;
-	result = xkCreateLinearAllocator(&linearAllocator, 145);
-
+	xkUnloadTexture(_xkApplication.textureLoader, &textureConfig);
 
 _catch:
 	return(result);
 }
 
 void xkDestroyApplication() {
-	/*xkDestroyTextureSystem(_xkApplication.textureSystem);
+	xkDestroyTextureSystem(_xkApplication.textureSystem);
 	xkDestroyShaderSystem(_xkApplication.shaderSystem);
 	xkDestroyModelSystem(_xkApplication.modelSystem);
 
 	xkDestroyTextureLoader(_xkApplication.textureLoader);
 	xkDestroyShaderLoader(_xkApplication.shaderLoader);
-	xkDestroyModelLoader(_xkApplication.modelLoader);*/
+	xkDestroyModelLoader(_xkApplication.modelLoader);
 
 	xkLogTerminate();
 }
