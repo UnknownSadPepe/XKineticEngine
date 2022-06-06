@@ -1,7 +1,7 @@
 TARGET=XKVulkanTest
 EXTENSION=.exe
 SRC_DIR=Tests\VulkanTest\
-INC_DIR=-ITests\VulkanTest\ -IXKinetic\ -IXKCore\
+INC_DIR=-ITests\VulkanTest\ -IXKinetic\ -IXKCore\ -IXKMath\
 TARGET_DIR=Target\Tests\
 BUILD_DIR=Target\
 CC=x86_64-w64-mingw32-gcc

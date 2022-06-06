@@ -1,5 +1,5 @@
 #include "XKinetic/Vulkan/Internal.h"
-#include "XKinetic/Core/Window.h"
+#include "XKinetic/Platform/Window.h"
 
 __XkVkContext _xkVkContext;
 
@@ -18,14 +18,14 @@ XkResult __xkVkInitializeContext() {
   }
 
   // If debug mode, create Vulkan context debug messenger.
-#ifdef XKVK_DEBUG
+#ifdef XKVULKAN_DEBUG
   result = __xkVkCreateDebugMessenger();
   if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan debug messenger: %d", result);
     result = XK_ERROR_INITIALIZE_FAILED;
     goto _catch;
   } 
-#endif // XKVK_DEBUG
+#endif // XKVULKAN_DEBUG
 
   // Create helper window for create helper Vulkan surface.
   XkWindow helperWindow;
@@ -89,9 +89,9 @@ void __xkVkTerminateContext() {
   __xkVkDestroyLogicalDevice();
 
   // If debug mode, destroy Vulkan context debug messenger. 
-#ifdef XKVK_DEBUG
+#ifdef XKVULKAN_DEBUG
   __xkVkDestroyDebugMessenger();
-#endif // XKVK_DEBUG
+#endif // XKVULKAN_DEBUG
 
   // Destroy Vulkan context instance.
   __xkVkDestroyInstance();

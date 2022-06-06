@@ -2,8 +2,8 @@
 
 #include "XKinetic/XKCore.h"
 
-XK_API_EXPORT XkResult xkLogInitialize(void);
-XK_API_EXPORT void xkLogTerminate(void);
+XK_EXPORT XkResult xkLogInitialize(void);
+XK_EXPORT void xkLogTerminate(void);
 
 XKCORE_API void xkLogFatal(const XkChar8*, ...);
 XKCORE_API void xkLogError(const XkChar8*, ...);

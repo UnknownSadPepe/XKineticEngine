@@ -4,7 +4,7 @@
 XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
   XkResult result = XK_SUCCESS;
 
-#if defined(XK_PLATFORM_LINUX)
+#if defined(XK_LINUX)
 	// Initialize Vulkan Wayland surface create info.
   const VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo = {
 		.sType 				= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
@@ -21,7 +21,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}  
-#elif defined(XK_PLATFORM_WIN32)
+#elif defined(XK_WIN32)
 	// Initialize Vulkan Win32 surface create info.
   const VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo = {
 		.sType 				= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
@@ -38,7 +38,7 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
-#endif // XK_PLATFORM_LINUX
+#endif // XK_LINUX
 
 _catch:
   return(result);

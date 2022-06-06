@@ -1,4 +1,5 @@
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/LinearAllocator.h"
 
 struct XkLinearAllocator {
 	XkSize totalSize;
@@ -6,6 +7,8 @@ struct XkLinearAllocator {
 
 	XkHandle memory;
 };
+
+#define XK_LINEAR_ALLOCATOR_ALIGN 16
 
 XkResult xkCreateLinearAllocator(XkLinearAllocator* pAllocator, const XkSize totalSize) {
 	XkResult result = XK_SUCCESS;
@@ -18,7 +21,7 @@ XkResult xkCreateLinearAllocator(XkLinearAllocator* pAllocator, const XkSize tot
 
 	XkLinearAllocator allocator = *pAllocator;
 
-	const XkSize alignTotalSize = (totalSize + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignTotalSize = (totalSize + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
 
 	allocator->totalSize = alignTotalSize;
 	allocator->allocated = 0;
@@ -28,8 +31,6 @@ XkResult xkCreateLinearAllocator(XkLinearAllocator* pAllocator, const XkSize tot
 		goto _catch;
 	}
 
-	
-
 _catch:
 	return(result);
 }
@@ -38,15 +39,15 @@ void xkDestroyLinearAllocator(XkLinearAllocator allocator) {
 	allocator->totalSize = 0;
 	allocator->allocated = 0;
 	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL;
+	allocator->memory = XK_NULL_HANDLE;
 	xkFreeMemory(allocator);
 }
 
 XkHandle xkAllocateLinearMemory(XkLinearAllocator allocator, const XkSize size) {
-	const XkSize alignSize = (size + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignSize = (size + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
 
 	if((allocator->allocated + alignSize) > allocator->totalSize) {
-		return(XK_NULL);
+		return(XK_NULL_HANDLE);
 	}
 
 	allocator->allocated += alignSize;

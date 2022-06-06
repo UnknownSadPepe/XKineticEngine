@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/DynamicArray.h"
 #include "XKinetic/Core/FreeList.h"
 #include "XKinetic/Core/HashTable.h"

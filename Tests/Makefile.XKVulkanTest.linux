@@ -1,7 +1,7 @@
 TARGET=XKVulkanTest
 EXTENSION=.out
 SRC_DIR=Tests/VulkanTest/
-INC_DIR=-ITests/VulkanTest/ -IXKinetic/ -IXKCore/
+INC_DIR=-ITests/VulkanTest/ -IXKinetic/ -IXKCore/ -IXKMath/
 TARGET_DIR=Target/Tests/
 BUILD_DIR=Target/
 CC=gcc

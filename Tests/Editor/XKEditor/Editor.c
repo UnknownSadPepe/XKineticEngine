@@ -1,6 +1,6 @@
 #include "XKinetic/Core/Minimal.h"
-#include "XKinetic/Core/File.h"
-#include "XKinetic/Core/Console.h"
+#include "XKinetic/Platform/File.h"
+#include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 
 #include "XKinetic/Resources/Loaders/ModelLoader.h"
@@ -175,5 +175,5 @@ void xkDestroyApplication() {
 }
 
 void xkUpdateApplication() {
-	// TODO: implementation.
+	/// TODO: implementation.
 }

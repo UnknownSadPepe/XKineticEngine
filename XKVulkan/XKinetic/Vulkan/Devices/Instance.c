@@ -29,19 +29,19 @@ XkResult __xkVkCreateInstance(void) {
     .apiVersion       = VK_API_VERSION_1_3
   };
 
-#ifdef XKVK_DEBUG
+#ifdef XKVULKAN_DEBUG
   VkDebugUtilsMessengerCreateInfoEXT vkDebugUtilsMessengerCreateInfo;
   __xkVkPopulateDebugMessengerCreateInfo(&vkDebugUtilsMessengerCreateInfo);
-#endif // XKVK_DEBUG
+#endif // XKVULKAN_DEBUG
 
   // Initialize Vulkan instance create info.
   const VkInstanceCreateInfo vkInstanceCreateInfo = {
     .sType                      = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-#ifdef XKVK_DEBUG
+#ifdef XKVULKAN_DEBUG
     .pNext                      = (VkDebugUtilsMessengerCreateInfoEXT*)&vkDebugUtilsMessengerCreateInfo,
 #else
     .pNext                      = VK_NULL_HANDLE,
-#endif // XKVK_DEBUG
+#endif // XKVULKAN_DEBUG
     .flags                      = 0,
     .pApplicationInfo           = &vkApplicationInfo,
     .enabledLayerCount          = _xkVkInstanceLayerCount,
@@ -84,10 +84,10 @@ static XkBool32 __xkVkCheckInstanceExtensionsSupport(void) {
   vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &availableExtensionPropertiesCount, vkAvailableExtensionProperties);
 
   // Template available Vulkan extension.
-  const char* availableExtension = XK_NULL;
+  const char* availableExtension = XK_NULL_HANDLE;
 
   // Template required Vulkan extension.
-  const char* requiredExtension = XK_NULL;
+  const char* requiredExtension = XK_NULL_HANDLE;
 
   // Helper boolean value.
   XkBool32 availableExtensionFind = XK_FALSE;
@@ -138,10 +138,10 @@ static XkBool32 __xkVkCheckInstanceLayersSupport(void) {
   vkEnumerateInstanceLayerProperties(&availableLayerPropertiesCount, vkAvailableLayerProperties);
 
   // Template available Vulkan layer.
-  const char* availableLayer = XK_NULL;
+  const char* availableLayer = XK_NULL_HANDLE;
 
   // Template required Vulkan layer.
-  const char* requiredLayer = XK_NULL;
+  const char* requiredLayer = XK_NULL_HANDLE;
 
   // Helper boolean value.
   XkBool32 availableLayerFind = XK_FALSE;

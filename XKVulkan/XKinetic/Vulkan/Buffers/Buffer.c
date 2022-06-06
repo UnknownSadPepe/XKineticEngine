@@ -65,34 +65,7 @@ XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVk
 
 	// If a pointer to the buffer data has been passed, map the Vulkan buffer and copy over the data.
 	if (data) {
-		void* mapped;
-    // Map Vulkan buffer memory.
-		vkResult = vkMapMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory, 0, vkMemoryRequirements.size, 0, &mapped);
-    if(vkResult != VK_SUCCESS) {
-      result = XK_ERROR_UNKNOWN;
-      xkLogError("Failed to map Vulkan buffer memory: %s", __xkVkGetErrorString(vkResult));
-      goto _catch;   
-    }
-
-    // Copy data.
-		xkCopyMemory((XkHandle)mapped, (XkHandle)data, (XkSize)vkMemoryRequirements.size);
-
-		// If host coherency hasn't been requested, do a manual flush to make writes visible.
-		if ((vkMemoryProperties & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0) {
-			const VkMappedMemoryRange vkMappedMemoryRange = {
-			  .sType    = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
-        .pNext    = VK_NULL_HANDLE,
-			  .memory   = vkBufferMemory,
-			  .offset   = 0,
-			  .size     = vkMemoryRequirements.size
-      };
-
-      // Flush Vulkan mapper memory ranges.
-			vkFlushMappedMemoryRanges(_xkVkContext.vkLogicalDevice, 1, &vkMappedMemoryRange);
-		}
-
-    // Unmap Vulkan buffer memory.
-		vkUnmapMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory);
+		__xkVkMapBuffer(vkBufferMemory, vkMemoryRequirements.size, data);
 	}
 
   // Bind Vulkan buffer memory.
@@ -112,4 +85,60 @@ void __xkVkDestroyBuffer(VkBuffer vkBuffer, VkDeviceMemory vkBufferMemory) {
 	vkDestroyBuffer(_xkVkContext.vkLogicalDevice, vkBuffer, VK_NULL_HANDLE);
   // Free Vulkan bufer memory.
   vkFreeMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory, VK_NULL_HANDLE);
+}
+
+XkResult __xkVkMapBuffer(VkDeviceMemory vkBufferMemory, const VkDeviceSize vkDeviceSize, const void* data) {
+  XkResult result = XK_SUCCESS;
+
+  void* mapped;
+  // Map Vulkan buffer memory.
+	VkResult vkResult = vkMapMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory, 0, vkDeviceSize, 0, &mapped);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to map Vulkan buffer memory: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;   
+  }
+
+  // Copy data.
+	xkCopyMemory((XkHandle)mapped, (XkHandle)data, (XkSize)vkDeviceSize);
+
+  // Unmap Vulkan buffer memory.
+	vkUnmapMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory);
+
+_catch:
+  return(result);
+}
+
+XkResult __xkVkCopyBuffer(VkBuffer vkDstBuffer, const VkBuffer vkSrcBuffer, const VkDeviceSize vkSize) {
+  XkResult result = XK_SUCCESS;
+
+  // Begin Vulkan single command buffer.
+  VkCommandBuffer vkSingleCommandBuffer;
+  result = __xkVkBeginSingleCommands(&vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to begin Vulkan command buffer");
+    goto _catch;   
+  }
+
+  // Initialize Vulkan buffer copy info.
+  const VkBufferCopy vkBufferCopyInfo = {
+    .srcOffset = 0,
+    .dstOffset = 0,
+    .size = vkSize
+  };
+
+  // Copy Vulkan buffer.
+  vkCmdCopyBuffer(vkSingleCommandBuffer, vkSrcBuffer, vkDstBuffer, 1, &vkBufferCopyInfo);
+
+  // End Vulkan single command buffer.
+  result = __xkVkEndSingleCommands(vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to end Vulkan command buffer");
+    goto _catch;   
+  }
+
+_catch:
+  return(result);
 }

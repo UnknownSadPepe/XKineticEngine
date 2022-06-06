@@ -2,7 +2,7 @@
 
 #include "XKinetic/XKVulkan.h"
 #include "XKinetic/Core/Minimal.h"
-#include "XKinetic/Core/Window.h"
+#include "XKinetic/Platform/Window.h"
 #include "XKinetic/Renderer/External.h"
 
 #ifdef XK_DEBUG
@@ -19,8 +19,8 @@ XKVULKAN_API XkResult xkVkCreateRenderer(XkVkRenderer*, XkRendererConfig* const,
 XKVULKAN_API void xkVkDestroyRenderer(XkVkRenderer);
 
 XKVULKAN_API void xkVkClearColorRenderer(XkVkRenderer, XkVec4);
-XKVULKAN_API void xkVkClearDepthRenderer(XkVkRenderer, XkFloat64);
-XKVULKAN_API void xkVkClearStencilRenderer(XkVkRenderer, XkInt32);
+XKVULKAN_API void xkVkClearDepthRenderer(XkVkRenderer, XkFloat32);
+XKVULKAN_API void xkVkClearStencilRenderer(XkVkRenderer, XkUInt32);
 XKVULKAN_API void xkVkClearRenderer(XkVkRenderer);
 
 XKVULKAN_API void xkVkTopologyRenderer(XkVkRenderer, XkTopology);
@@ -30,7 +30,7 @@ XKVULKAN_API void xkVkBeginRenderer(XkVkRenderer);
 XKVULKAN_API void xkVkEndRenderer(XkVkRenderer);
 
 XKVULKAN_API void xkVkResizeRenderer(XkVkRenderer, XkSize, XkSize);
-XKVULKAN_API void xkVkScissorRenderer(XkVkRenderer, XkSize, XkSize, XkSize, XkSize);
+XKVULKAN_API void xkVkScissorRenderer(XkVkRenderer, XkInt32, XkInt32, XkSize, XkSize);
 
 XKVULKAN_API void xkVkDraw(XkVkRenderer, XkSize);
 XKVULKAN_API void xkVkDrawIndexed(XkVkRenderer, XkSize);

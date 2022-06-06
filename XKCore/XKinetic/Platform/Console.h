@@ -1,0 +1,61 @@
+#pragma once
+
+#include "XKinetic/XKCore.h"
+
+#if defined(XK_LINUX)
+	#include "XKinetic/Platform/Linux/External.h"
+#elif defined(XK_WIN32)
+	#include "XKinetic/Platform/Win32/External.h"
+#endif // XK_LINUX
+
+typedef enum {
+	XK_CONSOLE_STDOUT = 1,
+	XK_CONSOLE_STDERR = 2
+} XkConsoleHandle;
+
+typedef enum {
+ XK_COLOR_RESET,
+
+ XK_COLOR_FBLACK_BIT,
+ XK_COLOR_FRED_BIT,
+ XK_COLOR_FGREEN_BIT,
+ XK_COLOR_FYELLOW_BIT,
+ XK_COLOR_FBLUE_BIT,
+ XK_COLOR_FPURPLE_BIT,
+ XK_COLOR_FCYAN_BIT,
+ XK_COLOR_FWHITE_BIT,
+
+ XK_COLOR_FUBLACK_BIT,
+ XK_COLOR_FURED_BIT,
+ XK_COLOR_FUGREEN_BIT,
+ XK_COLOR_FUYELLOW_BIT,
+ XK_COLOR_FUBLUE_BIT,
+ XK_COLOR_FUPURPLE_BIT,
+ XK_COLOR_FUCYAN_BIT,
+ XK_COLOR_FUWHITE_BIT,
+
+ XK_COLOR_FBBLACK_BIT,
+ XK_COLOR_FBRED_BIT,
+ XK_COLOR_FBGREEN_BIT,
+ XK_COLOR_FBYELLOW_BIT,
+ XK_COLOR_FBBLUE_BIT,
+ XK_COLOR_FBPURPLE_BIT,
+ XK_COLOR_FBCYAN_BIT,
+ XK_COLOR_FBWHITE_BIT,
+
+ XK_COLOR_BBLACK_BIT,
+ XK_COLOR_BRED_BIT,
+ XK_COLOR_BGREEN_BIT,
+ XK_COLOR_BYELLOW_BIT,
+ XK_COLOR_BBLUE_BIT,
+ XK_COLOR_BPURPLE_BIT,
+ XK_COLOR_BCYAN_BIT,
+ XK_COLOR_BWHITE_BIT
+} XkConsoleColor;
+
+XK_EXPORT XkResult xkConsoleInitialize(void);
+XK_EXPORT void xkConsoleTerminate(void);
+
+XK_EXPORT void xkColorConsole(const XkConsoleHandle, const XkConsoleColor);
+XK_EXPORT void xkWriteConsole(const XkConsoleHandle, const XkChar8*, const XkSize);
+XK_EXPORT void xkReadConsole(XkChar8*, const XkSize);

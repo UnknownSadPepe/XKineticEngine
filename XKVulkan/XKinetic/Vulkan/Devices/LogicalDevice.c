@@ -220,3 +220,93 @@ uint32_t __xkVkFindMemoryType(uint32_t typeFilter, const VkMemoryPropertyFlags v
 
   return(0);
 }
+
+XkResult __xkVkBeginSingleCommands(VkCommandBuffer* pVkCommandBuffer) {
+  XkResult result = XK_SUCCESS;
+
+  // Initialize Vulkan single command buffer allocate info.
+  const VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {
+    .sType                = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+    .pNext                = VK_NULL_HANDLE,
+    .commandPool          = _xkVkContext.vkCommandPool,
+    .level                = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+    .commandBufferCount   = 1
+  };
+
+  // Allocate Vulkan single command buffer.
+  VkResult vkResult = vkAllocateCommandBuffers(_xkVkContext.vkLogicalDevice, &vkCommandBufferAllocateInfo, pVkCommandBuffer);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to allocate Vulkan single command buffer: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }
+
+  VkCommandBuffer vkCommandBuffer = *pVkCommandBuffer;
+
+  // Initialize Vulkan command buffer begin info.
+  const VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
+    .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+    .pNext              = VK_NULL_HANDLE,
+    .flags              = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    .pInheritanceInfo   = VK_NULL_HANDLE
+  };
+
+  // Begin Vulkan command buffer.
+  vkResult = vkBeginCommandBuffer(vkCommandBuffer, &vkCommandBufferBeginInfo);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to begin Vulkan single command buffer: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }  
+
+_catch:
+  return(result);
+}
+
+XkResult __xkVkEndSingleCommands(VkCommandBuffer vkCommandBuffer) {
+  XkResult result = XK_SUCCESS;
+
+  // End Vulkan command buffer.
+  VkResult vkResult = vkEndCommandBuffer(vkCommandBuffer);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to end Vulkan single command buffer: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }  
+
+  // Initialize Vulkan submit info.
+  const VkSubmitInfo vkSubmitInfo = {
+    .sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+    .pNext                  = VK_NULL_HANDLE,
+    .waitSemaphoreCount     = 0,
+    .pWaitSemaphores        = VK_NULL_HANDLE,
+    .pWaitDstStageMask      = VK_NULL_HANDLE,
+    .commandBufferCount     = 1,
+    .pCommandBuffers        = &vkCommandBuffer,
+    .signalSemaphoreCount   = 0,
+    .pSignalSemaphores      = VK_NULL_HANDLE
+  };
+
+  // Sublit Vulkan queue.
+  vkResult = vkQueueSubmit(_xkVkContext.vkGraphicsQueue, 1, &vkSubmitInfo, VK_NULL_HANDLE);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to submit Vulkan queue: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }  
+
+  // Wait idle Vulkan queue.
+  vkResult = vkQueueWaitIdle(_xkVkContext.vkGraphicsQueue);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to wait idle Vulkan queue: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }  
+
+  // Free Vulkan command buffer.
+  vkFreeCommandBuffers(_xkVkContext.vkLogicalDevice, _xkVkContext.vkCommandPool, 1, &vkCommandBuffer);
+
+_catch:
+  return(result);
+}
+

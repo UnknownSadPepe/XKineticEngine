@@ -11,10 +11,10 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_xkVkContext.vkPhysicalDevice, vkSurface, &vkCapabilities);
 
   // Choose Vulkan surface format.
-  VkSurfaceFormatKHR vkSurfaceFormat = __xkVKChooseSurfaceFormat(vkSurface, (VkSurfaceFormatKHR){VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}); // NOTE: I don't know, should I check it out?
+  VkSurfaceFormatKHR vkSurfaceFormat = __xkVKChooseSurfaceFormat(vkSurface, (VkSurfaceFormatKHR){VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}); /// NOTE: I don't know, should I check it out?
 
   // Choose Vulkan present mode.
-  VkPresentModeKHR vkPresentMode = __xkVKChoosePresentMode(vkSurface, VK_PRESENT_MODE_MAILBOX_KHR); // NOTE: I don't know, should I check it out?
+  VkPresentModeKHR vkPresentMode = __xkVKChoosePresentMode(vkSurface, VK_PRESENT_MODE_MAILBOX_KHR); /// NOTE: I don't know, should I check it out?
 
   // Set minimal image count.
   uint32_t minImageCount = vkCapabilities.minImageCount + 1;
@@ -55,7 +55,7 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
     .compositeAlpha             = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
     .presentMode                = vkPresentMode,
     .clipped                    = VK_TRUE,
-    .oldSwapchain               = VK_NULL_HANDLE, // TODO: implementation 'oldSwapChain'.
+    .oldSwapchain               = VK_NULL_HANDLE, /// TODO: implementation 'oldSwapChain'.
   };
 
   // Create Vulkan swap chain.

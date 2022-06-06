@@ -5,11 +5,11 @@ XkResult __xkVkCreateCommandBuffer(VkCommandBuffer* pVkCommandBuffer, const VkCo
 
   // Initialize Vulkan command buffer allocate info.
 	const VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {
-    .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-    .pNext = VK_NULL_HANDLE,
-	  .commandPool = _xkVkContext.vkCommandPool,
-	  .level = vkCommandBufferLevel,
-	  .commandBufferCount = 1
+    .sType                  = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+    .pNext                  = VK_NULL_HANDLE,
+	  .commandPool            = _xkVkContext.vkCommandPool,
+	  .level                  = vkCommandBufferLevel,
+	  .commandBufferCount     = 1
   };
 	
   // Allocate Vulkan command buffer.

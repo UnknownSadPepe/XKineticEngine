@@ -20,7 +20,7 @@ XkResult xkCreateModelSystem(XkModelSystem* pSystem) {
   result = xkCreateDynamicArrayCapacity(&system->models, XK_MODEL_SYSTEM_ARRAY_SIZE, XkModel);
   if(result != XK_SUCCESS) goto _catch;
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
   
 
@@ -29,15 +29,15 @@ _catch:
 }
 
 void xkDestroyModelSystem(XkModelSystem system) {
-  // TODO: implementation.
+  /// TODO: implementation.
   xkDestroyDynamicArray(system->models);
 }
 
 XkModelID xkCreateModel(XkModelSystem system, XkModelConfig* const pConfig) {
-  // TODO: implementation.
+  /// TODO: implementation.
   return(-1);
 }
 
 void xkDestroyModel(XkModelSystem system, XkModelID id) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }

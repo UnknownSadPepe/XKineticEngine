@@ -19,29 +19,29 @@ XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkChar8* path) {
 
   xkNCopyString(loader->path, path, XK_SHADER_LOADER_PATH_MAX_SIZE);
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyShaderLoader(XkShaderLoader loader) {
-  // TODO: implementation.
+  /// TODO: implementation.
   xkFreeMemory(loader);
 }
 
 XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkChar8* name) {
   XkResult result = XK_SUCCESS;
 
-  // TODO: implementation.
+  /// TODO: implementation.
   pConfig->size = 0;
-  pConfig->code = XK_NULL;
+  pConfig->code = XK_NULL_HANDLE;
 
 _catch:
   return(result);
 }
 
 void xkUnloadShader(XkShaderLoader loader, XkShaderConfig* const pConfig) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }
 

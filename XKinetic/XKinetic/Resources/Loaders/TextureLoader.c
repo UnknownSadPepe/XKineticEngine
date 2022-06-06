@@ -19,7 +19,7 @@ XkResult xkCreateTextureLoader(XkTextureLoader* pLoader, XkChar8* path) {
 
   xkNCopyString(loader->path, path, XK_TEXTURE_LOADER_PATH_MAX_SIZE);
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
   
 
@@ -28,23 +28,23 @@ _catch:
 }
 
 void xkDestroyTextureLoader(XkTextureLoader loader) {
-  // TODO: implementation.
+  /// TODO: implementation.
   xkFreeMemory(loader);
 }
 
 XkResult xkLoadTexture(XkTextureLoader loader, XkTextureConfig* const pConfig, XkChar8* name) {
   XkResult result = XK_SUCCESS;
 
-  // TODO: implementation.
+  /// TODO: implementation.
   pConfig->width = 0;
   pConfig->height = 0;
-  pConfig->pixels = XK_NULL;
+  pConfig->pixels = XK_NULL_HANDLE;
 
 _catch:
   return(result);
 }
 
 void xkUnloadTexture(XkTextureLoader loader, XkTextureConfig* const pConfig) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }
 

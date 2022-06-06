@@ -4,6 +4,10 @@ REM XKCore
 make -f "Makefile.XKCore.win32" all
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
 
+REM XKMath
+make -f "Makefile.XKMath.win32" all
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)
+
 REM XKinetic
 make -f "Makefile.XKinetic.win32" all
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit)

@@ -1,10 +1,10 @@
 TARGET=libXKinetic
 EXTENSION=.so
 SRC_DIR=XKinetic/
-INC_DIR=-IXKinetic/ -IXKCore/ -IXKVulkan/
+INC_DIR=-IXKinetic/ -IXKCore/ -IXKMath/ -IXKVulkan/
 BUILD_DIR=Target/
 CC=gcc
-CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong -D__XK_DLL_BUILD__
+CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong -D__XK_BUILD__ -D__XK_DEBUG__
 LDFLAGS=-L$(BUILD_DIR) -lXKCore -shared -Wl,-z,defs -Wl,-z,now -Wl,-z,relro -Wl,--gc-sections
 
 SRC=$(shell find $(SRC_DIR) -name '*.c')

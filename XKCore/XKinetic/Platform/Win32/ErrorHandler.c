@@ -1,6 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 
-#if defined(XK_PLATFORM_WIN32)
+#if defined(XK_WIN32)
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -19,5 +19,5 @@ void __xkErrorHandler(const XkChar8* format, ...) {
 	va_end(args);
 }
 
-#endif // XK_PLATFORM_WIN32
+#endif // XK_WIN32
 

@@ -1,4 +1,5 @@
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/StackAllocator.h"
 
 struct XkStackAllocator {
 	XkSize totalSize;
@@ -6,6 +7,13 @@ struct XkStackAllocator {
 
 	XkHandle memory;
 };
+
+typedef struct {
+	XkSize size;
+	XkHandle memory;
+} XkStackMemoryHeader;
+
+#define XK_STACK_ALLOCATOR_ALIGN 16
 
 XkResult xkCreateStackAllocator(XkStackAllocator* pAllocator, const XkSize totalSize) {
 	XkResult result = XK_SUCCESS;
@@ -18,7 +26,7 @@ XkResult xkCreateStackAllocator(XkStackAllocator* pAllocator, const XkSize total
 
 	XkStackAllocator allocator = *pAllocator;
 
-	const XkSize alignTotalSize = (totalSize + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignTotalSize = (totalSize + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
 
 	allocator->totalSize = alignTotalSize;
 	allocator->allocated = 0;
@@ -28,8 +36,6 @@ XkResult xkCreateStackAllocator(XkStackAllocator* pAllocator, const XkSize total
 		goto _catch;
 	}
 
-	
-
 _catch:
 	return(result);
 }
@@ -38,15 +44,15 @@ void xkDestroyStackAllocator(XkStackAllocator allocator) {
 	allocator->totalSize = 0;
 	allocator->allocated = 0;
 	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL;
+	allocator->memory = XK_NULL_HANDLE;
 	xkFreeMemory(allocator);
 }
 
 XkHandle xkAllocateStackMemory(XkStackAllocator allocator, const XkSize size) {
-	const XkSize headerSize = (size + sizeof(XkMemoryHeader) + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize headerSize = (size + sizeof(XkStackMemoryHeader) + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
 
 	if((allocator->allocated + headerSize) > allocator->totalSize) {
-		return(XK_NULL);
+		return(XK_NULL_HANDLE);
 	}
 
 	allocator->allocated += headerSize;
@@ -55,7 +61,7 @@ XkHandle xkAllocateStackMemory(XkStackAllocator allocator, const XkSize size) {
 }
 
 void xkFreeStackMemory(XkStackAllocator allocator, const XkHandle memory) {
-	XkMemoryHeader* pHeader = (XkMemoryHeader*)(((XkChar8*)memory) - sizeof(XkMemoryHeader));
+	XkStackMemoryHeader* pHeader = (XkStackMemoryHeader*)(((XkChar8*)memory) - sizeof(XkStackMemoryHeader));
 
 	allocator->allocated -= pHeader->size;
 	xkZeroMemory(pHeader->memory, pHeader->size);	

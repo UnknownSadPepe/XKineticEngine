@@ -1,4 +1,5 @@
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/PoolAllocator.h"
 
 struct XkPoolAllocator {
 	XkSize totalChunkCount;
@@ -7,6 +8,8 @@ struct XkPoolAllocator {
 
 	XkHandle memory;
 };
+
+#define XK_POOL_ALLOCATOR_ALIGN 16
 
 XkResult xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalChunkCount, const XkSize chunkSize) {
 	XkResult result = XK_SUCCESS;
@@ -19,7 +22,7 @@ XkResult xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalCh
 
 	XkPoolAllocator allocator = *pAllocator;
 
-	const XkSize alignChunkSize = (chunkSize + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignChunkSize = (chunkSize + (XK_POOL_ALLOCATOR_ALIGN - 1)) & ~(XK_POOL_ALLOCATOR_ALIGN - 1);
 	const XkSize alignTotalSize = ((totalChunkCount * alignChunkSize) + (alignChunkSize - 1)) & ~ (alignChunkSize - 1);
 
 	allocator->totalChunkCount = totalChunkCount;
@@ -31,8 +34,6 @@ XkResult xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalCh
 		goto _catch;
 	}
 
-	
-
 _catch:
 	return(result);
 }
@@ -42,13 +43,13 @@ void xkDestroyPoolAllocator(XkPoolAllocator allocator) {
 	allocator->chunkSize = 0;
 	allocator->allocatedChunkCount = 0;
 	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL;
+	allocator->memory = XK_NULL_HANDLE;
 	xkFreeMemory(allocator);
 }
 
 XkHandle xkAllocatePoolMemory(XkPoolAllocator allocator, const XkSize chunkCount) {
 	if((allocator->allocatedChunkCount + chunkCount) > allocator->totalChunkCount) {
-		return(XK_NULL);
+		return(XK_NULL_HANDLE);
 	}
 
 	allocator->allocatedChunkCount += chunkCount;
@@ -57,7 +58,7 @@ XkHandle xkAllocatePoolMemory(XkPoolAllocator allocator, const XkSize chunkCount
 }
 
 void xkFreePoolMemory(XkPoolAllocator allocator, const XkHandle memory) {
-	// TODO: implementation.
+	/// TODO: implementation.
 
 	allocator->allocatedChunkCount--;
 	xkZeroMemory(memory, allocator->chunkSize);

@@ -1,4 +1,4 @@
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/DynamicArray.h"
 
 struct XkDynamicArray {

@@ -1,6 +1,6 @@
 #include "XKinetic/Vulkan/Internal.h"
 
-#ifdef XKVK_DEBUG
+#ifdef XKVULKAN_DEBUG
 static VKAPI_ATTR VkBool32 VKAPI_CALL __xkVkMessageCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* callbackData, void* data) {
 	if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
     xkLogNotice("Vulkan: %s", callbackData->pMessage);
@@ -65,4 +65,4 @@ void __xkVkDestroyDebugMessenger(void) {
   // Destroy Vulkan debug utils messenger.
   vkDestroyDebugUtilsMessenger(_xkVkContext.vkInstance, _xkVkContext.vkDebugMessenger, VK_NULL_HANDLE);
 }
-#endif // XKVK_DEBUG
+#endif // XKVULKAN_DEBUG

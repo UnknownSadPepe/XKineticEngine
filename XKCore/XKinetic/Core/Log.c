@@ -1,7 +1,7 @@
 #include "XKinetic/Core/String.h"
 #include "XKinetic/Core/Time.h"
-#include "XKinetic/Core/File.h"
-#include "XKinetic/Core/Console.h"
+#include "XKinetic/Platform/File.h"
+#include "XKinetic/Platform/Console.h"
 #include "XKinetic/Core/Log.h"
 
 typedef enum {
@@ -25,7 +25,7 @@ static struct {
 XkResult xkLogInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
-	result = xkOpenFile(&_xkLogger.file, "logger.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
+	result = xkOpenFile(_xkLogger.file, "XKineticLogFile.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
 	if(result != XK_SUCCESS) goto _catch;
 
 _catch:
@@ -108,11 +108,12 @@ void __xkLog(const XkLogType type, const XkChar8* format, XkArgs args) {
 	xkTimeStringFormat(&tm, timeBuffer, "%x-%X");
 
 	xkStringNFFormat(buffer, XK_LOG_BUFFER_SIZE, format, args);
+	const XkSize size = xkStringNFormat(buffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s", timeBuffer, typeString[type], buffer);
 
 	xkColorConsole(stream, color);
-	xkFWriteConsole(stream, "[%s]{%s} %s", timeBuffer, typeString[type], buffer);
+	xkWriteConsole(stream, buffer, size);
 	xkColorConsole(stream, XK_COLOR_RESET);
-	xkFWriteConsole(stream, "\n");
+	//xkWriteConsole(stream, "\n", );
 
-	xkFWriteFile(_xkLogger.file, "[%s]{%s} %s\n", timeBuffer, typeString[type], buffer);
+	xkWriteFile(_xkLogger.file, buffer, size);
 }

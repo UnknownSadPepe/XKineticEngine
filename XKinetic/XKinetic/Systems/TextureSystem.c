@@ -20,7 +20,7 @@ XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
   result = xkCreateDynamicArrayCapacity(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, XkTexture);
   if(result != XK_SUCCESS) goto _catch;
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
   
 
@@ -29,15 +29,15 @@ _catch:
 }
 
 void xkDestroyTextureSystem(XkTextureSystem system) {
-  // TODO: implementation.
+  /// TODO: implementation.
   xkDestroyDynamicArray(system->textures);
 }
 
 XkTextureID xkCreateTexture(XkTextureSystem system, XkTextureConfig* const pConfig) {
-  // TODO: implementation.
+  /// TODO: implementation.
   return(-1);
 }
 
 void xkDestroyTexture(XkTextureSystem system, XkTextureID id) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }

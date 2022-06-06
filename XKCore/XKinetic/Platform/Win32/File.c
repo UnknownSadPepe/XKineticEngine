@@ -1,6 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 
-#if defined(XK_PLATFORM_WIN32)
+#if defined(XK_WIN32)
 
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
@@ -8,14 +8,14 @@
 XkResult __xkFileInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
-	// NOTE: Nothing doing here.
+	/// NOTE: Nothing doing here.
 
 _catch:
 	return(result);
 }
 
 void __xkFileTerminate(void) {
-	// NOTE: Nothing doing here.
+	/// NOTE: Nothing doing here.
 }
 
 XkResult __xkOpenFile(XkFile file, const XkChar8* name, const XkFileFlag flag) {
@@ -27,7 +27,7 @@ XkResult __xkOpenFile(XkFile file, const XkChar8* name, const XkFileFlag flag) {
 	if(flag & XK_FILE_FLAG_WO_BIT) flags |= OF_WRITE;
 	if(flag & XK_FILE_FLAG_RW_BIT) flags |= OF_READWRITE;
 	//if(flag & XK_FILE_FLAG_AP_BIT) flags |= OF_APPEND;
-	// TODO: implementation.
+	/// TODO: implementation.
 	if(flag & XK_FILE_FLAG_CR_BIT) flags |= OF_CREATE;
 
 	file->handle.handle = OpenFile(name, NULL, flags);
@@ -88,4 +88,4 @@ void __xkReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
 	ReadFile(file->handle.handle, buffer, size, &numberOfBytesRead, NULL);
 }
 
-#endif // XK_PLATFORM_WIN32
+#endif // XK_WIN32

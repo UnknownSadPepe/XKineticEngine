@@ -5,10 +5,10 @@ XkResult __xkVkCreateCommandPool(void) {
 
   // Initialize Vulkan command pool create info.
   const VkCommandPoolCreateInfo vkCommandPoolCreateInfo = {
-    .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-    .pNext = VK_NULL_HANDLE,
-    .flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-    .queueFamilyIndex = _xkVkContext.queueFamilyIndices.graphics
+    .sType                = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+    .pNext                = VK_NULL_HANDLE,
+    .flags                = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+    .queueFamilyIndex     = _xkVkContext.queueFamilyIndices.graphics
   };
 
   // Create Vulkan command pool.

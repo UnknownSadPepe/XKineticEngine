@@ -1,7 +1,7 @@
 TARGET=XKEditor
 EXTENSION=.out
 SRC_DIR=Tests/Editor/
-INC_DIR=-ITests/Editor/ -IXKinetic/ -IXKCore/
+INC_DIR=-ITests/Editor/ -IXKinetic/ -IXKCore/ -IXKMath/
 TARGET_DIR=Target/Tests/
 BUILD_DIR=Target/
 CC=gcc

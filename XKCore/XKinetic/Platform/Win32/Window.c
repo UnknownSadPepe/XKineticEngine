@@ -1,6 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 
-#if defined(XK_PLATFORM_WIN32)
+#if defined(XK_WIN32)
 
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
@@ -76,6 +76,7 @@ XkResult __xkCreateWindow(XkWindow window, const XkChar8* title, const XkSize wi
   DWORD style = __xkWin32GetWindowStyle(window);
   DWORD exStyle = __xkWin32GetWindowExStyle(window);
 
+	// Create Win32 window.
 	window->handle.handle = CreateWindowW(XK_WIN32_WINDOW_CLASS_NAME, pWideTitle, style, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, _xkPlatform.handle.instance, NULL);
   if(!window->handle.handle) {
 		__xkErrorHandle("Failed to create window");
@@ -468,4 +469,4 @@ static XkWindowMod __xkWin32GetKeyMod(void) {
   return mod;
 }
 
-#endif // XK_PLATFORM_WIN32
+#endif // XK_WIN32

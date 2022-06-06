@@ -3,7 +3,7 @@
 XkResult xkCreateEntity(XkEntity* pEntity) {
   XkResult result = XK_SUCCESS;
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
   
 
@@ -12,18 +12,18 @@ _catch:
 }
 
 void xkDestroyEntity(XkEntity* pEntity) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }
 
 XkComponentID xkAddEntityComponent(XkEntity* pEntity, XkComponentType componentType) {
-  // TODO: implementation.
+  /// TODO: implementation.
   return(0);
 }
 
 void xkRemoveEntityComponent(XkEntity* pEntity, XkComponentID componentID) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }
 
 void xkEntityHasComponent(XkEntity* pEntity, XkComponentType componentType) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }

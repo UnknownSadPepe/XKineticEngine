@@ -20,22 +20,22 @@ XkResult xkCreateShaderSystem(XkShaderSystem* pSystem) {
   result = xkCreateDynamicArrayCapacity(&system->shaders, XK_SHADER_SYSTEM_ARRAY_SIZE, XkShader);
   if(result != XK_SUCCESS) goto _catch;
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyShaderSystem(XkShaderSystem system) {
-  // TODO: implementation.
+  /// TODO: implementation.
   xkDestroyDynamicArray(system->shaders);
 }
 
 XkShaderID xkCreateShader(XkShaderSystem system, XkShaderConfig* const pConfig) {
-  // TODO: implementation.
+  /// TODO: implementation.
   return(-1);
 }
 
 void xkDestroyShader(XkShaderSystem system, XkShaderID id) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }

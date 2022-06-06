@@ -1,6 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 
-#if defined(XK_PLATFORM_WIN32)
+#if defined(XK_WIN32)
 
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
@@ -42,7 +42,7 @@ _catch:
 }
 
 void __xkConsoleTerminate(void) {
-
+	/// NOTE: Nothing to do here.
 }
 
 void __xkColorConsole(const XkConsoleHandle handle, const XkConsoleColor color) {
@@ -115,4 +115,4 @@ void __xkReadConsole(XkChar8* buffer, const XkSize size) {
 	ReadConsoleA(_xkPlatform.handle.stdin, buffer, (DWORD)size, &numberReaden, NULL);
 }
 
-#endif // XK_PLATFORM_WIN32
+#endif // XK_WIN32

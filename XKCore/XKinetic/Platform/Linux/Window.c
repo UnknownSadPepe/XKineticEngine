@@ -1,12 +1,12 @@
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Window.h"
 
-#if defined(XK_PLATFORM_LINUX)
+#if defined(XK_LINUX)
 
 #include <string.h>
 #include "xdg-shell-client-protocol.h"
 #include "xdg-decoration-client-protocol.h"
 #include "wl-viewporter-client-protocol.h"
-#include "XKinetic/Platform/Linux/Internal.h"
 
 #define XK_WL_DECORATION_WIDTH 4
 #define XK_WL_DECORATION_TOP 24
@@ -51,12 +51,12 @@ static void __xkXdgToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
 
 	if(width != 0 && height != 0) {
 		__xkInputWindowSize(window, (XkSize)width, (XkSize)height);
-		__xkSetWindowSize(window, (XkSize)width, (XkSize)height);
+		xkSetWindowSize(window, (XkSize)width, (XkSize)height);
 	}
 
 	if(window->fullscreen) {
 		if(!activated || !fullscreen)	{
-			__xkShowWindow(window, XK_WINDOW_SHOW_MINIMIZED);
+			xkShowWindow(window, XK_WINDOW_SHOW_MINIMIZED);
 			window->fullscreen = XK_FALSE;
 		}
 	}
@@ -218,7 +218,7 @@ static const struct wl_surface_listener _xkWlSurfaceListener = {
   __xkWlSurfaceHandleLeave
 };
 
-XkResult __xkWindowInitialize(void) {
+XkResult xkWindowInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
 	// Connect Wayland server.
@@ -276,14 +276,14 @@ _catch:
 	return(result);
 }
 
-void __xkWindowTerminate(void) {
+void xkWindowTerminate(void) {
 	xdg_wm_base_destroy(_xkPlatform.handle.xdgBase);
   wl_registry_destroy(_xkPlatform.handle.wlRegistry);
   wl_display_flush(_xkPlatform.handle.wlDisplay);
 	wl_display_disconnect(_xkPlatform.handle.wlDisplay);
 }
 
-XkResult __xkCreateWindow(XkWindow window, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
+XkResult xkCreateWindow(XkWindow window, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
 
 	window->width = width;
@@ -316,11 +316,11 @@ _catch:
 	return(result);
 }
 
-void __xkDestroyWindow(XkWindow window) {
+void xkDestroyWindow(XkWindow window) {
 	//TODO: implementation
 }
 
-void __xkShowWindow(XkWindow window, const XkWindowShow show) {
+void xkShowWindow(XkWindow window, const XkWindowShow show) {
 	//TODO: implementation
 	if(!window->handle.xdgToplevel) {
 		__xkXdgCreateSurface(window);
@@ -353,55 +353,55 @@ void __xkShowWindow(XkWindow window, const XkWindowShow show) {
   wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
 }
 
-void __xkFocusWindow(XkWindow window) {
+void xkFocusWindow(XkWindow window) {
 	// A Wayland client can not focus.
 	__xkErrorHandle("Wayland platform doesn't support setting the input focus");
 }
 
-void __xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
+void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
 	//TODO: implementation
 }
 
-void __xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
+void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
 	if(pWidth)
 		*pWidth = window->width;
   if(pHeight)
     *pHeight = window->height;
 }
 
-void __xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
+void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
   xdg_toplevel_set_min_size(window->handle.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
 	xdg_toplevel_set_max_size(window->handle.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
 	wl_surface_commit(window->handle.wlSurface);
 }
 
-void __xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
+void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
 	// A Wayland client can not set its position.
 	__xkErrorHandle("Wayland platform doesn't support setting the input position");
 }
 
-void __xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
+void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
   // A Wayland client is not aware of its position.
 	__xkErrorHandle("Wayland platform doesn't provide the window position");
 }
 
-void __xkSetWindowTitle(XkWindow window, const XkChar8* title) {
+void xkSetWindowTitle(XkWindow window, const XkChar8* title) {
 	xdg_toplevel_set_title(window->handle.xdgToplevel, title);
 }
 
-void __xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
+void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
 	// A Wayland client can not set its icon
 	__xkErrorHandle("Wayland platform doesn't support setting the window icon");
 }
 
-void __xkPollWindowEvents(void) {
+void xkPollWindowEvents(void) {
 	//while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
 		/// TODO: implementation.
 		//__xkErrorHandler("Wayland display dispatch");
 	//}
 }
 
-void __xkWaitWindowEvents(void) {
+void xkWaitWindowEvents(void) {
 	//while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
 		//TODO: implementation
 		__xkErrorHandler("Wayland display dispatch");
@@ -453,4 +453,4 @@ _catch:
 	return(XK_TRUE);
 }*/
 
-#endif // XK_PLATFORM_LINUX
+#endif // XK_LINUX

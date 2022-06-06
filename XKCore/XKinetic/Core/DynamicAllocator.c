@@ -1,4 +1,5 @@
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/DynamicAllocator.h"
 
 struct XkDynamicAllocator {
 	XkSize totalSize;
@@ -7,6 +8,12 @@ struct XkDynamicAllocator {
 	XkHandle memory;
 };
 
+typedef struct {
+	XkSize size;
+	XkHandle memory;
+} XkDynamicMemoryHeader;
+
+#define XK_DYNAMIC_ALLOCATOR_ALIGN 16
 #define XK_DYNAMIC_ALLOCATOR_REALLOCATE_COEFFICIENT 2
 
 XkResult xkCreateDynamicAllocator(XkDynamicAllocator* pAllocator, const XkSize totalSize) {
@@ -20,7 +27,7 @@ XkResult xkCreateDynamicAllocator(XkDynamicAllocator* pAllocator, const XkSize t
 
 	XkDynamicAllocator allocator = *pAllocator;	
 
-	const XkSize alignTotalSize = (totalSize + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignTotalSize = (totalSize + (XK_DYNAMIC_ALLOCATOR_ALIGN - 1)) & ~(XK_DYNAMIC_ALLOCATOR_ALIGN - 1);
 
 	allocator->totalSize = alignTotalSize;
 	allocator->allocated = 0;
@@ -38,33 +45,33 @@ void xkDestroyDynamicAllocator(XkDynamicAllocator allocator) {
 	allocator->totalSize = 0;
 	allocator->allocated = 0;
 	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL;
+	allocator->memory = XK_NULL_HANDLE;
 	xkFreeMemory(allocator);
 }
 
 XkHandle xkAllocateDynamicMemory(XkDynamicAllocator allocator, const XkSize size) {
-	const XkSize headerSize = (size + sizeof(XkMemoryHeader) + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize headerSize = (size + sizeof(XkDynamicMemoryHeader) + (XK_DYNAMIC_ALLOCATOR_ALIGN - 1)) & ~(XK_DYNAMIC_ALLOCATOR_ALIGN - 1);
 
 	if((allocator->allocated + headerSize) > allocator->totalSize) {
 		allocator->totalSize *= XK_DYNAMIC_ALLOCATOR_REALLOCATE_COEFFICIENT;
 		allocator->memory = xkReallocateMemory(allocator->memory, allocator->totalSize);
 		if(!allocator->memory) {
-			return(XK_NULL);
+			return(XK_NULL_HANDLE);
 		}
 	}
 
 	allocator->allocated += headerSize;
  	XkHandle newMemory = allocator->memory + (allocator->allocated + headerSize);	
 
-	XkMemoryHeader* pHeader = (XkMemoryHeader*)newMemory;
+	XkDynamicMemoryHeader* pHeader = (XkDynamicMemoryHeader*)newMemory;
 	pHeader->size = headerSize;
 	pHeader->memory = newMemory;
 
-	return(newMemory + sizeof(XkMemoryHeader));
+	return(newMemory + sizeof(XkDynamicMemoryHeader));
 }
 
 void xkFreeDynamicMemory(XkDynamicAllocator allocator, const XkHandle memory) {
-	XkMemoryHeader* pHeader = (XkMemoryHeader*)(((XkChar8*)memory) - sizeof(XkMemoryHeader));
+	XkDynamicMemoryHeader* pHeader = (XkDynamicMemoryHeader*)(((XkChar8*)memory) - sizeof(XkDynamicMemoryHeader));
 
 	allocator->allocated = 0;
 	xkZeroMemory(pHeader->memory, pHeader->size);

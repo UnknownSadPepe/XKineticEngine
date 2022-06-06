@@ -19,7 +19,7 @@ XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkChar8* path) {
 
   xkNCopyString(loader->path, path, XK_MODEL_LOADER_PATH_MAX_SIZE);
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
   
 
@@ -28,23 +28,23 @@ _catch:
 }
 
 void xkDestroyModelLoader(XkModelLoader loader) {
-  // TODO: implementation.
+  /// TODO: implementation.
   xkFreeMemory(loader);
 }
 
 XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkChar8* name) {
   XkResult result = XK_SUCCESS;
 
-  // TODO: implementation.
+  /// TODO: implementation.
   pConfig->vertexCount = 0;
-  pConfig->vertices = XK_NULL;
+  pConfig->vertices = XK_NULL_HANDLE;
   pConfig->indexCount = 0;
-  pConfig->indices = XK_NULL;
+  pConfig->indices = XK_NULL_HANDLE;
 
 _catch:
   return(result); 
 }
 
 void xkUnloadModel(XkModelLoader loader, XkModelConfig* const pConfig) {
-  // TODO: implementation.
+  /// TODO: implementation.
 }

@@ -46,7 +46,7 @@ XkResult __xkVkPickPhysicalDevice(void) {
   xkLogDebug("Vulkan Physical Device transfer queue: %d", _xkVkContext.queueFamilyIndices.transfer);
   xkLogDebug("Vulkan Physical Device compute queue: %d", _xkVkContext.queueFamilyIndices.compute);
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
 _catch:
   return(result);
@@ -69,10 +69,10 @@ static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevic
   vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &availableExtensionPropertiesCount, vkAvailableExtensionProperties);
 
   // Template available Vulkan extension.
-  const char* availableExtension = XK_NULL;
+  const char* availableExtension = XK_NULL_HANDLE;
 
   // Template required Vulkan extension.
-  const char* requiredExtension = XK_NULL;
+  const char* requiredExtension = XK_NULL_HANDLE;
 
   // Helper boolean value.
   XkBool32 availableExtensionFind = XK_FALSE;
@@ -178,7 +178,7 @@ static uint32_t __xkVkScorePhysicalDevice(const VkPhysicalDevice vkPhysicalDevic
   vkGetPhysicalDeviceMemoryProperties(vkPhysicalDevice, &vkPhysicalDeviceMemoryProperties);
 	vkGetPhysicalDeviceFeatures(vkPhysicalDevice, &vkPhysicalDeviceFeatures);
 
-  // TODO: implement best physical device score.
+  /// TODO: implement best physical device score.
 
   // Adds a large score boost for discrete GPUs (dedicated graphics cards).
 	if(vkPhysicalDeviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -211,7 +211,7 @@ static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDe
   }
 
   // Check Vulkan surface formats support.
-  // NOTE: Can be done as a separate function.
+  /// NOTE: Can be done as a separate function.
   {
     uint32_t surfaceFormatCount = 0;
     vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &surfaceFormatCount, VK_NULL_HANDLE);
@@ -222,7 +222,7 @@ static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDe
   }
 
   // Check Vulkan present mode support.
-  // NOTE: Can be done as a separate function.
+  /// NOTE: Can be done as a separate function.
   {
     uint32_t presentModeCount = 0;
     vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, vkSurface, &presentModeCount, VK_NULL_HANDLE);

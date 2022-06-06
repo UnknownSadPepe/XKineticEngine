@@ -1,4 +1,4 @@
-#include "XKinetic/Core/Memory.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/HashTable.h"
 
 #include "XKinetic/Core/Log.h"
@@ -68,7 +68,7 @@ void xkClearHashTable(XkHashTable table) {
 void __xkHashTableInsert(XkHashTable table, const XkKey key, const XkHandle data) {
   XkSize hashIndex = __xkHashIndex(key, table->capacity);
 
-  // TODO: implementation.
+  /// TODO: implementation.
 
 	if(table->length >= table->capacity) {
 		xkResizeHashTable(table, table->capacity * XK_HASH_TABLE_REALLOCATE_COEFFICIENT);
@@ -79,7 +79,7 @@ void __xkHashTableInsert(XkHashTable table, const XkKey key, const XkHandle data
 
 void xkHashTableErase(XkHashTable table, XkKey key) {
   XkSize hashIndex = __xkHashIndex(key, table->capacity);
-  // TODO: implementation.
+  /// TODO: implementation.
 	table->length--;
 }
 

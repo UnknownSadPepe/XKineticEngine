@@ -1,6 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 
-#if defined(XK_PLATFORM_WIN32)
+#if defined(XK_WIN32)
 
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
@@ -10,11 +10,14 @@
 XkResult __xkThreadInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
+	/// NOTE: Nothing to do here.
+
 _catch:
 	return(result);
 }
 
 void __xkThreadTerminate(void) {
+	/// NOTE: Nothing to do here.
 }
 
 XkResult __xkCreateThread(XkThread thread, const XkThreadRoutinePfn pfnRoutine) {
@@ -29,7 +32,7 @@ XkResult __xkCreateThread(XkThread thread, const XkThreadRoutinePfn pfnRoutine) 
 
 	thread->handle.handle = CreateThread(NULL, XK_WIN32_THREAD_STACK_SIZE, pfnRoutine, thread->handle.pStack, 0, &thread->handle.id);
 	if(!thread->handle.handle) {
-		__xkErrorHandle("Failed to create memory!");
+		__xkErrorHandle("Failed to create memory");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -39,36 +42,36 @@ _catch:
 }
 
 void __xkJoinThread(XkThread thread, const XkInt32* pResult) {
-	// TODO: implementation.
+	/// TODO: implementation.
 	WaitForSingleObject(thread->handle.handle, INFINITE);
 	CloseHandle(thread->handle.handle);
 	__xkFreeMemory(thread->handle.pStack);
 }
 
 void __xkDetachThread(XkThread thread) {
-	// TODO: implementation.
+	/// TODO: implementation.
 	TerminateThread(thread->handle.handle, 0);
 	CloseHandle(thread->handle.handle);
 	__xkFreeMemory(thread->handle.pStack);
 }
 
 void __xkExitThread(XkThread thread, XkInt32 result) {
-	// TODO: implementation.
+	/// TODO: implementation.
 	ExitThread(result);
 	CloseHandle(thread->handle.handle);
 	__xkFreeMemory(thread->handle.pStack);
 }
 
 void __xkKillThread(XkThread thread) {
-	// TODO: implementation.
+	/// TODO: implementation.
 	TerminateThread(thread->handle.handle, 0);
 	CloseHandle(thread->handle.handle);
 	__xkFreeMemory(thread->handle.pStack);
 }
 
 XkThread __xkThreadSelf(void) {
-	// TODO: implementation.
-	return(XK_NULL);
+	/// TODO: implementation.
+	return(XK_NULL_HANDLE);
 }
 
 void __xkThreadYield(void) {
@@ -84,7 +87,7 @@ XkResult __xkCreateMutex(XkMutex mutex) {
 
 	mutex->handle.handle = CreateMutex(NULL, FALSE, NULL);
 	if(!mutex->handle.handle) {
-		__xkErrorHandle("Failed to create mutex!");
+		__xkErrorHandle("Failed to create mutex");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -131,4 +134,4 @@ _catch:
 	return(result);
 }
 
-#endif // XK_PLATFORM_WIN32
+#endif // XK_WIN32
