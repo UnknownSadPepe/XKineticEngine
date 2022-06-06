@@ -13,7 +13,7 @@ typedef struct {
 	XkHandle memory;
 } XkDynamicMemoryHeader;
 
-#define XK_DYNAMIC_ALLOCATOR_ALIGN 16
+static const XkSize XK_DYNAMIC_ALLOCATOR_ALIGN = 16;
 #define XK_DYNAMIC_ALLOCATOR_REALLOCATE_COEFFICIENT 2
 
 XkResult xkCreateDynamicAllocator(XkDynamicAllocator* pAllocator, const XkSize totalSize) {

@@ -5,7 +5,7 @@
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
 
-XkSize __xkGetTime(void) {
+XkSize xkGetTime(void) {
 	return((XkSize)GetTickCount());
 }
 

@@ -1,5 +1,5 @@
 #include "XKinetic/Core/String.h"
-#include "XKinetic/Core/Time.h"
+#include "XKinetic/Platform/Time.h"
 #include "XKinetic/Platform/File.h"
 #include "XKinetic/Platform/Console.h"
 #include "XKinetic/Core/Log.h"
@@ -20,12 +20,15 @@ static struct {
 	XkFile file;
 } _xkLogger;
 
-#define XK_LOG_BUFFER_SIZE 1024
+#define XK_LOG_TIME_BUFFER_SIZE 64
+#define XK_LOG_TYPE_BUFFER_SIZE 3
+#define XK_LOG_ARG_BUFFER_SIZE 1024
+#define XK_LOG_BUFFER_SIZE (XK_LOG_TIME_BUFFER_SIZE + XK_LOG_TYPE_BUFFER_SIZE + XK_LOG_ARG_BUFFER_SIZE)
 
 XkResult xkLogInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
-	result = xkOpenFile(_xkLogger.file, "XKineticLogFile.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
+	result = xkOpenFile(&_xkLogger.file, "XKineticLogs.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
 	if(result != XK_SUCCESS) goto _catch;
 
 _catch:
@@ -86,7 +89,7 @@ void xkLogDebug(const XkChar8* format, ...) {
 }
 
 void __xkLog(const XkLogType type, const XkChar8* format, XkArgs args) {
-	static const XkChar8* typeString[] = {"FATAL", "ERROR", "WARNING", "TRACE", "INFO", "NOTICE", "DEBUG"};
+	static const XkChar8* typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};
 	XkChar8 buffer[XK_LOG_BUFFER_SIZE] = {0};
 
 	XkConsoleHandle stream = type <= XK_LOG_TYPE_ERROR ? XK_CONSOLE_STDERR : XK_CONSOLE_STDOUT;
@@ -101,19 +104,18 @@ void __xkLog(const XkLogType type, const XkChar8* format, XkArgs args) {
 		case XK_LOG_TYPE_DEBUG:		color = XK_COLOR_FBLUE_BIT; break;
 	}
 
-	XkChar8 timeBuffer[64];
+	XkChar8 timeBuffer[XK_LOG_TIME_BUFFER_SIZE];
 	XkSize rawTime = xkGetTime();
 	XkTime tm;
 	xkTimeFormat(&tm, rawTime);
-	xkTimeStringFormat(&tm, timeBuffer, "%x-%X");
+	xkTimeStringFormat(&tm, timeBuffer, XK_LOG_TIME_BUFFER_SIZE, "%x-%X");
 
-	xkStringNFFormat(buffer, XK_LOG_BUFFER_SIZE, format, args);
-	const XkSize size = xkStringNFormat(buffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s", timeBuffer, typeString[type], buffer);
+	XkChar8 argBuffer[XK_LOG_ARG_BUFFER_SIZE];
+	xkStringNFFormat(argBuffer, XK_LOG_ARG_BUFFER_SIZE, format, args);
 
-	xkColorConsole(stream, color);
-	xkWriteConsole(stream, buffer, size);
-	xkColorConsole(stream, XK_COLOR_RESET);
-	//xkWriteConsole(stream, "\n", );
+	const XkSize size = xkStringNFormat(buffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s\n", timeBuffer, typeBuffer[type], argBuffer);
+
+	xkWriteConsoleColored(stream, color, buffer, size);
 
 	xkWriteFile(_xkLogger.file, buffer, size);
 }

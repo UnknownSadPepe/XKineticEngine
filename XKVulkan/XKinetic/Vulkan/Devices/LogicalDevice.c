@@ -310,3 +310,173 @@ _catch:
   return(result);
 }
 
+XkResult __xkVkCopyBuffer(VkBuffer vkDstBuffer, const VkBuffer vkSrcBuffer, const VkDeviceSize vkSize) {
+  XkResult result = XK_SUCCESS;
+
+  // Begin Vulkan single command buffer.
+  VkCommandBuffer vkSingleCommandBuffer;
+  result = __xkVkBeginSingleCommands(&vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to begin Vulkan command buffer");
+    goto _catch;   
+  }
+
+  // Initialize Vulkan buffer copy info.
+  const VkBufferCopy vkBufferCopyInfo = {
+    .srcOffset  = 0,
+    .dstOffset  = 0,
+    .size       = vkSize
+  };
+
+  // Copy Vulkan buffer.
+  vkCmdCopyBuffer(vkSingleCommandBuffer, vkSrcBuffer, vkDstBuffer, 1, &vkBufferCopyInfo);
+
+  // End Vulkan single command buffer.
+  result = __xkVkEndSingleCommands(vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to end Vulkan command buffer");
+    goto _catch;   
+  }
+
+_catch:
+  return(result);
+}
+
+XkResult __xkVkMapBuffer(VkDeviceMemory vkBufferMemory, const VkDeviceSize vkDeviceSize, const void* data) {
+  XkResult result = XK_SUCCESS;
+
+  void* mapped;
+  // Map Vulkan buffer memory.
+	VkResult vkResult = vkMapMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory, 0, vkDeviceSize, 0, &mapped);
+  if(vkResult != VK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to map Vulkan buffer memory: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;   
+  }
+
+  // Copy data.
+	xkCopyMemory((XkHandle)mapped, (XkHandle)data, (XkSize)vkDeviceSize);
+
+  // Unmap Vulkan buffer memory.
+	vkUnmapMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory);
+
+_catch:
+  return(result);
+}
+
+XkResult __xkVkTransitionImageLayout(VkImage vkImage, const VkFormat vkFormat, const VkImageLayout vkOldLayout, const VkImageLayout vkNewLayout, const uint32_t mipLevels) {
+  XkResult result = XK_SUCCESS;
+
+  // Begin Vulkan single command buffer.
+  VkCommandBuffer vkSingleCommandBuffer;
+  result = __xkVkBeginSingleCommands(&vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to begin Vulkan command buffer");
+    goto _catch;   
+  }
+
+  VkPipelineStageFlags vkSrcStage;
+  VkPipelineStageFlags vkDstStage;
+
+  // Template Vulkan source and destination access flags.
+  VkAccessFlags vkSrcAccess;
+  VkAccessFlags vkDstAccess;
+
+  // Choose Vulkan access flags and pipeline stages.
+  if(vkOldLayout == VK_IMAGE_LAYOUT_UNDEFINED && vkNewLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+    vkSrcAccess = 0;
+    vkDstAccess = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+    vkSrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    vkDstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+  } else if(vkOldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && vkNewLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+    vkSrcAccess = VK_ACCESS_TRANSFER_WRITE_BIT;
+    vkDstAccess = VK_ACCESS_SHADER_READ_BIT;
+
+    vkSrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    vkDstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+  } else {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("unsupported Vulkan layout transition");
+    goto _catch;
+  }
+
+  // Initialize Vulkan image memory barrier.
+  const VkImageMemoryBarrier vkImageMemoryBarrier = {
+    .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+    .pNext = VK_NULL_HANDLE,
+    .srcAccessMask = vkSrcAccess,
+    .dstAccessMask = vkDstAccess,
+    .oldLayout = vkOldLayout,
+    .newLayout = vkNewLayout,
+    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+    .image = vkImage,
+    .subresourceRange = {
+      .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+      .baseMipLevel = 0,
+      .levelCount = mipLevels,
+      .baseArrayLayer = 0,
+      .layerCount = 1
+    }
+  };
+
+  // Insert a Vulkan memory dependency.
+  vkCmdPipelineBarrier(vkSingleCommandBuffer, vkSrcStage, vkDstStage, 0, 0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, 1, &vkImageMemoryBarrier);
+
+  // End Vulkan single command buffer.
+  result = __xkVkEndSingleCommands(vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to end Vulkan command buffer");
+    goto _catch;   
+  }
+
+_catch:
+  return(result);
+}
+
+XkResult __xkVkCopyBufferToImage(VkBuffer vkBuffer, VkImage vkImage, const VkExtent3D vkExtent) {
+  XkResult result = XK_SUCCESS;
+
+  // Begin Vulkan single command buffer.
+  VkCommandBuffer vkSingleCommandBuffer;
+  result = __xkVkBeginSingleCommands(&vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to begin Vulkan command buffer");
+    goto _catch;   
+  }
+
+  // Initialize Vulkan image copy info.
+  const VkBufferImageCopy vkImageCopyInfo = {
+    .bufferOffset         = 0,
+    .bufferRowLength      = 0,
+    .bufferImageHeight    = 0,
+    .imageSubresource     = {
+      .aspectMask       = VK_IMAGE_ASPECT_COLOR_BIT,
+      .mipLevel         = 0,
+      .baseArrayLayer   = 0,
+      .layerCount       = 1
+    },
+    .imageOffset          = {0, 0, 0},
+    .imageExtent          = vkExtent
+  };
+
+  // Copy Vulkan image.
+  vkCmdCopyBufferToImage(vkSingleCommandBuffer, vkBuffer, vkImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &vkImageCopyInfo);
+
+  // End Vulkan single command buffer.
+  result = __xkVkEndSingleCommands(vkSingleCommandBuffer);
+  if(result != XK_SUCCESS) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("Failed to end Vulkan command buffer");
+    goto _catch;   
+  }
+
+_catch:
+  return(result);
+}

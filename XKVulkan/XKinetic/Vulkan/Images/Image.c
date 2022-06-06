@@ -60,7 +60,7 @@ XkResult __xkVkCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pVkIma
   };
 
   // Allocate Vulkan image memory.
-  result = vkAllocateMemory(_xkVkContext.vkLogicalDevice, &vkMemoryAllocateInfo, VK_NULL_HANDLE, pVkImageMemory);
+  vkResult = vkAllocateMemory(_xkVkContext.vkLogicalDevice, &vkMemoryAllocateInfo, VK_NULL_HANDLE, pVkImageMemory);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
     xkLogError("Failed to allocate Vulkan image memory: %s", __xkVkGetErrorString(vkResult));
@@ -71,7 +71,7 @@ XkResult __xkVkCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pVkIma
   VkDeviceMemory vkImageMemory = *pVkImageMemory;
 
   // Bind Vulkan image memory.
-	result = vkBindImageMemory(_xkVkContext.vkLogicalDevice, vkImage, vkImageMemory, 0);
+	vkResult = vkBindImageMemory(_xkVkContext.vkLogicalDevice, vkImage, vkImageMemory, 0);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
     xkLogError("Failed to bind Vulkan image memory: %s", __xkVkGetErrorString(vkResult));

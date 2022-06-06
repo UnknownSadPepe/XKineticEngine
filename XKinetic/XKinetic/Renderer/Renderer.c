@@ -230,102 +230,102 @@ XkResult __xkLoadVkModule(XkRenderer renderer) {
 	}
 
 	// Load Vulkan module symbols.
-	result = xkGetModuleSymbol(renderer->callbacks.create, XKVULKAN_CREATE_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.create, XKVULKAN_CREATE_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CREATE_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.destroy, XKVULKAN_DESTROY_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.destroy, XKVULKAN_DESTROY_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_DESTROY_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.clearColor, XKVULKAN_CLEAR_COLOR_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clearColor, XKVULKAN_CLEAR_COLOR_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CLEAR_COLOR_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.clearDepth, XKVULKAN_CLEAR_DEPTH_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clearDepth, XKVULKAN_CLEAR_DEPTH_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CLEAR_DEPTH_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.clearStencil, XKVULKAN_CLEAR_STENCIL_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clearStencil, XKVULKAN_CLEAR_STENCIL_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CLEAR_STENCIL_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.clear, XKVULKAN_CLEAR_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clear, XKVULKAN_CLEAR_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CLEAR_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.topology, XKVULKAN_TOPOLOGY_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.topology, XKVULKAN_TOPOLOGY_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_TOPOLOGY_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.cullMode, XKVULKAN_CULLMODE_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.cullMode, XKVULKAN_CULLMODE_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CULLMODE_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.begin, XKVULKAN_BEGIN_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.begin, XKVULKAN_BEGIN_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_BEGIN_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.end, XKVULKAN_END_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.end, XKVULKAN_END_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_END_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.resize, XKVULKAN_RESIZE_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.resize, XKVULKAN_RESIZE_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_RESIZE_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.scissor, XKVULKAN_SCISSOR_RENDERER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.scissor, XKVULKAN_SCISSOR_RENDERER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_SCISSOR_RENDERER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.draw, XKVULKAN_DRAW, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.draw, XKVULKAN_DRAW, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_DRAW);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.drawIndexed, XKVULKAN_DRAW_INDEXED, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.drawIndexed, XKVULKAN_DRAW_INDEXED, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_DRAW_INDEXED);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.createBuffer, XKVULKAN_CREATE_BUFFER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.createBuffer, XKVULKAN_CREATE_BUFFER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CREATE_BUFFER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.destroyBuffer, XKVULKAN_DESTROY_BUFFER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.destroyBuffer, XKVULKAN_DESTROY_BUFFER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_DESTROY_BUFFER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.bindVertexBuffer, XKVULKAN_BIND_VERTEX_BUFFER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.bindVertexBuffer, XKVULKAN_BIND_VERTEX_BUFFER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_BIND_VERTEX_BUFFER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.bindIndexBuffer, XKVULKAN_BIND_INDEX_BUFFER, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.bindIndexBuffer, XKVULKAN_BIND_INDEX_BUFFER, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_BIND_INDEX_BUFFER);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.createTexture2D, XKVULKAN_CREATE_TEXTURE2D, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.createTexture2D, XKVULKAN_CREATE_TEXTURE2D, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_CREATE_TEXTURE2D);
 		goto _catch;
 	}
-	result = xkGetModuleSymbol(renderer->callbacks.destroyTexture2D, XKVULKAN_DESTROY_TEXTURE2D, renderer->module);
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.destroyTexture2D, XKVULKAN_DESTROY_TEXTURE2D, renderer->module);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s symbol: %s", XKVULKAN_LIBRARY, XKVULKAN_DESTROY_TEXTURE2D);
 		goto _catch;

@@ -7,23 +7,18 @@
 
 #define XK_WIN32_THREAD_STACK_SIZE (1024 * 1024)
 
-XkResult __xkThreadInitialize(void) {
+XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) {
 	XkResult result = XK_SUCCESS;
 
-	/// NOTE: Nothing to do here.
+	*pThread = xkAllocateMemory(sizeof(struct XkThread));
+	if(!(*pThread)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkThread thread = *pThread;
 
-_catch:
-	return(result);
-}
-
-void __xkThreadTerminate(void) {
-	/// NOTE: Nothing to do here.
-}
-
-XkResult __xkCreateThread(XkThread thread, const XkThreadRoutinePfn pfnRoutine) {
-	XkResult result = XK_SUCCESS;
-
-	thread->handle.pStack = __xkAllocateMemory(XK_WIN32_THREAD_STACK_SIZE);
+	thread->handle.pStack = xkAllocateMemory(XK_WIN32_THREAD_STACK_SIZE);
 	if(!thread->handle.pStack) {
 		__xkErrorHandle("Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
@@ -32,7 +27,7 @@ XkResult __xkCreateThread(XkThread thread, const XkThreadRoutinePfn pfnRoutine) 
 
 	thread->handle.handle = CreateThread(NULL, XK_WIN32_THREAD_STACK_SIZE, pfnRoutine, thread->handle.pStack, 0, &thread->handle.id);
 	if(!thread->handle.handle) {
-		__xkErrorHandle("Failed to create memory");
+		__xkErrorHandle("Failed to create thread");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -41,97 +36,71 @@ _catch:
 	return(result);
 }
 
-void __xkJoinThread(XkThread thread, const XkInt32* pResult) {
+void xkJoinThread(XkThread thread, const XkInt32** ppResult) {
 	/// TODO: implementation.
 	WaitForSingleObject(thread->handle.handle, INFINITE);
 	CloseHandle(thread->handle.handle);
-	__xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
-void __xkDetachThread(XkThread thread) {
+void xkDetachThread(XkThread thread) {
 	/// TODO: implementation.
 	TerminateThread(thread->handle.handle, 0);
 	CloseHandle(thread->handle.handle);
-	__xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
-void __xkExitThread(XkThread thread, XkInt32 result) {
+void xkExitThread() {
 	/// TODO: implementation.
-	ExitThread(result);
+	XkThread thread = xkThreadSelf();
+	ExitThread(0);
 	CloseHandle(thread->handle.handle);
-	__xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
-void __xkKillThread(XkThread thread) {
+void xkKillThread(XkThread thread) {
 	/// TODO: implementation.
 	TerminateThread(thread->handle.handle, 0);
 	CloseHandle(thread->handle.handle);
-	__xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
-XkThread __xkThreadSelf(void) {
-	/// TODO: implementation.
-	return(XK_NULL_HANDLE);
-}
-
-void __xkThreadYield(void) {
-	SwitchToThread();
-}
-
-void __xkThreadSleep(const XkSize milliSeconds) {
+void xkThreadSleep(const XkSize milliSeconds) {
 	Sleep(milliSeconds);
 }
 
-XkResult __xkCreateMutex(XkMutex mutex) {
+XkResult xkCreateMutex(XkMutex* pMutex) {
 	XkResult result = XK_SUCCESS;
 
-	mutex->handle.handle = CreateMutex(NULL, FALSE, NULL);
-	if(!mutex->handle.handle) {
-		__xkErrorHandle("Failed to create mutex");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
+	*pMutex = xkAllocateMemory(sizeof(struct XkMutex));
+	if(!(*pMutex)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
 	}
-
-_catch:
-	return(result);
-}
-
-void __xkDestroyMutex(XkMutex mutex) {
-	CloseHandle(mutex->handle.handle);
-}
-
-XkResult __xkLockMutex(XkMutex mutex) {
-	XkResult result = XK_SUCCESS;
 	
-	DWORD waitResult = WaitForSingleObject(mutex->handle.handle, INFINITE);
-	switch(waitResult) {
-		case WAIT_OBJECT_0:
-			break;
+	XkMutex mutex = *pMutex;
 
-		case WAIT_ABANDONED:
-			break;
-	}
+	InitializeCriticalSection(&mutex->handle.handle);
 
 _catch:
 	return(result);
 }
 
-XkResult __xkTrylockMutex(XkMutex mutex) {
-	XkResult result = XK_SUCCESS;
-
-	DWORD waitResult = WaitForSingleObject(mutex->handle.handle, INFINITE);
-
-_catch:
-	return(result);
+void xkDestroyMutex(XkMutex mutex) {
+	DeleteCriticalSection(&mutex->handle.handle);
+	xkFreeMemory(mutex);
 }
 
-XkResult __xkUnlockMutex(XkMutex mutex) {
-	XkResult result = XK_SUCCESS;
-	
-	ReleaseMutex(mutex->handle.handle);
+void xkLockMutex(XkMutex mutex) {
+	EnterCriticalSection(&mutex->handle.handle);
+}
 
-_catch:
-	return(result);
+void xkUnlockMutex(XkMutex mutex) {
+	LeaveCriticalSection(&mutex->handle.handle);
 }
 
 #endif // XK_WIN32

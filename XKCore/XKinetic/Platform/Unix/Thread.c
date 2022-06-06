@@ -1,34 +1,44 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Thread.h"
+#include "XKinetic/Platform/Memory.h"
 
-#if defined(XK_UNIX)
+#if defined(XK_POSIX)
 
 #define _GNU_SOURCE
-#include <pthread.h>
 #include <signal.h>
 #include <unistd.h>
 
-XkResult xkThreadInitialize(void) {
-	XkResult result = XK_SUCCESS;
+#define XK_UNIX_THREAD_STACK_SIZE (1024 * 1024)
 
-	/// NOTE: Nothing to do here.
-
-_catch:
-	return(result);
-}
-
-void xkThreadTerminate(void) {
-	/// NOTE: Nothing to do here.
-}
-
-XkResult xkCreateThread(XkThread thread, const XkThreadRoutinePfn pfnRoutine) {
+XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) {
 	XkResult result = XK_SUCCESS;
 	
-	if(pthread_create(&thread->handle.handle, NULL, (void*(*)(void*))pfnRoutine, NULL) != 0) {
+	*pThread = xkAllocateMemory(sizeof(struct XkThread));
+	if(!(*pThread)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkThread thread = *pThread;
+
+	thread->handle.pStack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
+	if(!thread->handle.pStack) {
+		__xkErrorHandle("Failed to allocate thread stack memory");
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;
+	}
+
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setstack(&attr, thread->handle.pStack, XK_UNIX_THREAD_STACK_SIZE);
+
+	if(pthread_create(&thread->handle.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
 		__xkErrorHandle("Failed to create thread!");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
+
+	pthread_attr_destroy(&attr);
 
 _catch:
 	return(result);
@@ -36,10 +46,14 @@ _catch:
 
 void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 	pthread_join(thread->handle.handle, (void**)ppResult);
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
 void xkDetachThread(XkThread thread) {
 	pthread_detach(thread->handle.handle);
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
 void xkExitThread(void) {
@@ -48,24 +62,24 @@ void xkExitThread(void) {
 
 void xkKillThread(XkThread thread) {
 	pthread_kill(thread->handle.handle, 0);
-}
-
-XkThread xkThreadSelf(void) {
-	/// TODO: implementation.
-	return(XK_NULL_HANDLE);
-}
-
-void xkThreadYield(void) {
-	/// TODO: implementation.
-	//pthread_yield();
+	xkFreeMemory(thread->handle.pStack);
+	xkFreeMemory(thread);
 }
 
 void xkThreadSleep(const XkSize milliSeconds) {
 	usleep((unsigned int)milliSeconds);
 }
 
-XkResult xkCreateMutex(XkMutex mutex) {
+XkResult xkCreateMutex(XkMutex* pMutex) {
 	XkResult result = XK_SUCCESS;
+
+	*pMutex = xkAllocateMemory(sizeof(struct XkMutex));
+	if(!(*pMutex)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkMutex mutex = *pMutex;
 
 	if(pthread_mutex_init(&mutex->handle.handle, NULL) != 0) {
 		__xkErrorHandle("Failed to create mutex");
@@ -79,45 +93,15 @@ _catch:
 
 void xkDestroyMutex(XkMutex mutex) {
 	pthread_mutex_destroy(&mutex->handle.handle);
+	xkFreeMemory(mutex);
 }
 
-XkResult xkLockMutex(XkMutex mutex) {
-	XkResult result = XK_SUCCESS;
-
-	if(pthread_mutex_lock(&mutex->handle.handle) != 0) {
-		__xkErrorHandle("Failed to lock mutex");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
-	}
-
-_catch:
-	return(result);
+void xkLockMutex(XkMutex mutex) {
+	pthread_mutex_lock(&mutex->handle.handle);
 }
 
-XkResult xkTrylockMutex(XkMutex mutex) {
-	XkResult result = XK_SUCCESS;
-
-	if(pthread_mutex_trylock(&mutex->handle.handle) != 0) {
-		__xkErrorHandle("Failed to trylock mutex");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
-	}
-
-_catch:
-	return(result);
+void xkUnlockMutex(XkMutex mutex) {
+	pthread_mutex_unlock(&mutex->handle.handle);
 }
 
-XkResult xkUnlockMutex(XkMutex mutex) {
-	XkResult result = XK_SUCCESS;
-
-	if(pthread_mutex_unlock(&mutex->handle.handle) != 0) {
-		__xkErrorHandle("Failed to unlock mutex");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
-	}
-
-_catch:
-	return(result);
-}
-
-#endif // XK_UNIX
+#endif // XK_POSIX

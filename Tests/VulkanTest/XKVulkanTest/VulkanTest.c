@@ -33,15 +33,6 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	_xkApplication.config.version.patch = 1;
 	_xkApplication.exit = XK_FALSE;
 
-	result = xkMemoryInitialize();
-	if(result != XK_SUCCESS) goto _catch;
-
-	result = xkFileInitialize();
-	if(result != XK_SUCCESS) goto _catch;
-
-	result = xkConsoleInitialize();
-	if(result != XK_SUCCESS) goto _catch;	
-
 	result = xkLogInitialize();
 	if(result != XK_SUCCESS) goto _catch;
 
@@ -82,15 +73,11 @@ _catch:
 
 void xkDestroyApplication() {
 	xkDestroyWindow(_xkApplication.window);
-	//xkDestroyRenderer(_xkApplication.renderer);
+	xkDestroyRenderer(_xkApplication.renderer);
 
 	xkWindowTerminate();
 
 	xkLogTerminate();
-
-	xkConsoleTerminate();
-	xkFileTerminate();
-	xkMemoryTerminate();
 }
 
 void xkUpdateApplication() {

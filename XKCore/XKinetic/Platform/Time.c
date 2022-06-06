@@ -1,6 +1,5 @@
 /*TODO: remove #include <time.h>*/
 #include <time.h>
-#include "XKinetic/Platform/External.h"
 #include "XKinetic/Platform/Time.h"
 
 void xkTimeFormat(XkTime* const pTime, const XkSize rawTime) {
@@ -17,7 +16,7 @@ void xkTimeFormat(XkTime* const pTime, const XkSize rawTime) {
   pTime->yDay = (XkSize)t.tm_yday;
 }
 
-XkSize xkTimeStringFormat(XkTime* const pTime, XkChar8* buffer, const XkChar8* format) {
+XkSize xkTimeStringFormat(XkTime* const pTime, XkChar8* buffer, const XkSize size, const XkChar8* format) {
 	struct tm t = {
 		.tm_sec = (int)pTime->second,
 		.tm_min = (int)pTime->minute,
@@ -29,6 +28,6 @@ XkSize xkTimeStringFormat(XkTime* const pTime, XkChar8* buffer, const XkChar8* f
 		.tm_yday = (int)pTime->yDay
 	};
 
-	return((XkSize)strftime(buffer, 64, format, &t));
+	return((XkSize)strftime(buffer, size, format, &t));
 }
 

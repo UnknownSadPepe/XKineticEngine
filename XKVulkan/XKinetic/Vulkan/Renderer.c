@@ -307,6 +307,7 @@ XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, Xk
 
 	buffer->vkSize = (VkDeviceSize)size;
 
+	// Create Vulkan transfer buffer.
 	VkBuffer vkTransferBuffer;
 	VkDeviceMemory vkTransferBufferMemory;
 	result = __xkVkCreateBuffer(&vkTransferBuffer, &vkTransferBufferMemory, (VkDeviceSize)size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data);
@@ -316,6 +317,7 @@ XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, Xk
     goto _catch;
 	}
 
+	// Create Vulkan vertex buffer.
 	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, XK_NULL_HANDLE);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan buffer: %d", result);
@@ -323,6 +325,7 @@ XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, Xk
     goto _catch;
 	}
 
+	// Copy Vulkan transfer buffer to vertex.
 	result = __xkVkCopyBuffer(buffer->vkBuffer, vkTransferBuffer, buffer->vkSize);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to copy Vulkan buffer: %d", result);
@@ -330,6 +333,7 @@ XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, Xk
     goto _catch;
 	}
 
+	// Destroy Vulkan transfer buffer.
 	__xkVkDestroyBuffer(vkTransferBuffer, vkTransferBufferMemory);
 
 _catch:
@@ -337,6 +341,7 @@ _catch:
 }
 
 void xkVkDestroyVertexBuffer(XkVkVertexBuffer buffer) {
+	// Destroy Vulkan vertex buffer.
 	__xkVkDestroyBuffer(buffer->vkBuffer, buffer->vkMemory);
 	xkFreeMemory(buffer);
 }
@@ -366,6 +371,7 @@ XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHa
 
 	buffer->vkSize = (VkDeviceSize)size;
 
+	// Create Vulkan transfer buffer.
 	VkBuffer vkTransferBuffer;
 	VkDeviceMemory vkTransferBufferMemory;
 	result = __xkVkCreateBuffer(&vkTransferBuffer, &vkTransferBufferMemory, (VkDeviceSize)size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data);
@@ -375,6 +381,7 @@ XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHa
     goto _catch;
 	}
 
+	// Create Vulkan index buffer.
 	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, XK_NULL_HANDLE);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan buffer: %d", result);
@@ -382,6 +389,7 @@ XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHa
     goto _catch;
 	}
 
+	// Copy Vulkan transfer buffer to index.
 	result = __xkVkCopyBuffer(buffer->vkBuffer, vkTransferBuffer, buffer->vkSize);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to copy Vulkan buffer: %d", result);
@@ -389,6 +397,7 @@ XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHa
     goto _catch;
 	}
 
+	// Destroy Vulkan transfer buffer.
 	__xkVkDestroyBuffer(vkTransferBuffer, vkTransferBufferMemory);
 
 _catch:
@@ -396,19 +405,12 @@ _catch:
 }
 
 void xkVkDestroyIndexBuffer(XkVkIndexBuffer buffer) {
+	// Destroy Vulkan index buffer.
 	__xkVkDestroyBuffer(buffer->vkBuffer, buffer->vkMemory);
 	xkFreeMemory(buffer);
 }
 
 void xkVkBindIndexBuffer(XkVkIndexBuffer buffer) {
-	/// TODO: implementation.
-}
-
-void xkVkUnbindIndexBuffer(XkVkIndexBuffer buffer) {
-	/// TODO: implementation.
-}
-
-void xkVkSetIndexBuffer(XkVkIndexBuffer buffer, XkHandle data) {
 	/// TODO: implementation.
 }
 
@@ -425,6 +427,8 @@ XkResult xkVkCreateUniformBuffer(XkVkUniformBuffer* pBuffer, const XkSize size, 
 
 	buffer->vkSize = (VkDeviceSize)size;
 
+
+	// Create Vulkan uniform buffer.
 	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, XK_NULL_HANDLE);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan buffer: %d", result);
@@ -437,6 +441,7 @@ _catch:
 }
 
 void xkVkDestroyUniformBuffer(XkVkUniformBuffer buffer) {
+	// Destroy Vulkan uniform buffer.
 	__xkVkDestroyBuffer(buffer->vkBuffer, buffer->vkMemory);
 	xkFreeMemory(buffer);
 }
@@ -457,13 +462,65 @@ XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle* data, const XkSi
 	XkVkTexture2D texture = *pTexture;
 
 	/// TODO: implementation.
+	const VkDeviceSize vkSize = (width * height) * 4;
+
+	/// TODO: implementation.
+	uint32_t mipLevels = 1; 
+
+	const VkExtent3D vkExtent = {
+		.width = (uint32_t)width,
+		.height = (uint32_t)height,
+		.depth = 1
+	};
+
+	// Create Vulkan transfer buffer.
+	VkBuffer vkTransferBuffer;
+	VkDeviceMemory vkTransferBufferMemory;
+	result = __xkVkCreateBuffer(&vkTransferBuffer, &vkTransferBufferMemory, vkSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data);
+	if(result != XK_SUCCESS) {
+    xkLogError("Failed to create Vulkan transfer buffer: %d", result);
+    result = XK_ERROR_CREATE_FAILED;  
+    goto _catch;
+	}
+
+	// Create Vulkan image.
+	result = __xkVkCreateImage(&texture->vkImage, &texture->vkMemory, VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_SRGB, vkExtent, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mipLevels);
+	if(result != XK_SUCCESS) {
+    xkLogError("Failed to create Vulkan image: %d", result);
+    result = XK_ERROR_CREATE_FAILED;  
+    goto _catch;
+	}
+
+	__xkVkTransitionImageLayout(texture->vkImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
+	__xkVkCopyBufferToImage(vkTransferBuffer, texture->vkImage, vkExtent);
+
+	// Destroy Vulkan transfer buffer.
+	__xkVkDestroyBuffer(vkTransferBuffer, vkTransferBufferMemory);
+
+	// Create Vulkan image view.
+	result = __xkVkCreateImageView(&texture->vkImageView, texture->vkImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
+	if(result != XK_SUCCESS) {
+    xkLogError("Failed to create Vulkan image view: %d", result);
+    result = XK_ERROR_CREATE_FAILED;  
+    goto _catch;
+	}
+
+	// Create Vulkan sampler.
+	result = __xkVkCreateSampler(&texture->vkSampler, VK_FILTER_LINEAR, VK_SAMPLER_ADDRESS_MODE_REPEAT, VK_TRUE, mipLevels);
+	if(result != XK_SUCCESS) {
+    xkLogError("Failed to create Vulkan smapler: %d", result);
+    result = XK_ERROR_CREATE_FAILED;  
+    goto _catch;
+	}
 
 _catch:
 	return(result);
 }
 
 void xkVkDestroyTexture2D(XkVkTexture2D texture) {
-	/// TODO: implementation.
+	__xkVkDestroySampler(texture->vkSampler);
+	__xkVkDestroyImageView(texture->vkImageView);
+	__xkVkDestroyImage(texture->vkImage, texture->vkMemory);
 	xkFreeMemory(texture);
 }
 

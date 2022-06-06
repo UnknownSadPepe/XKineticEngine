@@ -2,20 +2,12 @@
 
 #include "XKinetic/XKCore.h"
 
-#if defined(XK_LINUX)
-	#include "XKinetic/Platform/Linux/External.h"
-#elif defined(XK_WIN32)
-	#include "XKinetic/Platform/Win32/External.h"
-#endif // XK_LINUX
-
 typedef enum {
 	XK_CONSOLE_STDOUT = 1,
 	XK_CONSOLE_STDERR = 2
 } XkConsoleHandle;
 
 typedef enum {
- XK_COLOR_RESET,
-
  XK_COLOR_FBLACK_BIT,
  XK_COLOR_FRED_BIT,
  XK_COLOR_FGREEN_BIT,
@@ -53,9 +45,6 @@ typedef enum {
  XK_COLOR_BWHITE_BIT
 } XkConsoleColor;
 
-XK_EXPORT XkResult xkConsoleInitialize(void);
-XK_EXPORT void xkConsoleTerminate(void);
-
-XK_EXPORT void xkColorConsole(const XkConsoleHandle, const XkConsoleColor);
 XK_EXPORT void xkWriteConsole(const XkConsoleHandle, const XkChar8*, const XkSize);
+XK_EXPORT void xkWriteConsoleColored(const XkConsoleHandle, const XkConsoleColor, const XkChar8*, const XkSize);
 XK_EXPORT void xkReadConsole(XkChar8*, const XkSize);

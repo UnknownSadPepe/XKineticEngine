@@ -13,7 +13,7 @@ typedef struct {
 	XkHandle memory;
 } XkStackMemoryHeader;
 
-#define XK_STACK_ALLOCATOR_ALIGN 16
+static const XkSize XK_STACK_ALLOCATOR_ALIGN = 16;
 
 XkResult xkCreateStackAllocator(XkStackAllocator* pAllocator, const XkSize totalSize) {
 	XkResult result = XK_SUCCESS;

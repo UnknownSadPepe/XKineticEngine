@@ -15,7 +15,7 @@ XkResult __xkVkCreateSampler(VkSampler* pVkSampler, const VkFilter vkFilter, con
 	  .addressModeV             = vkAddressMode,
 	  .addressModeW             = vkAddressMode,
 	  .mipLodBias               = 0.0f,
-    .anisotropyEnable         = vkAnisotropic,
+    .anisotropyEnable         = (vkAnisotropic && _xkVkContext.vkDeviceFeatures.samplerAnisotropy) ? VK_TRUE : VK_FALSE,
 	  .maxAnisotropy            = (vkAnisotropic && _xkVkContext.vkDeviceFeatures.samplerAnisotropy) ? _xkVkContext.vkDeviceProperties.limits.maxSamplerAnisotropy : 1.0f,
 	  .compareEnable            = VK_FALSE,
 	  .compareOp                = VK_COMPARE_OP_ALWAYS,

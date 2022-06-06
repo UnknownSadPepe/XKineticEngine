@@ -9,7 +9,7 @@ struct XkPoolAllocator {
 	XkHandle memory;
 };
 
-#define XK_POOL_ALLOCATOR_ALIGN 16
+static const XkSize XK_POOL_ALLOCATOR_ALIGN = 16;
 
 XkResult xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalChunkCount, const XkSize chunkSize) {
 	XkResult result = XK_SUCCESS;

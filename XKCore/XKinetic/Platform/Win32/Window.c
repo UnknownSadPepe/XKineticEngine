@@ -15,7 +15,7 @@ static WCHAR* __xkWin32CreateWideStringFromUTF8(const XkChar8*);
 static LRESULT CALLBACK __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
 static XkWindowMod __xkWin32GetKeyMod(void);
 
-XkResult __xkWindowInitialize(void) {
+XkResult xkWindowInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
 	_xkPlatform.handle.instance = GetModuleHandle(NULL);
@@ -53,13 +53,21 @@ _catch:
 	return(result);
 }
 
-void __xkWindowTerminate(void) {
+void xkWindowTerminate(void) {
 	// Unregister Win32 window class.
 	UnregisterClassW(XK_WIN32_WINDOW_CLASS_NAME, _xkPlatform.handle.instance); 
 }
 
-XkResult __xkCreateWindow(XkWindow window, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
+XkResult xkCreateWindow(XkWindow* pWindow, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
+
+	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
+	if(!(*pWindow)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkWindow window = *pWindow;
 
 	if(hint & XK_WINDOW_DECORATED_BIT) window->decorated = XK_TRUE;
 	if(hint & XK_WINDOW_RESIZABLE_BIT) window->resizable = XK_TRUE;
@@ -88,17 +96,21 @@ _catch:
 	return(result);
 }
 
-void __xkDestroyWindow(XkWindow window) {
+void xkDestroyWindow(XkWindow window) {
 	DestroyWindow(window->handle.handle);
 
-	if(window->handle.bigIcon)
+	if(window->handle.bigIcon) {
   	DestroyIcon(window->handle.bigIcon);
+	}
 
-  if(window->handle.smallIcon)
+  if(window->handle.smallIcon) {
     DestroyIcon(window->handle.smallIcon);
+	}
+
+	xkFreeMemory(window);
 }
 
-void __xkShowWindow(XkWindow window, const XkWindowShow show) {
+void xkShowWindow(XkWindow window, const XkWindowShow show) {
 	int cmdShow = 0;
 
 	switch(show) {
@@ -112,11 +124,11 @@ void __xkShowWindow(XkWindow window, const XkWindowShow show) {
 	ShowWindow(window->handle.handle, cmdShow);
 }
 
-void __xkFocusWindow(XkWindow window) {
+void xkFocusWindow(XkWindow window) {
 	SetFocus(window->handle.handle);
 }
 
-void __xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
+void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
 	RECT rect = { 0, 0, width, height };
 
   AdjustWindowRectEx(&rect, __xkWin32GetWindowStyle(window), FALSE, __xkWin32GetWindowExStyle(window));
@@ -124,7 +136,7 @@ void __xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height)
 	SetWindowPos(window->handle.handle, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
 }
 
-void __xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
+void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
   RECT area;
   GetClientRect(window->handle.handle, &area);
 
@@ -134,17 +146,17 @@ void __xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHei
   	*pHeight = area.bottom;
 }
 
-void __xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
+void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
 	RECT area;
 	GetWindowRect(window->handle.handle, &area);
   MoveWindow(window->handle.handle, area.left, area.top, area.right - area.left, area.bottom - area.top, TRUE);
 }
 
-void __xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
+void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
 	SetWindowPos(window->handle.handle, NULL, xPos , yPos, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
 }
 
-void __xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
+void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
 	POINT pos = { 0, 0 };
   ClientToScreen(window->handle.handle, &pos);
 
@@ -154,17 +166,17 @@ void __xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const
   	*pYPos = pos.y;
 }
 
-void __xkSetWindowTitle(XkWindow window, const XkChar8* title) {
+void xkSetWindowTitle(XkWindow window, const XkChar8* title) {
 	WCHAR* wideTitle = __xkWin32CreateWideStringFromUTF8(title);
   if(!wideTitle)
   	return;
 
 	SetWindowTextW(window->handle.handle, wideTitle);
 
-	__xkFreeMemory(wideTitle);
+	xkFreeMemory(wideTitle);
 }
 
-void __xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
+void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
 	HICON bigIcon = NULL, smallIcon = NULL;
 
    if(count) {
@@ -193,7 +205,7 @@ void __xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* 
   }
 }
 
-void __xkPollWindowEvents(void) {
+void xkPollWindowEvents(void) {
 	MSG msg;
 
 	while(PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -202,10 +214,10 @@ void __xkPollWindowEvents(void) {
 	}
 }
 
-void __xkWaitWindowEvents(void) {
+void xkWaitWindowEvents(void) {
 	WaitMessage();
 
-	__xkPollWindowEvents();
+	xkPollWindowEvents();
 }
 
 static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
@@ -315,13 +327,13 @@ WCHAR* __xkWin32CreateWideStringFromUTF8(const XkChar8* source) {
     return(NULL);
   }
 
-  pTarget = __xkAllocateMemory(count * sizeof(WCHAR));
+  pTarget = xkAllocateMemory(count * sizeof(WCHAR));
 	if(!pTarget) {
 		return(NULL);
 	}
 
   if(!MultiByteToWideChar(CP_UTF8, 0, source, -1, pTarget, count)) {
-  	__xkFreeMemory(pTarget);
+  	xkFreeMemory(pTarget);
     return(NULL);
   }
 

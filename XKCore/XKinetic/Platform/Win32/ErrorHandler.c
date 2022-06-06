@@ -20,4 +20,3 @@ void __xkErrorHandler(const XkChar8* format, ...) {
 }
 
 #endif // XK_WIN32
-

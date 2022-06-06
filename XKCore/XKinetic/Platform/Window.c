@@ -1,3 +1,4 @@
+#include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
 
 void __xkInputWindowShow(XkWindow window, const XkWindowShow show) {

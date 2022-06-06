@@ -11,6 +11,7 @@ typedef struct {
 
 typedef struct {
 	pthread_t handle;
+	XkHandle pStack;
 } __XkUnixThread;
 
 #define XK_PLATFORM_THREAD __XkUnixThread handle

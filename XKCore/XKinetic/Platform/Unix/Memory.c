@@ -12,23 +12,10 @@ typedef struct {
 	XkSize size;
 } __XkMemoryHeader;
 
-static const XkSize _xkAlign = 16;
-
-XkResult xkMemoryInitialize(void) {
-	XkResult result = XK_SUCCESS;
-
-	/// NOTE: nothing to do here.
-
-_catch:
-	return(result);
-}
-
-void xkMemoryTerminate(void) {
-	/// NOTE: nothing to do here.
-}
+static const XkSize XK_ALIGN = 16;
 
 XkHandle xkAllocateMemory(const XkSize size) {
-	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (XK_ALIGN - 1)) & ~ (XK_ALIGN - 1);
 
 	XkHandle memory = mmap(0, alignSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if(!memory) {
@@ -44,7 +31,7 @@ XkHandle xkAllocateMemory(const XkSize size) {
 }
 
 XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
-	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (_xkAlign - 1)) & ~ (_xkAlign - 1);
+	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (XK_ALIGN - 1)) & ~ (XK_ALIGN - 1);
 
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)(((XkUInt8*)memory) - sizeof(__XkMemoryHeader));
 

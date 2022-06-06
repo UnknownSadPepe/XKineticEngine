@@ -1,5 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
+#include "XKinetic/Platform/Memory.h"
 
 #if defined(XK_LINUX)
 
@@ -197,7 +198,7 @@ static void __xkWlRegistryGlobal(void* data, struct wl_registry* wlRegistry, uin
 }
 
 static void __xkWlRegistryGlobalRemove(void* data, struct wl_registry* wlRegistry, uint32_t name) {
-	//TODO: implementation
+	/// TODO: implementation
 }
 
 static const struct wl_registry_listener _xkWlRegistryListener = {
@@ -206,11 +207,11 @@ static const struct wl_registry_listener _xkWlRegistryListener = {
 };
 
 static void __xkWlSurfaceHandleEnter(void* data, struct wl_surface* pSurface, struct wl_output* pOutput) {
-	//TODO: implementation
+	/// TODO: implementation
 }
 
 static void __xkWlSurfaceHandleLeave(void* data, struct wl_surface* pSurface, struct wl_output* pOutput) {
-	//TODO: implementation
+	/// TODO: implementation
 }
 
 static const struct wl_surface_listener _xkWlSurfaceListener = {
@@ -283,8 +284,16 @@ void xkWindowTerminate(void) {
 	wl_display_disconnect(_xkPlatform.handle.wlDisplay);
 }
 
-XkResult xkCreateWindow(XkWindow window, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
+XkResult xkCreateWindow(XkWindow* pWindow, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
+
+	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
+	if(!(*pWindow)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;
+	}
+
+	XkWindow window = *pWindow;
 
 	window->width = width;
 	window->height = height;
@@ -317,18 +326,19 @@ _catch:
 }
 
 void xkDestroyWindow(XkWindow window) {
-	//TODO: implementation
+	/// TODO: implementation
+	xkFreeMemory(window);
 }
 
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
-	//TODO: implementation
+	/// TODO: implementation
 	if(!window->handle.xdgToplevel) {
 		__xkXdgCreateSurface(window);
 	}
 
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT:
-			//TODO: implementation
+			/// TODO: implementation
 			break;
 
 		case XK_WINDOW_SHOW_MAXIMIZED:
@@ -359,7 +369,7 @@ void xkFocusWindow(XkWindow window) {
 }
 
 void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
-	//TODO: implementation
+	/// TODO: implementation
 }
 
 void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
@@ -403,8 +413,8 @@ void xkPollWindowEvents(void) {
 
 void xkWaitWindowEvents(void) {
 	//while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
-		//TODO: implementation
-		__xkErrorHandler("Wayland display dispatch");
+		/// TODO: implementation
+		//__xkErrorHandler("Wayland display dispatch");
 	//}
 }
 

@@ -2,12 +2,6 @@
 
 #include "XKinetic/XKCore.h"
 
-#if defined(XK_LINUX)
-	#include "XKinetic/Platform/Linux/External.h"
-#elif defined(XK_WIN32)
-	#include "XKinetic/Platform/Win32/External.h"
-#endif // XK_LINUX
-
 typedef enum {
 	XK_WINDOW_DECORATED_BIT 	= 1,
 	XK_WINDOW_RESIZABLE_BIT 	= 2,
@@ -194,45 +188,10 @@ typedef struct XkWindowIcon {
 	XkUInt8* pixels;
 } XkWindowIcon;
 
-struct XkWindow {
-	XkSize width;
-	XkSize height;
-	XkSize xPos;
-	XkSize yPos;
-
-	XkBool32 maximized;
-	XkBool32 minimized;
-	XkBool32 fullscreen;
-	XkBool32 activated;
-
-	XkBool32 decorated;
-	XkBool32 resizable;
-	XkBool32 floating;
-
-	XkHandle userPointer;
-
-	XkBool32 closed;
-
-	struct {
-		XkWindowShowPfn show;
-		XkWindowKeyPfn key;
-		XkWindowButtonPfn button;
-		XkWindowCursorPfn cursor;
-		XkWindowCursorEnterPfn cursorEnter;
-		XkWindowScrollPfn scroll;
-		XkWindowClosePfn close;
-		XkWindowPositionPfn position;
-		XkWindowSizePfn size;
-		XkWindowFocusPfn focus;
-	} callbacks;
-
-	XK_PLATFORM_WINDOW;
-};
-
 XK_EXPORT XkResult xkWindowInitialize(void);
 XK_EXPORT void xkWindowTerminate(void);
 
-XK_EXPORT XkResult xkCreateWindow(XkWindow, const XkChar8*, const XkSize, const XkSize, const XkWindowHint);
+XK_EXPORT XkResult xkCreateWindow(XkWindow*, const XkChar8*, const XkSize, const XkSize, const XkWindowHint);
 XK_EXPORT void xkDestroyWindow(XkWindow);
 
 XK_EXPORT void xkShowWindow(XkWindow, const XkWindowShow);

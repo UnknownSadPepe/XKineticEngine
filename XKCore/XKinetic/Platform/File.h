@@ -2,12 +2,6 @@
 
 #include "XKinetic/XKCore.h"
 
-#if defined(XK_LINUX)
-	#include "XKinetic/Platform/Linux/External.h"
-#elif defined(XK_WIN32)
-	#include "XKinetic/Platform/Win32/External.h"
-#endif // XK_LINUX
-
 typedef enum {
 	XK_FILE_FLAG_RO_BIT = 1,
 	XK_FILE_FLAG_WO_BIT = 2,
@@ -22,19 +16,12 @@ typedef enum {
 	XK_FILE_SEEK_END = 2
 }	XkFileSeek;
 
-struct XkFile {
-	XK_PLATFORM_FILE;
-};
-
 typedef struct XkFile* XkFile;
 
-XK_EXPORT XkResult xkFileInitialize(void);
-XK_EXPORT void xkFileTerminate(void);
-
-XK_EXPORT XkResult xkOpenFile(XkFile, const XkChar8*, const XkFileFlag);
+XK_EXPORT XkResult xkOpenFile(XkFile*, const XkChar8*, const XkFileFlag);
 XK_EXPORT void xkCloseFile(XkFile);
 
-XK_EXPORT XkResult xkCreateFile(XkFile, const XkChar8*);
+XK_EXPORT XkResult xkCreateFile(XkFile*, const XkChar8*);
 XK_EXPORT void xkRemoveFile(const XkChar8*);
 
 XK_EXPORT void xkRenameFile(const XkChar8*, const XkChar8*);

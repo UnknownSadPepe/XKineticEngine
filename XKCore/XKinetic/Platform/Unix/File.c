@@ -1,5 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/File.h"
+#include "XKinetic/Platform/Memory.h"
 
 #if defined(XK_UNIX)
 
@@ -7,21 +8,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-XkResult xkFileInitialize(void) {
+XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
 	XkResult result = XK_SUCCESS;
 
-	/// NOTE: Nothing to do here.
-
-_catch:
-	return(result);
-}
-
-void xkFileTerminate(void) {
-	/// NOTE: Nothing to do here.
-}
-
-XkResult xkOpenFile(XkFile file, const XkChar8* name, const XkFileFlag flag) {
-	XkResult result = XK_SUCCESS;
+	*pFile = xkAllocateMemory(sizeof(struct XkFile));
+	if(!(*pFile)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkFile file = *pFile;
 
 	int flags = 0;
 
@@ -44,10 +40,19 @@ _catch:
 
 void xkCloseFile(XkFile file) {
 	close(file->handle.handle);
+	xkFreeMemory(file);
 }
 
-XkResult xkCreateFile(XkFile file, const XkChar8* name) {
+XkResult xkCreateFile(XkFile* pFile, const XkChar8* name) {
 	XkResult result = XK_SUCCESS;
+
+	*pFile = xkAllocateMemory(sizeof(struct XkFile));
+	if(!(*pFile)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkFile file = *pFile;
 
 	file->handle.handle = creat(name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if(file->handle.handle <= 0) {
@@ -86,6 +91,14 @@ void xkWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
 
 void xkReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
 	read(file->handle.handle, buffer, size);
+}
+
+void xkAsyncWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
+	/// TODO: implementation.
+}
+
+void xkAsyncReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
+	/// TODO: implementation.
 }
 
 #endif // XK_UNIX

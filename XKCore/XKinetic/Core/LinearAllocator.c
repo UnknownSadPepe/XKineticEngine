@@ -1,6 +1,8 @@
 #include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/LinearAllocator.h"
 
+#include "XKinetic/Core/Log.h"
+
 struct XkLinearAllocator {
 	XkSize totalSize;
 	XkSize allocated;
@@ -8,7 +10,7 @@ struct XkLinearAllocator {
 	XkHandle memory;
 };
 
-#define XK_LINEAR_ALLOCATOR_ALIGN 16
+static const XkSize XK_LINEAR_ALLOCATOR_ALIGN = 16;
 
 XkResult xkCreateLinearAllocator(XkLinearAllocator* pAllocator, const XkSize totalSize) {
 	XkResult result = XK_SUCCESS;

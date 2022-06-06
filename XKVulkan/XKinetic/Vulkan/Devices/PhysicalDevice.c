@@ -1,5 +1,11 @@
 #include "XKinetic/Vulkan/Internal.h"
 
+const char* _xkVkDeviceExtensions[] = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
+
+const uint32_t _xkVkDeviceExtensionCount = 1;
+
 static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice);
 static XkBool32 __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const, const VkPhysicalDevice, const VkSurfaceKHR);
 static uint32_t __xkVkScorePhysicalDevice(const VkPhysicalDevice);

@@ -1,5 +1,38 @@
 #include "XKinetic/Vulkan/Internal.h"
 
+const char* _xkVkInstanceExtensions[] = {
+	VK_KHR_SURFACE_EXTENSION_NAME,
+
+#if defined(XK_LINUX)
+	VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
+#elif defined(XK_WIN32)
+	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+#endif // XK_LINUX
+
+#ifdef XKVULKAN_DEBUG
+	VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+#endif // XKVULKAN_DEBUG
+};
+
+#ifdef XKVULKAN_DEBUG
+	const uint32_t _xkVkInstanceExtensionCount = 3;
+#else
+	const uint32_t _xkVkInstanceExtensionCount = 2;
+#endif // XKVULKAN_DEBUG
+
+#ifdef XKVULKAN_DEBUG
+const char* _xkVkInstanceLayers[] = {
+	"VK_LAYER_KHRONOS_validation"
+};
+
+const uint32_t _xkVkInstanceLayerCount = 1;
+#else
+const char* _xkVkInstanceLayers[] = {
+};
+
+const uint32_t _xkVkInstanceLayerCount = 0;
+#endif // XKVULKAN_DEBUG
+
 static XkBool32 __xkVkCheckInstanceExtensionsSupport(void);
 static XkBool32 __xkVkCheckInstanceLayersSupport(void);
 

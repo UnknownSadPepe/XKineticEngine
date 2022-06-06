@@ -11,44 +11,14 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Platform/Window.h"
 
-static const char* _xkVkInstanceExtensions[] = {
-	VK_KHR_SURFACE_EXTENSION_NAME,
+extern const char* _xkVkInstanceExtensions[];
+extern const uint32_t _xkVkInstanceExtensionCount;
 
-#if defined(XK_LINUX)
-	VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
-#elif defined(XK_WIN32)
-	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
-#endif // XK_LINUX
+extern const char* _xkVkInstanceLayers[];
+extern const uint32_t _xkVkInstanceLayerCount;
 
-#ifdef XKVULKAN_DEBUG
-	VK_EXT_DEBUG_UTILS_EXTENSION_NAME
-#endif // XKVULKAN_DEBUG
-};
-
-#ifdef XKVULKAN_DEBUG
-	static const uint32_t _xkVkInstanceExtensionCount = 3;
-#else
-	static const uint32_t _xkVkInstanceExtensionCount = 2;
-#endif // XKVULKAN_DEBUG
-
-#ifdef XKVULKAN_DEBUG
-static const char* _xkVkInstanceLayers[] = {
-	"VK_LAYER_KHRONOS_validation"
-};
-
-static const uint32_t _xkVkInstanceLayerCount = 1;
-#else
-static const char* _xkVkInstanceLayers[] = {
-};
-
-static const uint32_t _xkVkInstanceLayerCount = 0;
-#endif // XKVULKAN_DEBUG
-
-static const char* _xkVkDeviceExtensions[] = {
-	VK_KHR_SWAPCHAIN_EXTENSION_NAME
-};
-
-static const uint32_t _xkVkDeviceExtensionCount = 1;
+extern const char* _xkVkDeviceExtensions[];
+extern const uint32_t _xkVkDeviceExtensionCount;
 
 typedef struct {
   uint32_t graphics;
@@ -176,6 +146,9 @@ XK_IMPORT XkResult __xkVkMapBuffer(VkDeviceMemory, const VkDeviceSize, const voi
 
 XK_IMPORT XkResult __xkVkCreateImage(VkImage* const, VkDeviceMemory* const, const VkImageType, const VkFormat, const VkExtent3D, const VkSampleCountFlagBits, const VkImageTiling, const VkImageUsageFlags, const VkMemoryPropertyFlags, const uint32_t);
 XK_IMPORT void __xkVkDestroyImage(VkImage, VkDeviceMemory);
+
+XK_IMPORT XkResult __xkVkTransitionImageLayout(VkImage, const VkFormat, const VkImageLayout, const VkImageLayout, const uint32_t);
+XK_IMPORT XkResult __xkVkCopyBufferToImage(VkBuffer, VkImage, const VkExtent3D);
 
 XK_IMPORT XkResult __xkVkCreateImageView(VkImageView* const, VkImage, const VkFormat, const VkImageAspectFlags, const uint32_t);
 XK_IMPORT void __xkVkDestroyImageView(VkImageView);
