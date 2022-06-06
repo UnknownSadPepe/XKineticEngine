@@ -32,6 +32,14 @@ then
 	echo "Error:"$ERRORLEVEL && exit
 fi
 
+make -f Makefile.XKEditor.linux all
+
+ERRORLEVEL=$?
+if [ $ERRORLEVEL -ne 0 ] 
+then
+	echo "Error:"$ERRORLEVEL && exit
+fi
+
 make -f Makefile.XKTests.linux all
 
 ERRORLEVEL=$?

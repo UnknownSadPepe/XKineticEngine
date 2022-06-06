@@ -1,8 +1,6 @@
 all:
-	@ $(MAKE) -s all -f Tests/Makefile.XKEditor.linux
 	@ $(MAKE) -s all -f Tests/Makefile.XKVulkanTest.linux
 
 .PHONY: clean
 clean:
-	@ $(MAKE) -s clean -f Tests/Makefile.XKEditor.linux
 	@ $(MAKE) -s clean -f Tests/Makefile.XKVulkanTest.linux

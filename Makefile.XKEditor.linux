@@ -1,8 +1,8 @@
 TARGET=XKEditor
 EXTENSION=.out
-SRC_DIR=Tests/Editor/
-INC_DIR=-ITests/Editor/ -IXKinetic/ -IXKCore/ -IXKMath/
-TARGET_DIR=Target/Tests/
+SRC_DIR=XKEditor/
+INC_DIR=-IXKEditor/ -IXKinetic/ -IXKCore/ -IXKMath/
+TARGET_DIR=Target/
 BUILD_DIR=Target/
 CC=gcc
 CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -fno-builtin -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong
