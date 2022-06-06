@@ -10,7 +10,11 @@ typedef struct XkBuffer* XkBuffer;
 typedef struct XkTexture2D* XkTexture2D;
 
 typedef enum {
-	XK_RENDERER_API_VK
+	XK_RENDERER_API_DEFAULT,
+	XK_RENDERER_API_VK,
+#if defined(XK_WIN32)
+	XK_RENDERER_API_DX12
+#endif // XK_WIN32
 } XkRendererApi;
 
 typedef XkResult(*XkCreateRendererPfn)(XkHandle*, XkRendererConfig* const, XkWindow);

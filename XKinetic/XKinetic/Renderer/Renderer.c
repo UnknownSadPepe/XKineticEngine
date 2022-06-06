@@ -6,6 +6,28 @@
 	#define XKVULKAN_LIBRARY			"libXKVulkan.so"
 #elif defined(XK_WIN32)
 	#define XKVULKAN_LIBRARY			"XKVulkan.dll"
+	#define XKVULKAN_LIBRARY			"XKDirectX12.dll"
+
+	#define XKDIRECTX12_CREATE_RENDERER					"xkDX12CreateRenderer"
+	#define XKDIRECTX12_DESTROY_RENDERER				"xkDX12DestroyRenderer"
+	#define XKDIRECTX12_CLEAR_COLOR_RENDERER		"xkDX12ClearColorRenderer"
+	#define XKDIRECTX12_CLEAR_DEPTH_RENDERER		"xkDX12ClearDepthRenderer"
+	#define XKDIRECTX12_CLEAR_STENCIL_RENDERER	"xkDX12ClearStencilRenderer"
+	#define XKDIRECTX12_CLEAR_RENDERER					"xkDX12ClearRenderer"
+	#define XKDIRECTX12_TOPOLOGY_RENDERER				"xkDX12TopologyRenderer"
+	#define XKDIRECTX12_CULLMODE_RENDERER				"xkDX12CullModeRenderer"
+	#define XKDIRECTX12_BEGIN_RENDERER					"xkDX12BeginRenderer"
+	#define XKDIRECTX12_END_RENDERER						"xkDX12EndRenderer"
+	#define XKDIRECTX12_RESIZE_RENDERER					"xkDX12ResizeRenderer"
+	#define XKDIRECTX12_SCISSOR_RENDERER				"xkDX12ScissorRenderer"
+	#define XKDIRECTX12_DRAW										"xkDX12Draw"
+	#define XKDIRECTX12_DRAW_INDEXED						"xkDX12DrawIndexed"
+	#define XKDIRECTX12_CREATE_BUFFER						"xkDX12CreateBuffer"
+	#define XKDIRECTX12_DESTROY_BUFFER					"xkDX12DestroyBuffer"
+	#define XKDIRECTX12_BIND_VERTEX_BUFFER			"xkDX12BindVertexBuffer"
+	#define XKDIRECTX12_BIND_INDEX_BUFFER				"xkDX12BindIndexBuffer"
+	#define XKDIRECTX12_CREATE_TEXTURE2D				"xkDX12CreateTexture2D"
+	#define XKDIRECTX12_DESTROY_TEXTURE2D				"xkDX12DestroyTexture2D"
 #endif // XK_LINUX
 
 #define XKVULKAN_CREATE_RENDERER				"xkVkCreateRenderer"
@@ -79,6 +101,9 @@ struct XkTexture2D {
 };
 
 static XkResult __xkLoadVkModule(XkRenderer);
+#if defined(XK_WIN32)
+	static XkResult __xkLoadDX12Module(XkRenderer);
+#endif // XK_WIN32
 
 XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window, XkRendererApi api) {
 	XkResult result = XK_SUCCESS;
@@ -92,12 +117,35 @@ XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig
 	XkRenderer renderer = *pRenderer;
 
 	switch(api) {
+		case XK_RENDERER_API_DEFAULT:
+#if defined(XK_WIN32)
+			result = __xkLoadDX12Module(renderer);
+			if(result != XK_SUCCESS) {
+				goto _catch;
+			}
+#elif defined(XK_LINUX)
+			result = __xkLoadVkModule(renderer);
+			if(result != XK_SUCCESS) {
+				goto _catch;
+			}
+#endif // XK_WIN32
+			break;
+
 		case XK_RENDERER_API_VK:
 			result = __xkLoadVkModule(renderer);
 			if(result != XK_SUCCESS) {
 				goto _catch;
 			}
 			break;
+
+#if defined(XK_WIN32)
+		case XK_RENDERER_API_DX12:
+			result = __xkLoadDX12Module(renderer);
+			if(result != XK_SUCCESS) {
+				goto _catch;
+			}
+			break;
+#endif // XK_WIN32
 	}
 
 	result = renderer->callbacks.create(&renderer->handle, pConfig, window);
@@ -334,3 +382,123 @@ XkResult __xkLoadVkModule(XkRenderer renderer) {
 _catch:
 	return(result);
 }
+
+#if defined(XK_WIN32)
+
+XkResult __xkLoadDX12Module(XkRenderer renderer) {
+	XkResult result = XK_SUCCESS;
+
+	// Load DirectX12 module.
+	result = xkLoadModule(renderer->module, XKDIRECTX12_LIBRARY);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s", XKDIRECTX12_LIBRARY);
+		goto _catch;
+	}
+
+	// Load DirectX12 module symbols.
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.create, XKDIRECTX12_CREATE_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CREATE_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.destroy, XKDIRECTX12_DESTROY_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_DESTROY_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clearColor, XKDIRECTX12_CLEAR_COLOR_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CLEAR_COLOR_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clearDepth, XKDIRECTX12_CLEAR_DEPTH_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CLEAR_DEPTH_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clearStencil, XKDIRECTX12_CLEAR_STENCIL_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CLEAR_STENCIL_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.clear, XKDIRECTX12_CLEAR_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CLEAR_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.topology, XKDIRECTX12_TOPOLOGY_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_TOPOLOGY_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.cullMode, XKDIRECTX12_CULLMODE_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CULLMODE_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.begin, XKDIRECTX12_BEGIN_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_BEGIN_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.end, XKDIRECTX12_END_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_END_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.resize, XKDIRECTX12_RESIZE_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_RESIZE_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.scissor, XKDIRECTX12_SCISSOR_RENDERER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_SCISSOR_RENDERER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.draw, XKDIRECTX12_DRAW, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_DRAW);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.drawIndexed, XKDIRECTX12_DRAW_INDEXED, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_DRAW_INDEXED);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.createBuffer, XKDIRECTX12_CREATE_BUFFER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CREATE_BUFFER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.destroyBuffer, XKDIRECTX12_DESTROY_BUFFER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_DESTROY_BUFFER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.bindVertexBuffer, XKDIRECTX12_BIND_VERTEX_BUFFER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_BIND_VERTEX_BUFFER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.bindIndexBuffer, XKDIRECTX12_BIND_INDEX_BUFFER, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_BIND_INDEX_BUFFER);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.createTexture2D, XKDIRECTX12_CREATE_TEXTURE2D, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_CREATE_TEXTURE2D);
+		goto _catch;
+	}
+	result = xkGetModuleSymbol((XkProcPfn)renderer->callbacks.destroyTexture2D, XKDIRECTX12_DESTROY_TEXTURE2D, renderer->module);
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load module %s symbol: %s", XKDIRECTX12_LIBRARY, XKDIRECTX12_DESTROY_TEXTURE2D);
+		goto _catch;
+	}
+
+_catch:
+	return(result);
+}
+
+#endif // XK_WIN32
