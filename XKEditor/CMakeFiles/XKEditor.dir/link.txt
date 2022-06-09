@@ -1,0 +1,1 @@
+/usr/bin/cc -rdynamic CMakeFiles/XKEditor.dir/XKEditor/Editor.c.o CMakeFiles/XKEditor.dir/XKEditor/Entry.c.o -o ../Target/XKEditor 

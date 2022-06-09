@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -shared -Wl,-soname,libXKDirectX12.so -o ../Target/libXKDirectX12.so CMakeFiles/XKDirectX12.dir/XKinetic/DirectX12/Renderer.c.o 
