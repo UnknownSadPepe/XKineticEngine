@@ -49,5 +49,5 @@ XKDIRECTX12_API XkResult xkDX12CreateUniformBuffer(XkDX12UniformBuffer*, const X
 XKDIRECTX12_API void xkDX12DestroyUniformBuffer(XkDX12UniformBuffer);
 XKDIRECTX12_API void xkDX12SetUniformBuffer(XkDX12UniformBuffer, XkHandle, XkSize);
 
-XKDIRECTX12_API XkResult xkDX12CreateTexture2D(XkDX12Texture2D*, XkHandle*, const XkSize, const XkSize, XkDX12Renderer);
+XKDIRECTX12_API XkResult xkDX12CreateTexture2D(XkDX12Texture2D*, XkHandle, const XkSize, const XkSize, XkDX12Renderer);
 XKDIRECTX12_API void xkDX12DestroyTexture2D(XkDX12Texture2D);

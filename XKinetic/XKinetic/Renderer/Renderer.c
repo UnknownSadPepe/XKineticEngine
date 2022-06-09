@@ -5,8 +5,8 @@
 #if defined(XK_LINUX)
 	#define XKVULKAN_LIBRARY			"libXKVulkan.so"
 #elif defined(XK_WIN32)
-	#define XKVULKAN_LIBRARY			"XKVulkan.dll"
-	#define XKVULKAN_LIBRARY			"XKDirectX12.dll"
+	#define XKVULKAN_LIBRARY			"libXKVulkan.dll"
+	#define XKDIRECTX12_LIBRARY		"libXKDirectX12.dll"
 
 	#define XKDIRECTX12_CREATE_RENDERER					"xkDX12CreateRenderer"
 	#define XKDIRECTX12_DESTROY_RENDERER				"xkDX12DestroyRenderer"

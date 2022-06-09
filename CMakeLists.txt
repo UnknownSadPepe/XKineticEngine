@@ -18,7 +18,7 @@ add_subdirectory(XKCore)
 add_subdirectory(XKMath)
 
 # Add XKVulkan subdirectory.
-add_subdirectory(XKVulkan)
+# add_subdirectory(XKVulkan)
 
 # Add XKDirectX12 subdirectory.
 add_subdirectory(XKDirectX12)
@@ -30,6 +30,6 @@ add_subdirectory(XKinetic)
 add_subdirectory(XKEditor)
 
 # Add Tests subdirectory.
-if(XK_BUILD_TESTS)
+if(BUILD_TESTS)
 	add_subdirectory(Tests)
 endif()

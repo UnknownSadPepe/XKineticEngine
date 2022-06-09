@@ -29,7 +29,37 @@ XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
 
 	file->handle.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if(file->handle.handle <= 0) {
-		__xkErrorHandle("Failed to open file");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
+_catch:
+	return(result);
+}
+
+XkResult xkOpenAsyncFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
+	XkResult result = XK_SUCCESS;
+
+	/// TODO: implementation.
+
+	*pFile = xkAllocateMemory(sizeof(struct XkFile));
+	if(!(*pFile)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkFile file = *pFile;
+
+	int flags = 0;
+
+	if(flag & XK_FILE_FLAG_RO_BIT) flags |= O_RDONLY;
+	if(flag & XK_FILE_FLAG_WO_BIT) flags |= O_RDWR;
+	if(flag & XK_FILE_FLAG_RW_BIT) flags |= O_WRONLY;
+	if(flag & XK_FILE_FLAG_AP_BIT) flags |= O_APPEND;
+	if(flag & XK_FILE_FLAG_CR_BIT) flags |= O_CREAT;
+
+	file->handle.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if(file->handle.handle <= 0) {
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -43,26 +73,8 @@ void xkCloseFile(XkFile file) {
 	xkFreeMemory(file);
 }
 
-XkResult xkCreateFile(XkFile* pFile, const XkChar8* name) {
-	XkResult result = XK_SUCCESS;
-
-	*pFile = xkAllocateMemory(sizeof(struct XkFile));
-	if(!(*pFile)) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;	
-	}
-	
-	XkFile file = *pFile;
-
-	file->handle.handle = creat(name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if(file->handle.handle <= 0) {
-		__xkErrorHandle("Failed to create file");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
-	}
-
-_catch:
-	return(result);
+void xkCreateFile(const XkChar8* name) {
+	creat(name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 }
 
 void xkRemoveFile(const XkChar8* name) {

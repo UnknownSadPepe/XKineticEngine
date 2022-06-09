@@ -2,6 +2,7 @@
 
 #if defined(XK_WIN32)
 
+#include <limits.h>
 #include <windows.h>
 #include <windowsx.h>
 #include "XKinetic/Platform/Win32/Internal.h"
@@ -9,6 +10,10 @@
 #ifndef WM_MOUSEHWHEEL
  #define WM_MOUSEHWHEEL 0x020E
 #endif
+
+#ifndef GET_XBUTTON_WPARAM
+	#define GET_XBUTTON_WPARAM(w) (HIWORD(w))
+#endif // GET_XBUTTON_WPARAM
 
 static const char XK_WIN32_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
 
@@ -237,7 +242,7 @@ static DWORD __xkWin32GetWindowExStyle(const XkWindow window) {
 
 static XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, const XkSize count, const XkInt32 width, const XkInt32 height) {
   int leastDiff = INT_MAX;
-  const XkWindowIcon* pSelect = NULL;
+  XkWindowIcon* pSelect = NULL;
 
   for(XkSize i = 0;  i < count;  i++) {
   	const int currDiff = (pIcons[i].width * pIcons[i].height - width * height);
@@ -314,7 +319,7 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
 static LRESULT CALLBACK __xkWin32WindowProc(HWND hwindow, UINT message, WPARAM wParam, LPARAM lParam) {
 	XkWindow window = GetPropA(hwindow, "XKinetic");
 	if(!window) {
-		return DefWindowProcW(hwindow, message, wParam, lParam);
+		return DefWindowProcA(hwindow, message, wParam, lParam);
 	}
 
 	switch(message) {
@@ -448,7 +453,7 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hwindow, UINT message, WPARAM w
 		}
 	}
 
-  return DefWindowProcW(window, message, wParam, lParam);
+  return DefWindowProc(hwindow, message, wParam, lParam);
 }
 
 static XkWindowMod __xkWin32GetKeyMod(void) {

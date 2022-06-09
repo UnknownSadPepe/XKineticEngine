@@ -4,7 +4,7 @@
 #include "XKinetic/XKCore.h"
 
 typedef struct {
-	HFILE handle;
+	HANDLE handle;
 } __XkWin32File;
 
 #define XK_PLATFORM_FILE __XkWin32File handle

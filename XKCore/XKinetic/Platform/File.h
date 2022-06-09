@@ -19,9 +19,10 @@ typedef enum {
 typedef struct XkFile* XkFile;
 
 XK_EXPORT XkResult xkOpenFile(XkFile*, const XkChar8*, const XkFileFlag);
+XK_EXPORT XkResult xkOpenAsyncFile(XkFile*, const XkChar8*, const XkFileFlag);
 XK_EXPORT void xkCloseFile(XkFile);
 
-XK_EXPORT XkResult xkCreateFile(XkFile*, const XkChar8*);
+XK_EXPORT void xkCreateFile(const XkChar8*);
 XK_EXPORT void xkRemoveFile(const XkChar8*);
 
 XK_EXPORT void xkRenameFile(const XkChar8*, const XkChar8*);

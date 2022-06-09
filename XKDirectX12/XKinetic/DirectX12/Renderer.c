@@ -19,13 +19,13 @@ struct XkDX12Texture2D {
 XkResult xkDX12CreateRenderer(XkDX12Renderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window) {
 	XkResult result = XK_SUCCESS;
 
-	*pRenderer = xkAllocateMemory(sizeof(struct XkVkRenderer));
+	*pRenderer = xkAllocateMemory(sizeof(struct XkDX12Renderer));
 	if(!pRenderer) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	XkVkRenderer renderer = *pRenderer;
+	XkDX12Renderer renderer = *pRenderer;
 
 	renderer->config = *pConfig;
 

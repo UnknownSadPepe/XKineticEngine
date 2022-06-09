@@ -16,18 +16,49 @@ XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
 	
 	XkFile file = *pFile;
 
-	UINT flags = 0;
+	DWORD flags = 0;
+	DWORD open = OPEN_EXISTING;
 
-	if(flag & XK_FILE_FLAG_RO_BIT) flags |= OF_READ;
-	if(flag & XK_FILE_FLAG_WO_BIT) flags |= OF_WRITE;
-	if(flag & XK_FILE_FLAG_RW_BIT) flags |= OF_READWRITE;
+	if(flag & XK_FILE_FLAG_RO_BIT) flags |= GENERIC_READ;
+	if(flag & XK_FILE_FLAG_WO_BIT) flags |= GENERIC_WRITE;
+	if(flag & XK_FILE_FLAG_RW_BIT) flags |= GENERIC_READ | GENERIC_WRITE;
 	//if(flag & XK_FILE_FLAG_AP_BIT) flags |= OF_APPEND;
 	/// TODO: implementation.
-	if(flag & XK_FILE_FLAG_CR_BIT) flags |= OF_CREATE;
+	if(flag & XK_FILE_FLAG_CR_BIT) open = CREATE_ALWAYS;
 
-	file->handle.handle = OpenFile(name, NULL, flags);
-	if(file->handle.handle == HFILE_ERROR) {
-		__xkErrorHandle("Failed to open file");
+	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
+_catch:
+	return(result);
+}
+
+XkResult xkOpenAsyncFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
+	XkResult result = XK_SUCCESS;
+
+	*pFile = xkAllocateMemory(sizeof(struct XkFile));
+	if(!(*pFile)) {
+		result = XK_ERROR_BAD_ALLOCATE;
+		goto _catch;	
+	}
+	
+	XkFile file = *pFile;
+
+	DWORD flags = 0;
+	DWORD open = OPEN_EXISTING;
+
+	if(flag & XK_FILE_FLAG_RO_BIT) flags |= GENERIC_READ;
+	if(flag & XK_FILE_FLAG_WO_BIT) flags |= GENERIC_WRITE;
+	if(flag & XK_FILE_FLAG_RW_BIT) flags |= GENERIC_READ | GENERIC_WRITE;
+	//if(flag & XK_FILE_FLAG_AP_BIT) flags |= OF_APPEND;
+	/// TODO: implementation.
+	if(flag & XK_FILE_FLAG_CR_BIT) open = CREATE_ALWAYS;
+
+	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+	if(file->handle.handle == INVALID_HANDLE_VALUE) {
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -41,26 +72,8 @@ void xkCloseFile(XkFile file) {
 	xkFreeMemory(file);
 }
 
-XkResult xkCreateFile(XkFile* pFile, const XkChar8* name) {
-	XkResult result = XK_SUCCESS;
-
-	*pFile = xkAllocateMemory(sizeof(struct XkFile));
-	if(!(*pFile)) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;	
-	}
-	
-	XkFile file = *pFile;
-
-	file->handle.handle = CreateFile(name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(file->handle.handle == INVALID_HANDLE_VALUE) {
-		__xkErrorHandle("Failed to create file");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;	
-	}
-
-_catch:
-	return(result);
+void xkCreateFile(const XkChar8* name) {
+	CreateFile(name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
 void xkRemoveFile(const XkChar8* name) {
@@ -83,21 +96,39 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 }
 
 void xkWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
-	WORD numberOfBytesWrite;
+	DWORD numberOfBytesWrite;
 	WriteFile(file->handle.handle, buffer, size, &numberOfBytesWrite, NULL);
 }
 
 void xkReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
-	WORD numberOfBytesRead;
+	DWORD numberOfBytesRead;
 	ReadFile(file->handle.handle, buffer, size, &numberOfBytesRead, NULL);
 }
 
 void xkAsyncWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
 	/// TODO: implementation.
+	OVERLAPPED oWrite = {
+		.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)
+	};
+	WriteFile(file->handle.handle, buffer, size, NULL, &oWrite);
+
+	DWORD dwCommEvent;
+	WaitCommEvent(file->handle.handle, &dwCommEvent, &oWrite);
+
+	CloseHandle(oWrite.hEvent);
 }
 
 void xkAsyncReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
 	/// TODO: implementation.
+	OVERLAPPED oRead = {
+		.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)
+	};
+	ReadFile(file->handle.handle, buffer, size, NULL, &oRead);
+
+	DWORD dwCommEvent;
+	WaitCommEvent(file->handle.handle, &dwCommEvent, &oRead);
+
+	CloseHandle(oRead.hEvent);
 }
 
 #endif // XK_WIN32

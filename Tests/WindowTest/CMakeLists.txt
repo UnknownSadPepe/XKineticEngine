@@ -1,0 +1,9 @@
+set(WINDOW_TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/Tests/WindowTest)
+
+file(GLOB_RECURSE WINDOW_TEST_SRC ${WINDOW_TEST_SRC_DIR}/*.c)
+
+add_executable(XKWindowTest ${WINDOW_TEST_SRC})
+
+target_include_directories(XKWindowTest PUBLIC ${WINDOW_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore)
+
+target_link_libraries(XKWindowTest XKCore XKinetic)

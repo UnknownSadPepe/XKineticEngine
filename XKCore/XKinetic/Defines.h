@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(__unix__)
+/*#if defined(__unix__)
 	// Define unix platform.
 	#define XK_UNIX 1
 #else 
@@ -15,7 +15,7 @@
 	// Undefine posix standart.
 	#define XK_POSIX 0
 #endif // _POSIX_VERSION
-
+*/
 #if defined(__linux__) || defined(__gnu_linux__) 
 	// Define linux platform.
 	#define XK_LINUX 1
