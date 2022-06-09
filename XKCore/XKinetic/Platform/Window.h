@@ -231,6 +231,7 @@ XK_IMPORT void __xkInputWindowShow(XkWindow, const XkWindowShow);
 XK_IMPORT void __xkInputWindowKey(XkWindow, const XkWindowKey, const XkWindowAction, const XkWindowMod);
 XK_IMPORT void __xkInputWindowButton(XkWindow, const XkWindowButton, const XkWindowAction, const XkWindowMod);
 XK_IMPORT void __xkInputWindowCursor(XkWindow, const XkFloat64, const XkFloat64);
+XK_IMPORT void __xkInputWindowCursorEnter(XkWindow, const XkBool32);
 XK_IMPORT void __xkInputWindowScroll(XkWindow, const XkFloat64, const XkFloat64);
 XK_IMPORT void __xkInputWindowClose(XkWindow);
 XK_IMPORT void __xkInputWindowPosition(XkWindow, const XkInt32, const XkInt32);

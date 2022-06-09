@@ -12,19 +12,36 @@ XKCORE_API XkResult __xkCreateDynamicArray(XkDynamicArray*, XkSize, XkSize);
 
 XKCORE_API void xkDestroyDynamicArray(XkDynamicArray);
 
-XKCORE_API void xkResizeDynamicArray(XkDynamicArray, const XkSize);
 XKCORE_API void xkClearDynamicArray(XkDynamicArray);
+XKCORE_API void xkResizeDynamicArray(XkDynamicArray, const XkSize);
 
 XKCORE_API void __xkDynamicArrayPush(XkDynamicArray, const XkHandle);
-#define xkPushDynamicArray(array, value)		\
+#define xkDynamicArrayPush(array, value)		\
 {																						\
 	typeof(value) tmp = value;								\
-	__xkPushDynamicArray(array, &tmp);				\
+	__xkDynamicArrayPush(array, &tmp);				\
 }
 
 XKCORE_API void xkDynamicArrayPop(XkDynamicArray);
 
+
+XKCORE_API void __xkDynamicArrayInsert(XkDynamicArray, const XkSize, XkHandle);
+#define xkDynamicArrayInsert(array, index, value)	\
+{																									\
+	typeof(value) tmp = value;											\
+	__xkDynamicArrayInsert(array, index, &tmp);			\
+}
+
+XKCORE_API void xkDynamicArrayErase(XkDynamicArray, const XkSize);
+
 XKCORE_API XkSize xkDynamicArrayLength(XkDynamicArray);
 XKCORE_API XkSize xkDynamicArrayCapacity(XkDynamicArray);
+
 XKCORE_API XkHandle xkDynamicArrayGet(XkDynamicArray, const XkSize);
+XKCORE_API void __xkDynamicArraySet(XkDynamicArray, const XkSize, XkHandle);
+#define xkDynamicArraySet(array, value)			\
+{																						\
+	typeof(value) tmp = value;								\
+	__xkDynamicArraySet(array, &tmp);					\
+}
 

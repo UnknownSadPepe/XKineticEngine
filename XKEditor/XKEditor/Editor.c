@@ -36,7 +36,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 
 	result = xkLogInitialize();
 	if(result != XK_SUCCESS) goto _catch;
-
+/*
 	// Create shader loader.
 	result = xkCreateShaderLoader(&_xkApplication.shaderLoader, "resources/shaders/");
 	if(result != XK_SUCCESS) {
@@ -61,7 +61,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 
 	// Create shader.
 	XkShaderID shaderID = xkCreateShader(_xkApplication.shaderSystem, &shaderConfig);
-	if(shaderID == -1) {
+	if(shaderID == 0) {
 		result = XK_ERROR_RESOURCE_NOT_CREATE;
 		xkLogError("Failed to create shader");
 		goto _catch;			
@@ -97,7 +97,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 
 	// Create model.
 	XkModelID modelID = xkCreateModel(_xkApplication.modelSystem, &modelConfig);
-	if(modelID == -1) {
+	if(modelID == 0) {
 		result = XK_ERROR_RESOURCE_NOT_CREATE;
 		xkLogError("Failed to create model");
 		goto _catch;			
@@ -133,7 +133,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 
 	// Create texture.
 	XkTextureID textureID = xkCreateTexture(_xkApplication.textureSystem, &textureConfig);
-	if(textureID == -1) {
+	if(textureID == 0) {
 		result = XK_ERROR_RESOURCE_NOT_CREATE;
 		xkLogError("Failed to create texture");
 		goto _catch;			
@@ -144,12 +144,23 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 
 	// Unload texture.
 	xkUnloadTexture(_xkApplication.textureLoader, &textureConfig);
+*/
+
+	XkFreeList freelist;
+	result = xkCreateFreeList(&freelist, sizeof(XkUInt32) * 16);
+	if(result != XK_SUCCESS) {
+		xkLogError("failed to create freelist");
+		goto _catch;
+	}
+
+	xkDestroyFreeList(freelist);
 
 _catch:
 	return(result);
 }
 
 void xkDestroyApplication() {
+/*
 	xkDestroyTextureSystem(_xkApplication.textureSystem);
 	xkDestroyShaderSystem(_xkApplication.shaderSystem);
 	xkDestroyModelSystem(_xkApplication.modelSystem);
@@ -157,7 +168,7 @@ void xkDestroyApplication() {
 	xkDestroyTextureLoader(_xkApplication.textureLoader);
 	xkDestroyShaderLoader(_xkApplication.shaderLoader);
 	xkDestroyModelLoader(_xkApplication.modelLoader);
-
+*/
 	xkLogTerminate();
 }
 

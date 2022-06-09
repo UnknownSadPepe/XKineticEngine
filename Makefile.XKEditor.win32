@@ -1,15 +1,15 @@
 TARGET=XKEditor
 EXTENSION=.exe
-SRC_DIR=XKEditor\
-INC_DIR=-IXKEditor\ -IXKinetic\ -IXKCore\ -IXKMath\
-TARGET_DIR=Target\
-BUILD_DIR=Target\
+SRC_DIR=XKEditor/
+INC_DIR=-IXKEditor/ -IXKinetic/ -IXKCore/ -IXKMath/
+TARGET_DIR=Target/
+BUILD_DIR=Target/
 CC=x86_64-w64-mingw32-gcc
 CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -fno-builtin -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong
-LDFLAGS=-L$(BUILD_DIR) -lXKinetic -Wl,-rpath,. -Wl,-z,defs -Wl,-z,now -Wl,-z,relro -Wl,--gc-sections
+LDFLAGS=-L$(BUILD_DIR) -lXKinetic
 
 SRC=$(shell find $(SRC_DIR) -name '*.c')
-OBJ=$(patsubst $(SRC_DIR)%.c, $(TARGET_DIR)$(TARGET)\%.o, $(SRC))
+OBJ=$(patsubst $(SRC_DIR)%.c, $(TARGET_DIR)$(TARGET)/%.o, $(SRC))
 
 all: $(TARGET)
 
@@ -23,7 +23,7 @@ link: $(OBJ)
 	# @ echo -e '\033[4;34m''###' Linking $(TARGET) ...'\033[0m'
 	@ $(CC) $(LDFLAGS) $(OBJ) -o $(TARGET_DIR)$(TARGET)$(EXTENSION)
 
-$(TARGET_DIR)$(TARGET)\%.o: $(SRC_DIR)%.c
+$(TARGET_DIR)$(TARGET)/%.o: $(SRC_DIR)%.c
 	@ mkdir -p $(dir $@)
 	# @ echo -e '\033[0;35m'-- Builing $< '\033[0m'
 	@ $(CC) $(CFLAGS) -c $< -o $@

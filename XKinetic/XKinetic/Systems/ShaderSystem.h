@@ -4,7 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Shader.h"
 
-typedef XkInt32 XkShaderID;
+typedef XkUInt64 XkShaderID;
 
 typedef struct XkShaderSystem* XkShaderSystem;
 

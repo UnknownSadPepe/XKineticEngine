@@ -3,13 +3,12 @@
 #if defined(XK_WIN32)
 
 #include <windows.h>
-#include "XKinetic/Platform/Linux/Internal.h"
 
-XkResult xkLoadModule(XkModule module, const XkChar8* path) {
+XkResult xkLoadModule(XkModule* pModule, const XkChar8* path) {
 	XkResult result = XK_SUCCESS;
 
-	module = (XkHandle)LoadLibraryA(path);
-	if(!module) {
+	*pModule = (XkModule)LoadLibraryA(path);
+	if(!(*pModule)) {
 		result = XK_ERROR_MODULE_NOT_PRESENT;
 		goto _catch;
 	}
@@ -22,11 +21,11 @@ void xkUnloadModule(XkModule module) {
 	FreeLibrary((HMODULE)module);
 }
 
-XkResult xkGetModuleSymbol(XkProcPfn pfnProc, const XkChar8* name, XkModule module) {
+XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkChar8* name, XkModule module) {
 	XkResult result = XK_SUCCESS;
 
-	pfnProc = (XkProcPfn)GetProcAddress((HMODULE)module, name);
-	if(!pfnProc) {
+	*pPfnProc = (XkProcPfn)GetProcAddress((HMODULE)module, name);
+	if(!(*pPfnProc)) {
 		result = XK_ERROR_MODULE_SYMBOL_NOT_PRESENT;
 		goto _catch;
 	}

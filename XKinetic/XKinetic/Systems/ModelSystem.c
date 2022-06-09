@@ -1,9 +1,12 @@
+#include "XKinetic/Core/PoolAllocator.h"
 #include "XKinetic/Systems/ModelSystem.h"
 
 #define XK_MODEL_SYSTEM_ARRAY_SIZE 1024
 
 struct XkModelSystem {
-  XkDynamicArray models;
+  XkPoolAllocator models;
+
+  XkModelID modelID;
 };
 
 XkResult xkCreateModelSystem(XkModelSystem* pSystem) {
@@ -17,12 +20,12 @@ XkResult xkCreateModelSystem(XkModelSystem* pSystem) {
 
   XkModelSystem system = *pSystem;
 
-  result = xkCreateDynamicArrayCapacity(&system->models, XK_MODEL_SYSTEM_ARRAY_SIZE, XkModel);
+  system->modelID = 1;
+
+  result = xkCreatePoolAllocator(&system->models, XK_MODEL_SYSTEM_ARRAY_SIZE, struct XkModel);
   if(result != XK_SUCCESS) goto _catch;
 
   /// TODO: implementation.
-
-  
 
 _catch:
   return(result);
@@ -30,12 +33,17 @@ _catch:
 
 void xkDestroyModelSystem(XkModelSystem system) {
   /// TODO: implementation.
-  xkDestroyDynamicArray(system->models);
+  xkDestroyPoolAllocator(system->models);
 }
 
 XkModelID xkCreateModel(XkModelSystem system, XkModelConfig* const pConfig) {
   /// TODO: implementation.
-  return(-1);
+  XkModelID id = 0;
+
+  id = ++system->modelID;
+
+_catch:
+  return(id);
 }
 
 void xkDestroyModel(XkModelSystem system, XkModelID id) {

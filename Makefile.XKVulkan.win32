@@ -1,14 +1,14 @@
 TARGET=XKVulkan
 EXTENSION=.dll
-SRC_DIR=XKVulkan\
-INC_DIR=-IXKVulkan\ -IXKCore\ -IXKMath\ -IXKinetic\
-BUILD_DIR=Target\
+SRC_DIR=XKVulkan/
+INC_DIR=-IXKVulkan/ -IXKCore/ -IXKMath/ -IXKinetic/
+BUILD_DIR=Target/
 CC=x86_64-w64-mingw32-gcc
 CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong -D__XKVULKAN_BUILD__ -D__XKVULKAN_DEBUG__
-LDFLAGS=-L$(BUILD_DIR) -lXKCore -lvulkan -shared -Wl,-z,defs -Wl,-z,now -Wl,-z,relro -Wl,--gc-sections
+LDFLAGS=-L$(BUILD_DIR) -lXKCore -lvulkan -shared
 
 SRC=$(shell find $(SRC_DIR) -name '*.c')
-OBJ=$(patsubst $(SRC_DIR)%.c, $(BUILD_DIR)$(TARGET)\%.o, $(SRC))
+OBJ=$(patsubst $(SRC_DIR)%.c, $(BUILD_DIR)$(TARGET)/%.o, $(SRC))
 
 all: $(TARGET)
 
@@ -22,7 +22,7 @@ link: $(OBJ)
 	# @ echo -e '\033[4;34m''###' Linking $(TARGET) ...'\033[0m'
 	@ $(CC) $(LDFLAGS) $(OBJ) -o $(BUILD_DIR)$(TARGET)$(EXTENSION)
 
-$(BUILD_DIR)$(TARGET)\%.o: $(SRC_DIR)%.c
+$(BUILD_DIR)$(TARGET)/%.o: $(SRC_DIR)%.c
 	@ mkdir -p $(dir $@)
 	# @ echo -e '\033[0;35m'-- Builing $< '\033[0m'
 	@ $(CC) $(CFLAGS) -c $< -o $@

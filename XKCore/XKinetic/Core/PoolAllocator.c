@@ -1,4 +1,5 @@
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/FreeList.h"
 #include "XKinetic/Core/PoolAllocator.h"
 
 struct XkPoolAllocator {
@@ -6,12 +7,14 @@ struct XkPoolAllocator {
 	XkSize chunkSize;
 	XkSize allocatedChunkCount;
 
-	XkHandle memory;
+	XkFreeList freelist;
 };
 
 static const XkSize XK_POOL_ALLOCATOR_ALIGN = 16;
 
-XkResult xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalChunkCount, const XkSize chunkSize) {
+#define XK_POOL_ALLOCATOR_REALLOCATE_COEFFICIENT 2
+
+XkResult __xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalChunkCount, const XkSize chunkSize) {
 	XkResult result = XK_SUCCESS;
 
 	*pAllocator = xkAllocateMemory(sizeof(struct XkPoolAllocator));
@@ -28,38 +31,39 @@ XkResult xkCreatePoolAllocator(XkPoolAllocator* pAllocator, const XkSize totalCh
 	allocator->totalChunkCount = totalChunkCount;
 	allocator->chunkSize = alignChunkSize;
 	allocator->allocatedChunkCount = 0;
-	allocator->memory = xkAllocateMemory(alignTotalSize);
-	if(!allocator->memory) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
+	result = xkCreateFreeList(&allocator->freelist, alignTotalSize);
+	if(result != XK_SUCCESS) goto _catch;	
 
 _catch:
 	return(result);
 }
 
 void xkDestroyPoolAllocator(XkPoolAllocator allocator) {
-	allocator->totalChunkCount = 0;
-	allocator->chunkSize = 0;
-	allocator->allocatedChunkCount = 0;
-	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL_HANDLE;
+	xkDestroyFreeList(allocator->freelist);
 	xkFreeMemory(allocator);
+}
+
+void xkClearPoolAllocator(XkPoolAllocator allocator) {
+	allocator->allocatedChunkCount = 0;
+	xkClearFreeList(allocator->freelist);
+}
+
+void xkResizePoolAllocator(XkPoolAllocator allocator, const XkSize newChunkCount) {
+	const XkSize alignNewSize = ((newChunkCount * allocator->chunkSize) + (allocator->chunkSize - 1)) & ~(allocator->chunkSize - 1);
+
+	allocator->totalChunkCount = newChunkCount;
+	xkResizeFreeList(allocator->freelist, alignNewSize);
 }
 
 XkHandle xkAllocatePoolMemory(XkPoolAllocator allocator, const XkSize chunkCount) {
 	if((allocator->allocatedChunkCount + chunkCount) > allocator->totalChunkCount) {
-		return(XK_NULL_HANDLE);
+		xkResizePoolAllocator(allocator, allocator->totalChunkCount * XK_POOL_ALLOCATOR_REALLOCATE_COEFFICIENT);
 	}
 
-	allocator->allocatedChunkCount += chunkCount;
- 	XkHandle newMemory = allocator->memory + ((allocator->allocatedChunkCount + chunkCount) * allocator->chunkSize);
-	return(newMemory);
+	++allocator->allocatedChunkCount;
+	return(xkFreeListAllocate(allocator->freelist, allocator->chunkSize * chunkCount));
 }
 
 void xkFreePoolMemory(XkPoolAllocator allocator, const XkHandle memory) {
-	/// TODO: implementation.
-
-	allocator->allocatedChunkCount--;
-	xkZeroMemory(memory, allocator->chunkSize);
+	xkFreeListFree(allocator->freelist, memory);
 }

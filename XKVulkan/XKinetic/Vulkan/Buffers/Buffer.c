@@ -3,20 +3,6 @@
 XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVkBufferMemory, const VkDeviceSize vkSize, const VkBufferUsageFlags vkUsage, const VkMemoryPropertyFlags vkMemoryProperties, const void* data) {
   XkResult result = XK_SUCCESS;
 
-  // Set Vulkan image sharing mode.
-  // Set queue family index count.
-  // Set queue family indices.
-  VkSharingMode vkImageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  uint32_t queueFamilyIndexCount = 1;
-  uint32_t queueFamilyIndices[] = {
-    _xkVkContext.queueFamilyIndices.graphics,
-    _xkVkContext.queueFamilyIndices.present
-  };
-  if(_xkVkContext.queueFamilyIndices.graphics != _xkVkContext.queueFamilyIndices.present) {
-    vkImageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    queueFamilyIndexCount = 2;
-  }
-
   // Initialize Vulkan buffer create info.
   const VkBufferCreateInfo vkBufferCreateInfo = {
     .sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -24,9 +10,9 @@ XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVk
     .flags                    = 0,
 	  .size                     = vkSize,
 	  .usage                    = vkUsage,
-	  .sharingMode              = vkImageSharingMode,
-	  .queueFamilyIndexCount    = queueFamilyIndexCount,
-	  .pQueueFamilyIndices      = queueFamilyIndices
+	  .sharingMode              = VK_SHARING_MODE_EXCLUSIVE,
+	  .queueFamilyIndexCount    = 0,
+	  .pQueueFamilyIndices      = VK_NULL_HANDLE
   };
 
   // Create Vulkan buffer.

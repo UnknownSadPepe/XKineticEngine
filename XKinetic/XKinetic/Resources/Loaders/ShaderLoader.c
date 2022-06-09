@@ -33,6 +33,9 @@ void xkDestroyShaderLoader(XkShaderLoader loader) {
 XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkChar8* name) {
   XkResult result = XK_SUCCESS;
 
+  XkChar8 fullPath[XK_SHADER_LOADER_PATH_MAX_SIZE];
+  xkStringNFormat(fullPath, XK_SHADER_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
+
   /// TODO: implementation.
   pConfig->size = 0;
   pConfig->code = XK_NULL_HANDLE;

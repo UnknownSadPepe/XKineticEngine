@@ -10,4 +10,8 @@ typedef struct {
   XkHandle indices;
 } XkModelConfig;
 
+struct XkModel {
+
+};
+
 typedef struct XkModel* XkModel;

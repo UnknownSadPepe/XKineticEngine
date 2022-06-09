@@ -4,7 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Scene/Components.h"
 
-typedef XkSize XkEntityID;
+typedef XkUInt64 XkEntityID;
 
 typedef struct {
   XkEntityID id;

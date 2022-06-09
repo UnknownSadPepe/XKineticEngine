@@ -3,20 +3,6 @@
 XkResult __xkVkCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pVkImageMemory, const VkImageType vkImageType, const VkFormat vkImageFormat, const VkExtent3D vkExtent, const VkSampleCountFlagBits vkSamples, const VkImageTiling vkTiling, const VkImageUsageFlags vkUsage, const VkMemoryPropertyFlags vkMemoryProperties, const uint32_t mipLevels) {
   XkResult result = XK_SUCCESS;
 
-  // Set Vulkan image sharing mode.
-  // Set queue family index count.
-  // Set queue family indices.
-  VkSharingMode vkImageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  uint32_t queueFamilyIndexCount = 1;
-  uint32_t queueFamilyIndices[] = {
-    _xkVkContext.queueFamilyIndices.graphics,
-    _xkVkContext.queueFamilyIndices.present
-  };
-  if(_xkVkContext.queueFamilyIndices.graphics != _xkVkContext.queueFamilyIndices.present) {
-    vkImageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    queueFamilyIndexCount = 2;
-  }
-
   // Initialize Vulkan image create info.
 	const VkImageCreateInfo vkImageCreateInfo = {
     .sType                  = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -30,9 +16,9 @@ XkResult __xkVkCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pVkIma
 	  .samples                = vkSamples,
 	  .tiling                 = vkTiling,
 	  .usage                  = vkUsage,
-	  .sharingMode            = vkImageSharingMode,
-    .queueFamilyIndexCount  = queueFamilyIndexCount,
-    .pQueueFamilyIndices    = queueFamilyIndices,
+	  .sharingMode            = VK_SHARING_MODE_EXCLUSIVE,
+    .queueFamilyIndexCount  = 0,
+    .pQueueFamilyIndices    = VK_NULL_HANDLE,
 	  .initialLayout          = VK_IMAGE_LAYOUT_UNDEFINED
   };
 	

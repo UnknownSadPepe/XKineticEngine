@@ -4,7 +4,9 @@
 struct XkDynamicArray {
 	XkSize length;
 	XkSize capacity;
+
 	XkSize stride;
+
 	XkSize totalSize;
 
 	XkHandle memory;
@@ -24,13 +26,13 @@ XkResult __xkCreateDynamicArray(XkDynamicArray* pArray, const XkSize capacity, c
 	XkDynamicArray array = *pArray;
 
 	const XkSize size = capacity * stride;
-	const XkSize alignSize = (size + (stride - 1)) & ~ (stride - 1);
+	const XkSize alignTotalSize = (size + (stride - 1)) & ~ (stride - 1);
 
 	array->length = 0;
 	array->capacity = capacity;
 	array->stride = stride;
-	array->totalSize = alignSize;
-	array->memory = xkAllocateMemory(alignSize);
+	array->totalSize = alignTotalSize;
+	array->memory = xkAllocateMemory(alignTotalSize);
 	if(!array->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -45,30 +47,50 @@ void xkDestroyDynamicArray(XkDynamicArray array) {
 	xkFreeMemory(array);
 }
 
-void xkResizeDynamicArray(XkDynamicArray array, XkSize newCapacity) {
-	const XkSize size = newCapacity * array->stride;
-	const XkSize alignSize = (size + (array->stride - 1)) & ~ (array->stride - 1);
-
-	array->memory = xkReallocateMemory(array->memory, alignSize);
-	array->capacity = newCapacity;
-	array->totalSize = alignSize;
-}
-
 void xkClearDynamicArray(XkDynamicArray array) {
 	array->length = 0;
 	xkZeroMemory(array->memory, array->totalSize);	
+}
+
+void xkResizeDynamicArray(XkDynamicArray array, XkSize newCapacity) {
+	const XkSize size = newCapacity * array->stride;
+	const XkSize alignNewSize = (size + (array->stride - 1)) & ~ (array->stride - 1);
+
+	array->capacity = newCapacity;
+	array->totalSize = alignNewSize;
+	array->memory = xkReallocateMemory(array->memory, alignNewSize);
 }
 
 void __xkDynamicArrayPush(XkDynamicArray array, const XkHandle data) {
 	if(array->length >= array->capacity) {
 		xkResizeDynamicArray(array, array->capacity * XK_DYNAMIC_ARRAY_REALLOCATE_COEFFICIENT);
 	}
+
 	xkCopyMemory(array->memory + (array->stride * array->length), data, array->stride);
 	array->length++;
 }
 
 void xkDynamicArrayPop(XkDynamicArray array) {
 	xkZeroMemory(array->memory + (array->stride * array->length), array->stride);
+
+	array->length--;
+}
+
+void __xkDynamicArrayInsert(XkDynamicArray array, const XkSize index, XkHandle data) {
+	// Check if not the last element.
+	if(index != array->length - 1) {
+		xkCopyMemory(array->memory + ((index + 1) * array->stride), array->memory + (index * array->stride), array->stride * (array->length - index));
+  }
+
+	xkCopyMemory(array->memory + (index * array->stride), data, array->stride);
+	array->length++;
+}
+
+void xkDynamicArrayErase(XkDynamicArray array, const XkSize index) {
+	// Check if not the last element.
+	if(index != array->length - 1) {
+		xkCopyMemory(array->memory + (index * array->stride), array->memory + ((index + 1) * array->stride), array->stride * (array->length - index));
+  }
 	array->length--;
 }
 
@@ -81,6 +103,10 @@ XkSize xkDynamicArrayCapacity(XkDynamicArray array) {
 }
 
 XkHandle xkDynamicArrayGet(XkDynamicArray array, const XkSize index) {
-	XkSize i = index;
-	return(&array->memory + (array->stride * (i + 1)));
+	return(&array->memory + (array->stride * (index + 1)));
 }
+
+void __xkDynamicArraySet(XkDynamicArray array, const XkSize index, XkHandle data) {
+	xkCopyMemory(array->memory + (array->stride * (index + 1)), data, array->stride);
+}
+

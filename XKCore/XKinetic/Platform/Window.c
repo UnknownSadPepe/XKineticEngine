@@ -25,6 +25,12 @@ void __xkInputWindowCursor(XkWindow window, const XkFloat64 x, const XkFloat64 y
 	}
 }
 
+void __xkInputWindowCursorEnter(XkWindow window, const XkBool32 enter) {
+	if(window->callbacks.cursorEnter) {
+		window->callbacks.cursorEnter(window, enter);
+	}
+}
+
 void __xkInputWindowScroll(XkWindow window, const XkFloat64 x, const XkFloat64 y) {
 	if(window->callbacks.scroll) {
 		window->callbacks.scroll(window, x, y);

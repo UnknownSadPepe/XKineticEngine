@@ -37,8 +37,10 @@ typedef void(*XkScissorRendererPfn)(XkHandle, XkInt32, XkInt32, XkSize, XkSize);
 typedef void(*XkDrawPfn)(XkHandle, XkSize);
 typedef void(*XkDrawIndexedPfn)(XkHandle, XkSize);
 
-typedef XkResult(*XkCreateBufferPfn)(XkHandle*, const XkSize, XkHandle, XkHandle);
+typedef XkResult(*XkCreateBufferPfn)(XkHandle*, const XkSize, const XkHandle, XkHandle);
 typedef void(*XkDestroyBufferPfn)(XkHandle);
+
+typedef void(*XkMapBufferPfn)(XkHandle, const XkHandle);
 
 typedef void(*XkBindVertexBufferPfn)(XkHandle);
 typedef void(*XkBindIndexBufferPfn)(XkHandle);
@@ -68,6 +70,8 @@ XK_API void xkDrawIndexed(XkRenderer, XkSize);
 
 XK_API XkResult xkCreateBuffer(XkBuffer*, const XkSize, XkHandle, XkRenderer);
 XK_API void xkDestroyBuffer(XkBuffer);
+
+XK_API void xkMapBuffer(XkBuffer, const XkHandle);
 
 XK_API void xkBindVertexBuffer(XkBuffer);
 XK_API void xkBindIndexBuffer(XkBuffer);

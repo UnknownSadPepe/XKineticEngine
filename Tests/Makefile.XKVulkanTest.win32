@@ -4,10 +4,9 @@ SRC_DIR=Tests\VulkanTest\
 INC_DIR=-ITests\VulkanTest\ -IXKinetic\ -IXKCore\ -IXKMath\
 TARGET_DIR=Target\Tests\
 BUILD_DIR=Target\
-CC=x86_64-w64-mingw32-gcc
+CC=mingw32-gcc
 CFLAGS=-fno-builtin -g -Wall -Wextra -Wshadow -Wdouble-promotion -Wformat=2 -Wundef -fno-common -Wconversion -fno-builtin -Werror=format-security -Werror=implicit-function-declaration -Wno-unused-parameter -Wno-unused-label -ffunction-sections -fdata-sections -pipe -O0 $(INC_DIR) -fPIC -fstack-protector-strong
-LDFLAGS=-L$(BUILD_DIR) -lXKCore -lXKinetic -Wl,-rpath,. -Wl,-z,defs -Wl,-z,now -Wl,-z,relro -Wl,--gc-sections
-
+LDFLAGS=-L$(BUILD_DIR) -lXKCore -lXKinetic
 
 SRC=$(shell find $(SRC_DIR) -name '*.c')
 OBJ=$(patsubst $(SRC_DIR)%.c, $(TARGET_DIR)$(TARGET)\%.o, $(SRC))

@@ -21,8 +21,6 @@ XkResult xkCreateTextureLoader(XkTextureLoader* pLoader, XkChar8* path) {
 
   /// TODO: implementation.
 
-  
-
 _catch:
   return(result);
 }
@@ -34,6 +32,9 @@ void xkDestroyTextureLoader(XkTextureLoader loader) {
 
 XkResult xkLoadTexture(XkTextureLoader loader, XkTextureConfig* const pConfig, XkChar8* name) {
   XkResult result = XK_SUCCESS;
+
+	XkChar8 fullPath[XK_TEXTURE_LOADER_PATH_MAX_SIZE];
+  xkStringNFormat(fullPath, XK_TEXTURE_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.
   pConfig->width = 0;

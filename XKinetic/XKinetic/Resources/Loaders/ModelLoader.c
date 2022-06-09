@@ -21,8 +21,6 @@ XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkChar8* path) {
 
   /// TODO: implementation.
 
-  
-
 _catch:
   return(result);
 }
@@ -34,6 +32,9 @@ void xkDestroyModelLoader(XkModelLoader loader) {
 
 XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkChar8* name) {
   XkResult result = XK_SUCCESS;
+
+  XkChar8 fullPath[XK_MODEL_LOADER_PATH_MAX_SIZE];
+  xkStringNFormat(fullPath, XK_MODEL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.
   pConfig->vertexCount = 0;

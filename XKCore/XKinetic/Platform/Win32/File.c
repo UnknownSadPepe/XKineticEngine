@@ -41,7 +41,7 @@ void xkCloseFile(XkFile file) {
 	xkFreeMemory(file);
 }
 
-XkResult xkCreateFile(XkFile file, const XkChar8* name) {
+XkResult xkCreateFile(XkFile* pFile, const XkChar8* name) {
 	XkResult result = XK_SUCCESS;
 
 	*pFile = xkAllocateMemory(sizeof(struct XkFile));

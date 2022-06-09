@@ -11,6 +11,8 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Platform/Window.h"
 
+#define XKVULKAN_MAX_FRAMES_IN_FLIGHT 2
+
 extern const char* _xkVkInstanceExtensions[];
 extern const uint32_t _xkVkInstanceExtensionCount;
 

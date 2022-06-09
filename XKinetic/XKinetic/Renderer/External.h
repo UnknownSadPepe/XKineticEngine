@@ -20,6 +20,12 @@ typedef enum {
 	XK_CULL_MODE_FRONT_BACK
 } XkCullMode;
 
+typedef enum {
+	XK_BUFFER_USAGE_VERTEX,
+	XK_BUFFER_USAGE_INDEX,
+	XK_BUFFER_USAGE_UNIFORM
+} XkBufferUsage;
+
 typedef struct {
 	XkBool32 blending;
 	XkBool32 depthTest;

@@ -1,9 +1,12 @@
+#include "XKinetic/Core/PoolAllocator.h"
 #include "XKinetic/Systems/ShaderSystem.h"
 
 #define XK_SHADER_SYSTEM_ARRAY_SIZE 4
 
 struct XkShaderSystem {
-  XkDynamicArray shaders;
+  XkPoolAllocator shaders;
+
+  XkShaderID shaderID;
 };
 
 XkResult xkCreateShaderSystem(XkShaderSystem* pSystem) {
@@ -17,7 +20,9 @@ XkResult xkCreateShaderSystem(XkShaderSystem* pSystem) {
 
   XkShaderSystem system = *pSystem;
 
-  result = xkCreateDynamicArrayCapacity(&system->shaders, XK_SHADER_SYSTEM_ARRAY_SIZE, XkShader);
+  system->shaderID = 1;
+
+  result = xkCreatePoolAllocator(&system->shaders, XK_SHADER_SYSTEM_ARRAY_SIZE, struct XkShader);
   if(result != XK_SUCCESS) goto _catch;
 
   /// TODO: implementation.
@@ -28,12 +33,17 @@ _catch:
 
 void xkDestroyShaderSystem(XkShaderSystem system) {
   /// TODO: implementation.
-  xkDestroyDynamicArray(system->shaders);
+  xkDestroyPoolAllocator(system->shaders);
 }
 
 XkShaderID xkCreateShader(XkShaderSystem system, XkShaderConfig* const pConfig) {
   /// TODO: implementation.
-  return(-1);
+  XkShaderID id = 0;
+
+  id = ++system->shaderID;
+
+_catch:
+  return(id);
 }
 
 void xkDestroyShader(XkShaderSystem system, XkShaderID id) {

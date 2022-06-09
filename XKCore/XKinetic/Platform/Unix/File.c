@@ -73,7 +73,7 @@ void xkRenameFile(const XkChar8* oldName, const XkChar8* newName) {
 	link(oldName, newName);
 }
 
-XkSize __xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
+XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 	int whence = 0;
 
 	switch(seek) {

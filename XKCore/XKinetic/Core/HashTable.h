@@ -2,7 +2,7 @@
 
 #include "XKinetic/XKCore.h"
 
-typedef XkSize XkKey;
+typedef XkInt64 XkKey;
 
 typedef struct XkHashTable* XkHashTable;
 
@@ -28,4 +28,12 @@ XKCORE_API void xkHashTableErase(XkHashTable, const XkKey);
 
 XKCORE_API XkSize xkHashTableLength(XkHashTable);
 XKCORE_API XkSize xkHashTableCapacity(XkHashTable);
+
 XKCORE_API XkHandle xkHashTableGet(XkHashTable, const XkKey);
+XKCORE_API void __xkHashTableSet(XkHashTable, const XkKey, XkHandle);
+#define xkHashTableSet(table, key, value)					\
+{																						      \
+	typeof(value) tmp = value;								      \
+	__xkHashTableSet(table, key, &tmp);							\
+}
+

@@ -6,5 +6,10 @@ typedef struct XkStackAllocator* XkStackAllocator;
 
 XKCORE_API XkResult xkCreateStackAllocator(XkStackAllocator*, const XkSize);
 XKCORE_API void xkDestroyStackAllocator(XkStackAllocator);
+
+XKCORE_API void xkClearStackAllocator(XkStackAllocator);
+XKCORE_API void xkResizeStackAllocator(XkStackAllocator, const XkSize);
+
 XKCORE_API XkHandle xkAllocateStackMemory(XkStackAllocator, const XkSize);
 XKCORE_API void xkFreeStackMemory(XkStackAllocator, XkHandle);
+

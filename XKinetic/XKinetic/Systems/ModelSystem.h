@@ -4,7 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Model.h"
 
-typedef XkInt32 XkModelID;
+typedef XkUInt64 XkModelID;
 
 typedef struct XkModelSystem* XkModelSystem;
 

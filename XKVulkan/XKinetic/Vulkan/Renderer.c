@@ -6,6 +6,7 @@ struct XkVkRenderer {
 	XkRendererConfig config;
 
 	VkClearValue vkClearValues[2];
+	uint32_t clearValueCount;
 	VkRect2D vkScissor;
 	VkExtent2D vkExtent;
 	VkCullModeFlags vkCullMode;
@@ -14,27 +15,34 @@ struct XkVkRenderer {
 	VkSurfaceKHR vkSurface;
 	VkSwapchainKHR vkSwapChain;
 	VkFormat vkSwapChainImageFormat;
-	VkImage* vkSwapChainImages;
-	VkImageView* vkSwapChainImageViews;
+	VkImage vkSwapChainImages[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+	VkImageView vkSwapChainImageViews[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
 	uint32_t swapChainImageCount;
-	VkFramebuffer* vkSwapChainFrameBuffer;
+	VkFramebuffer vkFrameBuffers[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
 
-  VkSemaphore* vkAvailableSemaphores;
-  VkSemaphore* vkFinishedSemaphores;
-  VkFence* vkFlightFences;
+	VkRenderPass vkRenderPass;
 
-	VkCommandBuffer* vkCommandBuffers;
+  VkSemaphore vkAvailableSemaphores[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+  VkSemaphore vkFinishedSemaphores[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+  VkFence vkFlightFences[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+
+	VkCommandBuffer vkCommandBuffers[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
 
 	uint32_t frameIndex;
+	uint32_t imageIndex;
 };
 
 struct XkVkBuffer {
+	XkVkRenderer renderer;
+
 	VkBuffer vkBuffer;
 	VkDeviceMemory vkMemory;
 	VkDeviceSize vkSize;
 };
 
 struct XkVkTexture2D {
+	XkVkRenderer renderer;
+
 	VkImage vkImage;
 	VkDeviceMemory vkMemory;
 	VkImageView vkImageView;
@@ -84,6 +92,16 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	XkVkRenderer renderer = *pRenderer;
 
 	renderer->config = *pConfig;
+	renderer->vkPrimitiveTopology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+	renderer->vkCullMode = VK_CULL_MODE_FRONT_AND_BACK;
+	renderer->frameIndex = 0;
+	renderer->imageIndex = 0;
+
+	if(renderer->config.depthTest || renderer->config.stencilTest) {
+		renderer->clearValueCount = 2;
+	} else {
+		renderer->clearValueCount = 1;
+	}
 
 	// Initialize Vulkan context.
 	result = __xkVkInitializeContext();
@@ -102,7 +120,6 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
   }  
 
 	// Create Vulkan renderer swap chain.
-	renderer->vkSwapChainImages =  xkAllocateMemory(sizeof(VkImage) * 2);
 	result = __xkVkCreateSwapChain(&renderer->vkSwapChain, renderer->vkSurface, &renderer->vkExtent, &renderer->vkSwapChainImageFormat, renderer->vkSwapChainImages, &renderer->swapChainImageCount);
   if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan swap chain: %d", result);
@@ -111,8 +128,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
   }
 
 	// Create Vulkan renderer swap chain image views.
-	renderer->vkSwapChainImageViews =  xkAllocateMemory(sizeof(VkImageView) * 2);
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		result = __xkVkCreateImageView(&renderer->vkSwapChainImageViews[i], renderer->vkSwapChainImages[i], renderer->vkSwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan swap chain image view: %d", result);
@@ -122,8 +138,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan command buffers.
-	renderer->vkCommandBuffers =  xkAllocateMemory(sizeof(VkCommandBuffer) * 2);
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		result = __xkVkCreateCommandBuffer(&renderer->vkCommandBuffers[i], VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan command buffer: %d", result);
@@ -133,8 +148,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan available semaphores.
-	renderer->vkAvailableSemaphores = xkAllocateMemory(sizeof(VkSemaphore) * 2);
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		result = __xkVkCreateSemaphore(&renderer->vkAvailableSemaphores[i]);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan semaphore: %d", result);
@@ -144,8 +158,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan finished semaphores.
-  renderer->vkFinishedSemaphores = xkAllocateMemory(sizeof(VkSemaphore) * 2);
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		result = __xkVkCreateSemaphore(&renderer->vkFinishedSemaphores[i]);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan semaphore: %d", result);
@@ -155,15 +168,14 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan fences.
-  renderer->vkFlightFences = xkAllocateMemory(sizeof(VkFence) * 2);
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		result = __xkVkCreateFence(&renderer->vkFlightFences[i]);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan fence: %d", result);
     	result = XK_ERROR_CREATE_FAILED;  
     	goto _catch;
   	}		
-	}	
+	}
 
 	/// TODO: implementation.
 
@@ -176,27 +188,27 @@ void xkVkDestroyRenderer(XkVkRenderer renderer) {
 	xkFreeMemory(renderer);
 	
 	// Destroy Vulkan flight fence.
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		__xkVkDestroyFence(renderer->vkFlightFences[i]);
 	}
 
 	// Destroy Vulkan available semaphores.
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		__xkVkDestroySemaphore(renderer->vkAvailableSemaphores[i]);
 	}
 
 	// Destroy Vulkan finished semaphores.
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		__xkVkDestroySemaphore(renderer->vkFinishedSemaphores[i]);
 	}
 
 	// Destroy Vulkan command buffers.
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		__xkVkDestroyCommandBuffer(renderer->vkCommandBuffers[i]);
 	}	
 
 	// Destroy Vulkan renderer swap chain image views.
-	for(uint32_t i = 0; i < 2; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
 		__xkVkDestroyImageView(renderer->vkSwapChainImageViews[i]);
 	}
 
@@ -274,11 +286,68 @@ void xkVkCullModeRenderer(XkVkRenderer renderer, XkCullMode cullMode) {
 }
 
 void xkVkBeginRenderer(XkVkRenderer renderer) {
-	/// TODO: implementation.
+	/// TODO: acquire next Vulkan swap chain image.
+
+	// Template Vulkan command buffer.
+	VkCommandBuffer vkCommandBuffer = renderer->vkCommandBuffers[renderer->frameIndex];
+
+	// Template Vulkan frame buffer.
+	VkFramebuffer vkFrameBuffer = renderer->vkFrameBuffers[renderer->imageIndex];
+
+	// Initialize Vulkan command buffer begin info.
+  const VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
+    .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+    .pNext              = VK_NULL_HANDLE,
+    .flags              = 0,
+    .pInheritanceInfo   = VK_NULL_HANDLE
+  };
+
+  // Begin Vulkan command buffer.
+  VkResult vkResult = vkBeginCommandBuffer(vkCommandBuffer, &vkCommandBufferBeginInfo);
+  if(vkResult != VK_SUCCESS) {
+    xkLogError("Failed to begin Vulkan command buffer: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }
+
+	// Initialize Vulkan render pass begin info.
+	const VkRenderPassBeginInfo vkRenderPassBeginInfo = {
+  	.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+		.pNext = VK_NULL_HANDLE,
+		.renderPass = renderer->vkRenderPass,
+		.framebuffer = vkFrameBuffer,
+		.renderArea = {
+			.offset = {0, 0},
+			.extent = renderer->vkExtent
+		},
+		.clearValueCount = renderer->clearValueCount,
+		.pClearValues = renderer->vkClearValues
+	};
+
+	// Begin Vulkan render pass.
+  vkCmdBeginRenderPass(vkCommandBuffer, &vkRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+_catch:
+	return;
 }
 
 void xkVkEndRenderer(XkVkRenderer renderer) {
-	/// TODO: implementation.
+	// Template Vulkan command buffer.
+	VkCommandBuffer vkCommandBuffer = renderer->vkCommandBuffers[renderer->frameIndex];
+
+	// End Vulkan render pass.
+	vkCmdEndRenderPass(vkCommandBuffer);
+
+	// End Vulkan command buffer.
+  VkResult vkResult = vkEndCommandBuffer(vkCommandBuffer);
+  if(vkResult != VK_SUCCESS) {
+    xkLogError("Failed to end Vulkan single command buffer: %s", __xkVkGetErrorString(vkResult));
+    goto _catch;
+  }  
+
+	/// TODO: submit Vulkan command buffer.
+
+_catch:
+	return;
 }
 
 void xkVkResizeRenderer(XkVkRenderer renderer, XkSize width, XkSize height) {
@@ -307,7 +376,7 @@ void xkVkDrawIndexed(XkVkRenderer renderer, XkSize indexCount) {
 	vkCmdDrawIndexed(renderer->vkCommandBuffers[renderer->frameIndex], (uint32_t)indexCount, 1, 0, 0, 0);
 }
 
-XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, XkHandle data, XkVkRenderer renderer) {
+XkResult xkVkCreateBuffer(XkVkBuffer* pBuffer, const XkBufferUsage usage, const XkSize size, const XkHandle data, XkVkRenderer renderer) {
 	XkResult result = XK_SUCCESS;
 
 	*pBuffer = xkAllocateMemory(sizeof(struct XkVkBuffer));
@@ -316,125 +385,21 @@ XkResult xkVkCreateVertexBuffer(XkVkVertexBuffer* pBuffer, const XkSize size, Xk
 		goto _catch;
 	}
 
-	XkVkVertexBuffer buffer = *pBuffer;
+	XkVkBuffer buffer = *pBuffer;
 
 	buffer->vkSize = (VkDeviceSize)size;
+	buffer->renderer = renderer;
 
-	// Create Vulkan transfer buffer.
-	VkBuffer vkTransferBuffer;
-	VkDeviceMemory vkTransferBufferMemory;
-	result = __xkVkCreateBuffer(&vkTransferBuffer, &vkTransferBufferMemory, (VkDeviceSize)size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data);
-	if(result != XK_SUCCESS) {
-    xkLogError("Failed to create Vulkan transfer buffer: %d", result);
-    result = XK_ERROR_CREATE_FAILED;  
-    goto _catch;
+	// Choose Vulkan buffer usage flag.
+	VkBufferUsageFlags vkBufferUsage = {0};
+	switch(usage) {
+		case XK_BUFFER_USAGE_VERTEX: 	vkBufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; break;
+		case XK_BUFFER_USAGE_INDEX: 	vkBufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT; break;
+		case XK_BUFFER_USAGE_UNIFORM: vkBufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; break;
 	}
 
-	// Create Vulkan vertex buffer.
-	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, XK_NULL_HANDLE);
-	if(result != XK_SUCCESS) {
-    xkLogError("Failed to create Vulkan buffer: %d", result);
-    result = XK_ERROR_CREATE_FAILED;  
-    goto _catch;
-	}
-
-	// Copy Vulkan transfer buffer to vertex.
-	result = __xkVkCopyBuffer(buffer->vkBuffer, vkTransferBuffer, buffer->vkSize);
-	if(result != XK_SUCCESS) {
-    xkLogError("Failed to copy Vulkan buffer: %d", result);
-    result = XK_ERROR_CREATE_FAILED;  
-    goto _catch;
-	}
-
-	// Destroy Vulkan transfer buffer.
-	__xkVkDestroyBuffer(vkTransferBuffer, vkTransferBufferMemory);
-
-_catch:
-	return(result);
-}
-
-void xkVkDestroyVertexBuffer(XkVkVertexBuffer buffer) {
-	// Destroy Vulkan vertex buffer.
-	__xkVkDestroyBuffer(buffer->vkBuffer, buffer->vkMemory);
-	xkFreeMemory(buffer);
-}
-
-void xkVkBindVertexBuffer(XkVkVertexBuffer buffer) {
-	/// TODO: implementation.
-}
-
-XkResult xkVkCreateIndexBuffer(XkVkIndexBuffer* pBuffer, const XkSize size, XkHandle data, XkVkRenderer renderer) {
-	XkResult result = XK_SUCCESS;
-
-	*pBuffer = xkAllocateMemory(sizeof(struct XkVkBuffer));
-	if(!pBuffer) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
-
-	XkVkIndexBuffer buffer = *pBuffer;
-
-	buffer->vkSize = (VkDeviceSize)size;
-
-	// Create Vulkan transfer buffer.
-	VkBuffer vkTransferBuffer;
-	VkDeviceMemory vkTransferBufferMemory;
-	result = __xkVkCreateBuffer(&vkTransferBuffer, &vkTransferBufferMemory, (VkDeviceSize)size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data);
-	if(result != XK_SUCCESS) {
-    xkLogError("Failed to create Vulkan transfer buffer: %d", result);
-    result = XK_ERROR_CREATE_FAILED;  
-    goto _catch;
-	}
-
-	// Create Vulkan index buffer.
-	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, XK_NULL_HANDLE);
-	if(result != XK_SUCCESS) {
-    xkLogError("Failed to create Vulkan buffer: %d", result);
-    result = XK_ERROR_CREATE_FAILED;  
-    goto _catch;
-	}
-
-	// Copy Vulkan transfer buffer to index.
-	result = __xkVkCopyBuffer(buffer->vkBuffer, vkTransferBuffer, buffer->vkSize);
-	if(result != XK_SUCCESS) {
-    xkLogError("Failed to copy Vulkan buffer: %d", result);
-    result = XK_ERROR_CREATE_FAILED;  
-    goto _catch;
-	}
-
-	// Destroy Vulkan transfer buffer.
-	__xkVkDestroyBuffer(vkTransferBuffer, vkTransferBufferMemory);
-
-_catch:
-	return(result);
-}
-
-void xkVkDestroyIndexBuffer(XkVkIndexBuffer buffer) {
-	// Destroy Vulkan index buffer.
-	__xkVkDestroyBuffer(buffer->vkBuffer, buffer->vkMemory);
-	xkFreeMemory(buffer);
-}
-
-void xkVkBindIndexBuffer(XkVkIndexBuffer buffer) {
-	/// TODO: implementation.
-}
-
-XkResult xkVkCreateUniformBuffer(XkVkUniformBuffer* pBuffer, const XkSize size, const XkSize binding, XkVkRenderer renderer) {
-	XkResult result = XK_SUCCESS;
-
-	*pBuffer = xkAllocateMemory(sizeof(struct XkVkBuffer));
-	if(!pBuffer) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
-
-	XkVkUniformBuffer buffer = *pBuffer;
-
-	buffer->vkSize = (VkDeviceSize)size;
-
-
-	// Create Vulkan uniform buffer.
-	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, XK_NULL_HANDLE);
+	// Create Vulkan buffer.
+	result = __xkVkCreateBuffer(&buffer->vkBuffer, &buffer->vkMemory, buffer->vkSize, vkBufferUsage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, data);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan buffer: %d", result);
     result = XK_ERROR_CREATE_FAILED;  
@@ -445,14 +410,34 @@ _catch:
 	return(result);
 }
 
-void xkVkDestroyUniformBuffer(XkVkUniformBuffer buffer) {
-	// Destroy Vulkan uniform buffer.
+void xkVkDestroyBuffer(XkVkBuffer buffer) {
+	// Destroy Vulkan buffer.
 	__xkVkDestroyBuffer(buffer->vkBuffer, buffer->vkMemory);
+
 	xkFreeMemory(buffer);
 }
 
-void xkVkSetUniformBuffer(XkVkUniformBuffer buffer, XkHandle data, XkSize offset) {
-	/// TODO: implementation.
+void xkVkBindVertexBuffer(XkVkBuffer buffer) {
+	// Template Vulkan command buffer.
+	VkCommandBuffer vkCommandBuffer = buffer->renderer->vkCommandBuffers[buffer->renderer->frameIndex];
+
+	// Bind Vulkan vertex buffer.
+  VkBuffer vkVertexBuffers[] = {buffer->vkBuffer};
+  VkDeviceSize vkOffsets[] = {0};
+  vkCmdBindVertexBuffers(vkCommandBuffer, 0, 1, vkVertexBuffers, vkOffsets);
+}
+
+void xkVkBindIndexBuffer(XkVkBuffer buffer) {
+	// Template Vulkan command buffer.
+	VkCommandBuffer vkCommandBuffer = buffer->renderer->vkCommandBuffers[buffer->renderer->frameIndex];
+
+	// Bind Vulkan index buffer.
+	vkCmdBindIndexBuffer(vkCommandBuffer, buffer->vkBuffer, 0, VK_INDEX_TYPE_UINT32);
+}
+
+void xkVkMapBuffer(XkVkBuffer buffer, const XkHandle data) {
+	// Map Vulkan buffer.
+	__xkVkMapBuffer(buffer->vkMemory, buffer->vkSize, data);
 }
 
 XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle data, const XkSize width, const XkSize height, XkVkRenderer renderer) {
@@ -465,6 +450,8 @@ XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle data, const XkSiz
 	}
 
 	XkVkTexture2D texture = *pTexture;
+
+	texture->renderer = renderer;
 
 	/// TODO: implementation.
 	const VkDeviceSize vkSize = (width * height) * 4;
@@ -523,9 +510,15 @@ _catch:
 }
 
 void xkVkDestroyTexture2D(XkVkTexture2D texture) {
+	// Destroy Vulkan sampler.
 	__xkVkDestroySampler(texture->vkSampler);
+
+	// Destroy Vulkan image view.
 	__xkVkDestroyImageView(texture->vkImageView);
+
+	// Destroy Vulkan image.
 	__xkVkDestroyImage(texture->vkImage, texture->vkMemory);
+
 	xkFreeMemory(texture);
 }
 

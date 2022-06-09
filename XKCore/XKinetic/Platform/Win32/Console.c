@@ -5,38 +5,29 @@
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
 
-void xkColorConsole(const XkConsoleHandle handle, const XkConsoleColor color) {
-	/// TODO: implementation.
-
-
-	HANDLE stream;
-	switch(handle) {
-		case XK_CONSOLE_STDOUT: stream = GetStdHandle(STD_OUTPUT_HANDLE); break;
-		case XK_CONSOLE_STDERR: stream = GetStdHandle(STD_ERROR_HANDLE); break;
-	}	
-
-
-	SetConsoleTextAttribute(stream, attribute);
-}
-
 void xkWriteConsole(const XkConsoleHandle handle, const XkChar8* buffer, const XkSize size) {
+	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
+
 	HANDLE stream;
 	switch(handle) {
-		case XK_CONSOLE_STDOUT: stream = GetStdHandle(STD_OUTPUT_HANDLE); break;
-		case XK_CONSOLE_STDERR: stream = GetStdHandle(STD_ERROR_HANDLE); break;
+		case XK_CONSOLE_STDOUT: stream = stdout; break;
+		case XK_CONSOLE_STDERR: stream = stderr; break;
 	}	
 	LPDWORD numberWritten = 0;
 	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
 }
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkChar8* buffer, const XkSize size) {
+	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
+
 	CONSOLE_SCREEN_BUFFER_INFO CBI;
-	GetConsoleScreenBufferInfo(_xkPlatform.handle.stdout, &CBI);
 
 	HANDLE stream;
 	switch(handle) {
-		case XK_CONSOLE_STDOUT: stream = GetStdHandle(STD_OUTPUT_HANDLE); break;
-		case XK_CONSOLE_STDERR: stream = GetStdHandle(STD_ERROR_HANDLE); break;
+		case XK_CONSOLE_STDOUT: stream = stdout; GetConsoleScreenBufferInfo(stdout, &CBI); break;
+		case XK_CONSOLE_STDERR: stream = stdout; GetConsoleScreenBufferInfo(stderr, &CBI); break;
 	}	
 
 	WORD attribute;

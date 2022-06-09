@@ -4,7 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Texture.h"
 
-typedef XkInt32 XkTextureID;
+typedef XkUInt64 XkTextureID;
 
 typedef struct XkTextureSystem* XkTextureSystem;
 

@@ -27,6 +27,8 @@ typedef struct {
 	HWND handle;
   HICON bigIcon;
   HICON smallIcon;
+
+  XkBool32 cursorTracked;
 } __XkWin32Window;
 
 #define XK_PLATFORM_WINDOW __XkWin32Window handle

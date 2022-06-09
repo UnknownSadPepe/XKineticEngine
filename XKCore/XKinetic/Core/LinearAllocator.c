@@ -12,6 +12,8 @@ struct XkLinearAllocator {
 
 static const XkSize XK_LINEAR_ALLOCATOR_ALIGN = 16;
 
+#define XK_LINEAR_ALLOCATOR_REALLOCATE_COEFFICIENT 2
+
 XkResult xkCreateLinearAllocator(XkLinearAllocator* pAllocator, const XkSize totalSize) {
 	XkResult result = XK_SUCCESS;
 
@@ -38,18 +40,27 @@ _catch:
 }
 
 void xkDestroyLinearAllocator(XkLinearAllocator allocator) {
-	allocator->totalSize = 0;
-	allocator->allocated = 0;
 	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL_HANDLE;
 	xkFreeMemory(allocator);
+}
+
+void xkClearLinearAllocator(XkLinearAllocator allocator) {
+	allocator->allocated = 0;
+	xkZeroMemory(allocator->memory, allocator->totalSize);	
+}
+
+void xkResizeLinearAllocator(XkLinearAllocator allocator, const XkSize newSize) {
+	const XkSize alignNewSize = (newSize + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
+
+	allocator->totalSize = alignNewSize;
+	allocator->memory = xkReallocateMemory(allocator->memory, alignNewSize);
 }
 
 XkHandle xkAllocateLinearMemory(XkLinearAllocator allocator, const XkSize size) {
 	const XkSize alignSize = (size + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
 
 	if((allocator->allocated + alignSize) > allocator->totalSize) {
-		return(XK_NULL_HANDLE);
+		xkResizeLinearAllocator(allocator, allocator->totalSize * XK_LINEAR_ALLOCATOR_REALLOCATE_COEFFICIENT);
 	}
 
 	allocator->allocated += alignSize;
@@ -57,7 +68,3 @@ XkHandle xkAllocateLinearMemory(XkLinearAllocator allocator, const XkSize size) 
 	return(newMemory);
 }
 
-void xkFreeLinearMemory(XkLinearAllocator allocator) {
-	allocator->allocated = 0;
-	xkZeroMemory(allocator->memory, allocator->totalSize);	
-}

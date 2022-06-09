@@ -1,9 +1,12 @@
+#include "XKinetic/Core/PoolAllocator.h"
 #include "XKinetic/Systems/TextureSystem.h"
 
 #define XK_TEXTURE_SYSTEM_ARRAY_SIZE 128
 
 struct XkTextureSystem {
-  XkDynamicArray textures;
+  XkPoolAllocator textures;
+
+  XkTextureID textureID;
 };
 
 XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
@@ -17,12 +20,12 @@ XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
 
   XkTextureSystem system = *pSystem;
 
-  result = xkCreateDynamicArrayCapacity(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, XkTexture);
+  system->textureID = 1;
+
+  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkTexture);
   if(result != XK_SUCCESS) goto _catch;
 
   /// TODO: implementation.
-
-  
 
 _catch:
   return(result);
@@ -30,12 +33,17 @@ _catch:
 
 void xkDestroyTextureSystem(XkTextureSystem system) {
   /// TODO: implementation.
-  xkDestroyDynamicArray(system->textures);
+  xkDestroyPoolAllocator(system->textures);
 }
 
 XkTextureID xkCreateTexture(XkTextureSystem system, XkTextureConfig* const pConfig) {
   /// TODO: implementation.
-  return(-1);
+  XkTextureID id = 0;
+
+  id = ++system->textureID;
+
+_catch:
+  return(id);
 }
 
 void xkDestroyTexture(XkTextureSystem system, XkTextureID id) {

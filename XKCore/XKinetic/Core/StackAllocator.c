@@ -15,6 +15,8 @@ typedef struct {
 
 static const XkSize XK_STACK_ALLOCATOR_ALIGN = 16;
 
+#define XK_STACK_ALLOCATOR_REALLOCATE_COEFFICIENT 2
+
 XkResult xkCreateStackAllocator(XkStackAllocator* pAllocator, const XkSize totalSize) {
 	XkResult result = XK_SUCCESS;
 
@@ -41,18 +43,27 @@ _catch:
 }
 
 void xkDestroyStackAllocator(XkStackAllocator allocator) {
-	allocator->totalSize = 0;
-	allocator->allocated = 0;
 	xkFreeMemory(allocator->memory);
-	allocator->memory = XK_NULL_HANDLE;
 	xkFreeMemory(allocator);
+}
+
+void xkClearStackAllocator(XkStackAllocator allocator) {
+	allocator->allocated = 0;
+	xkZeroMemory(allocator->memory, allocator->totalSize);
+}
+
+void xkResizeStackAllocator(XkStackAllocator allocator, const XkSize newSize) {
+	const XkSize alignNewSize = (newSize + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
+
+	allocator->totalSize = alignNewSize;
+	allocator->memory = xkReallocateMemory(allocator->memory, alignNewSize);
 }
 
 XkHandle xkAllocateStackMemory(XkStackAllocator allocator, const XkSize size) {
 	const XkSize headerSize = (size + sizeof(XkStackMemoryHeader) + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
 
 	if((allocator->allocated + headerSize) > allocator->totalSize) {
-		return(XK_NULL_HANDLE);
+		xkResizeStackAllocator(allocator, allocator->totalSize * XK_STACK_ALLOCATOR_REALLOCATE_COEFFICIENT);
 	}
 
 	allocator->allocated += headerSize;

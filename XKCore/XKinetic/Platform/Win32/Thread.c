@@ -36,8 +36,7 @@ _catch:
 	return(result);
 }
 
-void xkJoinThread(XkThread thread, const XkInt32** ppResult) {
-	/// TODO: implementation.
+void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 	WaitForSingleObject(thread->handle.handle, INFINITE);
 	CloseHandle(thread->handle.handle);
 	xkFreeMemory(thread->handle.pStack);
@@ -45,7 +44,6 @@ void xkJoinThread(XkThread thread, const XkInt32** ppResult) {
 }
 
 void xkDetachThread(XkThread thread) {
-	/// TODO: implementation.
 	TerminateThread(thread->handle.handle, 0);
 	CloseHandle(thread->handle.handle);
 	xkFreeMemory(thread->handle.pStack);
@@ -53,16 +51,10 @@ void xkDetachThread(XkThread thread) {
 }
 
 void xkExitThread() {
-	/// TODO: implementation.
-	XkThread thread = xkThreadSelf();
 	ExitThread(0);
-	CloseHandle(thread->handle.handle);
-	xkFreeMemory(thread->handle.pStack);
-	xkFreeMemory(thread);
 }
 
 void xkKillThread(XkThread thread) {
-	/// TODO: implementation.
 	TerminateThread(thread->handle.handle, 0);
 	CloseHandle(thread->handle.handle);
 	xkFreeMemory(thread->handle.pStack);

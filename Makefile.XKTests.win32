@@ -1,7 +1,7 @@
 all:
-	@ $(MAKE) -s all -f Tests\Makefile.XKVulkanTest.win32
+	@ $(MAKE) -s all -f Tests/Makefile.XKVulkanTest.win32
 
 .PHONY: clean
 clean:
-	@ $(MAKE) -s clean -f Tests\Makefile.XKVulkanTest.win32
+	@ $(MAKE) -s clean -f Tests/Makefile.XKVulkanTest.win32
 

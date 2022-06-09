@@ -13,8 +13,6 @@ XkResult xkCreateScene(XkScene* pScene) {
     goto _catch;
   }
 
-  
-
 _catch:
   return(result);
 }

@@ -64,6 +64,8 @@ struct XkWindow {
 
 typedef struct {
 	XK_PLATFORM;
+
+	XkInt16 keycodes[256];
 } __XkPlatform;
 
 extern __XkPlatform _xkPlatform;

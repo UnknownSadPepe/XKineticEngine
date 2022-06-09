@@ -9,4 +9,8 @@ typedef struct {
   XkHandle pixels;
 } XkTextureConfig;
 
+struct XkTexture {
+
+};
+
 typedef struct XkTexture* XkTexture;

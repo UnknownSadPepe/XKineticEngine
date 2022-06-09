@@ -18,7 +18,7 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
 
   // Set minimal image count.
   uint32_t minImageCount = vkCapabilities.minImageCount + 1;
-  if (vkCapabilities.maxImageCount > 0 && minImageCount > vkCapabilities.maxImageCount) {
+  if(vkCapabilities.maxImageCount > 0 && minImageCount > vkCapabilities.maxImageCount) {
     minImageCount = vkCapabilities.maxImageCount;
   }
 
@@ -81,6 +81,8 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
     xkLogError("Failed to get Vulkan swap chain images: %s", __xkVkGetErrorString(vkResult));
     goto _catch;
   } 
+
+  xkLogTrace("minImageCount: %d", minImageCount);
 
   *pVkExtent = vkCapabilities.currentExtent;
   *pVkFormat = vkSurfaceFormat.format;
