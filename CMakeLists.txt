@@ -3,13 +3,18 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 # Initialize XKinetic project.
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
+# Set project build type.
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
 # Initialize project options.
 option(BUILD_TESTS "Build tests applications" OFF)
 
 # Set project build dir.
-set(BUILD_DIR ${PROJECT_SOURCE_DIR}/Target)
-set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR}/${CMAKE_BUILD_TYPE})
-set(LIBRARY_OUTPUT_PATH ${BUILD_DIR}/${CMAKE_BUILD_TYPE})
+set(BUILD_DIR ${PROJECT_SOURCE_DIR}/Target/${CMAKE_BUILD_TYPE})
+set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR})
+set(LIBRARY_OUTPUT_PATH ${BUILD_DIR})
 
 # Add XKCore subdirectory.
 add_subdirectory(XKCore)
@@ -18,10 +23,14 @@ add_subdirectory(XKCore)
 add_subdirectory(XKMath)
 
 # Add XKVulkan subdirectory.
-# add_subdirectory(XKVulkan)
+if(UNIX AND NOT APPLE OR WIN32)
+  add_subdirectory(XKVulkan)
+endif()
 
 # Add XKDirectX12 subdirectory.
-add_subdirectory(XKDirectX12)
+if(WIN32)
+  add_subdirectory(XKDirectX12)
+endif()
 
 # Add XKinetic subdirectory.
 add_subdirectory(XKinetic)

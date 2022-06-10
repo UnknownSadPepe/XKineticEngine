@@ -139,12 +139,14 @@ XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig
 #endif // XK_WIN32
 			break;
 
+#if defined(XK_WIN32) || defined(XK_LINUX)
 		case XK_RENDERER_API_VK:
 			result = __xkLoadVkModule(renderer);
 			if(result != XK_SUCCESS) {
 				goto _catch;
 			}
 			break;
+#endif // XK_WIN32 || XK_LINUX
 
 #if defined(XK_WIN32)
 		case XK_RENDERER_API_DX12:
@@ -158,8 +160,6 @@ XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig
 
 	result = renderer->callbacks.create(&renderer->handle, pConfig, window);
 	if(result != XK_SUCCESS) goto _catch;
-
-	xkLogDebug("hello");
 
 _catch:
 	return(result);
@@ -281,6 +281,8 @@ void xkDestroyTexture2D(XkTexture2D texture) {
 	xkFreeMemory(texture);
 }
 
+#if defined(XK_WIN32) || defined(XK_LINUX)
+
 XkResult __xkLoadVkModule(XkRenderer renderer) {
 	XkResult result = XK_SUCCESS;
 
@@ -401,6 +403,8 @@ XkResult __xkLoadVkModule(XkRenderer renderer) {
 _catch:
 	return(result);
 }
+
+#endif // XK_WIN32 || XK_LINUX
 
 #if defined(XK_WIN32)
 

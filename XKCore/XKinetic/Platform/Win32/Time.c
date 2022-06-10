@@ -6,7 +6,7 @@
 #include "XKinetic/Platform/Win32/Internal.h"
 
 XkSize xkGetTime(void) {
-	return((XkSize)GetTickCount());
+	return((XkSize)(GetTickCount() / 1000));
 }
 
 #endif // XK_WIN32

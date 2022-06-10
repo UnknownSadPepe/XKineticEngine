@@ -9,6 +9,7 @@ XkResult xkLoadModule(XkModule* pModule, const XkChar8* path) {
 
 	*pModule = (XkModule)LoadLibraryA(path);
 	if(!(*pModule)) {
+		__xkErrorHandle("Win32: Failed to load module");
 		result = XK_ERROR_MODULE_NOT_PRESENT;
 		goto _catch;
 	}
@@ -26,6 +27,7 @@ XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkChar8* name, XkModule mo
 
 	*pPfnProc = (XkProcPfn)GetProcAddress((HMODULE)module, name);
 	if(!(*pPfnProc)) {
+		__xkErrorHandle("Win32: Failed to get module symbol");
 		result = XK_ERROR_MODULE_SYMBOL_NOT_PRESENT;
 		goto _catch;
 	}
@@ -35,4 +37,3 @@ _catch:
 }
 
 #endif // XK_WIN32
-

@@ -33,6 +33,12 @@ struct XkWindow {
 	XkSize xPos;
 	XkSize yPos;
 
+	XkSize minWidth;
+	XkSize minHeight;
+
+	XkSize maxWidth;
+	XkSize maxHeight;
+
 	XkBool32 maximized;
 	XkBool32 minimized;
 	XkBool32 fullscreen;

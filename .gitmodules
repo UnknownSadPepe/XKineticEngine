@@ -1,0 +1,3 @@
+[submodule "External/stb"]
+	path = External/stb
+	url = https://github.com/jschmidt42/stb-cmake

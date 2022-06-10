@@ -89,7 +89,7 @@ void xkDX12DrawIndexed(XkDX12Renderer renderer, XkSize indexCount) {
 	/// TODO: implementation.
 }
 
-XkResult xkDX12CreateVertexBuffer(XkDX12VertexBuffer* pBuffer, const XkSize size, XkHandle data, XkDX12Renderer renderer) {
+XkResult xkDX12CreateBuffer(XkDX12Buffer* pBuffer, const XkBufferUsage usage, const XkSize size, XkHandle data, XkDX12Renderer renderer) {
 	XkResult result = XK_SUCCESS;
 
 	*pBuffer = xkAllocateMemory(sizeof(struct XkDX12Buffer));
@@ -98,7 +98,7 @@ XkResult xkDX12CreateVertexBuffer(XkDX12VertexBuffer* pBuffer, const XkSize size
 		goto _catch;
 	}
 
-	XkDX12VertexBuffer buffer = *pBuffer;
+	XkDX12Buffer buffer = *pBuffer;
 
 	/// TODO: implementation.
 
@@ -106,61 +106,19 @@ _catch:
 	return(result);
 }
 
-void xkDX12DestroyVertexBuffer(XkDX12VertexBuffer buffer) {
+void xkDX12DestroyBuffer(XkDX12Buffer buffer) {
 	/// TODO: implementation.
 }
 
-void xkDX12BindVertexBuffer(XkDX12VertexBuffer buffer) {
+void xkDX12MapBuffer(XkDX12Buffer buffer, const XkHandle data) {
 	/// TODO: implementation.
 }
 
-XkResult xkDX12CreateIndexBuffer(XkDX12IndexBuffer* pBuffer, const XkSize size, XkHandle data, XkDX12Renderer renderer) {
-	XkResult result = XK_SUCCESS;
-
-	*pBuffer = xkAllocateMemory(sizeof(struct XkDX12Buffer));
-	if(!pBuffer) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
-
-	XkDX12IndexBuffer buffer = *pBuffer;
-
-	/// TODO: implementation.
-
-_catch:
-	return(result);
-}
-
-void xkDX12DestroyIndexBuffer(XkDX12IndexBuffer buffer) {
+void xkDX12BindVertexBuffer(XkDX12Buffer buffer) {
 	/// TODO: implementation.
 }
 
-void xkDX12BindIndexBuffer(XkDX12IndexBuffer buffer) {
-	/// TODO: implementation.
-}
-
-XkResult xkDX12CreateUniformBuffer(XkDX12UniformBuffer* pBuffer, const XkSize size, const XkSize data, XkDX12Renderer renderer) {
-	XkResult result = XK_SUCCESS;
-
-	*pBuffer = xkAllocateMemory(sizeof(struct XkDX12Buffer));
-	if(!pBuffer) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
-
-	XkDX12UniformBuffer buffer = *pBuffer;
-
-	/// TODO: implementation.
-
-_catch:
-	return(result);
-}
-
-void xkDX12DestroyUniformBuffer(XkDX12UniformBuffer buffer) {
-	/// TODO: implementation.
-}
-
-void xkDX12SetUniformBuffer(XkDX12UniformBuffer buffer, XkHandle data, XkSize size) {
+void xkDX12BindIndexBuffer(XkDX12Buffer buffer) {
 	/// TODO: implementation.
 }
 

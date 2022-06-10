@@ -16,12 +16,12 @@ struct XkApplication {
 
 XkApplication _xkApplication;
 
-static void __xkeWindowClose(XkWindow window) {
+static void __xkWindowClose(XkWindow window) {
 	_xkApplication.exit = XK_TRUE;
 }
 
-static void __xkeWindowSize(XkWindow window, XkSize width, XkSize height) {
-	//xkResizeRenderer(_xkApplication.renderer, width, height);
+static void __xkWindowSize(XkWindow window, XkSize width, XkSize height) {
+	xkResizeRenderer(_xkApplication.renderer, width, height);
 }
 
 XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
@@ -47,10 +47,9 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 
 	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
 
-	xkSetWindowCloseCallback(_xkApplication.window, __xkeWindowClose);
-	xkSetWindowSizeCallback(_xkApplication.window, __xkeWindowSize);
+	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
+	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
 
-/*
 	XkRendererConfig rendererConfig = {
 		.blending = XK_FALSE,
 		.depthTest = XK_TRUE,
@@ -67,14 +66,14 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	xkClearColorRenderer(_xkApplication.renderer, (XkVec4){1.0f, 0.0f, 0.0f, 1.0f});
 	xkClearDepthRenderer(_xkApplication.renderer, (XkFloat64)1.0);
 	xkClearStencilRenderer(_xkApplication.renderer, (XkInt32)0.0);
-*/
+
 _catch:
 	return(result);
 }
 
 void xkDestroyApplication() {
 	xkDestroyWindow(_xkApplication.window);
-	//xkDestroyRenderer(_xkApplication.renderer);
+	xkDestroyRenderer(_xkApplication.renderer);
 
 	xkWindowTerminate();
 
@@ -83,13 +82,13 @@ void xkDestroyApplication() {
 
 void xkUpdateApplication() {
 	while(!_xkApplication.exit) {
-		//xkClearRenderer(_xkApplication.renderer);
+		xkClearRenderer(_xkApplication.renderer);
 
-		//xkBeginRenderer(_xkApplication.renderer);
+		xkBeginRenderer(_xkApplication.renderer);
 
 		// Draw scene.
 
-		//xkEndRenderer(_xkApplication.renderer);
+		xkEndRenderer(_xkApplication.renderer);
 
 		// Poll window events.
 		xkPollWindowEvents();

@@ -23,7 +23,7 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 
 	thread->handle.pStack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
 	if(!thread->handle.pStack) {
-		__xkErrorHandle("Failed to allocate thread stack memory");
+		__xkErrorHandle("Unix: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
@@ -33,7 +33,7 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	pthread_attr_setstack(&attr, thread->handle.pStack, XK_UNIX_THREAD_STACK_SIZE);
 
 	if(pthread_create(&thread->handle.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
-		__xkErrorHandle("Failed to create thread!");
+		__xkErrorHandle("Unix: Failed to create thread!");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -82,7 +82,7 @@ XkResult xkCreateMutex(XkMutex* pMutex) {
 	XkMutex mutex = *pMutex;
 
 	if(pthread_mutex_init(&mutex->handle.handle, NULL) != 0) {
-		__xkErrorHandle("Failed to create mutex");
+		__xkErrorHandle("Unix: Failed to create mutex");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}

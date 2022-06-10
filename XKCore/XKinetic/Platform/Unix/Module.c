@@ -10,6 +10,7 @@ XkResult xkLoadModule(XkModule* pModule, const XkChar8* path) {
 
 	*pModule = (XkModule)dlopen(path, RTLD_LAZY | RTLD_LOCAL);
 	if(!(*pModule)) {
+		__xkErrorHandle("Unix: Failed to load module");
 		result = XK_ERROR_MODULE_NOT_PRESENT;
 		goto _catch;
 	}
@@ -27,6 +28,7 @@ XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkChar8* name, XkModule mo
 
 	*pPfnProc = (XkProcPfn)dlsym(module, name);
 	if(!(*pPfnProc)) {
+		__xkErrorHandle("Unix: Failed to get module symbol");
 		result = XK_ERROR_MODULE_SYMBOL_NOT_PRESENT;
 		goto _catch;
 	}

@@ -7,10 +7,10 @@ typedef struct {
   XkSize width;
   XkSize height;
   XkHandle pixels;
-} XkTextureConfig;
+} XkImageConfig;
 
-struct XkTexture {
+struct XkImage {
 
 };
 
-typedef struct XkTexture* XkTexture;
+typedef struct XkImage* XkImage;

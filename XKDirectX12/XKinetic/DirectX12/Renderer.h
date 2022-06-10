@@ -5,14 +5,8 @@
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Renderer/External.h"
 
-#ifdef XK_DEBUG
-	#define XKDIRECTX12_DEBUG
-#endif // XK_DEBUG
-
 typedef struct XkDX12Renderer* XkDX12Renderer;
-typedef struct XkDX12Buffer* XkDX12VertexBuffer;
-typedef struct XkDX12Buffer* XkDX12IndexBuffer;
-typedef struct XkDX12Buffer* XkDX12UniformBuffer;
+typedef struct XkDX12Buffer* XkDX12Buffer;
 typedef struct XkDX12Texture2D* XkDX12Texture2D;
 
 XKDIRECTX12_API XkResult xkDX12CreateRenderer(XkDX12Renderer*, XkRendererConfig* const, XkWindow);
@@ -35,19 +29,13 @@ XKDIRECTX12_API void xkDX12ScissorRenderer(XkDX12Renderer, XkInt32, XkInt32, XkS
 XKDIRECTX12_API void xkDX12Draw(XkDX12Renderer, XkSize);
 XKDIRECTX12_API void xkDX12DrawIndexed(XkDX12Renderer, XkSize);
 
-XKDIRECTX12_API XkResult xkDX12CreateVertexBuffer(XkDX12VertexBuffer*, const XkSize, XkHandle, XkDX12Renderer);
-XKDIRECTX12_API void xkDX12DestroyVertexBuffer(XkDX12VertexBuffer);
-XKDIRECTX12_API void xkDX12BindVertexBuffer(XkDX12VertexBuffer);
-XKDIRECTX12_API void xkDX12UnbindVertexBuffer(XkDX12VertexBuffer);
+XKDIRECTX12_API XkResult xkDX12CreateBuffer(XkDX12Buffer*, const XkBufferUsage, const XkSize, XkHandle, XkDX12Renderer);
+XKDIRECTX12_API void xkDX12DestroyBuffer(XkDX12Buffer);
 
-XKDIRECTX12_API XkResult xkDX12CreateIndexBuffer(XkDX12IndexBuffer*, const XkSize, XkHandle, XkDX12Renderer);
-XKDIRECTX12_API void xkDX12DestroyIndexBuffer(XkDX12IndexBuffer);
-XKDIRECTX12_API void xkDX12BindIndexBuffer(XkDX12IndexBuffer);
-XKDIRECTX12_API void xkDX12UnbindIndexBuffer(XkDX12IndexBuffer);
+XKDIRECTX12_API void xkDX12MapBuffer(XkDX12Buffer, const XkHandle);
 
-XKDIRECTX12_API XkResult xkDX12CreateUniformBuffer(XkDX12UniformBuffer*, const XkSize, const XkSize, XkDX12Renderer);
-XKDIRECTX12_API void xkDX12DestroyUniformBuffer(XkDX12UniformBuffer);
-XKDIRECTX12_API void xkDX12SetUniformBuffer(XkDX12UniformBuffer, XkHandle, XkSize);
+XKDIRECTX12_API void xkDX12BindVertexBuffer(XkDX12Buffer);
+XKDIRECTX12_API void xkDX12BindIndexBuffer(XkDX12Buffer);
 
 XKDIRECTX12_API XkResult xkDX12CreateTexture2D(XkDX12Texture2D*, XkHandle, const XkSize, const XkSize, XkDX12Renderer);
 XKDIRECTX12_API void xkDX12DestroyTexture2D(XkDX12Texture2D);

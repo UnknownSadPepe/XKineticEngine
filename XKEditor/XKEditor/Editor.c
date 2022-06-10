@@ -5,7 +5,7 @@
 
 #include "XKinetic/Resources/Loaders/ModelLoader.h"
 #include "XKinetic/Resources/Loaders/ShaderLoader.h"
-#include "XKinetic/Resources/Loaders/TextureLoader.h"
+#include "XKinetic/Resources/Loaders/ImageLoader.h"
 
 #include "XKinetic/Systems/ModelSystem.h"
 #include "XKinetic/Systems/ShaderSystem.h"
@@ -17,7 +17,7 @@ struct XkApplication {
 
 	XkModelLoader modelLoader;
 	XkShaderLoader shaderLoader;
-	XkTextureLoader textureLoader;
+	XkImageLoader imageLoader;
 
 	XkModelSystem modelSystem;
 	XkShaderSystem shaderSystem;
@@ -109,10 +109,10 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	// Unload model.
 	xkUnloadModel(_xkApplication.modelLoader, &modelConfig);
 
-	// Create texture loader.
-	result = xkCreateTextureLoader(&_xkApplication.textureLoader, "resources/textures/");
+	// Create image loader.
+	result = xkCreateImageLoader(&_xkApplication.imageLoader, "resources/textures/");
 	if(result != XK_SUCCESS) {
-		xkLogError("Failed to create texture loader");
+		xkLogError("Failed to create image loader");
 		goto _catch;
 	}
 
@@ -124,8 +124,8 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	}
 
 	// Load texture.
-	XkTextureConfig textureConfig;
-	result = xkLoadTexture(_xkApplication.textureLoader, &textureConfig, "texture.png");
+	XkImageConfig textureConfig;
+	result = xkLoadTexture(_xkApplication.imageLoader, &textureConfig, "texture.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load texture");
 		goto _catch;	
@@ -143,7 +143,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	xkDestroyTexture(_xkApplication.textureSystem, textureID);
 
 	// Unload texture.
-	xkUnloadTexture(_xkApplication.textureLoader, &textureConfig);
+	xkUnloadTexture(_xkApplication.imageLoader, &textureConfig);
 */
 
 	XkFreeList freelist;
@@ -165,7 +165,7 @@ void xkDestroyApplication() {
 	xkDestroyShaderSystem(_xkApplication.shaderSystem);
 	xkDestroyModelSystem(_xkApplication.modelSystem);
 
-	xkDestroyTextureLoader(_xkApplication.textureLoader);
+	xkDestroyImageLoader(_xkApplication.imageLoader);
 	xkDestroyShaderLoader(_xkApplication.shaderLoader);
 	xkDestroyModelLoader(_xkApplication.modelLoader);
 */

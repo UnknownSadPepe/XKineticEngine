@@ -28,6 +28,7 @@ XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
 
 	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+		__xkErrorHandle("Win32: Failed to open file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -59,6 +60,7 @@ XkResult xkOpenAsyncFile(XkFile* pFile, const XkChar8* name, const XkFileFlag fl
 
 	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
 	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+		__xkErrorHandle("Win32: Failed to open async file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -87,9 +89,9 @@ void xkRenameFile(const XkChar8* oldName, const XkChar8* newName) {
 XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 	DWORD moveMethod = 0;
 
-	if(seek == 0) moveMethod = FILE_BEGIN;
-	if(seek == 1) moveMethod = FILE_CURRENT;
-	if(seek == 2) moveMethod = FILE_END;
+	if(seek == XK_FILE_SEEK_SET) moveMethod = FILE_BEGIN;
+	if(seek == XK_FILE_SEEK_CUR) moveMethod = FILE_CURRENT;
+	if(seek == XK_FILE_SEEK_END) moveMethod = FILE_END;
 
 	DWORD pointer = SetFilePointer(file->handle.handle, offset, NULL, moveMethod);
 	return((XkSize)pointer);

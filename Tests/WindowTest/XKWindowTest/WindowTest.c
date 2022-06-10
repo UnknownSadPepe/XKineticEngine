@@ -4,12 +4,16 @@
 #include "XKinetic/Application.h"
 #include "XKinetic/Platform/Window.h"
 
+#include "XKinetic/Resources/Loaders/ImageLoader.h"
+
 struct XkApplication {
 	XkApplicationConfig config;
 
 	XkWindow window;
 
 	XkBool32 exit;
+
+	XkImageLoader imageLoader;
 };
 
 XkApplication _xkApplication;
@@ -28,22 +32,74 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 	XkChar8* actionStr = XK_NULL_HANDLE; 
 
 	switch(action) {
-		case XK_RELEASE: actionStr = "release";
-		case XK_PRESS: actionStr = "press";
+		case XK_RELEASE: actionStr = "release"; break;
+		case XK_PRESS: actionStr = "press"; break;
+		case XK_REPEAT: actionStr = "repeat"; break;
 	}
 
-	xkLogNotice("key %d action: %s mod: %d", key, actionStr, mod);
+	if(mod & XK_MOD_SHIFT_BIT) {
+		xkLogNotice("mod: %s", "shift");
+	}
+	if(mod & XK_MOD_CONTROL_BIT) {
+		xkLogNotice("mod: %s", "control");		
+	}
+	if(mod & XK_MOD_ALT_BIT) {
+		xkLogNotice("mod: %s", "alt");
+	}
+	if(mod & XK_MOD_SUPER_BIT) {
+		xkLogNotice("mod: %s", "super");
+	}
+	if(mod & XK_MOD_CAPS_LOCK_BIT) {
+		xkLogNotice("mod: %s", "caps lock");
+	}
+	if(mod & XK_MOD_NUM_LOCK_BIT) {
+		xkLogNotice("mod: %s", "num lock");
+	}
+
+	if(mod & XK_MOD_CONTROL_BIT) {
+		if(key == XK_KEY_R) {
+			xkSetWindowSize(window, 800, 600);
+		} else if(key == XK_KEY_L) {
+			xkSetWindowSizeLimits(window, 800, 600, 1280, 720);
+		} else if(key == XK_KEY_P) {
+			xkSetWindowPosition(window, -1, -1);
+		} else if(key == XK_KEY_T) {
+			xkSetWindowTitle(window, "renamed window");
+		}
+	}
+
+	xkLogNotice("key: %d action: %s", key, actionStr);
 }
 
 static void __xkWindowButton(XkWindow window, const XkWindowButton button, const XkWindowAction action, const XkWindowMod mod) {
 	XkChar8* actionStr = XK_NULL_HANDLE; 
 
 	switch(action) {
-		case XK_RELEASE: actionStr = "release";
-		case XK_PRESS: actionStr = "press";
+		case XK_RELEASE: actionStr = "release"; break;
+		case XK_PRESS: actionStr = "press"; break;
+		case XK_REPEAT: actionStr = "repeat"; break;
 	}
 
-	xkLogNotice("button %d action: %s mod: %d", button, actionStr, mod);
+	if(mod & XK_MOD_SHIFT_BIT) {
+		xkLogNotice("mod: %s", "shift");
+	}
+	if(mod & XK_MOD_CONTROL_BIT) {
+		xkLogNotice("mod: %s", "control");		
+	}
+	if(mod & XK_MOD_ALT_BIT) {
+		xkLogNotice("mod: %s", "alt");
+	}
+	if(mod & XK_MOD_SUPER_BIT) {
+		xkLogNotice("mod: %s", "super");
+	}
+	if(mod & XK_MOD_CAPS_LOCK_BIT) {
+		xkLogNotice("mod: %s", "caps lock");
+	}
+	if(mod & XK_MOD_NUM_LOCK_BIT) {
+		xkLogNotice("mod: %s", "num lock");
+	}
+
+	xkLogNotice("button: %d action: %s", button, actionStr);
 }
 
 static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
@@ -103,7 +159,53 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 		goto _catch;
 	}
 
+	// Create image loader.
+	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to create image loader");
+		goto _catch;
+	}
+
+	// Load window icon.
+	XkImageConfig iconConfig;
+	result = xkLoadImage(_xkApplication.imageLoader, &iconConfig, "XKineticIcon.png");
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load window icon");
+		goto _catch;	
+	}
+
+	// Load window small icon.
+	XkImageConfig smallIconConfig;
+	result = xkLoadImage(_xkApplication.imageLoader, &smallIconConfig, "XKineticIcon.png");
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load window small icon");
+		goto _catch;	
+	}
+
+	XkWindowIcon icon = {
+		.width = iconConfig.width,
+		.height = iconConfig.height,
+		.pixels = iconConfig.pixels
+	};
+
+	XkWindowIcon smallIcon = {
+		.width = smallIconConfig.width,
+		.height = smallIconConfig.height,
+		.pixels = smallIconConfig.pixels
+	};
+
+	XkWindowIcon icons[2] = {icon, smallIcon};
+	xkSetWindowIcon(_xkApplication.window, 2, icons);
+
+	// Unload window icon.
+	xkUnloadImage(_xkApplication.imageLoader, &iconConfig);
+
+	// Unload window small icon.
+	xkUnloadImage(_xkApplication.imageLoader, &smallIconConfig);
+
 	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
+
+	xkSetWindowSizeLimits(_xkApplication.window, 800, 600, 1280, 720);
 
 	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
 	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
@@ -131,6 +233,6 @@ void xkDestroyApplication() {
 void xkUpdateApplication() {
 	while(!_xkApplication.exit) {
 		// Poll window events.
-		xkPollWindowEvents();
+		xkWaitWindowEvents();
 	}
 }

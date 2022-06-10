@@ -29,6 +29,7 @@ XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
 
 	file->handle.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if(file->handle.handle <= 0) {
+		__xkErrorHandle("Unix: Failed to open file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -60,6 +61,7 @@ XkResult xkOpenAsyncFile(XkFile* pFile, const XkChar8* name, const XkFileFlag fl
 
 	file->handle.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if(file->handle.handle <= 0) {
+		__xkErrorHandle("Unix: Failed to open async file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}

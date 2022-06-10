@@ -20,14 +20,14 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 
 	thread->handle.pStack = xkAllocateMemory(XK_WIN32_THREAD_STACK_SIZE);
 	if(!thread->handle.pStack) {
-		__xkErrorHandle("Failed to allocate thread stack memory");
+		__xkErrorHandle("Win32: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
 	thread->handle.handle = CreateThread(NULL, XK_WIN32_THREAD_STACK_SIZE, pfnRoutine, thread->handle.pStack, 0, &thread->handle.id);
 	if(!thread->handle.handle) {
-		__xkErrorHandle("Failed to create thread");
+		__xkErrorHandle("Win32: Failed to create thread");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -70,6 +70,7 @@ XkResult xkCreateMutex(XkMutex* pMutex) {
 
 	*pMutex = xkAllocateMemory(sizeof(struct XkMutex));
 	if(!(*pMutex)) {
+		__xkErrorHandle("Win32: Failed to create mutex");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}

@@ -5,10 +5,6 @@
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Renderer/External.h"
 
-#ifdef XK_DEBUG
-	#define XKVULKAN_DEBUG
-#endif // XK_DEBUG
-
 typedef struct XkVkRenderer* XkVkRenderer;
 typedef struct XkVkBuffer* XkVkBuffer;
 typedef struct XkVkTexture2D* XkVkTexture2D;

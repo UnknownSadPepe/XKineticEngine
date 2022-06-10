@@ -22,7 +22,7 @@ XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
 
   system->textureID = 1;
 
-  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkTexture);
+  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkImage);
   if(result != XK_SUCCESS) goto _catch;
 
   /// TODO: implementation.
@@ -36,7 +36,7 @@ void xkDestroyTextureSystem(XkTextureSystem system) {
   xkDestroyPoolAllocator(system->textures);
 }
 
-XkTextureID xkCreateTexture(XkTextureSystem system, XkTextureConfig* const pConfig) {
+XkTextureID xkCreateTexture(XkTextureSystem system, XkImageConfig* const pConfig) {
   /// TODO: implementation.
   XkTextureID id = 0;
 
