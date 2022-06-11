@@ -33,56 +33,13 @@ XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 		goto _catch;
 	}
 
-  DCB dcb = {0};
-  COMMTIMEOUTS timeouts;
-
-  dcb.DCBlength = sizeof(dcb);
-
-  GetCommTimeouts(file->handle.handle, &timeouts);
-  GetCommTimeouts(file->handle.handle, &timeouts);
-  timeouts.ReadIntervalTimeout          = 50;
-  timeouts.ReadTotalTimeoutConstant     = 50;
-  timeouts.ReadTotalTimeoutMultiplier   = 50;
-  timeouts.WriteTotalTimeoutConstant    = 50;
-  timeouts.WriteTotalTimeoutMultiplier  = 10;
-  if(!SetCommTimeouts(file->handle.handle, &timeouts)) {
-		__xkErrorHandle("Win32: Failed to setting timeouts on port");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
-  }
-
-  GetCommState(file->handle.handle, &dcb);
-  dcb.BaudRate =          19200;
-  dcb.Parity =            NOPARITY;
-  dcb.fBinary =           TRUE;
-  dcb.fParity =           FALSE;            
-  dcb.fOutxCtsFlow =      FALSE;
-  dcb.fOutxDsrFlow =      FALSE;
-  dcb.fDtrControl =       DTR_CONTROL_DISABLE; // DTR flow control type 
-  dcb.fDsrSensitivity =   FALSE;            // DSR sensitivity 
-  dcb.fTXContinueOnXoff = FALSE;            // XOFF continues Tx 
-  dcb.fOutX =             FALSE;            // No XON/XOFF out flow control 
-  dcb.fInX =              FALSE;            // No XON/XOFF in flow control
-  dcb.fErrorChar =        FALSE;            // Disable error replacement 
-  dcb.fNull =             FALSE;            // Disable null stripping 
-  dcb.fRtsControl =       RTS_CONTROL_DISABLE; // RTS flow control 
-  dcb.fAbortOnError =     FALSE;            // Do not abort reads/writes on err
-  dcb.ByteSize =          8;                // Number of bits/byte, 4-8 
-  dcb.StopBits =          ONESTOPBIT;       // 0,1,2 = 1, 1.5, 2
-  dcb.EvtChar =           0x84;             // 'T' 
-
-  if (!SetCommState (file->handle.handle, &dcb)) {
-		__xkErrorHandle("Win32: Failed to configure serial port");
-		result = XK_ERROR_UNKNOWN;
-		goto _catch;
-  }
-  return 0;
-
 _catch:
 	return(result);
 }
 
 XkResult xkOpenAsyncFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
+	/// TODO: impementation.
+
 	XkResult result = XK_SUCCESS;
 
 	*pFile = xkAllocateMemory(sizeof(struct XkFile));
@@ -103,9 +60,19 @@ XkResult xkOpenAsyncFile(XkFile* pFile, const XkString name, const XkFileFlag fl
 	/// TODO: implementation.
 	if(flag & XK_FILE_FLAG_CR_BIT) open = CREATE_ALWAYS;
 
-	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_FLAG_OVERLAPPED, NULL);
 	if(file->handle.handle == INVALID_HANDLE_VALUE) {
 		__xkErrorHandle("Win32: Failed to open async file");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
+	file->handle.overlapped.Offset = 0;
+	file->handle.overlapped.OffsetHigh = 0;
+
+	file->handle.overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+		__xkErrorHandle("Win32: Failed to create async file event");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -117,6 +84,12 @@ _catch:
 void xkCloseFile(XkFile file) {
 	CloseHandle(file->handle.handle);
 	xkFreeMemory(file);
+}
+
+XkSize xkFileSize(XkFile file) {
+	LARGE_INTEGER size;
+	GetFileSizeEx(file->handle.handle, &size);
+	return((XkSize)size.QuadPart);
 }
 
 void xkCreateFile(const XkString name) {
@@ -153,29 +126,33 @@ void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 }
 
 void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
-	/// TODO: implementation.
-	OVERLAPPED oWrite = {
-		.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)
-	};
-	WriteFile(file->handle.handle, buffer, size, NULL, &oWrite);
+	/// TODO: impementation.
 
-	DWORD dwCommEvent;
-	WaitCommEvent(file->handle.handle, &dwCommEvent, &oWrite);
+	WriteFile(file->handle.handle, buffer, size, NULL, &file->handle.overlapped);
 
-	CloseHandle(oWrite.hEvent);
+	if(WaitForSingleObject(file->handle.overlapped.hEvent, INFINITE) != WAIT_OBJECT_0) {
+		__xkErrorHandle("Win32: Failed to wait async file event");
+		return;
+	}
+
+	if(!ResetEvent(file->handle.overlapped.hEvent)) {
+		__xkErrorHandle("Win32: Failed to reset async file event");
+		return;
+	}
+
+	file->handle.overlapped.Offset += (DWORD)size;
 }
 
 void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
-	/// TODO: implementation.
-	OVERLAPPED oRead = {
-		.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)
-	};
-	ReadFile(file->handle.handle, buffer, size, NULL, &oRead);
+	/// TODO: impementation.
 
-	DWORD dwCommEvent;
-	WaitCommEvent(file->handle.handle, &dwCommEvent, &oRead);
+	ReadFile(file->handle.handle, buffer, size, NULL, &file->handle.overlapped);
 
-	CloseHandle(oRead.hEvent);
+	WaitForSingleObject(file->handle.overlapped.hEvent, INFINITE);
+
+	if(!ResetEvent(file->handle.overlapped.hEvent)) {
+		__xkErrorHandle("Win32: Failed to reset async file event");
+	}
 }
 
 #endif // XK_WIN32

@@ -9,9 +9,3 @@ typedef struct {
   XkSize indexCount;
   XkHandle indices;
 } XkModelConfig;
-
-struct XkModel {
-
-};
-
-typedef struct XkModel* XkModel;

@@ -6,6 +6,8 @@
 
 typedef XkUInt64 XkMaterialID;
 
+typedef struct XkMaterial* XkMaterial;
+
 typedef struct XkMaterialSystem* XkMaterialSystem;
 
 XK_API XkResult xkCreateMaterialSystem(XkMaterialSystem*);

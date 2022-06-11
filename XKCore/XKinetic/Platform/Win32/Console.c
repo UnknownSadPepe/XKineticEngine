@@ -5,9 +5,15 @@
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
 
+#ifndef COMMON_LVB_UNDERSCORE
+	#define COMMON_LVB_UNDERSCORE 0x8000
+#endif // COMMON_LVB_UNDERSCORE
+
 void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const XkSize size) {
 	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(stdout == INVALID_HANDLE_VALUE) return;
 	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
+	if(stderr == INVALID_HANDLE_VALUE) return;
 
 	HANDLE stream;
 	switch(handle) {
@@ -20,7 +26,9 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const X
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
 	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(stdout == INVALID_HANDLE_VALUE) return;
 	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
+	if(stderr == INVALID_HANDLE_VALUE) return;
 
 	CONSOLE_SCREEN_BUFFER_INFO CBI;
 
@@ -41,7 +49,6 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 		case XK_COLOR_FCYAN_BIT: attribute		= FOREGROUND_GREEN | FOREGROUND_BLUE; break;
 		case XK_COLOR_FWHITE_BIT: attribute		= FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE ; break;
 
-/*
 		case XK_COLOR_FUBLACK_BIT: attribute	= COMMON_LVB_UNDERSCORE; break;
 		case XK_COLOR_FURED_BIT: attribute		= COMMON_LVB_UNDERSCORE | FOREGROUND_RED; break;
 		case XK_COLOR_FUGREEN_BIT: attribute	= COMMON_LVB_UNDERSCORE | FOREGROUND_GREEN; break;
@@ -50,7 +57,7 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 		case XK_COLOR_FUPURPLE_BIT: attribute = COMMON_LVB_UNDERSCORE | FOREGROUND_RED | FOREGROUND_BLUE; break;
 		case XK_COLOR_FUCYAN_BIT: attribute		= COMMON_LVB_UNDERSCORE | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
 		case XK_COLOR_FUWHITE_BIT: attribute	= COMMON_LVB_UNDERSCORE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; break;
-*/
+
 		case XK_COLOR_FBBLACK_BIT: attribute	= FOREGROUND_INTENSITY; break;
 		case XK_COLOR_FBRED_BIT: attribute		= FOREGROUND_INTENSITY | FOREGROUND_RED; break;
 		case XK_COLOR_FBGREEN_BIT: attribute	= FOREGROUND_INTENSITY | FOREGROUND_GREEN; break;
@@ -78,6 +85,7 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 
 void xkReadConsole(XkString buffer, const XkSize size) {
 	HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
+	if(stdin == INVALID_HANDLE_VALUE) return;
 
 	DWORD numberReaden;
 	ReadConsoleA(stdin, buffer, (DWORD)size, &numberReaden, NULL);

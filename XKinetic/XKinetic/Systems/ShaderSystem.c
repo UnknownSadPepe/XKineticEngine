@@ -9,6 +9,11 @@ struct XkShaderSystem {
   XkShaderID shaderID;
 };
 
+struct XkShader {
+  XkShaderID ID;
+  /// TODO: implementation.
+};
+
 XkResult xkCreateShaderSystem(XkShaderSystem* pSystem) {
   XkResult result = XK_SUCCESS;
 

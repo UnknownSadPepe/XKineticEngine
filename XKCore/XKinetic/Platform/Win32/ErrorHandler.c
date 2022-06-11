@@ -14,8 +14,7 @@ void __xkErrorHandler(const XkString format, ...) {
 	va_list args;
 	va_start(args, format);
 	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
-	fprintf(stderr, "Platform Error Handler: %s Code: %d\n", buffer, GetLastError());
-	MessageBox(NULL, buffer, "Platform Error Handler", MB_ABORTRETRYIGNORE);
+	MessageBox(NULL, buffer, "XKinetic Error Handler", MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_TOPMOST);
 	va_end(args);
 }
 

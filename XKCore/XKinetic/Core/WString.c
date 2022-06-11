@@ -1,5 +1,7 @@
-/*TODO: remove #include <stdio.h>*/
+/// TODO: remove #include <wchar.h>
 #include <wchar.h>
+/// TODO: remove #include <stdio.h>
+#include <stdio.h>
 #include "XKinetic/Core/Types.h"
 #include "XKinetic/Core/WString.h"
 

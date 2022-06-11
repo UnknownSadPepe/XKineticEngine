@@ -6,6 +6,7 @@
 
 #define _GNU_SOURCE
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
@@ -73,6 +74,12 @@ _catch:
 void xkCloseFile(XkFile file) {
 	close(file->handle.handle);
 	xkFreeMemory(file);
+}
+
+XkSize xkFileSize(XkFile file) {
+	struct stat stat;
+	fstat(file->handle.handle, &stat);
+	return((XkSize)stat.st_size)
 }
 
 void xkCreateFile(const XkString name) {

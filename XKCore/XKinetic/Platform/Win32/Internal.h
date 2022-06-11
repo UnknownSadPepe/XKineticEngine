@@ -5,6 +5,7 @@
 
 typedef struct {
 	HANDLE handle;
+	OVERLAPPED overlapped;
 } __XkWin32File;
 
 #define XK_PLATFORM_FILE __XkWin32File handle

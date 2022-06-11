@@ -133,7 +133,7 @@ static XkBool32 __xkVkCheckInstanceExtensionsSupport(void) {
       availableExtension = vkAvailableExtensionProperties[j].extensionName;
 
       // Check Vulkan extension.
-      if(xkCompareString(requiredExtension, availableExtension)) {
+      if(xkCompareString((XkString)requiredExtension, (XkString)availableExtension)) {
         availableExtensionFind = XK_TRUE;
         break;
       }
@@ -187,7 +187,7 @@ static XkBool32 __xkVkCheckInstanceLayersSupport(void) {
       availableLayer = vkAvailableLayerProperties[j].layerName;
 
       // Check Vulkan layer.
-      if(xkCompareString(requiredLayer, availableLayer)) {
+      if(xkCompareString((XkString)requiredLayer, (XkString)availableLayer)) {
         availableLayerFind = XK_TRUE;
         break;
       }

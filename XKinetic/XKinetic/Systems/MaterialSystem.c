@@ -9,6 +9,11 @@ struct XkMaterialSystem {
   XkMaterialID materialID;
 };
 
+struct XkMaterial {
+  XkMaterialID ID;
+  /// TODO: implementation.
+};
+
 XkResult xkCreateMaterialSystem(XkMaterialSystem* pSystem) {
   XkResult result = XK_SUCCESS;
 

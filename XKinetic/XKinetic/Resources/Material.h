@@ -6,9 +6,3 @@
 typedef struct {
 
 } XkMaterialConfig;
-
-struct XkMaterial {
-
-};
-
-typedef struct XkMaterial* XkMaterial;

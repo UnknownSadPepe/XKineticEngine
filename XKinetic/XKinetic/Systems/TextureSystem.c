@@ -9,6 +9,11 @@ struct XkTextureSystem {
   XkTextureID textureID;
 };
 
+struct XkTexture {
+  XkTextureID ID;
+  /// TODO: implementation.
+};
+
 XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
   XkResult result = XK_SUCCESS;
 
@@ -22,7 +27,7 @@ XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
 
   system->textureID = 1;
 
-  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkImage);
+  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkTexture);
   if(result != XK_SUCCESS) goto _catch;
 
   /// TODO: implementation.

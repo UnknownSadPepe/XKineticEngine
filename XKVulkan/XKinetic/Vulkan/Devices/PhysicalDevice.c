@@ -91,7 +91,7 @@ static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevic
       availableExtension = vkAvailableExtensionProperties[j].extensionName;
 
       // Check Vulkan extension.
-      if(xkCompareString(requiredExtension, availableExtension)) {
+      if(xkCompareString((XkString)requiredExtension, (XkString)availableExtension)) {
         availableExtensionFind = XK_TRUE;
         break;
       }

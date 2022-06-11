@@ -6,6 +6,8 @@
 
 typedef XkUInt64 XkTextureID;
 
+typedef struct XkTexture* XkTexture;
+
 typedef struct XkTextureSystem* XkTextureSystem;
 
 XK_API XkResult xkCreateTextureSystem(XkTextureSystem*);

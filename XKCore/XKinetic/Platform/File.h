@@ -22,6 +22,8 @@ XK_EXPORT XkResult xkOpenFile(XkFile*, const XkString, const XkFileFlag);
 XK_EXPORT XkResult xkOpenAsyncFile(XkFile*, const XkString, const XkFileFlag);
 XK_EXPORT void xkCloseFile(XkFile);
 
+XK_EXPORT XkSize xkFileSize(XkFile);
+
 XK_EXPORT void xkCreateFile(const XkString);
 XK_EXPORT void xkRemoveFile(const XkString);
 

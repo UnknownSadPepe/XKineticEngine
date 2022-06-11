@@ -3,9 +3,21 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 # Initialize XKinetic project.
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
+# Set project C standard.
+set(CMAKE_REQUIRED_FLAGS "-std=c11 -Wall -Wextra")
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 # Set project build type.
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
+endif()
+
+if(CMAKE_BUILD_TYPE EQUAL "Debug")
+  set(CMAKE_REQUIRED_FLAGS CMAKE_REQUIRED_FLAGS "-g -O0")
+elseif(CMAKE_BUILD_TYPE EQUAL "Release")
+  set(CMAKE_REQUIRED_FLAGS CMAKE_REQUIRED_FLAGS "-O2") 
 endif()
 
 # Initialize project options.
@@ -15,6 +27,12 @@ option(BUILD_TESTS "Build tests applications" OFF)
 set(BUILD_DIR ${PROJECT_SOURCE_DIR}/Target/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR})
 set(LIBRARY_OUTPUT_PATH ${BUILD_DIR})
+
+# Remove all libraries prefix
+if(WIN32)
+  set(CMAKE_SHADER_LIBRARY_PREFIX "")
+  set(CMAKE_STATIC_LIBRARY_PREFIX "")
+endif()
 
 # Add XKCore subdirectory.
 add_subdirectory(XKCore)

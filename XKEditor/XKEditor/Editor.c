@@ -7,10 +7,9 @@
 #include "XKinetic/Resources/Loaders/ShaderLoader.h"
 #include "XKinetic/Resources/Loaders/ImageLoader.h"
 
-#include "XKinetic/Systems/ModelSystem.h"
+#include "XKinetic/Systems/MeshSystem.h"
 #include "XKinetic/Systems/ShaderSystem.h"
 #include "XKinetic/Systems/TextureSystem.h"
-
 
 struct XkApplication {
 	XkApplicationConfig config;
@@ -19,7 +18,7 @@ struct XkApplication {
 	XkShaderLoader shaderLoader;
 	XkImageLoader imageLoader;
 
-	XkModelSystem modelSystem;
+	XkMeshSystem meshSystem;
 	XkShaderSystem shaderSystem;
 	XkTextureSystem textureSystem;
 };
@@ -80,10 +79,10 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 		goto _catch;
 	}
 
-	// Create model system.
-	result = xkCreateModelSystem(&_xkApplication.modelSystem);
+	// Create mesh system.
+	result = xkCreateMeshSystem(&_xkApplication.meshSystem);
 	if(result != XK_SUCCESS) {
-		xkLogError("Failed to initialize model system");
+		xkLogError("Failed to initialize mesh system");
 		goto _catch;			
 	}
 
@@ -96,15 +95,15 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	}
 
 	// Create model.
-	XkModelID modelID = xkCreateModel(_xkApplication.modelSystem, &modelConfig);
-	if(modelID == 0) {
+	XkMeshID meshID = xkCreateesh(_xkApplication.meshSystem, &modelConfig);
+	if(meshID == 0) {
 		result = XK_ERROR_RESOURCE_NOT_CREATE;
-		xkLogError("Failed to create model");
+		xkLogError("Failed to create mesh");
 		goto _catch;			
 	}
 
-	// Destroy model.
-	xkDestroyModel(_xkApplication.modelSystem, modelID);
+	// Destroy mesh.
+	xkDestroyModel(_xkApplication.meshSystem, meshID);
 
 	// Unload model.
 	xkUnloadModel(_xkApplication.modelLoader, &modelConfig);
@@ -163,7 +162,7 @@ void xkDestroyApplication() {
 /*
 	xkDestroyTextureSystem(_xkApplication.textureSystem);
 	xkDestroyShaderSystem(_xkApplication.shaderSystem);
-	xkDestroyModelSystem(_xkApplication.modelSystem);
+	xkDestroyMeshSystem(_xkApplication.meshSystem);
 
 	xkDestroyImageLoader(_xkApplication.imageLoader);
 	xkDestroyShaderLoader(_xkApplication.shaderLoader);

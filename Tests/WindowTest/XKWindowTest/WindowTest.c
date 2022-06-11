@@ -205,7 +205,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 
 	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
 
-	xkSetWindowSizeLimits(_xkApplication.window, 800, 600, 1280, 720);
+	xkSetWindowSizeLimits(_xkApplication.window, 800, 600, 1920, 1080);
 
 	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
 	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
@@ -217,6 +217,45 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
 	xkSetWindowPositionCallback(_xkApplication.window, __xkWindowPosition);
 	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
+
+/*
+	XkFreeList freelist;
+	result = xkCreateFreeList(&freelist, sizeof(XkUInt32) * 128);
+	if(result != XK_SUCCESS) {
+		xkLogFatal("failed to create freelist");
+		goto _catch;
+	}
+
+	XkUInt32* pUI32 = xkFreeListAllocate(freelist, sizeof(XkUInt32));
+	XkUInt64* pUI64 = xkFreeListAllocate(freelist, sizeof(XkUInt64));
+	XkFloat32* pFL32 = xkFreeListAllocate(freelist, sizeof(XkFloat32));
+
+	xkLogInfo("[%p]: %d", pUI32, *pUI32);
+	xkLogInfo("[%p]: %lld", pUI64, *pUI64);
+	xkLogInfo("[%p]: %f", pFL32, *pFL32);
+
+	xkFreeListFree(freelist, pFL32);
+	xkFreeListFree(freelist, pUI64);
+	xkFreeListFree(freelist, pUI32);
+
+	xkDestroyFreeList(freelist);
+*/
+	XkFile file;
+	result = xkOpenAsyncFile(&file, "AsyncFile.txt", XK_FILE_FLAG_CR_BIT | XK_FILE_FLAG_RW_BIT);
+	if(result != XK_SUCCESS) {
+		xkLogFatal("failed to open async file");
+		goto _catch;
+	}	
+
+	xkAsyncWriteFile(file, "AsyncTest", 10);
+	//xkAsyncWriteFile(file, "HelloThere", 11);
+	//xkAsyncWriteFile(file, "MyNameIS", 9);
+	//xkAsyncWriteFile(file, "Vladislav", 10);
+
+	XkChar readBuf[10];
+	xkAsyncReadFile(file, readBuf, sizeof(readBuf));
+
+	xkLogDebug("%s", readBuf);
 
 _catch:
 	return(result);

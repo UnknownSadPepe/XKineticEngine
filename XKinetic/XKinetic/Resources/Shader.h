@@ -7,9 +7,3 @@ typedef struct {
   XkSize size;
   XkHandle code;
 } XkShaderConfig;
-
-struct XkShader {
-
-};
-
-typedef struct XkShader* XkShader;

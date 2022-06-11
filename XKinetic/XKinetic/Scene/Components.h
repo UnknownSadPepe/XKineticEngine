@@ -3,7 +3,7 @@
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Math/Vec3.h"
-#include "XKinetic/Systems/ModelSystem.h"
+#include "XKinetic/Systems/MeshSystem.h"
 #include "XKinetic/Systems/MaterialSystem.h"
 
 #define XK_TAG_COMPONENT_MAX_SIZE 64
@@ -33,7 +33,7 @@ typedef struct {
 } XkTransformComponent;
 
 typedef struct {
-  XkModelID model;
+  XkMeshID model;
   XkMaterialID material;
 } XkMeshComponent;
 

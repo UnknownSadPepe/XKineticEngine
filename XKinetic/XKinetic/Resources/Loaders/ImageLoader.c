@@ -40,7 +40,7 @@ XkResult xkLoadImage(XkImageLoader loader, XkImageConfig* const pConfig, XkStrin
   xkStringNFormat(fullPath, XK_IMAGE_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.
-  pConfig->pixels = stbi_load(fullPath, &pConfig->width, &pConfig->height, 0, 4);
+  pConfig->pixels = stbi_load(fullPath, (int*)&pConfig->width, (int*)&pConfig->height, XK_NULL_HANDLE, 4);
 
 _catch:
   return(result);

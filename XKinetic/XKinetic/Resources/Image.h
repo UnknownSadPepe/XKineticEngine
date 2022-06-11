@@ -8,9 +8,3 @@ typedef struct {
   XkSize height;
   XkHandle pixels;
 } XkImageConfig;
-
-struct XkImage {
-
-};
-
-typedef struct XkImage* XkImage;

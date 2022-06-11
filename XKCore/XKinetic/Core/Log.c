@@ -28,7 +28,7 @@ static struct {
 XkResult xkLogInitialize(void) {
 	XkResult result = XK_SUCCESS;
 
-	result = xkOpenAsyncFile(&_xkLogger.file, "XKineticLogs.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
+	result = xkOpenFile(&_xkLogger.file, "XKineticLogs.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
 	if(result != XK_SUCCESS) goto _catch;
 
 _catch:
@@ -117,5 +117,5 @@ void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 
 	xkWriteConsoleColored(stream, color, buffer, size);
 
-	xkAsyncWriteFile(_xkLogger.file, buffer, size);
+	xkWriteFile(_xkLogger.file, buffer, size);
 }
