@@ -3,7 +3,7 @@
 #define XK_MATERIAL_LOADER_PATH_MAX_SIZE 64
 
 struct XkMaterialLoader {
-  XkChar8 path[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
+  XkChar path[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
 };
 
 XkResult xkCreateMaterialLoader(XkMaterialLoader* pLoader, XkString path) {
@@ -33,7 +33,7 @@ void xkDestroyMaterialLoader(XkMaterialLoader loader) {
 XkResult xkLoadMaterial(XkMaterialLoader loader, XkMaterialConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
-  XkChar8 fullPath[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
+  XkChar fullPath[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
   xkStringNFormat(fullPath, XK_MATERIAL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.

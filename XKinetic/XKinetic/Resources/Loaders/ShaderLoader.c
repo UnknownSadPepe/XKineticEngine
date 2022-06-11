@@ -3,7 +3,7 @@
 #define XK_SHADER_LOADER_PATH_MAX_SIZE 64
 
 struct XkShaderLoader {
-  XkChar8 path[XK_SHADER_LOADER_PATH_MAX_SIZE];
+  XkChar path[XK_SHADER_LOADER_PATH_MAX_SIZE];
 };
 
 XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkString path) {
@@ -33,7 +33,7 @@ void xkDestroyShaderLoader(XkShaderLoader loader) {
 XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
-  XkChar8 fullPath[XK_SHADER_LOADER_PATH_MAX_SIZE];
+  XkChar fullPath[XK_SHADER_LOADER_PATH_MAX_SIZE];
   xkStringNFormat(fullPath, XK_SHADER_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.

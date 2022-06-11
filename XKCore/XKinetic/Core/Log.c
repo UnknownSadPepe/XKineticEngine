@@ -90,7 +90,7 @@ void xkLogDebug(const XkString format, ...) {
 
 void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 	static const XkString typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};
-	XkChar8 buffer[XK_LOG_BUFFER_SIZE] = {0};
+	XkChar buffer[XK_LOG_BUFFER_SIZE] = {0};
 
 	XkConsoleHandle stream = type <= XK_LOG_TYPE_ERROR ? XK_CONSOLE_STDERR : XK_CONSOLE_STDOUT;
 	XkConsoleColor color;
@@ -104,13 +104,13 @@ void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 		case XK_LOG_TYPE_DEBUG:		color = XK_COLOR_FBLUE_BIT; break;
 	}
 
-	XkChar8 timeBuffer[XK_LOG_TIME_BUFFER_SIZE];
+	XkChar timeBuffer[XK_LOG_TIME_BUFFER_SIZE];
 	XkSize rawTime = xkGetTime();
 	XkTime tm;
 	xkTimeFormat(&tm, rawTime);
 	xkTimeStringFormat(&tm, timeBuffer, XK_LOG_TIME_BUFFER_SIZE, "%x-%X");
 
-	XkChar8 argBuffer[XK_LOG_ARG_BUFFER_SIZE];
+	XkChar argBuffer[XK_LOG_ARG_BUFFER_SIZE];
 	xkStringNFFormat(argBuffer, XK_LOG_ARG_BUFFER_SIZE, format, args);
 
 	const XkSize size = xkStringNFormat(buffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s\n", timeBuffer, typeBuffer[type], argBuffer);

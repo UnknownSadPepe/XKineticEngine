@@ -6,7 +6,7 @@
 #define XK_IMAGE_LOADER_PATH_MAX_SIZE 64
 
 struct XkImageLoader {
-  XkChar8 path[XK_IMAGE_LOADER_PATH_MAX_SIZE];
+  XkChar path[XK_IMAGE_LOADER_PATH_MAX_SIZE];
 };
 
 XkResult xkCreateImageLoader(XkImageLoader* pLoader, XkString path) {
@@ -36,7 +36,7 @@ void xkDestroyImageLoader(XkImageLoader loader) {
 XkResult xkLoadImage(XkImageLoader loader, XkImageConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
-	XkChar8 fullPath[XK_IMAGE_LOADER_PATH_MAX_SIZE];
+	XkChar fullPath[XK_IMAGE_LOADER_PATH_MAX_SIZE];
   xkStringNFormat(fullPath, XK_IMAGE_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.

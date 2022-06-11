@@ -19,7 +19,7 @@ typedef enum {
 } XkComponentType;
 
 typedef struct {
-  XkChar8 tag[XK_TAG_COMPONENT_MAX_SIZE];
+  XkChar tag[XK_TAG_COMPONENT_MAX_SIZE];
 } XkTagComponent;
 
 typedef struct {

@@ -3,7 +3,7 @@
 #define XK_MODEL_LOADER_PATH_MAX_SIZE 64
 
 struct XkModelLoader {
-  XkChar8 path[XK_MODEL_LOADER_PATH_MAX_SIZE];
+  XkChar path[XK_MODEL_LOADER_PATH_MAX_SIZE];
 };
 
 XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkString path) {
@@ -33,7 +33,7 @@ void xkDestroyModelLoader(XkModelLoader loader) {
 XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
-  XkChar8 fullPath[XK_MODEL_LOADER_PATH_MAX_SIZE];
+  XkChar fullPath[XK_MODEL_LOADER_PATH_MAX_SIZE];
   xkStringNFormat(fullPath, XK_MODEL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
   /// TODO: implementation.

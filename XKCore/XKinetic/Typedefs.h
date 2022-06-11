@@ -21,12 +21,8 @@ typedef unsigned int XkBool32;
 #define XK_FALSE 0
 #define XK_TRUE 1
 
-typedef char XkChar8;
-typedef short XkChar16;
-typedef int XkChar32;
-
-typedef XkChar8 XkChar;
-typedef XkChar32 XkWChar;
+typedef char XkChar;
+typedef unsigned short int XkWChar;
 
 typedef XkChar* XkString;
 typedef XkWChar* XkWString;
