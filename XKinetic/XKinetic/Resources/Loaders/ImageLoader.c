@@ -9,7 +9,7 @@ struct XkImageLoader {
   XkChar8 path[XK_IMAGE_LOADER_PATH_MAX_SIZE];
 };
 
-XkResult xkCreateImageLoader(XkImageLoader* pLoader, XkChar8* path) {
+XkResult xkCreateImageLoader(XkImageLoader* pLoader, XkString path) {
   XkResult result = XK_SUCCESS;
 
 	*pLoader = xkAllocateMemory(sizeof(struct XkImageLoader));
@@ -33,7 +33,7 @@ void xkDestroyImageLoader(XkImageLoader loader) {
   xkFreeMemory(loader);
 }
 
-XkResult xkLoadImage(XkImageLoader loader, XkImageConfig* const pConfig, XkChar8* name) {
+XkResult xkLoadImage(XkImageLoader loader, XkImageConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
 	XkChar8 fullPath[XK_IMAGE_LOADER_PATH_MAX_SIZE];

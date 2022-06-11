@@ -284,7 +284,7 @@ void xkWindowTerminate(void) {
 	wl_display_disconnect(_xkPlatform.handle.wlDisplay);
 }
 
-XkResult xkCreateWindow(XkWindow* pWindow, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
+XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
 
 	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
@@ -395,7 +395,7 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
 	__xkErrorHandle("Wayland platform doesn't provide the window position");
 }
 
-void xkSetWindowTitle(XkWindow window, const XkChar8* title) {
+void xkSetWindowTitle(XkWindow window, const XkString title) {
 	xdg_toplevel_set_title(window->handle.xdgToplevel, title);
 }
 

@@ -9,7 +9,7 @@
 #endif // XK_LINUX
 #include "XKinetic/Application.h"
 
-XkResult __xkEntry(const XkSize argc, const XkChar8** argv) {
+XkResult __xkEntry(const XkSize argc, const XkWString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	result = xkCreateApplication(argc, argv);

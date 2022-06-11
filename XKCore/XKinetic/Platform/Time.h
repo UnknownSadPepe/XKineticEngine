@@ -15,4 +15,4 @@ typedef struct {
 
 XK_EXPORT XkSize xkGetTime(void);
 XK_EXPORT void xkTimeFormat(XkTime* const, const XkSize);
-XK_EXPORT XkSize xkTimeStringFormat(XkTime* const, XkChar8*, const XkSize, const XkChar8*);
+XK_EXPORT XkSize xkTimeStringFormat(XkTime* const, XkString, const XkSize, const XkString);

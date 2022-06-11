@@ -29,7 +29,7 @@ static void __xkWindowShow(XkWindow window, const XkWindowShow show) {
 }
 
 static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindowAction action, const XkWindowMod mod) {
-	XkChar8* actionStr = XK_NULL_HANDLE; 
+	XkString actionStr = XK_NULL_HANDLE; 
 
 	switch(action) {
 		case XK_RELEASE: actionStr = "release"; break;
@@ -72,7 +72,7 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 }
 
 static void __xkWindowButton(XkWindow window, const XkWindowButton button, const XkWindowAction action, const XkWindowMod mod) {
-	XkChar8* actionStr = XK_NULL_HANDLE; 
+	XkString actionStr = XK_NULL_HANDLE; 
 
 	switch(action) {
 		case XK_RELEASE: actionStr = "release"; break;
@@ -138,10 +138,10 @@ static void __xkWindowFocus(XkWindow window, XkBool32 focused) {
 	}
 }
 
-XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
+XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	XkResult result = XK_SUCCESS;
 
-	_xkApplication.config.pName = "XKWindowTest";
+	_xkApplication.config.name = "XKWindowTest";
 	_xkApplication.config.version.major = 0;
 	_xkApplication.config.version.minor = 0;
 	_xkApplication.config.version.patch = 1;
@@ -153,7 +153,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	result = xkWindowInitialize();
 	if(result != XK_SUCCESS) goto _catch;
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.pName, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;

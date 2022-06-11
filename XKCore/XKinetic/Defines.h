@@ -1,21 +1,10 @@
 #pragma once
 
-/*#if defined(__unix__)
+#if defined(__unix__) && !(defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 	// Define unix platform.
-	#define XK_UNIX 1
-#else 
-	// Undefine unix platform.
-	#define XK_UNIX 0
+	#define XK_UNIX
 #endif // __unix__
 
-#if defined(_POSIX_VERSION)
-	// Define posix standart.
-	#define XK_POSIX 1
-#else
-	// Undefine posix standart.
-	#define XK_POSIX 0
-#endif // _POSIX_VERSION
-*/
 #if defined(__linux__) || defined(__gnu_linux__) 
 	// Define linux platform.
 	#define XK_LINUX 1
@@ -26,15 +15,7 @@
 	#if defined(_WIN64)
 		// Define win64 platform.
 		#define XK_WIN64 1
-	#else
-		// Undefine win64 platform.
-		#define XK_WIN64 0
 	#endif // _WIN64
-#else
-	// Undefine linux platform.
-	#define XK_LINUX 0
-	// Undefine win32 platform.
-	#define XK_WIN32 0
 #endif // WIN32 || _WIN32 || __WIN32__
 
 #if defined(__GNUC__) || defined(__clang__) || defined(__TINYC__)

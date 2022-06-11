@@ -5,7 +5,7 @@
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
 
-void xkWriteConsole(const XkConsoleHandle handle, const XkChar8* buffer, const XkSize size) {
+void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const XkSize size) {
 	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
 
@@ -18,7 +18,7 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkChar8* buffer, const X
 	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
 }
 
-void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkChar8* buffer, const XkSize size) {
+void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
 	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
 	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
 
@@ -76,7 +76,7 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 	SetConsoleTextAttribute(stream, CBI.wAttributes);
 }
 
-void xkReadConsole(XkChar8* buffer, const XkSize size) {
+void xkReadConsole(XkString buffer, const XkSize size) {
 	HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
 
 	DWORD numberReaden;

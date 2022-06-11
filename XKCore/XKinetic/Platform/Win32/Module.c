@@ -4,7 +4,7 @@
 
 #include <windows.h>
 
-XkResult xkLoadModule(XkModule* pModule, const XkChar8* path) {
+XkResult xkLoadModule(XkModule* pModule, const XkString path) {
 	XkResult result = XK_SUCCESS;
 
 	*pModule = (XkModule)LoadLibraryA(path);
@@ -22,7 +22,7 @@ void xkUnloadModule(XkModule module) {
 	FreeLibrary((HMODULE)module);
 }
 
-XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkChar8* name, XkModule module) {
+XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkString name, XkModule module) {
 	XkResult result = XK_SUCCESS;
 
 	*pPfnProc = (XkProcPfn)GetProcAddress((HMODULE)module, name);

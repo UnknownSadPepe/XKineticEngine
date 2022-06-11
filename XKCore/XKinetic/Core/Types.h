@@ -14,7 +14,7 @@ XK_INLINE XkBool32 xkAlnum(const XkInt32 chr) {
 	return(xkAlbet(chr) || xkDigit(chr));
 }
 
-XK_INLINE XkBool32 xkDelim(const XkChar8 chr, const XkChar8* delim) {
+XK_INLINE XkBool32 xkDelim(const XkChar8 chr, XkString delim) {
 	while(*delim) {
 		if(chr == *delim) {
 			return(XK_TRUE);

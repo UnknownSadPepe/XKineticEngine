@@ -49,7 +49,7 @@ struct XkVkTexture2D {
 	VkSampler vkSampler;
 };
 
-XkChar8* __xkVkGetErrorString(VkResult error) {
+XkString __xkVkGetErrorString(VkResult error) {
 	switch(error) {
 		case VK_SUCCESS:												return "Success";
 		case VK_NOT_READY:											return "A Vulkan fence or query has not yet completed";

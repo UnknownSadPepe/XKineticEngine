@@ -6,7 +6,7 @@
 
 typedef struct XkMaterialLoader* XkMaterialLoader;
 
-XK_API XkResult xkCreateMaterialLoader(XkMaterialLoader*, XkChar8*);
+XK_API XkResult xkCreateMaterialLoader(XkMaterialLoader*, XkString);
 XK_API void xkDestroyMaterialLoader(XkMaterialLoader);
-XK_API XkResult xkLoadMaterial(XkMaterialLoader, XkMaterialConfig* const, XkChar8*);
+XK_API XkResult xkLoadMaterial(XkMaterialLoader, XkMaterialConfig* const, XkString);
 XK_API void xkUnloadMaterial(XkMaterialLoader, XkMaterialConfig* const);

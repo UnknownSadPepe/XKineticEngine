@@ -21,7 +21,7 @@ static DWORD __xkWin32GetWindowStyle(const XkWindow);
 static DWORD __xkWin32GetWindowExStyle(const XkWindow);
 static void __xkWin32GetFullWindowSize(DWORD, DWORD, int, int, int*, int*);
 static HICON __xkWin32CreateIcon(const XkWindowIcon*, int, int, XkBool32);
-static XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
+static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
 static LRESULT CALLBACK __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
 static XkWindowMod __xkWin32GetKeyMod(void);
 
@@ -67,7 +67,7 @@ void xkWindowTerminate(void) {
 	UnregisterClass(XK_WIN32_WINDOW_CLASS_NAME, _xkPlatform.handle.instance); 
 }
 
-XkResult xkCreateWindow(XkWindow* pWindow, const XkChar8* title, const XkSize width, const XkSize height, const XkWindowHint hint) {
+XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
 
 	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
@@ -185,7 +185,7 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
   	*pYPos = pos.y;
 }
 
-void xkSetWindowTitle(XkWindow window, const XkChar8* title) {
+void xkSetWindowTitle(XkWindow window, const XkString title) {
 	SetWindowTextA(window->handle.handle, title);
 }
 
@@ -253,9 +253,9 @@ static DWORD __xkWin32GetWindowExStyle(const XkWindow window) {
   return(style);
 }
 
-static XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, const XkSize count, const XkInt32 width, const XkInt32 height) {
+static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, const XkSize count, const XkInt32 width, const XkInt32 height) {
   int leastDiff = INT_MAX;
-  XkWindowIcon* pSelect = NULL;
+  const XkWindowIcon* pSelect = NULL;
 
   for(XkSize i = 0;  i < count;  i++) {
   	const int currDiff = (pIcons[i].width * pIcons[i].height - width * height);

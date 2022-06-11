@@ -77,4 +77,4 @@ typedef struct {
 extern __XkPlatform _xkPlatform;
 
 #define __xkErrorHandle(format) __xkErrorHandler("%s %s %d", format, __FILE__, __LINE__)
-XK_IMPORT void __xkErrorHandler(const XkChar8* pFormat, ...);
+XK_IMPORT void __xkErrorHandler(const XkString pFormat, ...);

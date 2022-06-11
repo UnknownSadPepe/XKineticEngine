@@ -7,7 +7,7 @@
 
 #define XK_ERROR_HANDLER_BUFFER_SIZE 1024
 
-void __xkErrorHandler(const XkChar8* format, ...) {
+void __xkErrorHandler(const XkString format, ...) {
 	XkChar8 buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {0};
 
 	va_list args;

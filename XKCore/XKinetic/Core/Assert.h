@@ -4,7 +4,7 @@
 
 #ifdef XK_DEBUG
 
-XKCORE_API void __xkAssertion(const XkChar8*, const XkChar8*, const XkInt32);
+XKCORE_API void __xkAssertion(const XkString, const XkString, const XkInt32);
 
 #define xkAssert(expr)													\
 {																								\

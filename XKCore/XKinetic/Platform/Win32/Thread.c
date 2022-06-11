@@ -25,7 +25,7 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 		goto _catch;
 	}
 
-	thread->handle.handle = CreateThread(NULL, XK_WIN32_THREAD_STACK_SIZE, pfnRoutine, thread->handle.pStack, 0, &thread->handle.id);
+	thread->handle.handle = CreateThread(NULL, XK_WIN32_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->handle.pStack, 0, &thread->handle.id);
 	if(!thread->handle.handle) {
 		__xkErrorHandle("Win32: Failed to create thread");
 		result = XK_ERROR_UNKNOWN;

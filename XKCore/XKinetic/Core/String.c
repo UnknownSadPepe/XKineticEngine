@@ -3,7 +3,7 @@
 #include "XKinetic/Core/Types.h"
 #include "XKinetic/Core/String.h"
 
-XkSize xkStringLength(const XkChar8* string) {
+XkSize xkStringLength(XkString string) {
 	XkSize length = 0;
 	while(*string) {
 		++length;
@@ -12,7 +12,7 @@ XkSize xkStringLength(const XkChar8* string) {
 	return(length);
 }
 
-XkChar8* xkCopyString(XkChar8* dstString, const XkChar8* srcString) {
+XkString xkCopyString(XkString dstString, XkString srcString) {
 	while(*srcString) {
 		*dstString = *srcString;
 		++dstString;
@@ -22,7 +22,7 @@ XkChar8* xkCopyString(XkChar8* dstString, const XkChar8* srcString) {
 	return(dstString);
 }
 
-XkChar8* xkNCopyString(XkChar8* dstString, const XkChar8* srcString, const XkSize length) {
+XkString xkNCopyString(XkString dstString, XkString srcString, const XkSize length) {
 	XkSize len = length;
 	while(*srcString && --len) {
 		*dstString = *srcString;
@@ -33,15 +33,15 @@ XkChar8* xkNCopyString(XkChar8* dstString, const XkChar8* srcString, const XkSiz
 	return(dstString);
 }
 
-XkChar8* xkConcatString(XkChar8* dstString, const XkChar8* srcString) {
+XkString xkConcatString(XkString dstString, XkString srcString) {
 	return(xkCopyString(dstString + xkStringLength(dstString), srcString));
 }
 
-XkChar8* xkNConcatString(XkChar8* dstString, const XkChar8* srcString, const XkSize length) {
+XkString xkNConcatString(XkString dstString, XkString srcString, const XkSize length) {
 	return(xkNCopyString(dstString + xkStringLength(dstString), srcString, length));
 }
 
-XkInt32 xkCompareString(const XkChar8* string1, const XkChar8* string2) {
+XkInt32 xkCompareString(XkString string1, XkString string2) {
 	while((*string1 && *string2) && *string1 == *string2) {
 		++string1;
 		++string2;
@@ -50,7 +50,7 @@ XkInt32 xkCompareString(const XkChar8* string1, const XkChar8* string2) {
 	return(status);
 }
 
-XkInt32 xkNCompareString(const XkChar8* string1, const XkChar8* string2, const XkSize length) {
+XkInt32 xkNCompareString(XkString string1, XkString string2, const XkSize length) {
 	XkSize len = length;
 	while((*string1 && *string2) && (*string1 == *string2) && --len) {
 		++string1;
@@ -60,7 +60,7 @@ XkInt32 xkNCompareString(const XkChar8* string1, const XkChar8* string2, const X
 	return(status);
 }
 
-XkChar8* xkTokenString(XkChar8* string, const XkChar8* token) {
+XkString xkTokenString(XkString string, XkString token) {
 	while(*string) {
 		if(xkDelim(*string, token)) {
 			*string = '\0';
@@ -72,7 +72,7 @@ XkChar8* xkTokenString(XkChar8* string, const XkChar8* token) {
 	return(string);
 }
 
-XkChar8* xkNTokenString(XkChar8* string, const XkChar8* token, const XkSize length) {
+XkString xkNTokenString(XkString string, XkString token, const XkSize length) {
 	XkSize len = length;
 	while(*string && --len) {
 		if(xkDelim(*string, token)) {
@@ -85,7 +85,7 @@ XkChar8* xkNTokenString(XkChar8* string, const XkChar8* token, const XkSize leng
 	return(string);
 }
 
-XkSize xkStringFormat(XkChar8* string, const XkChar8* format, ...) {
+XkSize xkStringFormat(XkString string, XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	const XkSize size = xkStringFFormat(string, format, args);
@@ -93,7 +93,7 @@ XkSize xkStringFormat(XkChar8* string, const XkChar8* format, ...) {
 	return(size);
 }
 
-XkSize xkStringNFormat(XkChar8* string, const XkSize length, const XkChar8* format, ...) {
+XkSize xkStringNFormat(XkString string, const XkSize length, XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	const XkSize size = xkStringNFFormat(string, length, format, args);
@@ -101,13 +101,13 @@ XkSize xkStringNFormat(XkChar8* string, const XkSize length, const XkChar8* form
 	return(size);
 }
 
-XkSize xkStringFFormat(XkChar8* string, const XkChar8* format, XkArgs args) {
+XkSize xkStringFFormat(XkString string, XkString format, XkArgs args) {
 	/*TODO: remove vsprintf*/
 	int size = vsprintf(string, format, args);
 	return((XkSize)size);
 }
 
-XkSize xkStringNFFormat(XkChar8* string, const XkSize length, const XkChar8* format, XkArgs args) {
+XkSize xkStringNFFormat(XkString string, const XkSize length, XkString format, XkArgs args) {
 	/*TODO: remove vsnprintf*/
 	int size = vsnprintf(string, (unsigned long)length, (const char*)format, args);
 	return((XkSize)size);

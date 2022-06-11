@@ -3,15 +3,15 @@
 #include <windows.h>
 #include "XKinetic/XKCore.h"
 
-extern XK_IMPORT XkResult __xkEntry(const XkSize, const XkChar8**);
+extern XK_IMPORT XkResult __xkEntry(const XkSize, const XkWString*);
 
-int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, PSTR cmdline, INT cmdshow) {
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, INT nCmdShow) {
 	int res = EXIT_SUCCESS;
 
-  int argc = 0;
-  LPWSTR* wArgv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	int argc;
+	LPWSTR* wArgv = CommandLineToArgvW(pCmdLine, &argc);
 
-	XkResult result = __xkEntry((const XkSize)argc, (const XkChar8**)wArgv);
+	XkResult result = __xkEntry((const XkSize)argc, (const XkWString*)wArgv);
 	if(result != XK_SUCCESS) {
 		res = EXIT_FAILURE;
 		goto _catch;
@@ -19,5 +19,6 @@ int WINAPI WinMain(HINSTANCE instance, HINSTANCE prev_instance, PSTR cmdline, IN
 
 _catch:
 	LocalFree(wArgv);
+
 	return(res);
 }

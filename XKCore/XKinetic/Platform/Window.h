@@ -192,7 +192,7 @@ typedef struct XkWindowIcon {
 XK_EXPORT XkResult xkWindowInitialize(void);
 XK_EXPORT void xkWindowTerminate(void);
 
-XK_EXPORT XkResult xkCreateWindow(XkWindow*, const XkChar8*, const XkSize, const XkSize, const XkWindowHint);
+XK_EXPORT XkResult xkCreateWindow(XkWindow*, const XkString, const XkSize, const XkSize, const XkWindowHint);
 XK_EXPORT void xkDestroyWindow(XkWindow);
 
 XK_EXPORT void xkShowWindow(XkWindow, const XkWindowShow);
@@ -207,7 +207,7 @@ XK_EXPORT void xkSetWindowSizeLimits(XkWindow, const XkSize, const XkSize, const
 XK_EXPORT void xkSetWindowPosition(XkWindow, const XkInt32, const XkInt32);
 XK_EXPORT void xkGetWindowPosition(XkWindow, XkInt32* const, XkInt32* const);
 
-XK_EXPORT void xkSetWindowTitle(XkWindow, const XkChar8*);
+XK_EXPORT void xkSetWindowTitle(XkWindow, const XkString);
 
 XK_EXPORT void xkSetWindowIcon(XkWindow, const XkSize, const XkWindowIcon*);
 

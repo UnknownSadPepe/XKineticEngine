@@ -6,7 +6,7 @@ struct XkMaterialLoader {
   XkChar8 path[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
 };
 
-XkResult xkCreateMaterialLoader(XkMaterialLoader* pLoader, XkChar8* path) {
+XkResult xkCreateMaterialLoader(XkMaterialLoader* pLoader, XkString path) {
   XkResult result = XK_SUCCESS;
 
 	*pLoader = xkAllocateMemory(sizeof(struct XkMaterialLoader));
@@ -30,7 +30,7 @@ void xkDestroyMaterialLoader(XkMaterialLoader loader) {
   xkFreeMemory(loader);
 }
 
-XkResult xkLoadMaterial(XkMaterialLoader loader, XkMaterialConfig* const pConfig, XkChar8* name) {
+XkResult xkLoadMaterial(XkMaterialLoader loader, XkMaterialConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
   XkChar8 fullPath[XK_MATERIAL_LOADER_PATH_MAX_SIZE];

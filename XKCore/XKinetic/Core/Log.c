@@ -14,7 +14,7 @@ typedef enum {
 	XK_LOG_TYPE_DEBUG = 6
 }	XkLogType;
 
-static void __xkLog(const XkLogType, const XkChar8*, XkArgs);
+static void __xkLog(const XkLogType, const XkString, XkArgs);
 
 static struct {
 	XkFile file;
@@ -39,57 +39,57 @@ void xkLogTerminate(void) {
 	xkCloseFile(_xkLogger.file);
 }
 
-void xkLogFatal(const XkChar8* format, ...) {
+void xkLogFatal(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_FATAL, format, args);
 	xkEndArgs(args);
 }
 
-void xkLogError(const XkChar8* format, ...) {
+void xkLogError(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_ERROR, format, args);
 	xkEndArgs(args);
 }
 
-void xkLogWarning(const XkChar8* format, ...) {
+void xkLogWarning(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_WARNING, format, args);
 	xkEndArgs(args);
 }
 
-void xkLogTrace(const XkChar8* format, ...) {
+void xkLogTrace(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_TRACE, format, args);
 	xkEndArgs(args);
 }
 
-void xkLogInfo(const XkChar8* format, ...) {
+void xkLogInfo(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_INFO, format, args);
 	xkEndArgs(args);
 }
 
-void xkLogNotice(const XkChar8* format, ...) {
+void xkLogNotice(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_NOTICE, format, args);
 	xkEndArgs(args);
 }
 
-void xkLogDebug(const XkChar8* format, ...) {
+void xkLogDebug(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_DEBUG, format, args);
 	xkEndArgs(args);
 }
 
-void __xkLog(const XkLogType type, const XkChar8* format, XkArgs args) {
-	static const XkChar8* typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};
+void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
+	static const XkString typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};
 	XkChar8 buffer[XK_LOG_BUFFER_SIZE] = {0};
 
 	XkConsoleHandle stream = type <= XK_LOG_TYPE_ERROR ? XK_CONSOLE_STDERR : XK_CONSOLE_STDOUT;

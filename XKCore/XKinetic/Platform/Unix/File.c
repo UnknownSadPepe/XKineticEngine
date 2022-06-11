@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
+XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 	XkResult result = XK_SUCCESS;
 
 	*pFile = xkAllocateMemory(sizeof(struct XkFile));
@@ -38,7 +38,7 @@ _catch:
 	return(result);
 }
 
-XkResult xkOpenAsyncFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
+XkResult xkOpenAsyncFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 	XkResult result = XK_SUCCESS;
 
 	/// TODO: implementation.
@@ -75,15 +75,15 @@ void xkCloseFile(XkFile file) {
 	xkFreeMemory(file);
 }
 
-void xkCreateFile(const XkChar8* name) {
+void xkCreateFile(const XkString name) {
 	creat(name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 }
 
-void xkRemoveFile(const XkChar8* name) {
+void xkRemoveFile(const XkString name) {
 	unlink(name);
 }
 
-void xkRenameFile(const XkChar8* oldName, const XkChar8* newName) {
+void xkRenameFile(const XkString oldName, const XkString newName) {
 	link(oldName, newName);
 }
 
@@ -99,19 +99,19 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 	return((XkSize)lseek(file->handle.handle, (long)offset, whence));
 }
 
-void xkWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
+void xkWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	write(file->handle.handle, buffer, size);
 }
 
-void xkReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
+void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 	read(file->handle.handle, buffer, size);
 }
 
-void xkAsyncWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
+void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	/// TODO: implementation.
 }
 
-void xkAsyncReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
+void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
 	/// TODO: implementation.
 }
 

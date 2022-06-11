@@ -287,7 +287,7 @@ XkResult __xkLoadVkModule(XkRenderer renderer) {
 	XkResult result = XK_SUCCESS;
 
 	// Load Vulkan module.
-	result = xkLoadModule(&renderer->module, XKVULKAN_LIBRARY);
+	result = xkLoadModule(&renderer->module, "libXKVulkan.dll");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s", XKVULKAN_LIBRARY);
 		goto _catch;

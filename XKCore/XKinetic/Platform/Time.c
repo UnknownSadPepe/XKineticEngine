@@ -16,7 +16,7 @@ void xkTimeFormat(XkTime* const pTime, const XkSize rawTime) {
   pTime->yDay = (XkSize)t.tm_yday;
 }
 
-XkSize xkTimeStringFormat(XkTime* const pTime, XkChar8* buffer, const XkSize size, const XkChar8* format) {
+XkSize xkTimeStringFormat(XkTime* const pTime, XkString buffer, const XkSize size, const XkString format) {
 	struct tm t = {
 		.tm_sec = (int)pTime->second,
 		.tm_min = (int)pTime->minute,

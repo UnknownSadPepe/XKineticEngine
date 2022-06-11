@@ -5,7 +5,7 @@
 #include <windows.h>
 #include "XKinetic/Platform/Win32/Internal.h"
 
-XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
+XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 	XkResult result = XK_SUCCESS;
 
 	*pFile = xkAllocateMemory(sizeof(struct XkFile));
@@ -33,11 +33,56 @@ XkResult xkOpenFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
 		goto _catch;
 	}
 
+  DCB dcb = {0};
+  COMMTIMEOUTS timeouts;
+
+  dcb.DCBlength = sizeof(dcb);
+
+  GetCommTimeouts(file->handle.handle, &timeouts);
+  GetCommTimeouts(file->handle.handle, &timeouts);
+  timeouts.ReadIntervalTimeout          = 50;
+  timeouts.ReadTotalTimeoutConstant     = 50;
+  timeouts.ReadTotalTimeoutMultiplier   = 50;
+  timeouts.WriteTotalTimeoutConstant    = 50;
+  timeouts.WriteTotalTimeoutMultiplier  = 10;
+  if(!SetCommTimeouts(file->handle.handle, &timeouts)) {
+		__xkErrorHandle("Win32: Failed to setting timeouts on port");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+  }
+
+  GetCommState(file->handle.handle, &dcb);
+  dcb.BaudRate =          19200;
+  dcb.Parity =            NOPARITY;
+  dcb.fBinary =           TRUE;
+  dcb.fParity =           FALSE;            
+  dcb.fOutxCtsFlow =      FALSE;
+  dcb.fOutxDsrFlow =      FALSE;
+  dcb.fDtrControl =       DTR_CONTROL_DISABLE; // DTR flow control type 
+  dcb.fDsrSensitivity =   FALSE;            // DSR sensitivity 
+  dcb.fTXContinueOnXoff = FALSE;            // XOFF continues Tx 
+  dcb.fOutX =             FALSE;            // No XON/XOFF out flow control 
+  dcb.fInX =              FALSE;            // No XON/XOFF in flow control
+  dcb.fErrorChar =        FALSE;            // Disable error replacement 
+  dcb.fNull =             FALSE;            // Disable null stripping 
+  dcb.fRtsControl =       RTS_CONTROL_DISABLE; // RTS flow control 
+  dcb.fAbortOnError =     FALSE;            // Do not abort reads/writes on err
+  dcb.ByteSize =          8;                // Number of bits/byte, 4-8 
+  dcb.StopBits =          ONESTOPBIT;       // 0,1,2 = 1, 1.5, 2
+  dcb.EvtChar =           0x84;             // 'T' 
+
+  if (!SetCommState (file->handle.handle, &dcb)) {
+		__xkErrorHandle("Win32: Failed to configure serial port");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+  }
+  return 0;
+
 _catch:
 	return(result);
 }
 
-XkResult xkOpenAsyncFile(XkFile* pFile, const XkChar8* name, const XkFileFlag flag) {
+XkResult xkOpenAsyncFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 	XkResult result = XK_SUCCESS;
 
 	*pFile = xkAllocateMemory(sizeof(struct XkFile));
@@ -74,15 +119,15 @@ void xkCloseFile(XkFile file) {
 	xkFreeMemory(file);
 }
 
-void xkCreateFile(const XkChar8* name) {
+void xkCreateFile(const XkString name) {
 	CreateFile(name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
-void xkRemoveFile(const XkChar8* name) {
+void xkRemoveFile(const XkString name) {
 	DeleteFileA(name);
 }
 
-void xkRenameFile(const XkChar8* oldName, const XkChar8* newName) {
+void xkRenameFile(const XkString oldName, const XkString newName) {
 	MoveFile(oldName, newName);
 }
 
@@ -97,17 +142,17 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 	return((XkSize)pointer);
 }
 
-void xkWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
+void xkWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	DWORD numberOfBytesWrite;
 	WriteFile(file->handle.handle, buffer, size, &numberOfBytesWrite, NULL);
 }
 
-void xkReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
+void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 	DWORD numberOfBytesRead;
 	ReadFile(file->handle.handle, buffer, size, &numberOfBytesRead, NULL);
 }
 
-void xkAsyncWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
+void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	/// TODO: implementation.
 	OVERLAPPED oWrite = {
 		.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)
@@ -120,7 +165,7 @@ void xkAsyncWriteFile(XkFile file, const XkChar8* buffer, const XkSize size) {
 	CloseHandle(oWrite.hEvent);
 }
 
-void xkAsyncReadFile(XkFile file, XkChar8* buffer, const XkSize size) {
+void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
 	/// TODO: implementation.
 	OVERLAPPED oRead = {
 		.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL)

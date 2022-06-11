@@ -8,13 +8,13 @@
 
 #define XK_ERROR_HANDLER_BUFFER_SIZE 1024
 
-void __xkErrorHandler(const XkChar8* format, ...) {
+void __xkErrorHandler(const XkString format, ...) {
 	XkChar8 buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {0};
 
 	va_list args;
 	va_start(args, format);
 	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
-	fprintf(stderr, "Platform Error Handler: %s\n", buffer);
+	fprintf(stderr, "Platform Error Handler: %s Code: %d\n", buffer, GetLastError());
 	MessageBox(NULL, buffer, "Platform Error Handler", MB_ABORTRETRYIGNORE);
 	va_end(args);
 }

@@ -3,7 +3,7 @@
 #include "XKinetic/XKinetic.h"
 
 typedef struct {
-	XkChar8* pName;
+	XkString name;
 	struct {
 		XkUInt32 major;
 		XkUInt32 minor;	
@@ -15,6 +15,6 @@ typedef struct XkApplication XkApplication;
 
 extern XkApplication _xkApplication;
 
-XK_IMPORT XkResult xkCreateApplication(const XkSize, const XkChar8**);
+XK_IMPORT XkResult xkCreateApplication(const XkSize, const XkWString*);
 XK_IMPORT void xkDestroyApplication();
 XK_IMPORT void xkUpdateApplication();

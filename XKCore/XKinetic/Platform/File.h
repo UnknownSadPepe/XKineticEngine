@@ -18,19 +18,19 @@ typedef enum {
 
 typedef struct XkFile* XkFile;
 
-XK_EXPORT XkResult xkOpenFile(XkFile*, const XkChar8*, const XkFileFlag);
-XK_EXPORT XkResult xkOpenAsyncFile(XkFile*, const XkChar8*, const XkFileFlag);
+XK_EXPORT XkResult xkOpenFile(XkFile*, const XkString, const XkFileFlag);
+XK_EXPORT XkResult xkOpenAsyncFile(XkFile*, const XkString, const XkFileFlag);
 XK_EXPORT void xkCloseFile(XkFile);
 
-XK_EXPORT void xkCreateFile(const XkChar8*);
-XK_EXPORT void xkRemoveFile(const XkChar8*);
+XK_EXPORT void xkCreateFile(const XkString);
+XK_EXPORT void xkRemoveFile(const XkString);
 
-XK_EXPORT void xkRenameFile(const XkChar8*, const XkChar8*);
+XK_EXPORT void xkRenameFile(const XkString, const XkString);
 
 XK_EXPORT XkSize xkSeekFile(XkFile, const XkInt32, const XkFileSeek);
 
-XK_EXPORT void xkWriteFile(XkFile, const XkChar8*, const XkSize);
-XK_EXPORT void xkReadFile(XkFile, XkChar8*, const XkSize);
+XK_EXPORT void xkWriteFile(XkFile, const XkString, const XkSize);
+XK_EXPORT void xkReadFile(XkFile, XkString, const XkSize);
 
-XK_EXPORT void xkAsyncWriteFile(XkFile, const XkChar8*, const XkSize);
-XK_EXPORT void xkAsyncReadFile(XkFile, XkChar8*, const XkSize);
+XK_EXPORT void xkAsyncWriteFile(XkFile, const XkString, const XkSize);
+XK_EXPORT void xkAsyncReadFile(XkFile, XkString, const XkSize);

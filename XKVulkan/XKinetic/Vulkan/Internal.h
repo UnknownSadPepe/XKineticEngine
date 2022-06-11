@@ -68,7 +68,7 @@ typedef struct {
 
 extern __XkVkContext _xkVkContext;
 
-XK_IMPORT XkChar8* __xkVkGetErrorString(VkResult); 
+XK_IMPORT XkString __xkVkGetErrorString(VkResult); 
 
 XK_IMPORT XkResult __xkVkInitializeContext(void);
 XK_IMPORT void __xkVkTerminateContext(void);

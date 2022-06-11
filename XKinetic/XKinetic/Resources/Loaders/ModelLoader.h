@@ -6,7 +6,7 @@
 
 typedef struct XkModelLoader* XkModelLoader;
 
-XK_API XkResult xkCreateModelLoader(XkModelLoader*, XkChar8*);
+XK_API XkResult xkCreateModelLoader(XkModelLoader*, XkString);
 XK_API void xkDestroyModelLoader(XkModelLoader);
-XK_API XkResult xkLoadModel(XkModelLoader, XkModelConfig* const, XkChar8*);
+XK_API XkResult xkLoadModel(XkModelLoader, XkModelConfig* const, XkString);
 XK_API void xkUnloadModel(XkModelLoader, XkModelConfig* const);

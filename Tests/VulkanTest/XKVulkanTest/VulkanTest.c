@@ -24,10 +24,10 @@ static void __xkWindowSize(XkWindow window, XkSize width, XkSize height) {
 	xkResizeRenderer(_xkApplication.renderer, width, height);
 }
 
-XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
+XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	XkResult result = XK_SUCCESS;
 
-	_xkApplication.config.pName = "XKVulkanTest";
+	_xkApplication.config.name = "XKVulkanTest";
 	_xkApplication.config.version.major = 0;
 	_xkApplication.config.version.minor = 0;
 	_xkApplication.config.version.patch = 1;
@@ -39,7 +39,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
 	result = xkWindowInitialize();
 	if(result != XK_SUCCESS) goto _catch;
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.pName, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;

@@ -25,6 +25,12 @@ typedef char XkChar8;
 typedef short XkChar16;
 typedef int XkChar32;
 
+typedef XkChar8 XkChar;
+typedef XkChar32 XkWChar;
+
+typedef XkChar* XkString;
+typedef XkWChar* XkWString;
+
 typedef signed char XkInt8;
 typedef unsigned char XkUInt8;
 typedef signed short int  XkInt16;

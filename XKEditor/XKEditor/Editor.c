@@ -26,10 +26,10 @@ struct XkApplication {
 
 XkApplication _xkApplication;
 
-XkResult xkCreateApplication(const XkSize argc, const XkChar8** argv) {
+XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	XkResult result = XK_SUCCESS;
 
-	_xkApplication.config.pName = "XKEditor";
+	_xkApplication.config.name = "XKEditor";
 	_xkApplication.config.version.major = 0;
 	_xkApplication.config.version.minor = 0;
 	_xkApplication.config.version.patch = 1;

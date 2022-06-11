@@ -6,7 +6,7 @@
 
 typedef struct XkImageLoader* XkImageLoader;
 
-XK_API XkResult xkCreateImageLoader(XkImageLoader*, XkChar8*);
+XK_API XkResult xkCreateImageLoader(XkImageLoader*, XkString);
 XK_API void xkDestroyImageLoader(XkImageLoader);
-XK_API XkResult xkLoadImage(XkImageLoader, XkImageConfig* const, XkChar8*);
+XK_API XkResult xkLoadImage(XkImageLoader, XkImageConfig* const, XkString);
 XK_API void xkUnloadImage(XkImageLoader, XkImageConfig* const);

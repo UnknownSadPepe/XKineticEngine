@@ -5,7 +5,7 @@
 
 #include <dlfcn.h>
 
-XkResult xkLoadModule(XkModule* pModule, const XkChar8* path) {
+XkResult xkLoadModule(XkModule* pModule, const XkString path) {
 	XkResult result = XK_SUCCESS;
 
 	*pModule = (XkModule)dlopen(path, RTLD_LAZY | RTLD_LOCAL);
@@ -23,7 +23,7 @@ void xkUnloadModule(XkModule module) {
 	dlclose(module);
 }
 
-XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkChar8* name, XkModule module) {
+XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkString name, XkModule module) {
 	XkResult result = XK_SUCCESS;
 
 	*pPfnProc = (XkProcPfn)dlsym(module, name);

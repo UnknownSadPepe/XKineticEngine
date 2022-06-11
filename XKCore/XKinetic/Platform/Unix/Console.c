@@ -93,7 +93,7 @@ void xkColorConsole(const XkConsoleHandle handle, const XkConsoleColor color) {
 	write(stream, pColor, size);
 }
 
-void xkWriteConsole(const XkConsoleHandle handle, const XkChar8* buffer, const XkSize size) {
+void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const XkSize size) {
 	int stream;
 	switch(handle) {
 		case XK_CONSOLE_STDOUT: stream = 1; break;
@@ -102,7 +102,7 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkChar8* buffer, const X
 	write(stream, buffer, size);
 }
 
-void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkChar8* buffer, const XkSize size) {
+void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
 	int stream;
 	switch(handle) {
 		case XK_CONSOLE_STDOUT: stream = 1; break;
@@ -153,7 +153,7 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 	write(stream, XK_UNIX_COLOR_RESET, 5);
 }
 
-void xkReadConsole(XkChar8* buffer, const XkSize size) {
+void xkReadConsole(XkString buffer, const XkSize size) {
 	read(0, buffer, size);
 }
 

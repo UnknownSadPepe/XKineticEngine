@@ -6,7 +6,7 @@ struct XkModelLoader {
   XkChar8 path[XK_MODEL_LOADER_PATH_MAX_SIZE];
 };
 
-XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkChar8* path) {
+XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkString path) {
   XkResult result = XK_SUCCESS;
 
 	*pLoader = xkAllocateMemory(sizeof(struct XkModelLoader));
@@ -30,7 +30,7 @@ void xkDestroyModelLoader(XkModelLoader loader) {
   xkFreeMemory(loader);
 }
 
-XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkChar8* name) {
+XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
   XkChar8 fullPath[XK_MODEL_LOADER_PATH_MAX_SIZE];

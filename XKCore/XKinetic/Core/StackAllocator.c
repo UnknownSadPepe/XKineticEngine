@@ -72,7 +72,7 @@ XkHandle xkAllocateStackMemory(XkStackAllocator allocator, const XkSize size) {
 }
 
 void xkFreeStackMemory(XkStackAllocator allocator, const XkHandle memory) {
-	XkStackMemoryHeader* pHeader = (XkStackMemoryHeader*)(((XkChar8*)memory) - sizeof(XkStackMemoryHeader));
+	XkStackMemoryHeader* pHeader = (XkStackMemoryHeader*)(((XkString)memory) - sizeof(XkStackMemoryHeader));
 
 	allocator->allocated -= pHeader->size;
 	xkZeroMemory(pHeader->memory, pHeader->size);	

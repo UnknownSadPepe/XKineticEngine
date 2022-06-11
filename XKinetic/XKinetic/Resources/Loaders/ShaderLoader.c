@@ -6,7 +6,7 @@ struct XkShaderLoader {
   XkChar8 path[XK_SHADER_LOADER_PATH_MAX_SIZE];
 };
 
-XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkChar8* path) {
+XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkString path) {
   XkResult result = XK_SUCCESS;
 
 	*pLoader = xkAllocateMemory(sizeof(struct XkShaderLoader));
@@ -30,7 +30,7 @@ void xkDestroyShaderLoader(XkShaderLoader loader) {
   xkFreeMemory(loader);
 }
 
-XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkChar8* name) {
+XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkString name) {
   XkResult result = XK_SUCCESS;
 
   XkChar8 fullPath[XK_SHADER_LOADER_PATH_MAX_SIZE];
