@@ -32,29 +32,27 @@
 #endif // XK_LINUX
 
 #if defined(XK_LINUX) || defined(XK_WIN32)
-
-#define XKVULKAN_CREATE_RENDERER				"xkVkCreateRenderer"
-#define XKVULKAN_DESTROY_RENDERER				"xkVkDestroyRenderer"
-#define XKVULKAN_CLEAR_COLOR_RENDERER		"xkVkClearColorRenderer"
-#define XKVULKAN_CLEAR_DEPTH_RENDERER		"xkVkClearDepthRenderer"
-#define XKVULKAN_CLEAR_STENCIL_RENDERER	"xkVkClearStencilRenderer"
-#define XKVULKAN_CLEAR_RENDERER					"xkVkClearRenderer"
-#define XKVULKAN_TOPOLOGY_RENDERER			"xkVkTopologyRenderer"
-#define XKVULKAN_CULLMODE_RENDERER			"xkVkCullModeRenderer"
-#define XKVULKAN_BEGIN_RENDERER					"xkVkBeginRenderer"
-#define XKVULKAN_END_RENDERER						"xkVkEndRenderer"
-#define XKVULKAN_RESIZE_RENDERER				"xkVkResizeRenderer"
-#define XKVULKAN_SCISSOR_RENDERER				"xkVkScissorRenderer"
-#define XKVULKAN_DRAW										"xkVkDraw"
-#define XKVULKAN_DRAW_INDEXED						"xkVkDrawIndexed"
-#define XKVULKAN_CREATE_BUFFER					"xkVkCreateBuffer"
-#define XKVULKAN_DESTROY_BUFFER					"xkVkDestroyBuffer"
-#define XKVULKAN_MAP_BUFFER							"xkVkMapBuffer"
-#define XKVULKAN_BIND_VERTEX_BUFFER			"xkVkBindVertexBuffer"
-#define XKVULKAN_BIND_INDEX_BUFFER			"xkVkBindIndexBuffer"
-#define XKVULKAN_CREATE_TEXTURE2D				"xkVkCreateTexture2D"
-#define XKVULKAN_DESTROY_TEXTURE2D			"xkVkDestroyTexture2D"
-
+	#define XKVULKAN_CREATE_RENDERER				"xkVkCreateRenderer"
+	#define XKVULKAN_DESTROY_RENDERER				"xkVkDestroyRenderer"
+	#define XKVULKAN_CLEAR_COLOR_RENDERER		"xkVkClearColorRenderer"
+	#define XKVULKAN_CLEAR_DEPTH_RENDERER		"xkVkClearDepthRenderer"
+	#define XKVULKAN_CLEAR_STENCIL_RENDERER	"xkVkClearStencilRenderer"
+	#define XKVULKAN_CLEAR_RENDERER					"xkVkClearRenderer"
+	#define XKVULKAN_TOPOLOGY_RENDERER			"xkVkTopologyRenderer"
+	#define XKVULKAN_CULLMODE_RENDERER			"xkVkCullModeRenderer"
+	#define XKVULKAN_BEGIN_RENDERER					"xkVkBeginRenderer"
+	#define XKVULKAN_END_RENDERER						"xkVkEndRenderer"
+	#define XKVULKAN_RESIZE_RENDERER				"xkVkResizeRenderer"
+	#define XKVULKAN_SCISSOR_RENDERER				"xkVkScissorRenderer"
+	#define XKVULKAN_DRAW										"xkVkDraw"
+	#define XKVULKAN_DRAW_INDEXED						"xkVkDrawIndexed"
+	#define XKVULKAN_CREATE_BUFFER					"xkVkCreateBuffer"
+	#define XKVULKAN_DESTROY_BUFFER					"xkVkDestroyBuffer"
+	#define XKVULKAN_MAP_BUFFER							"xkVkMapBuffer"
+	#define XKVULKAN_BIND_VERTEX_BUFFER			"xkVkBindVertexBuffer"
+	#define XKVULKAN_BIND_INDEX_BUFFER			"xkVkBindIndexBuffer"
+	#define XKVULKAN_CREATE_TEXTURE2D				"xkVkCreateTexture2D"
+	#define XKVULKAN_DESTROY_TEXTURE2D			"xkVkDestroyTexture2D"
 #endif // XK_LINUX || XK_WIN32
 
 struct XkRenderer {
@@ -108,7 +106,11 @@ struct XkTexture2D {
 	XkHandle handle;
 };
 
-static XkResult __xkLoadVkModule(XkRenderer);
+
+#if defined(XK_WIN32) || defined(XK_LINUX)
+	static XkResult __xkLoadVkModule(XkRenderer);
+#endif // XK_WIN32 || XK_LINUX
+			 //
 #if defined(XK_WIN32)
 	static XkResult __xkLoadDX12Module(XkRenderer);
 #endif // XK_WIN32
@@ -287,7 +289,7 @@ XkResult __xkLoadVkModule(XkRenderer renderer) {
 	XkResult result = XK_SUCCESS;
 
 	// Load Vulkan module.
-	result = xkLoadModule(&renderer->module, "libXKVulkan.dll");
+	result = xkLoadModule(&renderer->module, XKVULKAN_LIBRARY);
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load module %s", XKVULKAN_LIBRARY);
 		goto _catch;
