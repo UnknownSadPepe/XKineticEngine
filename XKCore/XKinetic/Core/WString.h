@@ -12,6 +12,8 @@ XKCORE_API XkInt32 xkCompareWString(XkWString, XkWString);
 XKCORE_API XkInt32 xkNCompareWString(XkWString, XkWString, const XkSize);
 XKCORE_API XkWString xkTokenWString(XkWString, XkWString);
 XKCORE_API XkWString xkNTokenWString(XkWString, XkWString, const XkSize);
+XKCORE_API XkWString xkDuplicateWString(XkWString);
+XKCORE_API XkWString xkNDuplicateWString(XkWString, const XkSize);
 
 XKCORE_API XkSize xkWStringFormat(XkWString, XkWString, ...);
 XKCORE_API XkSize xkWStringNFormat(XkWString, const XkSize, XkWString, ...);

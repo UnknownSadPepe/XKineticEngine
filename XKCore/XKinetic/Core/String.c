@@ -1,6 +1,7 @@
 /*TODO: remove #include <stdio.h>*/
 #include <stdio.h>
 #include "XKinetic/Core/Types.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/String.h"
 
 XkSize xkStringLength(XkString string) {
@@ -83,6 +84,19 @@ XkString xkNTokenString(XkString string, XkString token, const XkSize length) {
 	}
 
 	return(string);
+}
+
+XkString xkDuplicateString(XkString string) {
+  const XkSize length = xkStringLength(string);
+  XkString result = xkAllocateMemory(sizeof(XkChar) * (length + 1));
+  xkCopyString(result, string);
+  return(result);
+}
+
+XkString xkNDublicateString(XkString string, const XkSize length) {
+  XkString result = xkAllocateMemory(sizeof(XkChar) * (length + 1));
+  xkNCopyString(result, string, length);
+  return(result);
 }
 
 XkSize xkStringFormat(XkString string, XkString format, ...) {

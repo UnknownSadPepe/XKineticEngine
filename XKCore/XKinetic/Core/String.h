@@ -12,6 +12,8 @@ XKCORE_API XkInt32 xkCompareString(XkString, XkString);
 XKCORE_API XkInt32 xkNCompareString(XkString, XkString, const XkSize);
 XKCORE_API XkString xkTokenString(XkString, XkString);
 XKCORE_API XkString xkNTokenString(XkString, XkString, const XkSize);
+XKCORE_API XkString xkDuplicateString(XkString);
+XKCORE_API XkString xkNDuplicateString(XkString, const XkSize);
 
 XKCORE_API XkSize xkStringFormat(XkString, XkString, ...);
 XKCORE_API XkSize xkStringNFormat(XkString, const XkSize, XkString, ...);

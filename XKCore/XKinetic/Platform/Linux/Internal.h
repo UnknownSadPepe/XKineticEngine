@@ -1,6 +1,10 @@
 #pragma once
 
 #include <wayland-client.h>
+#include <wayland-cursor.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-compose.h>
+#include <linux/input.h>
 #include "XKinetic/XKCore.h"
 #include "XKinetic/Platform/Unix/Internal.h"
 
@@ -10,16 +14,19 @@ typedef struct {
   struct xdg_surface* xdgSurface;
 	struct xdg_toplevel* xdgToplevel;
 	struct zxdg_toplevel_decoration_v1* xdgDecoration;
+	struct zwp_idle_inhibitor_v1* zwpIdleInhibitor;
 
   struct {
 		struct wl_buffer* wlBuffer;
     struct {
 			struct wl_surface* wlSurface;
 			struct wl_subsurface* wlSubsurface;
-			struct wp_viewport*   wlViewport;
+			struct wp_viewport*   wpViewport;
 		} top, left, right, bottom;
 		XkBool32 serverSide;
   } decorations;
+
+	char*	title;
 } __XkLinuxWindow;
 
 #define XK_PLATFORM_WINDOW __XkLinuxWindow handle
@@ -36,10 +43,39 @@ typedef struct {
   struct wl_pointer* wlPointer;
   struct wl_keyboard* wlKeyboard;
 
-	struct xdg_wm_base* xdgBase;
+	struct wl_data_device_manager*	wlDataDeviceManager;
+	struct wl_data_device*      		wlDataDevice;
 
+  struct wl_data_offer*       wlSelectionOffer;
+  struct wl_data_source*      wlSelectionSource;
+
+  struct wl_data_offer*       wlDragOffer;
+
+	struct wl_cursor_theme*     wlCursorTheme;
+	struct wl_cursor_theme*     wlCursorThemeHiDPI;
+  struct wl_surface*          wlCursorSurface;
+
+	struct xdg_wm_base* xdgBase;
 	struct zxdg_decoration_manager_v1* xdgDecorationManager;
-	struct wp_viewporter*       wlViewporter;
+
+	struct wp_viewporter*  wpViewporter;
+
+  struct zwp_relative_pointer_manager_v1* zwpRelativePointerManager;
+  struct zwp_pointer_constraints_v1*      zwpPointerConstraints;
+  struct zwp_idle_inhibit_manager_v1*     zwpIdleInhibitManager;
+
+	struct xkb_context*     	xkbContext;
+	struct xkb_keymap*      	xkbKeymap;
+	struct xkb_state*       	xkbState;
+	struct xkb_compose_state* xkbComposeState;
+
+	xkb_mod_index_t         xkbControlIndex;
+  xkb_mod_index_t         xkbAltIndex;
+  xkb_mod_index_t         xkbShiftIndex;
+  xkb_mod_index_t         xkbSuperIndex;
+  xkb_mod_index_t         xkbCapsLockIndex;
+  xkb_mod_index_t         xkbNumLockIndex;
+  unsigned int            xkbModifiers;
 } __XkLinuxPlatform;
 
 typedef struct {

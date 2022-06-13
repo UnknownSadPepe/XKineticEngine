@@ -13,6 +13,7 @@ if(CMAKE_BUILD_TYPE EQUAL "Debug")
   target_compile_definitions(XKCore PUBLIC __XKCORE_DEBUG__)
 endif()
 
+# Generate Wayland headers.
 if(UNIX AND NOT APPLE)
   find_program(WAYLAND_SCANNER_EXECUTABLE NAMES wayland-scanner)
 
@@ -65,5 +66,10 @@ if(UNIX AND NOT APPLE)
     "${WAYLAND_PROTOCOLS_BASE}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml"
     "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-idle-inhibit-unstable-v1-client-protocol")
 
-	target_link_libraries(XKCore PUBLIC wayland-client)
+	target_link_libraries(XKCore PUBLIC wayland-client wayland-cursor xkbcommon)
+endif()
+
+# Link Unix specific libraries.
+if(UNIX AND NOT APPLE)
+  target_link_libraries(XKCore PRIVATE dl rt)
 endif()

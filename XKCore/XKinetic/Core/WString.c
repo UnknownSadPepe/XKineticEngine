@@ -3,6 +3,7 @@
 /// TODO: remove #include <stdio.h>
 #include <stdio.h>
 #include "XKinetic/Core/Types.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/WString.h"
 
 XkSize xkWStringLength(XkWString string) {
@@ -85,6 +86,19 @@ XkWString xkNTokenWString(XkWString string, XkWString token, const XkSize length
 	}
 
 	return(string);
+}
+
+XkWString xkDuplicateWString(XkWString string) {
+  const XkSize length = xkWStringLength(string);
+  XkWString result = xkAllocateMemory(sizeof(XkWChar) * (length + 1));
+  xkCopyWString(result, string);
+  return(result);
+}
+
+XkWString xkNDublicateWString(XkWString string, const XkSize length) {
+  XkWString result = xkAllocateMemory(sizeof(XkWChar) * (length + 1));
+  xkNCopyWString(result, string, length);
+  return(result);
 }
 
 XkSize xkWStringFormat(XkWString string, XkWString format, ...) {

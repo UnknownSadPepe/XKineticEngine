@@ -5,6 +5,7 @@
 
 #define _GNU_SOURCE
 #define __USE_GNU
+#define __USE_MISC
 #include <sys/mman.h>
 
 typedef struct {
