@@ -105,12 +105,12 @@ XkSize xkWStringNFormat(XkWString string, const XkSize length, XkWString format,
 
 XkSize xkWStringFFormat(XkWString string, XkWString format, XkArgs args) {
 	/*TODO: remove vswprintf*/
-	int size = vswprintf((wchar_t*)string, (const wchar_t*)format, args);
+	int size = vswprintf((wchar_t*)string, 1024, (const wchar_t*)format, args);
 	return((XkSize)size);
 }
 
 XkSize xkWStringNFFormat(XkWString string, const XkSize length, XkWString format, XkArgs args) {
 	/*TODO: remove vswprintf*/
-	int size = vsnwprintf((wchar_t*)string, (size_t)length, (const wchar_t*)format, args);
+	int size = vswprintf((wchar_t*)string, (size_t)length, (const wchar_t*)format, args);
 	return((XkSize)size);
 }

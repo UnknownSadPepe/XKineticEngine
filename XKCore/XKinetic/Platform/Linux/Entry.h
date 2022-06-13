@@ -1,10 +1,11 @@
 #pragma once
 
+#include <stddef.h>
 #include "XKinetic/XKCore.h"
 
 extern XK_IMPORT XkResult __xkEntry(const XkSize, const XkWString*);
 
-int wmain(int argc, wchar_t** argv) {
+int main(int argc, char** argv) {
 	int res = 0;
 
 	XkResult result = __xkEntry((const XkSize)argc, (const XkWString*)argv);

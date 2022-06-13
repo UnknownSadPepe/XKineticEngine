@@ -11,4 +11,8 @@ XKCORE_API void xkLogWarning(const XkString, ...);
 XKCORE_API void xkLogTrace(const XkString, ...);
 XKCORE_API void xkLogInfo(const XkString, ...);
 XKCORE_API void xkLogNotice(const XkString, ...);
-XKCORE_API void xkLogDebug(const XkString, ...);
+#if defined(XK_DEBUG)
+	XKCORE_API void xkLogDebug(const XkString, ...);
+#else
+	#define xkLogDebug(format, ...)
+#endif // XK_DEBUG

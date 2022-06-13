@@ -79,7 +79,7 @@ void xkCloseFile(XkFile file) {
 XkSize xkFileSize(XkFile file) {
 	struct stat stat;
 	fstat(file->handle.handle, &stat);
-	return((XkSize)stat.st_size)
+	return((XkSize)stat.st_size);
 }
 
 void xkCreateFile(const XkString name) {

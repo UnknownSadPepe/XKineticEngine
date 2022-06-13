@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 # Initialize XKinetic project.
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
@@ -24,7 +24,7 @@ endif()
 option(BUILD_TESTS "Build tests applications" OFF)
 
 # Set project build dir.
-set(BUILD_DIR ${PROJECT_SOURCE_DIR}/Target)
+set(BUILD_DIR ${CMAKE_SOURCE_DIR}/Target/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR})
 set(LIBRARY_OUTPUT_PATH ${BUILD_DIR})
 

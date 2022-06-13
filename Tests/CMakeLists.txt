@@ -14,6 +14,8 @@ if(BUILD_VULKAN_TEST)
 endif()
 
 # Add XKDirectX12Tests subdirectory.
-if(BUILD_DIRECTX12_TEST)
-  add_subdirectory(DirectX12Test)
+if(WIN32)
+	if(BUILD_DIRECTX12_TEST)
+		add_subdirectory(DirectX12Test)
+	endif()
 endif()

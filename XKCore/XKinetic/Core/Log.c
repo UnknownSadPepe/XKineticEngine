@@ -81,12 +81,14 @@ void xkLogNotice(const XkString format, ...) {
 	xkEndArgs(args);
 }
 
+#if defined(XK_DEBUG)
 void xkLogDebug(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);
 	__xkLog(XK_LOG_TYPE_DEBUG, format, args);
 	xkEndArgs(args);
 }
+#endif // XK_DEBUG
 
 void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 	static const XkString typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};

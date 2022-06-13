@@ -13,7 +13,7 @@ void __xkErrorHandler(const XkString format, ...) {
 	va_list args;
 	va_start(args, format);
 	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
-	fprintf(stderr, "Platform Error Handler: %s\n", buffer);
+	fprintf(stderr, "XKinetic Error Handler: %s\n", buffer);
 	va_end(args);
 }
 

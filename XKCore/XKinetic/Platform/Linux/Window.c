@@ -5,9 +5,23 @@
 #if defined(XK_LINUX)
 
 #include <string.h>
-#include "xdg-shell-client-protocol.h"
-#include "xdg-decoration-client-protocol.h"
-#include "wl-viewporter-client-protocol.h"
+#include <xkbcommon/xkbcommon.h>
+
+#include "wayland-client-protocol.h"
+#include "wayland-xdg-shell-client-protocol.h"
+#include "wayland-xdg-decoration-client-protocol.h"
+#include "wayland-viewporter-client-protocol.h"
+#include "wayland-relative-pointer-unstable-v1-client-protocol.h"
+#include "wayland-pointer-constraints-unstable-v1-client-protocol.h"
+#include "wayland-idle-inhibit-unstable-v1-client-protocol.h"
+
+#include "wayland-client-protocol-code.h"
+#include "wayland-xdg-shell-client-protocol-code.h"
+#include "wayland-xdg-decoration-client-protocol-code.h"
+#include "wayland-viewporter-client-protocol-code.h"
+#include "wayland-relative-pointer-unstable-v1-client-protocol-code.h"
+#include "wayland-pointer-constraints-unstable-v1-client-protocol-code.h"
+#include "wayland-idle-inhibit-unstable-v1-client-protocol-code.h"
 
 #define XK_WL_DECORATION_WIDTH 4
 #define XK_WL_DECORATION_TOP 24
@@ -225,7 +239,7 @@ XkResult xkWindowInitialize(void) {
 	// Connect Wayland server.
 	_xkPlatform.handle.wlDisplay = wl_display_connect(NULL);
 	if(!_xkPlatform.handle.wlDisplay) {
-		__xkErrorHandle("Failed to connect Wayland display");
+		__xkErrorHandle("Wayland: Failed to connect display");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -233,7 +247,7 @@ XkResult xkWindowInitialize(void) {
 	// Get Wayland display registry.
 	_xkPlatform.handle.wlRegistry = wl_display_get_registry(_xkPlatform.handle.wlDisplay);
 	if(!_xkPlatform.handle.wlRegistry) {
-		__xkErrorHandle("Failed to get Wayland display registry");
+		__xkErrorHandle("Wayland: Failed to get display registry");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -246,21 +260,21 @@ XkResult xkWindowInitialize(void) {
 
 	// Check Wayland compositor register object.
 	if(!_xkPlatform.handle.wlCompositor) {
-		__xkErrorHandle("Failed to create Wayland compositor");
+		__xkErrorHandle("Wayland: Failed to create compositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Check Wayland subcompositor register object.
 	if(!_xkPlatform.handle.wlSubcompositor) {
-		__xkErrorHandle("Failed to create Wayland subcompositor");
+		__xkErrorHandle("Wayland: Failed to create subcompositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Check Xdg base register object.
 	if(!_xkPlatform.handle.xdgBase) {
-		__xkErrorHandle("Failed to create Wayland XDG base");
+		__xkErrorHandle("Wayland: Failed to create XDG base");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -268,7 +282,7 @@ XkResult xkWindowInitialize(void) {
 	// Create Wayland compositor surface.
   _xkPlatform.handle.wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
 	if(!_xkPlatform.handle.wlSurface) {
-		__xkErrorHandle("Failed to create Wayland compositor surface");
+		__xkErrorHandle("Wayland: Failed to create compositor surface");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -310,7 +324,7 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	// Create Wayland window surface.
 	window->handle.wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
   if(!window->handle.wlSurface) {
-		__xkErrorHandle("Failed to create Wayland surface");
+		__xkErrorHandle("Wayland: Failed to create surface");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -365,7 +379,7 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 
 void xkFocusWindow(XkWindow window) {
 	// A Wayland client can not focus.
-	__xkErrorHandle("Wayland platform doesn't support setting the input focus");
+	__xkErrorHandle("Wayland: platform doesn't support setting the input focus");
 }
 
 void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
@@ -387,12 +401,12 @@ void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize 
 
 void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
 	// A Wayland client can not set its position.
-	__xkErrorHandle("Wayland platform doesn't support setting the input position");
+	__xkErrorHandle("Wayland: platform doesn't support setting the input position");
 }
 
 void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
   // A Wayland client is not aware of its position.
-	__xkErrorHandle("Wayland platform doesn't provide the window position");
+	__xkErrorHandle("Wayland: platform doesn't provide the window position");
 }
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
@@ -401,28 +415,26 @@ void xkSetWindowTitle(XkWindow window, const XkString title) {
 
 void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
 	// A Wayland client can not set its icon
-	__xkErrorHandle("Wayland platform doesn't support setting the window icon");
+	__xkErrorHandle("Wayland: platform doesn't support setting the window icon");
 }
 
 void xkPollWindowEvents(void) {
-	//while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
+	while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
 		/// TODO: implementation.
-		//__xkErrorHandler("Wayland display dispatch");
-	//}
+	}
 }
 
 void xkWaitWindowEvents(void) {
-	//while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
+	while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
 		/// TODO: implementation
-		//__xkErrorHandler("Wayland display dispatch");
-	//}
+	}
 }
 
 static XkBool32 __xkXdgCreateSurface(XkWindow window) {
 	// Get Xdg surface from Wayland surface.
 	window->handle.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.handle.xdgBase, window->handle.wlSurface);
 	if(!window->handle.xdgSurface) {
-		__xkErrorHandle("Failed to create Xdg surface");
+		__xkErrorHandle("Wayland: Failed to create Xdg surface");
 		goto _catch;
   }
 
@@ -432,7 +444,7 @@ static XkBool32 __xkXdgCreateSurface(XkWindow window) {
 	// Get Xdg toplevel.
 	window->handle.xdgToplevel = xdg_surface_get_toplevel(window->handle.xdgSurface);
   if(!window->handle.xdgToplevel) {
-		__xkErrorHandle("Failed to create Xdg toplevel");
+		__xkErrorHandle("Wayland: Failed to create Xdg toplevel");
 		goto _catch;
   }
 
