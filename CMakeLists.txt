@@ -24,7 +24,7 @@ endif()
 option(BUILD_TESTS "Build tests applications" OFF)
 
 # Set project build dir.
-set(BUILD_DIR ${PROJECT_SOURCE_DIR}/Target/${CMAKE_BUILD_TYPE})
+set(BUILD_DIR ${PROJECT_SOURCE_DIR}/Target)
 set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR})
 set(LIBRARY_OUTPUT_PATH ${BUILD_DIR})
 
