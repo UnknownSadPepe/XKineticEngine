@@ -1,6 +1,10 @@
 #pragma once
 
+#include <linux/input.h>
+#include <linux/limits.h>
+#include <regex.h>
 #include <wayland-client.h>
+#include <wayland-egl.h>
 #include <wayland-cursor.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-compose.h>
@@ -9,27 +13,39 @@
 #include "XKinetic/Platform/Unix/Internal.h"
 
 typedef struct {
-	struct wl_surface* wlSurface;
-	struct wl_output* wlOutput;
-  struct xdg_surface* xdgSurface;
-	struct xdg_toplevel* xdgToplevel;
-	struct zxdg_toplevel_decoration_v1* xdgDecoration;
-	struct zwp_idle_inhibitor_v1* zwpIdleInhibitor;
+	struct wl_egl_window* 								eglWindow;
+	struct wl_surface* 										wlSurface;
+  struct xdg_surface* 									xdgSurface;
+	struct xdg_toplevel* 									xdgToplevel;
+	struct zxdg_toplevel_decoration_v1* 	xdgDecoration;
+	struct zwp_idle_inhibitor_v1* 				zwpIdleInhibitor;
 
-  struct {
-		struct wl_buffer* wlBuffer;
-    struct {
-			struct wl_surface* wlSurface;
-			struct wl_subsurface* wlSubsurface;
-			struct wp_viewport*   wpViewport;
-		} top, left, right, bottom;
-		XkBool32 serverSide;
-  } decorations;
+	struct zwp_relative_pointer_v1*    		zwpRelativePointer;
+	struct zwp_locked_pointer_v1*      		zwpLockedPointer;
 
 	char*	title;
 } __XkLinuxWindow;
 
 #define XK_PLATFORM_WINDOW __XkLinuxWindow handle
+
+typedef struct {
+	int                     handle;
+	char                    path[PATH_MAX];
+	int                     keyMap[KEY_CNT - BTN_MISC];
+	int                     absMap[ABS_CNT];
+	struct input_absinfo    absInfo[ABS_CNT];
+	int                     hats[4][2];
+} __XkLinuxJoystick;
+
+#define XK_PLATFORM_JOYSTICK __XkLinuxJoystick handle
+
+typedef struct {
+  XkSize 										image_count;
+  struct wl_cursor_image** 	wlImages;
+  char* 										name;
+} __XkLinuxWindowCursor;
+
+#define XK_PLATFORM_WINDOW_CURSOR __XkLinuxWindowCursor handle
 
 typedef struct {
 	struct wl_display* wlDisplay;
@@ -78,11 +94,4 @@ typedef struct {
   unsigned int            xkbModifiers;
 } __XkLinuxPlatform;
 
-typedef struct {
-	struct wl_surface* wlSurface;
-	struct wl_subsurface* wlSubsurface;
-	struct wp_viewport*   wlViewport;
-} __XkLinuxWindowDecoration;
-
 #define XK_PLATFORM __XkLinuxPlatform handle
-

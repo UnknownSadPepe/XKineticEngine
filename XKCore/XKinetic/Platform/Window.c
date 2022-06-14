@@ -1,6 +1,10 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
 
+void xkSetCursorInputMode(XkWindow window, const XkWindowCursorMode mode) {
+	window->cursorMode = mode;
+}
+
 void __xkInputWindowShow(XkWindow window, const XkWindowShow show) {
 	if(window->callbacks.show) {
 		window->callbacks.show(window, show);
@@ -25,7 +29,7 @@ void __xkInputWindowCursor(XkWindow window, const XkFloat64 x, const XkFloat64 y
 	}
 }
 
-void __xkInputWindowCursorEnter(XkWindow window, const XkBool32 enter) {
+void __xkInputWindowCursorEnter(XkWindow window, const XkBool enter) {
 	if(window->callbacks.cursorEnter) {
 		window->callbacks.cursorEnter(window, enter);
 	}
@@ -55,10 +59,16 @@ void __xkInputWindowSize(XkWindow window, const XkSize width, const XkSize heigh
 	}
 }
 
-void __xkInputWindowFocus(XkWindow window, const XkBool32 focused) {
+void __xkInputWindowFocus(XkWindow window, const XkBool focused) {
 	if(window->callbacks.focus) {
 		window->callbacks.focus(window, focused);
 	}
+}
+
+void __xkInputWindowDropFile(XkWindow window, const XkSize count, const XkString* paths) {
+	if(window->callbacks.dropFile) {
+		window->callbacks.dropFile(window, count, paths);
+	}	
 }
 
 void xkSetWindowShowCallback(XkWindow window, const XkWindowShowPfn pfnCallback) {
@@ -101,11 +111,15 @@ void xkSetWindowFocusCallback(XkWindow window, const XkWindowFocusPfn pfnCallbac
 	window->callbacks.focus = pfnCallback;
 }
 
-XkBool32 xkShouldWindowClosed(XkWindow window) {
+void xkSetWindowDropFileCallback(XkWindow window, const XkWindowDropFilePfn pfnCallback) {
+	window->callbacks.dropFile = pfnCallback;	
+}
+
+XkBool xkShouldWindowClosed(XkWindow window) {
 	return(window->closed);
 }
 
-XkBool32 xkShouldWindowShowed(XkWindow window, const XkWindowShow show) {
+XkBool xkShouldWindowShowed(XkWindow window, const XkWindowShow show) {
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT:
 			return(window->activated);

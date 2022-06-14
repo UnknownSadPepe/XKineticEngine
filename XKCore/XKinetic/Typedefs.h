@@ -16,7 +16,7 @@ typedef enum {
 
 typedef void* XkHandle;
 
-typedef unsigned int XkBool32;
+typedef unsigned int XkBool;
 
 #define XK_FALSE 0
 #define XK_TRUE 1
@@ -73,7 +73,6 @@ typedef unsigned long int XkSize;
 
 #define XK_SIZE_MIN 0
 #if defined(__LP64__)
-
 	#define XK_SIZE_MAX (0xffffffffffffffffu)
 #elif defined(__LP64__)
 	#define XK_SIZE_MAX (0xffffffffu)

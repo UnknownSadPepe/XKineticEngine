@@ -27,10 +27,31 @@ typedef struct {
 typedef struct {
 	HWND handle;
 
-  XkBool32 cursorTracked;
+  XkBool cursorTracked;
 } __XkWin32Window;
 
 #define XK_PLATFORM_WINDOW __XkWin32Window handle
+
+typedef struct {
+    int                     offset;
+    int                     type;
+} __Win32JoystickObject;
+
+typedef struct {
+	__Win32JoystickObject*  objects;
+	int                     objectCount;
+	IDirectInputDevice8W*   device;
+	DWORD                   index;
+	GUID                    guid;
+} __XkWin32Joystick;
+
+#define XK_PLATFORM_JOYSTICK __XkWin32Joystick handle
+
+typedef struct {
+	HCURSOR handle;
+} __XkWin32WindowCursor;
+
+#define XK_PLATFORM_WINDOW_CURSOR __XkWin32WindowCursor handle
 
 typedef struct {
 	HINSTANCE instance;

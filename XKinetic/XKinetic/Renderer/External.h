@@ -27,10 +27,10 @@ typedef enum {
 } XkBufferUsage;
 
 typedef struct {
-	XkBool32 blending;
-	XkBool32 depthTest;
-	XkBool32 stencilTest;
-	XkBool32 scissorTest;
+	XkBool blending;
+	XkBool depthTest;
+	XkBool stencilTest;
+	XkBool scissorTest;
 } XkRendererConfig;
 
 typedef struct {

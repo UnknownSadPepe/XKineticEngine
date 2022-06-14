@@ -33,15 +33,9 @@
 #include "wayland-pointer-constraints-unstable-v1-client-protocol-code.h"
 #include "wayland-idle-inhibit-unstable-v1-client-protocol-code.h"
 
-#define XK_WL_DECORATION_WIDTH 4
-#define XK_WL_DECORATION_TOP 24
-#define XK_WL_DECORATION_VERTICAL (XK_WL_DECORATION_TOP + XK_WL_DECORATION_WIDTH)
-#define XK_WL_DECORATION_HORIZONTAL (2 * XK_WL_DECORATION_WIDTH)
-
-static XkBool32 __xkXdgCreateSurface(XkWindow);
-static XkBool32 __xkXdgCreateDecorations(XkWindow);
-static void __xkXdgDestroyDecorations(XkWindow);
-static void __xkZWPSetIdleInhibitor(XkWindow, XkBool32);
+static XkBool __xkXdgCreateSurface(XkWindow);
+static void __xkXdgSetDecorations(XkWindow);
+static void __xkZwpSetIdleInhibitor(XkWindow, XkBool);
 
 static void __xkWlCreateKeycodes(void);
 
@@ -61,16 +55,16 @@ static const struct xdg_surface_listener _xkXdgSurfaceListener = {
   __xkXdgSurfaceHandleConfigure
 };
 
-static void __xkXdgToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgToplevel, int32_t width, int32_t height, struct wl_array* states) {
+static void __xkXdgToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgToplevel, int32_t width, int32_t height, struct wl_array* wlStates) {
 	XkWindow window = (XkWindow)data;
 
-  XkBool32 maximized = XK_FALSE;
-  XkBool32 fullscreen = XK_FALSE;
-  XkBool32 activated = XK_FALSE;
+  XkBool maximized = XK_FALSE;
+  XkBool fullscreen = XK_FALSE;
+  XkBool activated = XK_FALSE;
 
 	uint32_t* state;
-	wl_array_for_each(state, states) {
-		switch (*state) {
+	wl_array_for_each(state, wlStates) {
+		switch(*state) {
 			case XDG_TOPLEVEL_STATE_MAXIMIZED: maximized = XK_TRUE; break;
       case XDG_TOPLEVEL_STATE_FULLSCREEN: fullscreen = XK_TRUE; break;
       case XDG_TOPLEVEL_STATE_RESIZING: break;
@@ -90,8 +84,9 @@ static void __xkXdgToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
 		}
 	}
 
-  if(fullscreen && activated)
+  if(fullscreen && activated) {
 		window->fullscreen = XK_TRUE;
+  }
 }
 
 static void __xkXdgToplevelHandleClose(void* data, struct xdg_toplevel* xdgToplevel) {
@@ -105,12 +100,7 @@ static const struct xdg_toplevel_listener _xkXdgToplevelListener = {
 };
 
 static void __xkXdgDecorationHandleConfigure(void* data, struct zxdg_toplevel_decoration_v1* xdgDecoration, uint32_t mode) {
-  XkWindow window = (XkWindow)data;
-
-  window->handle.decorations.serverSide = (mode == ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
-
-  if(!window->handle.decorations.serverSide)
-		__xkXdgCreateDecorations(window);
+	/// NOTE: nothing to do here.
 }
 
 static const struct zxdg_toplevel_decoration_v1_listener __xkXdgDecorationListener = {
@@ -123,39 +113,39 @@ static void __xkWlRegistryGlobal(void* data, struct wl_registry* wlRegistry, uin
 		_xkPlatform.handle.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
 	} else if(xkCompareString((XkString)interface, "wl_subcompositor")) {
 		// Wayland subcompositor.
-		_xkPlatform.handle.wlSubcompositor = wl_registry_bind(wlRegistry, name, &wl_subcompositor_interface, version);
+		_xkPlatform.handle.wlSubcompositor = wl_registry_bind(wlRegistry, name, &wl_subcompositor_interface, 1);
 	} else if(xkCompareString((XkString)interface, "wl_shm")) { 
 		// Wayland shared memory.
-		_xkPlatform.handle.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, version);
+		_xkPlatform.handle.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, 1);
   } else if(xkCompareString((XkString)interface, "wl_seat")) {
 		// Wayland seat.
-    _xkPlatform.handle.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, version);
+    _xkPlatform.handle.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, 4);
 	} else if(xkCompareString((XkString)interface, "wl_output")) {
 		// Wayland output.
 			_xkPlatform.handle.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
   } else if(xkCompareString((XkString)interface, "xdg_wm_base")) {
 		// Xdg Base.
-    _xkPlatform.handle.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, version);
+    _xkPlatform.handle.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, 1);
 		xdg_wm_base_add_listener(_xkPlatform.handle.xdgBase, &_xkXdgWmBaseListener, NULL);
   } else if(xkCompareString((XkString)interface, "zxdg_decoration_manager_v1")) {
 		// Xdg decoration manager.
-    _xkPlatform.handle.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, version);
+    _xkPlatform.handle.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, 1);
   } else if(xkCompareString((XkString)interface, "wp_viewporter")) {
 		// Wp viewporter.
-    _xkPlatform.handle.wpViewporter = wl_registry_bind(wlRegistry, name, &wp_viewporter_interface, version);
+    _xkPlatform.handle.wpViewporter = wl_registry_bind(wlRegistry, name, &wp_viewporter_interface, 1);
   } else if(xkCompareString((XkString)interface, "zwp_relative_pointer_manager_v1")) {
   	// ZWp relative pointer manager.
-     _xkPlatform.handle.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, version);
+     _xkPlatform.handle.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, 1);
   } else if (xkCompareString((XkString)interface, "zwp_pointer_constraints_v1")) {
   	// ZWp pointer constraints.
-    _xkPlatform.handle.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, version);
+    _xkPlatform.handle.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, 1);
   } else if (xkCompareString((XkString)interface, "zwp_idle_inhibit_manager_v1")) {
   	// ZWp idle inhibit manager.
-    _xkPlatform.handle.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, version);
+    _xkPlatform.handle.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, 1);
   } else if(xkCompareString((XkString)interface, "wl_data_device_manager") == 0) {
   	// Wayland data device manager.
 		if(!_xkPlatform.handle.wlDataDeviceManager) {
-			_xkPlatform.handle.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, version);
+			_xkPlatform.handle.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, 1);
     }
 	}
 }
@@ -397,12 +387,17 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	window->xPos = 0;
 	window->yPos = 0;
 
+	window->decorated = XK_FALSE;
+	window->resizable = XK_FALSE;
+	window->floating = XK_FALSE;
+	window->fullscreen = XK_FALSE;
 	window->maximized = XK_FALSE;
 	window->minimized = XK_FALSE;
 
 	if(hint & XK_WINDOW_DECORATED_BIT) window->decorated = XK_TRUE;
 	if(hint & XK_WINDOW_RESIZABLE_BIT) window->resizable = XK_TRUE;
 	if(hint & XK_WINDOW_FLOATING_BIT) window->floating = XK_TRUE;
+	if(hint & XK_WINDOW_FULLSCREEN_BIT) window->fullscreen = XK_TRUE;
 
 	// Create Wayland window surface.
 	window->handle.wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
@@ -418,9 +413,17 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	// Set Wayland surface user data.
 	wl_surface_set_user_data(window->handle.wlSurface, window);
 
-	if(window->decorated) {
-		__xkXdgCreateDecorations(window);
+	// Create Wayland EGL window.
+	window->handle.eglWindow = wl_egl_window_create(window->handle.wlSurface, (int)width, (int)height);
+  if(!window->handle.wlSurface) {
+		__xkErrorHandle("Wayland: Failed to create EGL window");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
 	}
+
+	// Commit pending Wayland surface state.
+  wl_surface_commit(window->handle.wlSurface);
+  wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
 
 _catch:
 	return(result);
@@ -432,13 +435,8 @@ void xkDestroyWindow(XkWindow window) {
 		zwp_idle_inhibitor_v1_destroy(window->handle.zwpIdleInhibitor);
 	}
 
-  __xkXdgDestroyDecorations(window);
 	if(window->handle.xdgDecoration) {
 		zxdg_toplevel_decoration_v1_destroy(window->handle.xdgDecoration);
-	}
-
-	if(window->handle.decorations.wlBuffer) {
-		wl_buffer_destroy(window->handle.decorations.wlBuffer);
 	}
 
 	if(window->handle.xdgToplevel) {
@@ -453,12 +451,18 @@ void xkDestroyWindow(XkWindow window) {
 		wl_surface_destroy(window->handle.wlSurface);
 	}
 
+	if(window->handle.eglWindow) {
+		wl_egl_window_destroy(window->handle.eglWindow);
+	}
+
+
 	xkFreeMemory(window->handle.title);
 	xkFreeMemory(window);
 }
 
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
 	/// TODO: implementation
+
 	if(!window->handle.xdgToplevel) {
 		__xkXdgCreateSurface(window);
 	}
@@ -467,18 +471,20 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 		case XK_WINDOW_SHOW_DEFAULT:
 			if(window->fullscreen) {
 				xdg_toplevel_unset_fullscreen(window->handle.xdgToplevel);
+				window->fullscreen = XK_FALSE;
 			}
 			if(window->maximized) {
 				xdg_toplevel_unset_maximized(window->handle.xdgToplevel);
+				window->maximized = XK_FALSE;
 			}
-			__xkXdgCreateDecorations(window);
-			__xkZWPSetIdleInhibitor(window, XK_FALSE);
+			__xkZwpSetIdleInhibitor(window, XK_FALSE);
+			__xkXdgSetDecorations(window);
 			break;
 
 		case XK_WINDOW_SHOW_MAXIMIZED:
 			xdg_toplevel_set_maximized(window->handle.xdgToplevel);
-			__xkZWPSetIdleInhibitor(window, XK_FALSE);
-			__xkXdgCreateDecorations(window);
+			__xkZwpSetIdleInhibitor(window, XK_FALSE);
+			__xkXdgSetDecorations(window);
 			window->maximized = XK_TRUE;
 			break;
 
@@ -487,12 +493,9 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 			break;
 
 		case XK_WINDOW_SHOW_FULLSCREEN:
-      xdg_toplevel_set_fullscreen(window->handle.xdgToplevel, window->handle.wlOutput);
-      __xkZWPSetIdleInhibitor(window, XK_TRUE);
-      if(window->handle.decorations.serverSide) {
-      	__xkXdgDestroyDecorations(window);
-      }
-      window->fullscreen = XK_TRUE;
+			xdg_toplevel_set_fullscreen(window->handle.xdgToplevel, _xkPlatform.handle.wlOutput);
+    	__xkZwpSetIdleInhibitor(window, XK_TRUE);
+    	window->fullscreen = XK_TRUE;
 			break;
 
 		case XK_WINDOW_HIDE:
@@ -500,6 +503,10 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
       wl_surface_commit(window->handle.wlSurface);
 			break;
 	}
+
+	// Commit pending Wayland surface state.
+ 	wl_surface_commit(window->handle.wlSurface);
+ 	wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
 }
 
 void xkFocusWindow(XkWindow window) {
@@ -511,32 +518,6 @@ void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
 	/// TODO: implementation
 	window->width = width;
 	window->width = height;
-
-	// Top decoration.
-	if(window->handle.decorations.top.wlSurface) {
-    wp_viewport_set_destination(window->handle.decorations.top.wpViewport, window->width, XK_WL_DECORATION_TOP);
-    wl_surface_commit(window->handle.decorations.top.wlSurface);
-	}
-
-  // Left decoration.
-	if(window->handle.decorations.left.wlSurface) {
-    wp_viewport_set_destination(window->handle.decorations.left.wpViewport, XK_WL_DECORATION_WIDTH, window->height + XK_WL_DECORATION_TOP);
-    wl_surface_commit(window->handle.decorations.left.wlSurface);
-	}
-
-	// Right decoration.
-	if(window->handle.decorations.right.wlSurface) {    
-		wl_subsurface_set_position(window->handle.decorations.right.wlSubsurface, window->width, -XK_WL_DECORATION_TOP);
-    wp_viewport_set_destination(window->handle.decorations.right.wpViewport, XK_WL_DECORATION_WIDTH, window->height + XK_WL_DECORATION_TOP);
-    wl_surface_commit(window->handle.decorations.right.wlSurface);
-  }
-
-	// Bottom decoration.
-	if(window->handle.decorations.bottom.wlSurface) {    
-    wl_subsurface_set_position(window->handle.decorations.bottom.wlSubsurface, -XK_WL_DECORATION_WIDTH, window->height);
-    wp_viewport_set_destination(window->handle.decorations.bottom.wpViewport, window->width + XK_WL_DECORATION_HORIZONTAL, XK_WL_DECORATION_WIDTH);
-    wl_surface_commit(window->handle.decorations.bottom.wlSurface);
-	}
 }
 
 void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
@@ -580,6 +561,37 @@ void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pI
 	__xkErrorHandle("Wayland: platform doesn't support setting the window icon");
 }
 
+void xkSetCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
+	zwp_locked_pointer_v1_set_cursor_position_hint(window->handle.zwpLockedPointer, wl_fixed_from_double(xPos), wl_fixed_from_double(yPos));
+	wl_surface_commit(window->handle.wlSurface);
+}
+
+void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
+	if(pXPos) {
+		*pXPos = window->xCursorPos;
+	}
+	if(pYPos) {
+		*pYPos = window->yCursorPos;
+	}
+}
+
+XkResult xkCreateWindowCursor(XkWindowCursor* pCursor, XkWindowIcon* pIcon, const XkSize xhot, const XkSize yhot) {
+	XkResult result = XK_SUCCESS;
+
+	/// TODO: implementation.
+
+_catch:
+	return(result);
+}
+
+void xkSetWindowCursor(XkWindow window, XkWindowCursor cursor) {
+	/// TODO: implementation.
+}
+
+void xkDestroyWindowCursor(XkWindowCursor cursor) {
+	/// TODO: implementation.
+}
+
 void xkPollWindowEvents(void) {
 	while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
 		/// TODO: implementation.
@@ -592,10 +604,13 @@ void xkWaitWindowEvents(void) {
 	}
 }
 
-static XkBool32 __xkXdgCreateSurface(XkWindow window) {
+static XkBool __xkXdgCreateSurface(XkWindow window) {
+	XkBool result = XK_TRUE;
+
 	// Get Xdg surface from Wayland surface.
 	window->handle.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.handle.xdgBase, window->handle.wlSurface);
 	if(!window->handle.xdgSurface) {
+		result = XK_FALSE;
 		__xkErrorHandle("Wayland: Failed to create Xdg surface");
 		goto _catch;
   }
@@ -606,6 +621,7 @@ static XkBool32 __xkXdgCreateSurface(XkWindow window) {
 	// Get Xdg toplevel.
 	window->handle.xdgToplevel = xdg_surface_get_toplevel(window->handle.xdgSurface);
   if(!window->handle.xdgToplevel) {
+		result = XK_FALSE;
 		__xkErrorHandle("Wayland: Failed to create Xdg toplevel");
 		goto _catch;
   }
@@ -615,209 +631,40 @@ static XkBool32 __xkXdgCreateSurface(XkWindow window) {
 
 	// Set Xdg window title.
   xdg_toplevel_set_title(window->handle.xdgToplevel, window->handle.title);
-
+			
 	// Commit pending Wayland surface state.
   wl_surface_commit(window->handle.wlSurface);
   wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
 
-	return(XK_FALSE);
-
 _catch:
-	return(XK_TRUE);
+	return(result);
 }
 
-static int __xkWlCreateTmpfileCloexec(char* tmpname) {
-	/*int fd = mkostemp(tmpname, O_CLOEXEC);
-	if(fd >= 0) {
-		unlink(tmpname);
-	}
-*/
-	return(-1);
-}
-
-static int __xkWlCreateAnonymousFile(int size) {
-	/*static const char template[] = "/xkinetic-shared-XXXXXX";
-
-  int fd = shm_open(SHM_ANON, O_RDWR | O_CLOEXEC, 0600);
-	if (fd < 0) {
-		const char* path = getenv("XDG_RUNTIME_DIR");
-		if (!path) {
-			return(-1);
-		}
-
-		char* name = xkAllocateMemory(xkStringLength(path) + sizeof(template));
-		xkCopyString(name, path);
-		xkStringConcat(name, template);
-
-		fd = __xkWlCreateTmpfileCloexec(name);
-		xkFreeMemory(name);
-		if(fd < 0) {
-			return(-1);
-		}
-	}
-
-	int ret = ftruncate(fd, size);
-	if(ret != 0) {
-		close(fd);
-		return(-1);
-	}
-*/
-	return(-1);
-}
-
-static void __xkXdgCreateDecoration(struct wl_subsurface* wlSubsurface, struct wl_surface* wlSurface, struct wp_viewport* wpViewport, struct wl_surface* wlParent, struct wl_buffer* wlBuffer, XkBool32 opaque, XkInt32 x, XkInt32 y, XkInt32 width, XkInt32 height) {
-  wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
-  wlSubsurface = wl_subcompositor_get_subsurface(_xkPlatform.handle.wlSubcompositor, wlSurface, wlParent);
-  wl_subsurface_set_position(wlSubsurface, (int)x, (int)y);
-  wpViewport = wp_viewporter_get_viewport(_xkPlatform.handle.wpViewporter, wlSurface);
-  wp_viewport_set_destination(wpViewport, (int)width, (int)height);
-  wl_surface_attach(wlSurface, wlBuffer, 0, 0);
-
-  if(opaque) {
-		struct wl_region* wlRegion = wl_compositor_create_region(_xkPlatform.handle.wlCompositor);
-    wl_region_add(wlRegion, 0, 0, width, height);
-    wl_surface_set_opaque_region(wlSurface, wlRegion);
-    wl_surface_commit(wlSurface);
-    wl_region_destroy(wlRegion);
-  } else {
-		wl_surface_commit(wlSurface);
-	}
-}
-
-static struct wl_buffer* __xkWlCreateShmBuffer(const XkWindowIcon* image) {
-	struct wl_shm_pool* wlPool;
-  struct wl_buffer* wlBuffer;
-  int stride = image->width * 4;
-  int length = image->width * image->height * 4;
-  XkHandle data;
-
-  const int fd = __xkWlCreateAnonymousFile(length);
-  if(fd < 0) {
-		__xkErrorHandle("Wayland: Failed to create anonymous file");
-    return(NULL);
-  }
-
-  data = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if(data == MAP_FAILED) {
-    __xkErrorHandle("Wayland: Failed to map anonymous file");
-    //close(fd);
-    return(NULL);
-  }
-
-  wlPool = wl_shm_create_pool(_xkPlatform.handle.wlShm, fd, length);
-
-  //close(fd);
-  XkUInt8* source = (XkUInt8*) image->pixels;
-  XkUInt8* target = data;
-	for(unsigned long i = 0;  i < image->width * image->height;  i++, source += 4) {
-		unsigned int alpha = source[3];
-
-    *target++ = (XkUInt8) ((source[2] * alpha) / 255);
-    *target++ = (XkUInt8) ((source[1] * alpha) / 255);
-    *target++ = (XkUInt8) ((source[0] * alpha) / 255);
-    *target++ = (XkUInt8) alpha;
-  }
-
-  wlBuffer = wl_shm_pool_create_buffer(wlPool, 0, image->width, image->height, stride, WL_SHM_FORMAT_ARGB8888);
-  munmap(data, length);
-  wl_shm_pool_destroy(wlPool);
-
-  return(wlBuffer);
-}
-
-static XkBool32 __xkXdgCreateDecorations(XkWindow window) {
+static void __xkXdgSetDecorations(XkWindow window) {
 	if(_xkPlatform.handle.xdgDecorationManager) {
 		window->handle.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.handle.xdgDecorationManager, window->handle.xdgToplevel);
   	zxdg_toplevel_decoration_v1_add_listener(window->handle.xdgDecoration, &__xkXdgDecorationListener, window);
   	zxdg_toplevel_decoration_v1_set_mode(window->handle.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
   } else {
-    window->handle.decorations.serverSide = XK_FALSE;
-
-    unsigned char data[] = { 224, 224, 224, 255 };
-    const XkWindowIcon image = { 1, 1, data };
-    XkBool32 opaque = (data[3] == 255);
-
-    if(!window->handle.decorations.wlBuffer)
-    	window->handle.decorations.wlBuffer = __xkWlCreateShmBuffer(&image);
-
-    if(!window->handle.decorations.wlBuffer) goto _catch;
-
-    // Create top decoration.
-    __xkXdgCreateDecoration(window->handle.decorations.top.wlSubsurface,
-    												window->handle.decorations.top.wlSurface,
-    												window->handle.decorations.top.wpViewport,
-    												window->handle.wlSurface,
-                     				window->handle.decorations.wlBuffer, 
-                     				opaque,
-                     				0, 
-                     				-XK_WL_DECORATION_TOP,
-                     				window->width, 
-                     				XK_WL_DECORATION_TOP);
-
-    // Create left decoration.
-    __xkXdgCreateDecoration(window->handle.decorations.left.wlSubsurface, 
-    												window->handle.decorations.top.wlSurface,
-    												window->handle.decorations.top.wpViewport,
-    												window->handle.wlSurface,
-                     				window->handle.decorations.wlBuffer, 
-                     				opaque,
-                     				-XK_WL_DECORATION_WIDTH, 
-                     				-XK_WL_DECORATION_TOP,
-                     				XK_WL_DECORATION_WIDTH, 
-                     				window->height + XK_WL_DECORATION_TOP);
-
-    // Create right decoration.
-    __xkXdgCreateDecoration(window->handle.decorations.right.wlSubsurface, 
-    												window->handle.decorations.top.wlSurface,
-    												window->handle.decorations.top.wpViewport,
-    												window->handle.wlSurface,
-                     				window->handle.decorations.wlBuffer, 
-                     				opaque,
-                     				window->width, 
-                     				-XK_WL_DECORATION_TOP,
-                     				XK_WL_DECORATION_WIDTH, 
-                     				window->height + XK_WL_DECORATION_TOP);
-
-    // Create bottom decoration.
-    __xkXdgCreateDecoration(window->handle.decorations.bottom.wlSubsurface,
-    												window->handle.decorations.bottom.wlSurface,
-    												window->handle.decorations.bottom.wpViewport,
-    												window->handle.wlSurface,
-                     				window->handle.decorations.wlBuffer, 
-                     				opaque,
-                     				-XK_WL_DECORATION_WIDTH, 
-                     				window->height,
-                     				window->width + XK_WL_DECORATION_HORIZONTAL, 
-                     				XK_WL_DECORATION_WIDTH);
+		__xkErrorHandle("Wayland: Failed to create XDG decorations");
+		goto _catch;
   }
 
 _catch:
-	return(XK_TRUE);
+	return;
 }
 
-static void __xkXdgDestroyDecoration(struct wl_subsurface* wlSubsurface, struct wl_surface* wlSurface, struct wp_viewport* wpViewport) {
-	wl_subsurface_destroy(wlSubsurface);
-	wl_surface_destroy(wlSurface);
-	wp_viewport_destroy(wpViewport);
-}
-
-static void __xkXdgDestroyDecorations(XkWindow window) {
-  __xkXdgDestroyDecoration(window->handle.decorations.top.wlSubsurface, window->handle.decorations.top.wlSurface, window->handle.decorations.top.wpViewport);
-  __xkXdgDestroyDecoration(window->handle.decorations.left.wlSubsurface, window->handle.decorations.left.wlSurface, window->handle.decorations.left.wpViewport);
-  __xkXdgDestroyDecoration(window->handle.decorations.right.wlSubsurface, window->handle.decorations.right.wlSurface, window->handle.decorations.right.wpViewport);
-  __xkXdgDestroyDecoration(window->handle.decorations.bottom.wlSubsurface, window->handle.decorations.bottom.wlSurface, window->handle.decorations.bottom.wpViewport);
-}
-
-static void __xkZWPSetIdleInhibitor(XkWindow window, XkBool32 enabled) {
+static void __xkZwpSetIdleInhibitor(XkWindow window, XkBool enabled) {
 	if(enabled && !window->handle.zwpIdleInhibitor && _xkPlatform.handle.zwpIdleInhibitManager) {
 		window->handle.zwpIdleInhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(_xkPlatform.handle.zwpIdleInhibitManager, window->handle.wlSurface);
+
 		if(!window->handle.zwpIdleInhibitor) {
 			__xkErrorHandle("Wayland: Failed to create idle inhibitor");
 			goto _catch;
-    } else if(!enabled && window->handle.zwpIdleInhibitor) {
+		}
+  } else if(!enabled && window->handle.zwpIdleInhibitor) {
       zwp_idle_inhibitor_v1_destroy(window->handle.zwpIdleInhibitor);
       window->handle.zwpIdleInhibitor = XK_NULL_HANDLE;
-    }
   }
 
 _catch:

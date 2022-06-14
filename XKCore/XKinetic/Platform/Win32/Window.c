@@ -20,7 +20,7 @@ static const char XK_WIN32_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
 static DWORD __xkWin32GetWindowStyle(const XkWindow);
 static DWORD __xkWin32GetWindowExStyle(const XkWindow);
 static void __xkWin32GetFullWindowSize(DWORD, DWORD, int, int, int*, int*);
-static HICON __xkWin32CreateIcon(const XkWindowIcon*, int, int, XkBool32);
+static HICON __xkWin32CreateIcon(const XkWindowIcon*, int, int, XkBool);
 static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
 static LRESULT CALLBACK __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
 static XkWindowMod __xkWin32GetKeyMod(void);
@@ -207,6 +207,78 @@ void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pI
   SendMessageW(window->handle.handle, WM_SETICON, ICON_SMALL, (LPARAM) smallIcon);
 }
 
+void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
+  // A Wayland client can not set its icon
+  __xkErrorHandle("Wayland: platform doesn't support setting the window icon");
+}
+
+void xkSetCursorPosition(XkWindow, const XkFloat64 xPos, const XkFloat64 yPos) {
+  POINT position = {(int)xPos, (int)yPos};
+
+  // Store the new position so it can be recognized later
+  window->win32.lastCursorPosX = position.x;
+  window->win32.lastCursorPosY = position.y;
+
+  ClientToScreen(window->handle.handle, &position);
+  SetCursorPos(position.x, position.y);
+}
+
+void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
+  POINT position;
+
+  if(GetCursorPos(&position)) {
+    ScreenToClient(window->handle.handle, &position);
+
+    if(pXPos) {
+      *pXPos = position.x;     
+    }
+
+    if(pYPos) {
+      *pYPos = position.y;
+    }
+  }
+}
+
+XkResult xkCreateWindowCursor(XkWindowCursor* pCursor, XkWindowIcon* pIcon, const XkSize xhot, const XkSize yhot) {
+  XkResult result = XK_SUCCESS;
+
+  *pCursor = xkAllocateMemory(sizeof(struct XkWindowCursor));
+  if(!(*pCursor)) {
+    result = XK_ERROR_BAD_ALLOCATE;
+    goto _catch; 
+  }
+
+  XkWindowCursor cursor = *pCursor;
+
+  // Create Win32 cursor.
+  cursor->handle.handle = (HCURSOR)__xkWin32CreateIcon(pIcon, xhot, yhot, XK_FALSE);
+  if(!cursor->handle.handle) {
+    __xkErrorHandle("Win32: Failed to create cursor");
+    result = XK_ERROR_UNKNOWN;
+    goto _catch;
+  }
+
+_catch:
+  return(result);
+}
+
+void xkSetWindowCursor(XkWindow window, XkWindowCursor cursor) {
+  if(window->cursorMode == GLFW_CURSOR_NORMAL) {
+    if(window->cursor) {
+      SetCursor(window->cursor->handle.handle);
+    } else {
+      SetCursor(LoadCursorW(NULL, IDC_ARROW));
+    }        
+  } else {
+    SetCursor(NULL);
+  }
+}
+
+void xkDestroyWindowCursor(XkWindowCursor cursor) {
+  DestroyIcon((HICON)cursor->handle.handle);
+}
+
+
 void xkPollWindowEvents(void) {
 	MSG msg;
 
@@ -268,7 +340,7 @@ static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, cons
   return(pSelect);
 }
 
-static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, const XkInt32 yHot, const XkBool32 icon) {
+static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, const XkInt32 yHot, const XkBool icon) {
 	XkUInt8* pTarget = NULL;
 	XkUInt8* pSource = pIcon->pixels;
 
@@ -480,8 +552,8 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hwindow, UINT message, WPARAM w
 		case WM_SIZE: {
 			const int width = LOWORD(lParam);
       const int height = HIWORD(lParam);
-      const XkBool32 minimized = wParam == SIZE_MINIMIZED;
-      const XkBool32 maximized = wParam == SIZE_MAXIMIZED || (window->maximized && wParam != SIZE_RESTORED);
+      const XkBool minimized = wParam == SIZE_MINIMIZED;
+      const XkBool maximized = wParam == SIZE_MAXIMIZED || (window->maximized && wParam != SIZE_RESTORED);
 
 			if(window->minimized != minimized) {
         __xkInputWindowShow(window, XK_WINDOW_SHOW_MINIMIZED);

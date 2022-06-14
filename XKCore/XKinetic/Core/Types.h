@@ -2,19 +2,19 @@
 
 #include "XKinetic/XKCore.h"
 
-XK_INLINE XkBool32 xkAlbet(const XkInt32 chr) {
+XK_INLINE XkBool xkAlbet(const XkInt32 chr) {
 	return((XkUInt32)chr | 32) - 'a' < 26;
 }
 
-XK_INLINE XkBool32 xkDigit(const XkInt32 chr) {
+XK_INLINE XkBool xkDigit(const XkInt32 chr) {
 	return(XkUInt32)chr - '0' < 10;
 }
 
-XK_INLINE XkBool32 xkAlnum(const XkInt32 chr) {
+XK_INLINE XkBool xkAlnum(const XkInt32 chr) {
 	return(xkAlbet(chr) || xkDigit(chr));
 }
 
-XK_INLINE XkBool32 xkDelim(const XkChar chr, XkString delim) {
+XK_INLINE XkBool xkDelim(const XkChar chr, XkString delim) {
 	while(*delim) {
 		if(chr == *delim) {
 			return(XK_TRUE);
@@ -24,7 +24,7 @@ XK_INLINE XkBool32 xkDelim(const XkChar chr, XkString delim) {
 	return(XK_FALSE);
 }
 
-XK_INLINE XkBool32 xkWDelim(const XkWChar chr, XkWString delim) {
+XK_INLINE XkBool xkWDelim(const XkWChar chr, XkWString delim) {
 	while(*delim) {
 		if(chr == *delim) {
 			return(XK_TRUE);
@@ -34,11 +34,11 @@ XK_INLINE XkBool32 xkWDelim(const XkWChar chr, XkWString delim) {
 	return(XK_FALSE);
 }
 
-XK_INLINE XkBool32 xkLower(const XkInt32 chr) {
+XK_INLINE XkBool xkLower(const XkInt32 chr) {
 	return((XkUInt32)chr - 'a' < 26);
 }
 
-XK_INLINE XkBool32 xkUpper(const XkInt32 chr) {
+XK_INLINE XkBool xkUpper(const XkInt32 chr) {
 	return((XkUInt32)chr - 'A' < 26);
 }
 

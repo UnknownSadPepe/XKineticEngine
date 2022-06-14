@@ -6,10 +6,10 @@ const char* _xkVkDeviceExtensions[] = {
 
 const uint32_t _xkVkDeviceExtensionCount = 1;
 
-static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice);
-static XkBool32 __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const, const VkPhysicalDevice, const VkSurfaceKHR);
+static XkBool __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice);
+static XkBool __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const, const VkPhysicalDevice, const VkSurfaceKHR);
 static uint32_t __xkVkScorePhysicalDevice(const VkPhysicalDevice);
-static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice, const VkSurfaceKHR);
+static XkBool __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice, const VkSurfaceKHR);
 static VkPhysicalDevice __xkVkChoosePhysicalDevice(const VkPhysicalDevice*, const uint32_t);
 
 XkResult __xkVkPickPhysicalDevice(void) {
@@ -58,8 +58,8 @@ _catch:
   return(result);
 }
 
-static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice vkPhysicalDevice) {
-  XkBool32 result = XK_TRUE; 
+static XkBool __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice vkPhysicalDevice) {
+  XkBool result = XK_TRUE; 
 
   // Get Vulkan device extension properties count.
   uint32_t availableExtensionPropertiesCount = 0;
@@ -81,7 +81,7 @@ static XkBool32 __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevic
   const char* requiredExtension = XK_NULL_HANDLE;
 
   // Helper boolean value.
-  XkBool32 availableExtensionFind = XK_FALSE;
+  XkBool availableExtensionFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVkDeviceExtensionCount; i++) {
     requiredExtension = _xkVkDeviceExtensions[i];
@@ -112,8 +112,8 @@ _catch:
   return(result);
 }
 
-static XkBool32 __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const pFamilyIndices, const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
-  XkBool32 result = XK_TRUE; 
+static XkBool __xkVkFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const pFamilyIndices, const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
+  XkBool result = XK_TRUE; 
 
   // Get Vulkan queue family propesties count.
   uint32_t queueFamilyPropertiesCount = 0;
@@ -198,19 +198,19 @@ _catch:
   return(result);
 }
 
-static XkBool32 __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
-  XkBool32 result = XK_TRUE; 
+static XkBool __xkVkPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
+  XkBool result = XK_TRUE; 
 
   // Check Vulkan queue families support
   __XkVkQueueFamilyIndices familyIndices;
-  XkBool32 queueFamiliesSupport = __xkVkFindQueueFamilyIndices(&familyIndices, vkPhysicalDevice, vkSurface);
+  XkBool queueFamiliesSupport = __xkVkFindQueueFamilyIndices(&familyIndices, vkPhysicalDevice, vkSurface);
   if(!queueFamiliesSupport) {
     result = XK_FALSE;
     goto _catch;
   }
 
   // Check Vulkan device extensions support.
-  XkBool32 extensionsSupport = __xkVkCheckPhysicalDeviceExtensionsSupport(vkPhysicalDevice);
+  XkBool extensionsSupport = __xkVkCheckPhysicalDeviceExtensionsSupport(vkPhysicalDevice);
   if(!extensionsSupport) {
     result = XK_FALSE;
     goto _catch;

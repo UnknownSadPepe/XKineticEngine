@@ -33,8 +33,8 @@ const char* _xkVkInstanceLayers[] = {
 const uint32_t _xkVkInstanceLayerCount = 0;
 #endif // XKVULKAN_DEBUG
 
-static XkBool32 __xkVkCheckInstanceExtensionsSupport(void);
-static XkBool32 __xkVkCheckInstanceLayersSupport(void);
+static XkBool __xkVkCheckInstanceExtensionsSupport(void);
+static XkBool __xkVkCheckInstanceLayersSupport(void);
 
 XkResult __xkVkCreateInstance(void) {
   XkResult result = XK_SUCCESS;
@@ -100,8 +100,8 @@ void __xkVkDestroyInstance(void) {
   vkDestroyInstance(_xkVkContext.vkInstance, VK_NULL_HANDLE);
 }
 
-static XkBool32 __xkVkCheckInstanceExtensionsSupport(void) {
-  XkBool32 result = XK_TRUE; 
+static XkBool __xkVkCheckInstanceExtensionsSupport(void) {
+  XkBool result = XK_TRUE; 
 
   // Get Vulkan instance extension properties count.
   uint32_t availableExtensionPropertiesCount = 0;
@@ -123,7 +123,7 @@ static XkBool32 __xkVkCheckInstanceExtensionsSupport(void) {
   const char* requiredExtension = XK_NULL_HANDLE;
 
   // Helper boolean value.
-  XkBool32 availableExtensionFind = XK_FALSE;
+  XkBool availableExtensionFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVkInstanceExtensionCount; i++) {
     requiredExtension = _xkVkInstanceExtensions[i];
@@ -154,8 +154,8 @@ _catch:
   return(result);
 }
 
-static XkBool32 __xkVkCheckInstanceLayersSupport(void) {
-  XkBool32 result = XK_TRUE; 
+static XkBool __xkVkCheckInstanceLayersSupport(void) {
+  XkBool result = XK_TRUE; 
 
   // Get Vulkan instance layer properties count.
   uint32_t availableLayerPropertiesCount = 0;
@@ -177,7 +177,7 @@ static XkBool32 __xkVkCheckInstanceLayersSupport(void) {
   const char* requiredLayer = XK_NULL_HANDLE;
 
   // Helper boolean value.
-  XkBool32 availableLayerFind = XK_FALSE;
+  XkBool availableLayerFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVkInstanceLayerCount; i++) {
     requiredLayer = _xkVkInstanceLayers[i];

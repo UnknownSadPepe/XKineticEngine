@@ -89,7 +89,7 @@ XK_INLINE XkDVec4 xkDVec4Div(const XkDVec4 a, const XkDVec4 b) {
 	});
 }
 
-XK_INLINE XkBool32 xkVec4Compare(const XkVec4 a, const XkVec4 b) {
+XK_INLINE XkBool xkVec4Compare(const XkVec4 a, const XkVec4 b) {
 	if(xkAbs(a.x - b.x) > XK_FLOAT32_EPSILON) return(XK_FALSE);
   if(xkAbs(a.y - b.y) > XK_FLOAT32_EPSILON) return(XK_FALSE);
 	if(xkAbs(a.z - b.z) > XK_FLOAT32_EPSILON) return(XK_FALSE);
@@ -98,7 +98,7 @@ XK_INLINE XkBool32 xkVec4Compare(const XkVec4 a, const XkVec4 b) {
 	return(XK_TRUE);
 }
 
-XK_INLINE XkBool32 xkDVec4Compare(const XkDVec4 a, const XkDVec4 b) {
+XK_INLINE XkBool xkDVec4Compare(const XkDVec4 a, const XkDVec4 b) {
 	if(xkAbs(a.x - b.x) > XK_FLOAT64_EPSILON) return(XK_FALSE);
   if(xkAbs(a.y - b.y) > XK_FLOAT64_EPSILON) return(XK_FALSE);
 	if(xkAbs(a.z - b.z) > XK_FLOAT64_EPSILON) return(XK_FALSE);

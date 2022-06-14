@@ -29,7 +29,7 @@ typedef struct {
   uint32_t compute;
 
 	VkQueueFlags supportedQueues;
-	XkBool32 supportPresentQueue;
+	XkBool supportPresentQueue;
 } __XkVkQueueFamilyIndices;
 
 typedef struct {
@@ -39,7 +39,7 @@ typedef struct {
 } __XkVkSwapChainDetails;
 
 typedef struct {
-	XkBool32 initialized;
+	XkBool initialized;
 
 	VkInstance vkInstance;
 #ifdef XKVULKAN_DEBUG

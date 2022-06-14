@@ -14,6 +14,7 @@
 #include "XKinetic/Platform/Thread.h"
 #include "XKinetic/Platform/Time.h"
 #include "XKinetic/Platform/Window.h"
+#include "XKinetic/Platform/Joystick.h"
 
 struct XkFile {
 	XK_PLATFORM_FILE;
@@ -32,6 +33,8 @@ struct XkWindow {
 	XkSize height;
 	XkSize xPos;
 	XkSize yPos;
+	XkFloat64 xCursorPos;
+	XkFloat64 yCursorPos;
 
 	XkSize minWidth;
 	XkSize minHeight;
@@ -39,18 +42,18 @@ struct XkWindow {
 	XkSize maxWidth;
 	XkSize maxHeight;
 
-	XkBool32 maximized;
-	XkBool32 minimized;
-	XkBool32 fullscreen;
-	XkBool32 activated;
+	XkBool maximized;
+	XkBool minimized;
+	XkBool fullscreen;
+	XkBool activated;
 
-	XkBool32 decorated;
-	XkBool32 resizable;
-	XkBool32 floating;
+	XkBool decorated;
+	XkBool resizable;
+	XkBool floating;
 
-	XkHandle userPointer;
+	XkWindowCursorMode cursorMode;
 
-	XkBool32 closed;
+	XkBool closed;
 
 	struct {
 		XkWindowShowPfn show;
@@ -63,9 +66,55 @@ struct XkWindow {
 		XkWindowPositionPfn position;
 		XkWindowSizePfn size;
 		XkWindowFocusPfn focus;
+
+		XkWindowDropFilePfn dropFile;
 	} callbacks;
 
 	XK_PLATFORM_WINDOW;
+};
+
+typedef struct {
+  XkUInt8         type;
+  XkUInt8         index;
+  XkInt8          axisScale;
+  XkInt8          axisOffset;
+} __xkJoystickMapElemets;
+
+typedef struct
+{
+    char            name[128];
+    char            guid[33];
+    __xkJoystickMapElemets buttons[15];
+    __xkJoystickMapElemets axes[6];
+} __xkJoystickMapping;
+
+struct XkJoystick {
+	XkJoystickID 		id;
+	XkBool        	connected;
+	float*          axes;
+	int             axisCount;
+	unsigned char*  buttons;
+	int             buttonCount;
+	unsigned char*  hats;
+	int             hatCount;
+	char            name[128];
+	void*           userPointer;
+	char            guid[33];
+
+	__xkJoystickMapping* mapping;
+
+	struct {
+		XkJoystickEventPfn event;
+		XkJoystickAxisPfn axis;
+		XkJoystickButtonPfn button;
+		XkJoystickHatPfn hat;
+	} callbacks;
+
+	XK_PLATFORM_JOYSTICK;
+};
+
+struct XkWindowCursor {
+	XK_PLATFORM_WINDOW_CURSOR;
 };
 
 typedef struct {

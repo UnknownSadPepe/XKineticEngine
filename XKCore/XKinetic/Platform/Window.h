@@ -167,8 +167,14 @@ typedef enum {
 	XK_BUTTON_8 			= 7,
 	XK_BUTTON_LEFT  	= XK_BUTTON_1,
 	XK_BUTTON_RIGHT 	= XK_BUTTON_2,
-	XK_BUTTON_MIDDLE = XK_BUTTON_3
+	XK_BUTTON_MIDDLE 	= XK_BUTTON_3
 } XkWindowButton;
+
+typedef enum {
+	XK_CURSOR_NORMAL =   0x0001,
+	XK_CURSOR_HIDDEN =   0x0002,
+	XK_CURSOR_DISABLED = 0x0004
+} XkWindowCursorMode;
 
 typedef struct XkWindow* XkWindow;
 
@@ -176,18 +182,22 @@ typedef void(*XkWindowShowPfn)(XkWindow, const XkWindowShow);
 typedef void(*XkWindowKeyPfn)(XkWindow, const XkWindowKey, const XkWindowAction, const XkWindowMod);
 typedef void(*XkWindowButtonPfn)(XkWindow, const XkWindowButton, const XkWindowAction, const XkWindowMod);
 typedef void(*XkWindowCursorPfn)(XkWindow, const XkFloat64, const XkFloat64);
-typedef void(*XkWindowCursorEnterPfn)(XkWindow, const XkBool32);
+typedef void(*XkWindowCursorEnterPfn)(XkWindow, const XkBool);
 typedef void(*XkWindowScrollPfn)(XkWindow, const XkFloat64, const XkFloat64);
 typedef void(*XkWindowClosePfn)(XkWindow);
 typedef void(*XkWindowPositionPfn)(XkWindow, const XkInt32, const XkInt32);
 typedef void(*XkWindowSizePfn)(XkWindow, const XkSize, const XkSize);
-typedef void(*XkWindowFocusPfn)(XkWindow, const XkBool32);
+typedef void(*XkWindowFocusPfn)(XkWindow, const XkBool);
 
-typedef struct XkWindowIcon {
+typedef void(*XkWindowDropFilePfn)(XkWindow, const XkSize, const XkString*);
+
+typedef struct {
 	XkSize width;
 	XkSize height;
 	XkUInt8* pixels;
 } XkWindowIcon;
+
+typedef struct XkWindowCursor* XkWindowCursor;
 
 XK_EXPORT XkResult xkWindowInitialize(void);
 XK_EXPORT void xkWindowTerminate(void);
@@ -211,6 +221,15 @@ XK_EXPORT void xkSetWindowTitle(XkWindow, const XkString);
 
 XK_EXPORT void xkSetWindowIcon(XkWindow, const XkSize, const XkWindowIcon*);
 
+XK_EXPORT void xkSetCursorInputMode(XkWindow, const XkWindowCursorMode);
+
+XK_EXPORT void xkSetCursorPosition(XkWindow, const XkFloat64, const XkFloat64);
+XK_EXPORT void xkGetCursorPosition(XkWindow, XkFloat64* const, XkFloat64* const);
+
+XK_EXPORT XkResult xkCreateWindowCursor(XkWindowCursor*, XkWindowIcon*, const XkSize, const XkSize);
+XK_EXPORT void xkSetWindowCursor(XkWindow, XkWindowCursor);
+XK_EXPORT void xkDestroyWindowCursor(XkWindowCursor);
+
 XK_EXPORT void xkSetWindowShowCallback(XkWindow, const XkWindowShowPfn);
 XK_EXPORT void xkSetWindowKeyCallback(XkWindow, const XkWindowKeyPfn);
 XK_EXPORT void xkSetWindowButtonCallback(XkWindow, const XkWindowButtonPfn);
@@ -222,8 +241,10 @@ XK_EXPORT void xkSetWindowPositionCallback(XkWindow, const XkWindowPositionPfn);
 XK_EXPORT void xkSetWindowSizeCallback(XkWindow, const XkWindowSizePfn);
 XK_EXPORT void xkSetWindowFocusCallback(XkWindow, const XkWindowFocusPfn);
 
-XK_EXPORT XkBool32 xkShouldWindowClosed(XkWindow);
-XK_EXPORT XkBool32 xkShouldWindowShowed(XkWindow, const XkWindowShow);
+XK_EXPORT void xkSetWindowDropFileCallback(XkWindow, const XkWindowDropFilePfn);
+
+XK_EXPORT XkBool xkShouldWindowClosed(XkWindow);
+XK_EXPORT XkBool xkShouldWindowShowed(XkWindow, const XkWindowShow);
 
 XK_EXPORT void xkPollWindowEvents(void);
 XK_EXPORT void xkWaitWindowEvents(void);
@@ -232,9 +253,11 @@ XK_IMPORT void __xkInputWindowShow(XkWindow, const XkWindowShow);
 XK_IMPORT void __xkInputWindowKey(XkWindow, const XkWindowKey, const XkWindowAction, const XkWindowMod);
 XK_IMPORT void __xkInputWindowButton(XkWindow, const XkWindowButton, const XkWindowAction, const XkWindowMod);
 XK_IMPORT void __xkInputWindowCursor(XkWindow, const XkFloat64, const XkFloat64);
-XK_IMPORT void __xkInputWindowCursorEnter(XkWindow, const XkBool32);
+XK_IMPORT void __xkInputWindowCursorEnter(XkWindow, const XkBool);
 XK_IMPORT void __xkInputWindowScroll(XkWindow, const XkFloat64, const XkFloat64);
 XK_IMPORT void __xkInputWindowClose(XkWindow);
 XK_IMPORT void __xkInputWindowPosition(XkWindow, const XkInt32, const XkInt32);
 XK_IMPORT void __xkInputWindowSize(XkWindow, const XkSize, const XkSize);
-XK_IMPORT void __xkInputWindowFocus(XkWindow, const XkBool32);
+XK_IMPORT void __xkInputWindowFocus(XkWindow, const XkBool);
+
+XK_IMPORT void __xkInputWindowDropFile(XkWindow, const XkSize, const XkString*);

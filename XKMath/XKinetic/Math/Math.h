@@ -116,11 +116,7 @@ XKMATH_API XkInt64 xkLILog(const XkInt64);
 XKMATH_API XkUInt64 xkLULog(const XkUInt64);
 #define xkLog(x) _Generic((x), \
 	XkFloat32: xkFLog, \
-  XkFloat64: xkDLog, \
-  XkInt32: xkILog, \
-  XkUInt32: xkULog, \
-  XkInt64: xkLILog, \
-  XkUInt64: xkLULog)(x)
+  XkFloat64: xkDLog)(x)
 
 XKMATH_API XkFloat32 xkFExp(const XkFloat32);
 XKMATH_API XkFloat64 xkDExp(const XkFloat64);
@@ -130,11 +126,7 @@ XKMATH_API XkInt64 xkLIExp(const XkInt64);
 XKMATH_API XkUInt64 xkLUExp(const XkUInt64);
 #define xkExp(x) _Generic((x), \
 	XkFloat32: xkFExp, \
-  XkFloat64: xkDExp, \
-  XkInt32: xkIExp, \
-  XkUInt32: xkUExp, \
-  XkInt64: xkLIExp, \
-  XkUInt64: xkLUExp)(x)
+  XkFloat64: xkDExp)(x)
 
 XKMATH_API XkFloat32 xkFPow(const XkFloat32, const XkFloat32);
 XKMATH_API XkFloat64 xkDPow(const XkFloat64, const XkFloat64);
@@ -144,11 +136,7 @@ XKMATH_API XkInt64 xkLIPow(const XkInt64, const XkInt64);
 XKMATH_API XkUInt64 xkLUPow(const XkUInt64, const XkUInt64);
 #define xkPow(x) _Generic((x), \
 	XkFloat32: xkFPow, \
-  XkFloat64: xkDPow, \
-  XkInt32: xkIPow, \
-  XkUInt32: xkUPow, \
-  XkInt64: xkLIPow, \
-  XkUInt64: xkLUPow)(x)
+  XkFloat64: xkDPow)(x)
 
 XKMATH_API XkFloat32 xkFSqrt(const XkFloat32);
 XKMATH_API XkFloat64 xkDSqrt(const XkFloat64);
@@ -158,11 +146,7 @@ XKMATH_API XkInt64 xkLISqrt(const XkInt64);
 XKMATH_API XkUInt64 xkLUSqrt(const XkUInt64);
 #define xkSqrt(x) _Generic((x), \
 	XkFloat32: xkFSqrt, \
-  XkFloat64: xkDSqrt, \
-  XkInt32: xkISqrt, \
-  XkUInt32: xkUSqrt, \
-  XkInt64: xkLISqrt, \
-  XkUInt64: xkLUSqrt)(x)
+  XkFloat64: xkDSqrt)(x)
 
 
 XKMATH_API XkFloat32 xkFCbrt(const XkFloat32);
@@ -173,11 +157,7 @@ XKMATH_API XkInt64 xkLICbrt(const XkInt64);
 XKMATH_API XkUInt64 xkLUCbrt(const XkUInt64);
 #define xkCbrt(x) _Generic((x), \
 	XkFloat32: xkFCbrt, \
-  XkFloat64: xkDCbrt, \
-  XkInt32: xkICbrt, \
-  XkUInt32: xkUCbrt, \
-  XkInt64: xkLICbrt, \
-  XkUInt64: xkLUCbrt)(x)
+  XkFloat64: xkDCbrt)(x)
 
 XKMATH_API XkFloat32 xkFCeil(const XkFloat32);
 XKMATH_API XkFloat64 xkDCeil(const XkFloat64);

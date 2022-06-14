@@ -11,7 +11,7 @@ struct XkApplication {
 	XkWindow window;
 	XkRenderer renderer;
 
-	XkBool32 exit;
+	XkBool exit;
 };
 
 XkApplication _xkApplication;

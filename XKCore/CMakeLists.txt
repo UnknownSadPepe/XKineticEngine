@@ -66,7 +66,7 @@ if(UNIX AND NOT APPLE)
     "${WAYLAND_PROTOCOLS_BASE}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml"
     "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-idle-inhibit-unstable-v1-client-protocol")
 
-	target_link_libraries(XKCore PUBLIC wayland-client wayland-cursor xkbcommon)
+	target_link_libraries(XKCore PUBLIC wayland-client wayland-cursor wayland-egl xkbcommon)
 endif()
 
 # Link Unix specific libraries.

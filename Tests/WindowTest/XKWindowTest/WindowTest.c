@@ -11,7 +11,7 @@ struct XkApplication {
 
 	XkWindow window;
 
-	XkBool32 exit;
+	XkBool exit;
 
 	XkImageLoader imageLoader;
 };
@@ -106,7 +106,7 @@ static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
 	xkLogNotice("cursor x: %f y: %f", x, y);
 }
 
-static void __xkWindowCursorEnter(XkWindow window, XkBool32 entered) {
+static void __xkWindowCursorEnter(XkWindow window, XkBool entered) {
 	if(entered) {
 		xkLogNotice("cursor entered");
 	} else {
@@ -130,7 +130,7 @@ static void __xkWindowPosition(XkWindow window, XkInt32 x, XkInt32 y) {
 	xkLogNotice("x: %d y: %d", x, y);
 }
 
-static void __xkWindowFocus(XkWindow window, XkBool32 focused) {
+static void __xkWindowFocus(XkWindow window, XkBool focused) {
 	if(focused) {
 		xkLogNotice("focused");
 	} else {
@@ -197,6 +197,12 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	XkWindowIcon icons[2] = {icon, smallIcon};
 	xkSetWindowIcon(_xkApplication.window, 2, icons);
 
+/*
+	XkWindowIcon cursor = {
+		.
+	};
+	xkSetWindowCursor();
+*/
 	// Unload window icon.
 	xkUnloadImage(_xkApplication.imageLoader, &iconConfig);
 
