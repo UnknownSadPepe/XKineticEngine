@@ -22,8 +22,6 @@ typedef struct {
 
 	struct zwp_relative_pointer_v1*    		zwpRelativePointer;
 	struct zwp_locked_pointer_v1*      		zwpLockedPointer;
-
-	char*	title;
 } __XkLinuxWindow;
 
 #define XK_PLATFORM_WINDOW __XkLinuxWindow handle

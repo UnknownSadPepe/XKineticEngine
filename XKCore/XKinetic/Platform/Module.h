@@ -2,7 +2,7 @@
 
 #include "XKinetic/XKCore.h"
 
-typedef XkHandle XkModule;
+typedef struct XkModule* XkModule;
 typedef void(*XkProcPfn)(void);
 
 XK_EXPORT XkResult xkLoadModule(XkModule*, const XkString);

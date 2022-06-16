@@ -60,7 +60,7 @@ XkResult __xkCreateHashTable(XkHashTable* pTable, const XkSize capacity, const X
 	table->capacity = capacity;
 	table->stride = stride;
 	table->totalSize = alignSize;
-	table->nodes = memory + alignSize;
+	table->nodes = (XkUInt8)memory + alignSize;
 	table->memory = memory;
 	if(!table->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;

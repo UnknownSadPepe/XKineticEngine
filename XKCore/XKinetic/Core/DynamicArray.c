@@ -66,12 +66,12 @@ void __xkDynamicArrayPush(XkDynamicArray array, const XkHandle data) {
 		xkResizeDynamicArray(array, array->capacity * XK_DYNAMIC_ARRAY_REALLOCATE_COEFFICIENT);
 	}
 
-	xkCopyMemory(array->memory + (array->stride * array->length), data, array->stride);
+	xkCopyMemory((XkUInt8)array->memory + (array->stride * array->length), data, array->stride);
 	array->length++;
 }
 
 void xkDynamicArrayPop(XkDynamicArray array) {
-	xkZeroMemory(array->memory + (array->stride * array->length), array->stride);
+	xkZeroMemory((XkUInt8)array->memory + (array->stride * array->length), array->stride);
 
 	array->length--;
 }
@@ -79,17 +79,17 @@ void xkDynamicArrayPop(XkDynamicArray array) {
 void __xkDynamicArrayInsert(XkDynamicArray array, const XkSize index, XkHandle data) {
 	// Check if not the last element.
 	if(index != array->length - 1) {
-		xkCopyMemory(array->memory + ((index + 1) * array->stride), array->memory + (index * array->stride), array->stride * (array->length - index));
-  }
+		xkCopyMemory((XkUInt8)array->memory + ((index + 1) * array->stride), (XkUInt8)array->memory + (index * array->stride), array->stride * (array->length - index));
+	}
 
-	xkCopyMemory(array->memory + (index * array->stride), data, array->stride);
+	xkCopyMemory((XkUInt8)array->memory + (index * array->stride), data, array->stride);
 	array->length++;
 }
 
 void xkDynamicArrayErase(XkDynamicArray array, const XkSize index) {
 	// Check if not the last element.
 	if(index != array->length - 1) {
-		xkCopyMemory(array->memory + (index * array->stride), array->memory + ((index + 1) * array->stride), array->stride * (array->length - index));
+		xkCopyMemory((XkUInt8)array->memory + (index * array->stride), (XkUInt8)array->memory + ((index + 1) * array->stride), array->stride * (array->length - index));
   }
 	array->length--;
 }
@@ -107,6 +107,6 @@ XkHandle xkDynamicArrayGet(XkDynamicArray array, const XkSize index) {
 }
 
 void __xkDynamicArraySet(XkDynamicArray array, const XkSize index, XkHandle data) {
-	xkCopyMemory(array->memory + (array->stride * (index + 1)), data, array->stride);
+	xkCopyMemory((XkUInt8)array->memory + (array->stride * (index + 1)), data, array->stride);
 }
 

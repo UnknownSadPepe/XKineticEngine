@@ -21,3 +21,9 @@ typedef struct {
 } __XkUnixMutex;
 
 #define XK_PLATFORM_MUTEX __XkUnixMutex handle
+
+typedef struct {
+	void* handle;
+} __XkUnixModule;
+
+#define XK_PLATFORM_MODULE __XkUnixModule handle

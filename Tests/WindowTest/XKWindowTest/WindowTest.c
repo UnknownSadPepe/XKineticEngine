@@ -66,6 +66,24 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 		} else if(key == XK_KEY_T) {
 			xkSetWindowTitle(window, "renamed window");
 		}
+
+		if(key == XK_KEY_C) {
+			xkSetWindowCursorMode(window, XK_CURSOR_NORMAL);
+		} else if(key == XK_KEY_V) {
+			xkSetWindowCursorMode(window, XK_CURSOR_HIDDEN);
+		} else if(key == XK_KEY_B) {
+			xkSetWindowCursorMode(window, XK_CURSOR_DISABLED);
+		}
+
+		if(key == XK_KEY_F) {
+			xkShowWindow(window, XK_WINDOW_SHOW_FULLSCREEN);
+		} else if(key == XK_KEY_M) {
+			xkShowWindow(window, XK_WINDOW_SHOW_MAXIMIZED);
+		} else if(key == XK_KEY_D) {
+			xkShowWindow(window, XK_WINDOW_SHOW_DEFAULT);
+		} else if(key == XK_KEY_H) {
+			xkShowWindow(window, XK_WINDOW_HIDE);
+		}
 	}
 
 	xkLogNotice("key: %d action: %s", key, actionStr);
@@ -138,6 +156,12 @@ static void __xkWindowFocus(XkWindow window, XkBool focused) {
 	}
 }
 
+static void __xkWindowDropFile(XkWindow window, const XkSize count, const XkString* paths) {
+	for(XkSize i = 0; i < count; i++) {
+		xkLogNotice("file[%ld]: %s", i, paths[i]);
+	}
+}
+
 XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	XkResult result = XK_SUCCESS;
 
@@ -153,11 +177,25 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	result = xkWindowInitialize();
 	if(result != XK_SUCCESS) goto _catch;
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT | XK_WINDOW_DRAG_DROP_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;
 	}
+
+	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
+
+	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
+	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
+	xkSetWindowButtonCallback(_xkApplication.window, __xkWindowButton);
+	xkSetWindowCursorCallback(_xkApplication.window, __xkWindowCursor);
+	xkSetWindowCursorEnterCallback(_xkApplication.window, __xkWindowCursorEnter);
+	xkSetWindowScrollCallback(_xkApplication.window, __xkWindowScroll);
+	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
+	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
+	xkSetWindowPositionCallback(_xkApplication.window, __xkWindowPosition);
+	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
+	xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
 
 	// Create image loader.
 	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
@@ -171,17 +209,23 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	result = xkLoadImage(_xkApplication.imageLoader, &iconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window icon");
-		goto _catch;	
 	}
 
 	// Load window small icon.
 	XkImageConfig smallIconConfig;
 	result = xkLoadImage(_xkApplication.imageLoader, &smallIconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
-		xkLogError("Failed to load window small icon");
-		goto _catch;	
+		xkLogError("Failed to load window small icon");	
 	}
 
+	// Load window small icon.
+	XkImageConfig cursorConfig;
+	result = xkLoadImage(_xkApplication.imageLoader, &cursorConfig, "XKineticCursor.png");
+	if(result != XK_SUCCESS) {
+		xkLogError("Failed to load window cursor");
+	}
+
+	// Set window icon.
 	XkWindowIcon icon = {
 		.width = iconConfig.width,
 		.height = iconConfig.height,
@@ -197,34 +241,23 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	XkWindowIcon icons[2] = {icon, smallIcon};
 	xkSetWindowIcon(_xkApplication.window, 2, icons);
 
-/*
-	XkWindowIcon cursor = {
-		.
+	// Set window cursor.
+	XkWindowIcon cursorIcon = {
+		.width = cursorConfig.width,
+		.height = cursorConfig.height,
+		.pixels = cursorConfig.pixels
 	};
-	xkSetWindowCursor();
-*/
+
+	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
+
+	// Unload window cursor.
+	xkUnloadImage(_xkApplication.imageLoader, &cursorConfig);
+
 	// Unload window icon.
 	xkUnloadImage(_xkApplication.imageLoader, &iconConfig);
 
 	// Unload window small icon.
 	xkUnloadImage(_xkApplication.imageLoader, &smallIconConfig);
-
-	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
-
-	xkSetWindowSizeLimits(_xkApplication.window, 800, 600, 1920, 1080);
-
-	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
-	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
-	xkSetWindowButtonCallback(_xkApplication.window, __xkWindowButton);
-	xkSetWindowCursorCallback(_xkApplication.window, __xkWindowCursor);
-	xkSetWindowCursorEnterCallback(_xkApplication.window, __xkWindowCursorEnter);
-	xkSetWindowScrollCallback(_xkApplication.window, __xkWindowScroll);
-	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
-	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
-	xkSetWindowPositionCallback(_xkApplication.window, __xkWindowPosition);
-	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
-
-	xkLogDebug("XKinetic Debug mode");
 
 _catch:
 	return(result);

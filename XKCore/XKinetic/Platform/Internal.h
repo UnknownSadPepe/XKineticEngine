@@ -29,31 +29,19 @@ struct XkMutex {
 };
 
 struct XkWindow {
-	XkSize width;
-	XkSize height;
-	XkSize xPos;
-	XkSize yPos;
-	XkFloat64 xCursorPos;
-	XkFloat64 yCursorPos;
-
 	XkSize minWidth;
 	XkSize minHeight;
-
 	XkSize maxWidth;
 	XkSize maxHeight;
-
-	XkBool maximized;
-	XkBool minimized;
-	XkBool fullscreen;
-	XkBool activated;
 
 	XkBool decorated;
 	XkBool resizable;
 	XkBool floating;
+	XkBool fullscreen;
 
 	XkWindowCursorMode cursorMode;
 
-	XkBool closed;
+	XkString title;
 
 	struct {
 		XkWindowShowPfn show;
@@ -66,7 +54,6 @@ struct XkWindow {
 		XkWindowPositionPfn position;
 		XkWindowSizePfn size;
 		XkWindowFocusPfn focus;
-
 		XkWindowDropFilePfn dropFile;
 	} callbacks;
 
@@ -113,17 +100,27 @@ struct XkJoystick {
 	XK_PLATFORM_JOYSTICK;
 };
 
-struct XkWindowCursor {
-	XK_PLATFORM_WINDOW_CURSOR;
+struct XkModule {
+	XK_PLATFORM_MODULE;
 };
 
 typedef struct {
-	XK_PLATFORM;
+	XkBool initialized;
 
 	XkInt16 keycodes[256];
+
+	XK_PLATFORM;
 } __XkPlatform;
 
 extern __XkPlatform _xkPlatform;
+
+#if defined(XK_WIN32)
+	XKCORE_API HINSTANCE __xkWin32GetInstance(void);
+	XKCORE_API HWND __xkWin32GetHWND(const XkWindow);
+#elif defined(XK_LINUX)
+	XKCORE_API struct wl_display* __xkWaylandGetDisplay(void);
+	XKCORE_API struct wl_surface* __xkWaylandGetSurface(const XkWindow);
+#endif // XK_WIN32
 
 #define __xkErrorHandle(format) __xkErrorHandler("%s %s %d", format, __FILE__, __LINE__)
 XK_IMPORT void __xkErrorHandler(const XkString pFormat, ...);

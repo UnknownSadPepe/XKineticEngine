@@ -10,32 +10,36 @@
 #endif // COMMON_LVB_UNDERSCORE
 
 void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const XkSize size) {
-	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	if(stdout == INVALID_HANDLE_VALUE) return;
-	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
-	if(stderr == INVALID_HANDLE_VALUE) return;
-
 	HANDLE stream;
 	switch(handle) {
-		case XK_CONSOLE_STDOUT: stream = stdout; break;
-		case XK_CONSOLE_STDERR: stream = stderr; break;
-	}	
+		case XK_CONSOLE_STDOUT: {
+			stream = GetStdHandle(STD_OUTPUT_HANDLE);
+			if(!stream) return;
+		}
+		case XK_CONSOLE_STDERR: {
+			stream =  GetStdHandle(STD_ERROR_HANDLE);
+			if(!stream) return;;
+		}
+	}
 	LPDWORD numberWritten = 0;
 	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
 }
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
-	HANDLE stdout = GetStdHandle(STD_OUTPUT_HANDLE);
-	if(stdout == INVALID_HANDLE_VALUE) return;
-	HANDLE stderr = GetStdHandle(STD_ERROR_HANDLE);
-	if(stderr == INVALID_HANDLE_VALUE) return;
-
 	CONSOLE_SCREEN_BUFFER_INFO CBI;
 
 	HANDLE stream;
 	switch(handle) {
-		case XK_CONSOLE_STDOUT: stream = stdout; GetConsoleScreenBufferInfo(stdout, &CBI); break;
-		case XK_CONSOLE_STDERR: stream = stdout; GetConsoleScreenBufferInfo(stderr, &CBI); break;
+		case XK_CONSOLE_STDOUT: {
+			stream = GetStdHandle(STD_OUTPUT_HANDLE);
+			if(!stream) return;
+			GetConsoleScreenBufferInfo(stream, &CBI); break;
+		}
+		case XK_CONSOLE_STDERR: {
+			stream =  GetStdHandle(STD_ERROR_HANDLE);
+			if(!stream) return;
+			GetConsoleScreenBufferInfo(stream, &CBI); break;
+		}
 	}	
 
 	WORD attribute;

@@ -9,10 +9,12 @@ struct XkDX12Renderer {
 };
 
 struct XkDX12Buffer {
+	ID3D12Resource* dx12Resource;
   /// TODO: implementation.
 };
 
 struct XkDX12Texture2D {
+	ID3D12Resource* dx12Resource;
   /// TODO: implementation.
 };
 
@@ -29,6 +31,14 @@ XkResult xkDX12CreateRenderer(XkDX12Renderer* pRenderer, XkRendererConfig* const
 
 	renderer->config = *pConfig;
 
+	// Initialize DirectX12 context.
+	result = __xkDX12InitializeContext();
+	if (result != XK_SUCCESS) {
+		result = XK_ERROR_CREATE_FAILED;
+		xkLogError("Failed to initialize DirectX12 Context");
+		goto _catch;
+	}
+
 	/// TODO: implementation.
 
 _catch:
@@ -38,8 +48,10 @@ _catch:
 void xkDX12DestroyRenderer(XkDX12Renderer renderer) {
 	/// TODO: implementation.
 	xkFreeMemory(renderer);
-}
 
+	// Terminate DirectX12 context.
+	__xkDX12TerminateContext();
+}
 
 void xkDX12ClearColorRenderer(XkDX12Renderer renderer, XkVec4 color) {
 	/// TODO: implementation.

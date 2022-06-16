@@ -4,13 +4,14 @@ file(GLOB_RECURSE CORE_SRC ${CORE_SRC_DIR}/*.c)
 
 add_library(XKCore SHARED ${CORE_SRC})
 
-target_include_directories(XKCore PUBLIC ${CORE_SRC_DIR})
+target_include_directories(XKCore PRIVATE ${CORE_SRC_DIR})
+target_include_directories(XKCore PRIVATE  ${PROJECT_SOURCE_DIR}/External/mingw)
 
-target_compile_definitions(XKCore PUBLIC __XKCORE_BUILD__)
+target_compile_definitions(XKCore PRIVATE __XKCORE_BUILD__)
 
 # Check if debug build type, add compile defenition
 if(CMAKE_BUILD_TYPE EQUAL "Debug")
-  target_compile_definitions(XKCore PUBLIC __XKCORE_DEBUG__)
+  target_compile_definitions(XKCore PRIVATE __XKCORE_DEBUG__)
 endif()
 
 # Generate Wayland headers.
@@ -19,7 +20,7 @@ if(UNIX AND NOT APPLE)
 
   include(FindPkgConfig)
 	pkg_check_modules(Wayland REQUIRED wayland-client>=0.2.7 wayland-protocols>=1.15 wayland-cursor>=0.2.7 xkbcommon>=0.5.0)
-	target_include_directories(XKCore PUBLIC ${Wayland_INCLUDE_DIRS})
+	target_include_directories(XKCore PRIVATE ${Wayland_INCLUDE_DIRS})
 
   pkg_get_variable(WAYLAND_PROTOCOLS_BASE wayland-protocols pkgdatadir)
   pkg_get_variable(WAYLAND_CLIENT_PKGDATADIR wayland-client pkgdatadir)
@@ -35,7 +36,7 @@ if(UNIX AND NOT APPLE)
       DEPENDS "${protocol_file}"
       VERBATIM)
 
-		target_sources(XKCore PUBLIC "${output_file}.h" "${output_file}-code.h")
+		target_sources(XKCore PRIVATE "${output_file}.h" "${output_file}-code.h")
   endmacro()
 
   wayland_generate(
@@ -66,7 +67,12 @@ if(UNIX AND NOT APPLE)
     "${WAYLAND_PROTOCOLS_BASE}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml"
     "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-idle-inhibit-unstable-v1-client-protocol")
 
-	target_link_libraries(XKCore PUBLIC wayland-client wayland-cursor wayland-egl xkbcommon)
+	target_link_libraries(XKCore PRIVATE wayland-client wayland-cursor wayland-egl xkbcommon)
+endif()
+
+# Link Win32 specific libraries.
+if(WIN32)
+  target_link_libraries(XKCore PRIVATE user32 gdi32)   
 endif()
 
 # Link Unix specific libraries.

@@ -67,7 +67,7 @@ XkHandle xkAllocateStackMemory(XkStackAllocator allocator, const XkSize size) {
 	}
 
 	allocator->allocated += headerSize;
- 	XkHandle newMemory = allocator->memory + (allocator->allocated + headerSize);
+ 	XkHandle newMemory = (XkUInt8)allocator->memory + (allocator->allocated + headerSize);
 	return(newMemory);
 }
 

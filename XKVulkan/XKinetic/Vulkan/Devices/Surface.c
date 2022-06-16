@@ -10,8 +10,8 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		.sType 				= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
 		.pNext 				= VK_NULL_HANDLE,
 		.flags 				= 0,
-		.display 			= _xkPlatform.handle.wlDisplay,
-		.surface 			= window->handle.wlSurface
+		.display 			= __xkWaylandGetDisplay(),
+		.surface 			= __xkWaylandGetSurface(window)
 	};
 
 	// Create Vulkan Wayland surface.
@@ -27,8 +27,8 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		.sType 				= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
 		.pNext 				= VK_NULL_HANDLE,
 		.flags 				= 0,
-		.hinstance 		= _xkPlatform.handle.instance,
-		.hwnd 				= window->handle.handle
+		.hinstance 			= __xkWin32GetInstance(),
+		.hwnd 				= __xkWin32GetHWND(window)
 	};
 
 	// Create Vulkan Win32 surface.

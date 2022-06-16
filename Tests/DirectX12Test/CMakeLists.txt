@@ -8,6 +8,6 @@ else()
   add_executable(XKDirectX12Test ${DIRECTX12_TEST_SRC})
 endif()
 
-target_include_directories(XKDirectX12Test PUBLIC ${DIRECTX12_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath)
+target_include_directories(XKDirectX12Test PRIVATE ${DIRECTX12_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
 
-target_link_libraries(XKDirectX12Test XKCore XKMath XKinetic)
+target_link_libraries(XKDirectX12Test PRIVATE XKCore XKMath XKinetic)

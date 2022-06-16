@@ -42,7 +42,7 @@ add_subdirectory(XKMath)
 
 # Add XKVulkan subdirectory.
 if(UNIX AND NOT APPLE OR WIN32)
-  #add_subdirectory(XKVulkan)
+  add_subdirectory(XKVulkan)
 endif()
 
 # Add XKDirectX12 subdirectory.

@@ -13,7 +13,6 @@
 #include <sys/timerfd.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "XKinetic/Core/String.h"
 #include <xkbcommon/xkbcommon.h>
 #include <poll.h>
 
@@ -32,6 +31,8 @@
 #include "wayland-relative-pointer-unstable-v1-client-protocol-code.h"
 #include "wayland-pointer-constraints-unstable-v1-client-protocol-code.h"
 #include "wayland-idle-inhibit-unstable-v1-client-protocol-code.h"
+
+#include "XKinetic/Core/String.h"
 
 static XkBool __xkXdgCreateSurface(XkWindow);
 static void __xkXdgSetDecorations(XkWindow);
@@ -370,6 +371,14 @@ void xkWindowTerminate(void) {
 	}
 }
 
+struct wl_display* __xkWaylandGetDisplay(void) {
+	return(_xkPlatform.wayland.wlDisplay);
+}
+
+struct wl_surface* __xkWaylandGetSurface(const XkWindow window) {
+	return(window->wayland.wlSurface);
+}
+
 XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
 
@@ -381,23 +390,25 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 
 	XkWindow window = *pWindow;
 
-	window->handle.title = xkDuplicateString(title);
-	window->width = width;
-	window->height = height;
-	window->xPos = 0;
-	window->yPos = 0;
-
-	window->decorated = XK_FALSE;
-	window->resizable = XK_FALSE;
-	window->floating = XK_FALSE;
-	window->fullscreen = XK_FALSE;
-	window->maximized = XK_FALSE;
-	window->minimized = XK_FALSE;
+  if(
+    (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FLOATING_BIT) || 
+    (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FULLSCREEN_BIT) ||
+    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FLOATING_BIT) ||
+    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FULLSCREEN_BIT)) {
+    __xkErrorHandle("Win32: Unsupported window hints");
+  }
 
 	if(hint & XK_WINDOW_DECORATED_BIT) window->decorated = XK_TRUE;
 	if(hint & XK_WINDOW_RESIZABLE_BIT) window->resizable = XK_TRUE;
 	if(hint & XK_WINDOW_FLOATING_BIT) window->floating = XK_TRUE;
 	if(hint & XK_WINDOW_FULLSCREEN_BIT) window->fullscreen = XK_TRUE;
+
+  window->minWidth  = 0;
+  window->minHeight = 0;
+  window->maxWidth  = 0;
+  window->maxHeight = 0;
+  window->cursorMode = XK_CURSOR_NORMAL;
+  window->title = xkDuplicateString(title);
 
 	// Create Wayland window surface.
 	window->handle.wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
@@ -455,8 +466,8 @@ void xkDestroyWindow(XkWindow window) {
 		wl_egl_window_destroy(window->handle.eglWindow);
 	}
 
-
-	xkFreeMemory(window->handle.title);
+	xkFreeMemory(window->title);
+	
 	xkFreeMemory(window);
 }
 
@@ -547,10 +558,10 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
   if(window->handle.xdgToplevel) {
-  	if(window->handle.title) {
-			xkFreeMemory(window->handle.title);
+  	if(window->title) {
+			xkFreeMemory(window->title);
 		}
-  	window->handle.title = xkDuplicateString(title);
+  	window->title = xkDuplicateString(title);
 
 		xdg_toplevel_set_title(window->handle.xdgToplevel, title);
   }
@@ -575,20 +586,7 @@ void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* con
 	}
 }
 
-XkResult xkCreateWindowCursor(XkWindowCursor* pCursor, XkWindowIcon* pIcon, const XkSize xhot, const XkSize yhot) {
-	XkResult result = XK_SUCCESS;
-
-	/// TODO: implementation.
-
-_catch:
-	return(result);
-}
-
-void xkSetWindowCursor(XkWindow window, XkWindowCursor cursor) {
-	/// TODO: implementation.
-}
-
-void xkDestroyWindowCursor(XkWindowCursor cursor) {
+void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 	/// TODO: implementation.
 }
 
@@ -630,7 +628,7 @@ static XkBool __xkXdgCreateSurface(XkWindow window) {
   xdg_toplevel_add_listener(window->handle.xdgToplevel, &_xkXdgToplevelListener, window);
 
 	// Set Xdg window title.
-  xdg_toplevel_set_title(window->handle.xdgToplevel, window->handle.title);
+  xdg_toplevel_set_title(window->handle.xdgToplevel, window->title);
 			
 	// Commit pending Wayland surface state.
   wl_surface_commit(window->handle.wlSurface);

@@ -64,7 +64,7 @@ XkHandle xkAllocateLinearMemory(XkLinearAllocator allocator, const XkSize size) 
 	}
 
 	allocator->allocated += alignSize;
- 	XkHandle newMemory = allocator->memory + (allocator->allocated + alignSize);
+ 	XkHandle newMemory = (XkUInt8)allocator->memory + (allocator->allocated + alignSize);
 	return(newMemory);
 }
 

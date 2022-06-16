@@ -22,12 +22,11 @@ XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 	if(flag & XK_FILE_FLAG_RO_BIT) flags |= GENERIC_READ;
 	if(flag & XK_FILE_FLAG_WO_BIT) flags |= GENERIC_WRITE;
 	if(flag & XK_FILE_FLAG_RW_BIT) flags |= GENERIC_READ | GENERIC_WRITE;
-	//if(flag & XK_FILE_FLAG_AP_BIT) flags |= OF_APPEND;
-	/// TODO: implementation.
+	if(flag & XK_FILE_FLAG_AP_BIT) flags |= FILE_APPEND_DATA;
 	if(flag & XK_FILE_FLAG_CR_BIT) open = CREATE_ALWAYS;
 
-	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL, NULL);
-	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+	file->win32.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(file->win32.handle == INVALID_HANDLE_VALUE) {
 		__xkErrorHandle("Win32: Failed to open file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
@@ -56,22 +55,21 @@ XkResult xkOpenAsyncFile(XkFile* pFile, const XkString name, const XkFileFlag fl
 	if(flag & XK_FILE_FLAG_RO_BIT) flags |= GENERIC_READ;
 	if(flag & XK_FILE_FLAG_WO_BIT) flags |= GENERIC_WRITE;
 	if(flag & XK_FILE_FLAG_RW_BIT) flags |= GENERIC_READ | GENERIC_WRITE;
-	//if(flag & XK_FILE_FLAG_AP_BIT) flags |= OF_APPEND;
-	/// TODO: implementation.
+	if(flag & XK_FILE_FLAG_AP_BIT) flags |= FILE_APPEND_DATA;
 	if(flag & XK_FILE_FLAG_CR_BIT) open = CREATE_ALWAYS;
 
-	file->handle.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_FLAG_OVERLAPPED, NULL);
-	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+	file->win32.handle = CreateFile(name, flags, FILE_SHARE_READ, NULL, open, FILE_FLAG_OVERLAPPED, NULL);
+	if(file->win32.handle == INVALID_HANDLE_VALUE) {
 		__xkErrorHandle("Win32: Failed to open async file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	file->handle.overlapped.Offset = 0;
-	file->handle.overlapped.OffsetHigh = 0;
+	file->win32.overlapped.Offset = 0;
+	file->win32.overlapped.OffsetHigh = 0;
 
-	file->handle.overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
-	if(file->handle.handle == INVALID_HANDLE_VALUE) {
+	file->win32.overlapped.hEvent = CreateEventA(NULL, TRUE, FALSE, NULL);
+	if(file->win32.handle == INVALID_HANDLE_VALUE) {
 		__xkErrorHandle("Win32: Failed to create async file event");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
@@ -82,13 +80,13 @@ _catch:
 }
 
 void xkCloseFile(XkFile file) {
-	CloseHandle(file->handle.handle);
+	CloseHandle(file->win32.handle);
 	xkFreeMemory(file);
 }
 
 XkSize xkFileSize(XkFile file) {
 	LARGE_INTEGER size;
-	GetFileSizeEx(file->handle.handle, &size);
+	GetFileSizeEx(file->win32.handle, &size);
 	return((XkSize)size.QuadPart);
 }
 
@@ -111,46 +109,46 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 	if(seek == XK_FILE_SEEK_CUR) moveMethod = FILE_CURRENT;
 	if(seek == XK_FILE_SEEK_END) moveMethod = FILE_END;
 
-	DWORD pointer = SetFilePointer(file->handle.handle, offset, NULL, moveMethod);
+	DWORD pointer = SetFilePointer(file->win32.handle, offset, NULL, moveMethod);
 	return((XkSize)pointer);
 }
 
 void xkWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	DWORD numberOfBytesWrite;
-	WriteFile(file->handle.handle, buffer, size, &numberOfBytesWrite, NULL);
+	WriteFile(file->win32.handle, buffer, size, &numberOfBytesWrite, NULL);
 }
 
 void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 	DWORD numberOfBytesRead;
-	ReadFile(file->handle.handle, buffer, size, &numberOfBytesRead, NULL);
+	ReadFile(file->win32.handle, buffer, size, &numberOfBytesRead, NULL);
 }
 
 void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	/// TODO: impementation.
 
-	WriteFile(file->handle.handle, buffer, size, NULL, &file->handle.overlapped);
+	WriteFile(file->win32.handle, buffer, size, NULL, &file->win32.overlapped);
 
-	if(WaitForSingleObject(file->handle.overlapped.hEvent, INFINITE) != WAIT_OBJECT_0) {
+	if(WaitForSingleObject(file->win32.overlapped.hEvent, INFINITE) != WAIT_OBJECT_0) {
 		__xkErrorHandle("Win32: Failed to wait async file event");
 		return;
 	}
 
-	if(!ResetEvent(file->handle.overlapped.hEvent)) {
+	if(!ResetEvent(file->win32.overlapped.hEvent)) {
 		__xkErrorHandle("Win32: Failed to reset async file event");
 		return;
 	}
 
-	file->handle.overlapped.Offset += (DWORD)size;
+	file->win32.overlapped.Offset += (DWORD)size;
 }
 
 void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
 	/// TODO: impementation.
 
-	ReadFile(file->handle.handle, buffer, size, NULL, &file->handle.overlapped);
+	ReadFile(file->win32.handle, buffer, size, NULL, &file->win32.overlapped);
 
-	WaitForSingleObject(file->handle.overlapped.hEvent, INFINITE);
+	WaitForSingleObject(file->win32.overlapped.hEvent, INFINITE);
 
-	if(!ResetEvent(file->handle.overlapped.hEvent)) {
+	if(!ResetEvent(file->win32.overlapped.hEvent)) {
 		__xkErrorHandle("Win32: Failed to reset async file event");
 	}
 }

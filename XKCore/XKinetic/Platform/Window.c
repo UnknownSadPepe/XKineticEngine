@@ -1,8 +1,12 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
 
-void xkSetCursorInputMode(XkWindow window, const XkWindowCursorMode mode) {
-	window->cursorMode = mode;
+XkWindowCursorMode xkGetWindowCursorMode(XkWindow window) {
+	return(window->cursorMode);
+}
+
+XkString xkGetWindowTitle(XkWindow window) {
+	return(window->title);
 }
 
 void __xkInputWindowShow(XkWindow window, const XkWindowShow show) {
@@ -113,33 +117,4 @@ void xkSetWindowFocusCallback(XkWindow window, const XkWindowFocusPfn pfnCallbac
 
 void xkSetWindowDropFileCallback(XkWindow window, const XkWindowDropFilePfn pfnCallback) {
 	window->callbacks.dropFile = pfnCallback;	
-}
-
-XkBool xkShouldWindowClosed(XkWindow window) {
-	return(window->closed);
-}
-
-XkBool xkShouldWindowShowed(XkWindow window, const XkWindowShow show) {
-	switch(show) {
-		case XK_WINDOW_SHOW_DEFAULT:
-			return(window->activated);
-			break;
-
-		case XK_WINDOW_SHOW_MAXIMIZED:
-			return(window->maximized);
-			break;
-
-		case XK_WINDOW_SHOW_MINIMIZED:
-			return(window->minimized);
-			break;
-
-		case XK_WINDOW_SHOW_FULLSCREEN:
-			return(window->fullscreen);
-			break;
-
-		case XK_WINDOW_HIDE:
-			return(!window->activated);
-			break;
-	}
-	return(XK_FALSE);
 }
