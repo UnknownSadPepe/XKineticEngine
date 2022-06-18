@@ -59,7 +59,7 @@ XkResult __xkVkCreateInstance(void) {
     .pNext            = VK_NULL_HANDLE,
     .pEngineName      = "XKineticEngine",
     .engineVersion    = VK_MAKE_VERSION(0, 0, 1),
-    .apiVersion       = VK_API_VERSION_1_3
+    .apiVersion       = VK_API_VERSION_1_2
   };
 
 #ifdef XKVULKAN_DEBUG

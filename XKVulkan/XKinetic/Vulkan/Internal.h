@@ -13,6 +13,10 @@
 
 #define XKVULKAN_MAX_FRAMES_IN_FLIGHT 2
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 extern const char* _xkVkInstanceExtensions[];
 extern const uint32_t _xkVkInstanceExtensionCount;
 
@@ -137,3 +141,7 @@ XK_IMPORT void __xkVkDestroyImageView(VkImageView);
 
 XK_IMPORT XkResult __xkVkCreateSampler(VkSampler*, const VkFilter, const VkSamplerAddressMode, const VkBool32, const uint32_t);
 XK_IMPORT void __xkVkDestroySampler(VkSampler);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

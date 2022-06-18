@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 XK_INLINE XkBool xkAlbet(const XkInt32 chr) {
 	return((XkUInt32)chr | 32) - 'a' < 26;
 }
@@ -55,3 +59,7 @@ XK_INLINE XkInt32 xkToUpper(const XkInt32 chr) {
 	}
 	return(chr);
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

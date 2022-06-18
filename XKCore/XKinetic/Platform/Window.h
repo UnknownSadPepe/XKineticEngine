@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum {
 	XK_WINDOW_DECORATED_BIT 	= 0x0001,
 	XK_WINDOW_RESIZABLE_BIT 	= 0x0002,
@@ -254,3 +258,7 @@ XK_IMPORT void __xkInputWindowPosition(XkWindow, const XkInt32, const XkInt32);
 XK_IMPORT void __xkInputWindowSize(XkWindow, const XkSize, const XkSize);
 XK_IMPORT void __xkInputWindowFocus(XkWindow, const XkBool);
 XK_IMPORT void __xkInputWindowDropFile(XkWindow, const XkSize, const XkString*);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -8,6 +8,10 @@
 
 #define XK_TAG_COMPONENT_MAX_SIZE 64
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef XkUInt64 XkComponentID;
 
 typedef enum {
@@ -49,3 +53,7 @@ typedef struct {
 	XkFloat32 zNear;
 	XkFloat32 zFar;
 } XkCameraComponent;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

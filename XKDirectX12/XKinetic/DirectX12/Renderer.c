@@ -104,7 +104,7 @@ void xkDX12DrawIndexed(XkDX12Renderer renderer, XkSize indexCount) {
 XkResult xkDX12CreateBuffer(XkDX12Buffer* pBuffer, const XkBufferUsage usage, const XkSize size, XkHandle data, XkDX12Renderer renderer) {
 	XkResult result = XK_SUCCESS;
 
-	*pBuffer = xkAllocateMemory(sizeof(struct XkDX12Buffer));
+	*pBuffer = (XkDX12Buffer)xkAllocateMemory(sizeof(struct XkDX12Buffer));
 	if(!pBuffer) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -137,7 +137,7 @@ void xkDX12BindIndexBuffer(XkDX12Buffer buffer) {
 XkResult xkDX12CreateTexture2D(XkDX12Texture2D* pTexture, XkHandle data, const XkSize width, const XkSize height, XkDX12Renderer renderer) {
 	XkResult result = XK_SUCCESS;
 
-	*pTexture = xkAllocateMemory(sizeof(struct XkDX12Texture2D));
+	*pTexture = (XkDX12Texture2D)xkAllocateMemory(sizeof(struct XkDX12Texture2D));
 	if(!pTexture) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;

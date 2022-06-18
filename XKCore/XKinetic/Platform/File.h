@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum {
 	XK_FILE_FLAG_RO_BIT = 1,
 	XK_FILE_FLAG_WO_BIT = 2,
@@ -36,3 +40,7 @@ XK_EXPORT void xkReadFile(XkFile, XkString, const XkSize);
 
 XK_EXPORT void xkAsyncWriteFile(XkFile, const XkString, const XkSize);
 XK_EXPORT void xkAsyncReadFile(XkFile, XkString, const XkSize);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

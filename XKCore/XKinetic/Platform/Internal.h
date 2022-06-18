@@ -16,6 +16,10 @@
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Platform/Joystick.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 struct XkFile {
 	XK_PLATFORM_FILE;
 };
@@ -124,3 +128,7 @@ extern __XkPlatform _xkPlatform;
 
 #define __xkErrorHandle(format) __xkErrorHandler("%s %s %d", format, __FILE__, __LINE__)
 XK_IMPORT void __xkErrorHandler(const XkString pFormat, ...);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

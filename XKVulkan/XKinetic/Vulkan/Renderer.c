@@ -262,8 +262,8 @@ void xkVkClearRenderer(XkVkRenderer renderer) {
 
   vkCmdSetViewport(vkCommandBuffer, 0, 1, &vkViewport);
   vkCmdSetScissor(vkCommandBuffer, 0, 1, &renderer->vkScissor);
-	vkCmdSetPrimitiveTopology(vkCommandBuffer, renderer->vkPrimitiveTopology);
-	vkCmdSetCullMode(vkCommandBuffer, renderer->vkCullMode);
+	//vkCmdSetPrimitiveTopologyEXT(vkCommandBuffer, renderer->vkPrimitiveTopology);
+	//vkCmdSetCullModeEXT(vkCommandBuffer, renderer->vkCullMode);
 }
 
 void xkVkTopologyRenderer(XkVkRenderer renderer, XkTopology topology) {
@@ -296,12 +296,11 @@ void xkVkBeginRenderer(XkVkRenderer renderer) {
 	VkFramebuffer vkFrameBuffer = renderer->vkFrameBuffers[renderer->imageIndex];
 
 	// Initialize Vulkan command buffer begin info.
-  const VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
-    .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-    .pNext              = VK_NULL_HANDLE,
-    .flags              = 0,
-    .pInheritanceInfo   = VK_NULL_HANDLE
-  };
+  VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {0};
+  vkCommandBufferBeginInfo.sType              			= VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  vkCommandBufferBeginInfo.pNext              			= VK_NULL_HANDLE;
+  vkCommandBufferBeginInfo.flags              			= 0;
+  vkCommandBufferBeginInfo.pInheritanceInfo   			= VK_NULL_HANDLE;
 
   // Begin Vulkan command buffer.
   VkResult vkResult = vkBeginCommandBuffer(vkCommandBuffer, &vkCommandBufferBeginInfo);
@@ -311,18 +310,15 @@ void xkVkBeginRenderer(XkVkRenderer renderer) {
   }
 
 	// Initialize Vulkan render pass begin info.
-	const VkRenderPassBeginInfo vkRenderPassBeginInfo = {
-  	.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-		.pNext = VK_NULL_HANDLE,
-		.renderPass = renderer->vkRenderPass,
-		.framebuffer = vkFrameBuffer,
-		.renderArea = {
-			.offset = {0, 0},
-			.extent = renderer->vkExtent
-		},
-		.clearValueCount = renderer->clearValueCount,
-		.pClearValues = renderer->vkClearValues
-	};
+	VkRenderPassBeginInfo vkRenderPassBeginInfo = {0};
+  vkRenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	vkRenderPassBeginInfo.pNext = VK_NULL_HANDLE;
+	vkRenderPassBeginInfo.renderPass = renderer->vkRenderPass;
+	vkRenderPassBeginInfo.framebuffer = vkFrameBuffer;
+	vkRenderPassBeginInfo.renderArea.offset = {0, 0};
+	vkRenderPassBeginInfo.renderArea.extent = renderer->vkExtent;
+	vkRenderPassBeginInfo.clearValueCount = renderer->clearValueCount;
+	vkRenderPassBeginInfo.pClearValues = renderer->vkClearValues;
 
 	// Begin Vulkan render pass.
   vkCmdBeginRenderPass(vkCommandBuffer, &vkRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -460,11 +456,10 @@ XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle data, const XkSiz
 	/// TODO: implementation.
 	uint32_t mipLevels = 1; 
 
-	const VkExtent3D vkExtent = {
-		.width = (uint32_t)width,
-		.height = (uint32_t)height,
-		.depth = 1
-	};
+	VkExtent3D vkExtent 	= {0};
+	vkExtent.width 				= (uint32_t)width;
+	vkExtent.height 			= (uint32_t)height;
+	vkExtent.depth 				= 1;
 
 	// Create Vulkan transfer buffer.
 	VkBuffer vkTransferBuffer;

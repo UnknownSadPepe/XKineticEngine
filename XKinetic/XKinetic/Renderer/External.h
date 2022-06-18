@@ -6,6 +6,10 @@
 #include "XKinetic/Math/Vec4.h"
 #include "XKinetic/Math/Mat4.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum {
 	XK_TOPOLOGY_POINT_LIST,
 	XK_TOPOLOGY_LINE_LIST,
@@ -46,3 +50,7 @@ typedef struct {
   XkMat4 view;
   XkMat4 projection;
 } XkUniformBufferObject;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

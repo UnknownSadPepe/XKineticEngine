@@ -4,6 +4,10 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Scene/Components.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef XkUInt64 XkEntityID;
 
 typedef struct {
@@ -15,3 +19,7 @@ XK_API void xkDestroyEntity(XkEntity*);
 XK_API XkComponentID xkAddEntityComponent(XkEntity*, XkComponentType);
 XK_API void xkRemoveEntityComponent(XkEntity*, XkComponentID);
 XK_API void xkEntityHasComponent(XkEntity*, XkComponentType);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

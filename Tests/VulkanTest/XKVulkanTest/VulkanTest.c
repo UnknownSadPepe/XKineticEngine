@@ -50,12 +50,12 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
 	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
 
-	XkRendererConfig rendererConfig = {
-		.blending = XK_FALSE,
-		.depthTest = XK_TRUE,
-		.stencilTest = XK_TRUE,
-		.scissorTest = XK_TRUE
-	};
+	XkRendererConfig rendererConfig = {0};
+	rendererConfig.blending 				= XK_FALSE;
+	rendererConfig.depthTest 				= XK_TRUE;
+	rendererConfig.stencilTest 			= XK_TRUE;
+	rendererConfig.scissorTest 			= XK_TRUE;
+
 
 	result = xkCreateRenderer(&_xkApplication.renderer, &rendererConfig, _xkApplication.window, XK_RENDERER_API_VK);
 	if(result != XK_SUCCESS) {

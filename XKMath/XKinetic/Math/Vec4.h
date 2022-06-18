@@ -3,6 +3,10 @@
 #include "XKinetic/XKMath.h"
 #include "XKinetic/Math/Math.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
 	union {
 		struct { XkFloat32 x, y, z, w; };
@@ -134,3 +138,7 @@ XK_INLINE XkDVec4 xkDVec4Normalize(const XkDVec4 a) {
 		.w = a.w / length
 	});
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

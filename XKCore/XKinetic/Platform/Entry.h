@@ -9,6 +9,10 @@
 #endif // XK_LINUX
 #include "XKinetic/Application.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 XkResult __xkEntry(const XkSize argc, const XkWString* argv) {
 	XkResult result = XK_SUCCESS;
 
@@ -22,3 +26,7 @@ XkResult __xkEntry(const XkSize argc, const XkWString* argv) {
 _catch:
 	return(result);
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

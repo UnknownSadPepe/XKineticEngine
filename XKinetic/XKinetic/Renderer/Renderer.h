@@ -5,6 +5,10 @@
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Renderer/External.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct XkRenderer* XkRenderer;
 typedef struct XkBuffer* XkBuffer;
 typedef struct XkTexture2D* XkTexture2D;
@@ -78,3 +82,7 @@ XK_API void xkBindIndexBuffer(XkBuffer);
 
 XK_API XkResult xkCreateTexture2D(XkTexture2D*, XkHandle, const XkSize, const XkSize, XkRenderer);
 XK_API void xkDestroyTexture2D(XkTexture2D);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

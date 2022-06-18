@@ -4,9 +4,7 @@ XkResult xkCreateEntity(XkEntity* pEntity) {
   XkResult result = XK_SUCCESS;
 
   /// TODO: implementation.
-
   
-
 _catch:
   return(result);
 }

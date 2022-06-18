@@ -2,10 +2,12 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef XkHandle(*XkThreadRoutinePfn)(XkHandle);
-
 typedef struct XkThread* XkThread;
-
 typedef struct XkMutex* XkMutex;
 
 XK_EXPORT XkResult xkCreateThread(XkThread*, const XkThreadRoutinePfn);
@@ -19,3 +21,7 @@ XK_EXPORT XkResult xkCreateMutex(XkMutex*);
 XK_EXPORT void xkDestroyMutex(XkMutex);
 XK_EXPORT void xkLockMutex(XkMutex);
 XK_EXPORT void xkUnlockMutex(XkMutex);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

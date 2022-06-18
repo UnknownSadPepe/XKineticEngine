@@ -5,6 +5,10 @@
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Renderer/External.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct XkVkRenderer* XkVkRenderer;
 typedef struct XkVkBuffer* XkVkBuffer;
 typedef struct XkVkTexture2D* XkVkTexture2D;
@@ -40,3 +44,6 @@ XKVULKAN_API void xkVkBindIndexBuffer(XkVkBuffer);
 XKVULKAN_API XkResult xkVkCreateTexture2D(XkVkTexture2D*, XkHandle, const XkSize, const XkSize, XkVkRenderer);
 XKVULKAN_API void xkVkDestroyTexture2D(XkVkTexture2D);
 
+#ifdef __cplusplus
+}
+#endif // __cplusplus

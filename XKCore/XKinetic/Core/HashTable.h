@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef XkInt64 XkKey;
 
 typedef struct XkHashTable* XkHashTable;
@@ -37,3 +41,6 @@ XKCORE_API void __xkHashTableSet(XkHashTable, const XkKey, XkHandle);
 	__xkHashTableSet(table, key, &tmp);							\
 }
 
+#ifdef __cplusplus
+}
+#endif // __cplusplus

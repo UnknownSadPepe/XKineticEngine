@@ -12,6 +12,10 @@
 #include "XKinetic/XKCore.h"
 #include "XKinetic/Platform/Unix/Internal.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
 	struct wl_egl_window* 								eglWindow;
 	struct wl_surface* 										wlSurface;
@@ -93,3 +97,7 @@ typedef struct {
 } __XkLinuxPlatform;
 
 #define XK_PLATFORM __XkLinuxPlatform handle
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

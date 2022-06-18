@@ -3,6 +3,10 @@
 #include <pthread.h>
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
 	int handle;
 } __XkUnixFile;
@@ -27,3 +31,7 @@ typedef struct {
 } __XkUnixModule;
 
 #define XK_PLATFORM_MODULE __XkUnixModule handle
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

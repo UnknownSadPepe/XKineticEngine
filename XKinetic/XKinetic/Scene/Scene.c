@@ -3,7 +3,7 @@
 #define XK_SCENE_NAME_MAX_SIZE 128
 
 struct XkScene {
-    XkChar name[XK_SCENE_NAME_MAX_SIZE];
+  XkChar name[XK_SCENE_NAME_MAX_SIZE];
 };
 
 XkResult xkCreateScene(XkScene* pScene) {

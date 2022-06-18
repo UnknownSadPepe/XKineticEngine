@@ -2,6 +2,10 @@
 
 #define XK_NULL_HANDLE ((void*)0)
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum {
 	XK_SUCCESS													= 0,
 	XK_ERROR_BAD_ALLOCATE								= -1,
@@ -40,6 +44,10 @@ typedef float XkFloat32;
 typedef double XkFloat64;
 
 typedef unsigned long int XkSize;
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #define XK_INT8_MIN (-1-0x7f)
 #define XK_INT8_MAX (0x7f)

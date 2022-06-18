@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum {
 	XK_JOYSTICK_1  = 0,
 	XK_JOYSTICK_2  = 1,
@@ -104,3 +108,7 @@ XK_IMPORT void __xkInputJoystickEvent(XkJoystick, const XkJoystickEvent);
 XK_IMPORT void __xkInputJoystickAxis(XkJoystick, const XkJoystickAxis, const XkFloat32);
 XK_IMPORT void __xkInputJoystickButton(XkJoystick, const XkJoystickButton, const XkJoystickAction);
 XK_IMPORT void __xkInputJoystickHat(XkJoystick, const XkJoystickHat, const XkJoystickAction);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

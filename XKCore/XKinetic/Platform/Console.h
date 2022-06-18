@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef enum {
 	XK_CONSOLE_STDOUT = 1,
 	XK_CONSOLE_STDERR = 2
@@ -48,3 +52,7 @@ typedef enum {
 XK_EXPORT void xkWriteConsole(const XkConsoleHandle, const XkString, const XkSize);
 XK_EXPORT void xkWriteConsoleColored(const XkConsoleHandle, const XkConsoleColor, const XkString, const XkSize);
 XK_EXPORT void xkReadConsole(XkString, const XkSize);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

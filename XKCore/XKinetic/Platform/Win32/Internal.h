@@ -6,6 +6,10 @@
 #include <dbt.h>
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
 	HANDLE handle;
 	OVERLAPPED overlapped;
@@ -66,3 +70,6 @@ typedef struct {
 
 #define XK_PLATFORM __XkWin32Platform win32
 
+#ifdef __cplusplus
+}
+#endif // __cplusplus

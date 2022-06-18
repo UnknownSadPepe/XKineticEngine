@@ -2,6 +2,10 @@
 
 #include "XKinetic/Math/Math.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #ifndef fp_force_evalf
 #define fp_force_evalf fp_force_evalf
 static inline void fp_force_evalf(float x)
@@ -38,3 +42,7 @@ static inline void fp_force_evall(long double x)
 		fp_force_evall(x);                			\
 	}                                         \
 } while(0)
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct XkPoolAllocator* XkPoolAllocator;
 
 XKCORE_API XkResult __xkCreatePoolAllocator(XkPoolAllocator*, const XkSize, const XkSize);
@@ -13,3 +17,7 @@ XKCORE_API void xkResizePoolAllocator(XkPoolAllocator, const XkSize);
 XKCORE_API void xkDestroyPoolAllocator(XkPoolAllocator);
 XKCORE_API XkHandle xkAllocatePoolMemory(XkPoolAllocator, const XkSize);
 XKCORE_API void xkFreePoolMemory(XkPoolAllocator, const XkHandle);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

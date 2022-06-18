@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct XkDynamicArray* XkDynamicArray;
 
 #define XK_DYNAMIC_ARRAY_DEFAULT_CAPACITY 2
@@ -45,3 +49,6 @@ XKCORE_API void __xkDynamicArraySet(XkDynamicArray, const XkSize, XkHandle);
 	__xkDynamicArraySet(array, &tmp);					\
 }
 
+#ifdef __cplusplus
+}
+#endif // __cplusplus

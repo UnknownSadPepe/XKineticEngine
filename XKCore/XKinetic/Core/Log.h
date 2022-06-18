@@ -2,6 +2,10 @@
 
 #include "XKinetic/XKCore.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 XK_EXPORT XkResult xkLogInitialize(void);
 XK_EXPORT void xkLogTerminate(void);
 
@@ -16,3 +20,7 @@ XKCORE_API void xkLogNotice(const XkString, ...);
 #else
 	#define xkLogDebug(format, ...)
 #endif // XK_DEBUG
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

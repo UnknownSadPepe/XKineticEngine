@@ -226,27 +226,24 @@ XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
 	}
 
 	// Set window icon.
-	XkWindowIcon icon = {
-		.width = iconConfig.width,
-		.height = iconConfig.height,
-		.pixels = iconConfig.pixels
-	};
+	XkWindowIcon icon = {0};
+	icon.width				= iconConfig.width;
+	icon.height 			= iconConfig.height;
+	icon.pixels 			= iconConfig.pixels;
 
-	XkWindowIcon smallIcon = {
-		.width = smallIconConfig.width,
-		.height = smallIconConfig.height,
-		.pixels = smallIconConfig.pixels
-	};
+	XkWindowIcon smallIcon 	= {0};
+	smallIcon.width 				= smallIconConfig.width;
+	smallIcon.height 				= smallIconConfig.height;
+	smallIcon.pixels 				= smallIconConfig.pixels;
 
 	XkWindowIcon icons[2] = {icon, smallIcon};
 	xkSetWindowIcon(_xkApplication.window, 2, icons);
 
 	// Set window cursor.
-	XkWindowIcon cursorIcon = {
-		.width = cursorConfig.width,
-		.height = cursorConfig.height,
-		.pixels = cursorConfig.pixels
-	};
+	XkWindowIcon cursorIcon = {0};
+	cursorIcon.width = cursorConfig.width;
+	cursorIcon.height = cursorConfig.height;
+	cursorIcon.pixels = cursorConfig.pixels;
 
 	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
 

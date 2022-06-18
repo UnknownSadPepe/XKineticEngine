@@ -33,8 +33,12 @@
 // huge number that should be larger than any valid number used.
 #define XK_INFINITY 1e30f
 // least significant digit representable.
-#define XK_FLOAT32_EPSILON (XkFloat32)1E-5
-#define XK_FLOAT64_EPSILON (XkFloat64)1E-9
+#define XK_FLOAT32_EPSILON 1E-5
+#define XK_FLOAT64_EPSILON 1E-9
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 XKMATH_API XkFloat32 xkFCos(const XkFloat32);
 XKMATH_API XkFloat64 xkDCos(const XkFloat64);
@@ -230,3 +234,7 @@ XKMATH_API XkFloat64 xkDAbs(const XkFloat64);
 #define xkAbs(x) _Generic((x), \
 	XkFloat32: xkFAbs, \
   XkFloat64: xkDAbs)(x)
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
