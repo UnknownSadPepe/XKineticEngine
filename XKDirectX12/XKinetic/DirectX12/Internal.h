@@ -1,5 +1,9 @@
 #pragma once
 
+#define INITGUID
+#define CINTERFACE
+#define COBJMACROS
+#include <windows.h>
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include "XKinetic/XKDirectX12.h"

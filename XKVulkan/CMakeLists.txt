@@ -1,6 +1,3 @@
-# Initialize XKVulkan project.
-project(XKVulkan VERSION 0.0.1 LANGUAGES C)
-
 set(VULKAN_SRC_DIR ${CMAKE_SOURCE_DIR}/XKVulkan)
 
 file(GLOB_RECURSE VULKAN_SRC ${VULKAN_SRC_DIR}/*.c)

@@ -315,7 +315,8 @@ void xkVkBeginRenderer(XkVkRenderer renderer) {
 	vkRenderPassBeginInfo.pNext = VK_NULL_HANDLE;
 	vkRenderPassBeginInfo.renderPass = renderer->vkRenderPass;
 	vkRenderPassBeginInfo.framebuffer = vkFrameBuffer;
-	vkRenderPassBeginInfo.renderArea.offset = {0, 0};
+	vkRenderPassBeginInfo.renderArea.offset.x = 0;
+	vkRenderPassBeginInfo.renderArea.offset.y = 0;
 	vkRenderPassBeginInfo.renderArea.extent = renderer->vkExtent;
 	vkRenderPassBeginInfo.clearValueCount = renderer->clearValueCount;
 	vkRenderPassBeginInfo.pClearValues = renderer->vkClearValues;

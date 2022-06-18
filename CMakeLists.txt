@@ -1,16 +1,13 @@
-cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 
 # Initialize XKinetic project.
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
 # Set project C standard.
-set(CMAKE_REQUIRED_FLAGS "-std=c++20 -std=c11 -Wall -Wextra")
+set(CMAKE_REQUIRED_FLAGS "-std=c17 -Wall -Wextra")
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Set project build type.
 if(NOT CMAKE_BUILD_TYPE)

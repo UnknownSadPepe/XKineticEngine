@@ -41,7 +41,7 @@ XkResult __xkDX12InitializeContext(void) {
     goto _catch;
   }
 
-  const D3D_FEATURE_LEVEL d3dDeviceMaximumFeatureLevel = __xkDXGIAdapterGetMaximumFeatureLevel(_xkDX12Context.dxgiAdapter4);
+  const D3D_FEATURE_LEVEL d3dDeviceMaximumFeatureLevel = __xkDXGIAdapter4GetMaximumFeatureLevel(_xkDX12Context.dxgiAdapter4);
   hResult = D3D12CreateDevice(_xkDX12Context.dxgiAdapter4, d3dDeviceMaximumFeatureLevel, &IID_ID3D12Device8, &_xkDX12Context.d3d12Device8);
   if(FAILED(hResult)) {
     result = XK_ERROR_UNKNOWN;
@@ -50,21 +50,16 @@ XkResult __xkDX12InitializeContext(void) {
   }
 
 #ifdef XKDIRECTX12_DEBUG
-  //_xkDX12Context.d3d12Device->SetName(L"D3D12 Device");
   ID3D12Object_SetName(_xkDX12Context.d3d12Device8, L"D3D12 Device");
 #endif // XKDIRECTX12_DEBUG
 
 
 #ifdef XKDIRECTX12_DEBUG
   ID3D12Device8_QueryInterface(_xkDX12Context.d3d12Device8, &IID_ID3D12InfoQueue, &_xkDX12Context.d3d12InfoQueue);
-  //_xkDX12Context.d3d12Device->QueryInterface(XK_DX12_IID_PPV(&_xkDX12Context.d3d12InfoQueue));
 
   ID3D12InfoQueue_SetBreakOnSeverity(_xkDX12Context.d3d12InfoQueue, D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
   ID3D12InfoQueue_SetBreakOnSeverity(_xkDX12Context.d3d12InfoQueue, D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
   ID3D12InfoQueue_SetBreakOnSeverity(_xkDX12Context.d3d12InfoQueue, D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
-  //_xkDX12Context.d3d12InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-  //.d3d12InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
-  //_xkDX12Context.d3d12InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
 #endif // XKDIRECTX12_DEBUG
 
   /// TODO: implementation.
@@ -73,16 +68,14 @@ _catch:
   return(result);
 }
 
-void __xkd3d12TerminateContext(void) {
+void __xkDX12TerminateContext(void) {
   if(_xkDX12Context.dxgiAdapter4) {
     IDXGIAdapter4_Release(_xkDX12Context.dxgiAdapter4);
-    //_xkDX12Context.dxgiAdapter->Release();
     _xkDX12Context.dxgiAdapter4 = NULL;
   }
 
   if(_xkDX12Context.dxgiFactory7) {
     IDXGIFactory7_Release(_xkDX12Context.dxgiFactory7);
-    //_xkDX12Context.dxgiFactory7->Release();
     _xkDX12Context.dxgiFactory7 = NULL;
   }
 
@@ -90,14 +83,10 @@ void __xkd3d12TerminateContext(void) {
   ID3D12InfoQueue_SetBreakOnSeverity(_xkDX12Context.d3d12InfoQueue, D3D12_MESSAGE_SEVERITY_CORRUPTION, FALSE);
   ID3D12InfoQueue_SetBreakOnSeverity(_xkDX12Context.d3d12InfoQueue, D3D12_MESSAGE_SEVERITY_ERROR, FALSE);
   ID3D12InfoQueue_SetBreakOnSeverity(_xkDX12Context.d3d12InfoQueue, D3D12_MESSAGE_SEVERITY_WARNING, FALSE);
-  //_xkDX12Context.d3d12InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, FALSE);
-  //_xkDX12Context.d3d12InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, FALSE);
-  //_xkDX12Context.d3d12InfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, FALSE);
 
   ID3D12DebugDevice2* d3d12DebugDevice2;
   ID3D12DebugDevice2_QueryInterface(_xkDX12Context.d3d12Device8, &IID_ID3D12DebugDevice2, &d3d12DebugDevice2);
-  //_xkDX12Context.d3d12Device->QueryInterface(XK_DX12_IID_PPV(&d3d12DebugDevice2));
-  // The reason because i release DirectX12 device object here, because i don't want any life object to next point.
+
   if (_xkDX12Context.d3d12Device8) {
     ID3D12Device8_Release(_xkDX12Context.d3d12Device8);
     //_xkDX12Context.d3d12Device->Release();
@@ -105,12 +94,10 @@ void __xkd3d12TerminateContext(void) {
   }
 
   ID3D12DebugDevice2_ReportLiveDeviceObjects(d3d12DebugDevice2, D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
-  //d3d12DebugDevice2->ReportLiveDeviceObjects(D3D12_RLDO_SUMMARY | D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
 #endif // XKDIRECTX12_DEBUG
 
   if(_xkDX12Context.d3d12Device8) {
-
-    //_xkDX12Context.d3d12Device8->Release();
+    ID3D12Device8_Release(_xkDX12Context.d3d12Device8);
     _xkDX12Context.d3d12Device8 = NULL;
   }
 
@@ -129,7 +116,6 @@ static D3D_FEATURE_LEVEL __xkDXGIAdapter4GetMaximumFeatureLevel(IDXGIAdapter4* d
   }
 
   ID3D12Device_CheckFeatureSupport(d3d12Device, D3D12_FEATURE_FEATURE_LEVELS, &d3d12FeatureLevelInfo, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
-  //d3d12Device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &d3d12FeatureLevelInfo, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
 
   return(d3d12FeatureLevelInfo.MaxSupportedFeatureLevel);
 }
@@ -138,16 +124,15 @@ static IDXGIAdapter4* __xkDXGIChooseAdapter4(void) {
   IDXGIAdapter4* dxgiAdapter4 = NULL;
 
   // Choose best DXGI adapter by performance.
-  for(UINT i = 0; /*_xkDX12Context.dxgiFactory7->EnumAdapterByGpuPreference(i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, XK_DX12_IID_PPV(&dxgiAdapter4))*/ IDXGIFactory7_EnumAdapterByGpuPreference(_xkDX12Context.dxgiFactory7, i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, &IID_IDXGIAdapter4, &dxgiAdapter4) != DXGI_ERROR_NOT_FOUND; i++) {
+  for(UINT i = 0; IDXGIFactory7_EnumAdapterByGpuPreference(_xkDX12Context.dxgiFactory7, i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, &IID_IDXGIAdapter4, &dxgiAdapter4) != DXGI_ERROR_NOT_FOUND; i++) {
     HRESULT hResult = D3D12CreateDevice(dxgiAdapter4, _xkD3DMinimumDeviceFeatureLevel, &IID_ID3D12Device, NULL);
     if(SUCCEEDED(hResult)) {
       const D3D_FEATURE_LEVEL d3dDeviceMaximumFeatureLevel = __xkDXGIAdapter4GetMaximumFeatureLevel(dxgiAdapter4);
       if (d3dDeviceMaximumFeatureLevel > _xkD3DMinimumDeviceFeatureLevel) {
         break;
       }
-    } else if (FAILED(hResult)) {
+    } else if(FAILED(hResult)) {
       IDXGIAdapter4_Release(dxgiAdapter4);
-      //dxgiAdapter->Release();
       dxgiAdapter4 = NULL;
     }
   }
