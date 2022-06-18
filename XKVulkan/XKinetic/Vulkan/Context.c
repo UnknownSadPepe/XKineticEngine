@@ -47,7 +47,7 @@ XkResult __xkVkInitializeContext() {
   // Pick best Vulkan context physical device.
   result = __xkVkPickPhysicalDevice();
   if(result != XK_SUCCESS) {
-    xkLogError("Failed to pick Vulkan physical device: %d", result);
+    xkLogError("Failed to choose Vulkan physical device: %d", result);
     result = XK_ERROR_INITIALIZE_FAILED;
     goto _catch;
   } 

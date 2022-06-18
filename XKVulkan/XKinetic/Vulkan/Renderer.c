@@ -15,18 +15,18 @@ struct XkVkRenderer {
 	VkSurfaceKHR vkSurface;
 	VkSwapchainKHR vkSwapChain;
 	VkFormat vkSwapChainImageFormat;
-	VkImage vkSwapChainImages[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
-	VkImageView vkSwapChainImageViews[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+	VkImage vkSwapChainImages[XKVULKAN_FRAME_COUNT];
+	VkImageView vkSwapChainImageViews[XKVULKAN_FRAME_COUNT];
 	uint32_t swapChainImageCount;
-	VkFramebuffer vkFrameBuffers[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+	VkFramebuffer vkFrameBuffers[XKVULKAN_FRAME_COUNT];
 
 	VkRenderPass vkRenderPass;
 
-  VkSemaphore vkAvailableSemaphores[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
-  VkSemaphore vkFinishedSemaphores[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
-  VkFence vkFlightFences[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+  VkSemaphore vkAvailableSemaphores[XKVULKAN_FRAME_COUNT];
+  VkSemaphore vkFinishedSemaphores[XKVULKAN_FRAME_COUNT];
+  VkFence vkFlightFences[XKVULKAN_FRAME_COUNT];
 
-	VkCommandBuffer vkCommandBuffers[XKVULKAN_MAX_FRAMES_IN_FLIGHT];
+	VkCommandBuffer vkCommandBuffers[XKVULKAN_FRAME_COUNT];
 
 	uint32_t frameIndex;
 	uint32_t imageIndex;
@@ -128,7 +128,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
   }
 
 	// Create Vulkan renderer swap chain image views.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		result = __xkVkCreateImageView(&renderer->vkSwapChainImageViews[i], renderer->vkSwapChainImages[i], renderer->vkSwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan swap chain image view: %d", result);
@@ -138,7 +138,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan command buffers.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		result = __xkVkCreateCommandBuffer(&renderer->vkCommandBuffers[i], VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan command buffer: %d", result);
@@ -148,7 +148,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan available semaphores.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		result = __xkVkCreateSemaphore(&renderer->vkAvailableSemaphores[i]);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan semaphore: %d", result);
@@ -158,7 +158,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan finished semaphores.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		result = __xkVkCreateSemaphore(&renderer->vkFinishedSemaphores[i]);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan semaphore: %d", result);
@@ -168,7 +168,7 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
 	}
 
 	// Create Vulkan fences.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		result = __xkVkCreateFence(&renderer->vkFlightFences[i]);
 		if(result != XK_SUCCESS) {
     	xkLogError("Failed to create Vulkan fence: %d", result);
@@ -187,27 +187,27 @@ void xkVkDestroyRenderer(XkVkRenderer renderer) {
 	/// TODO: implementation.
 	
 	// Destroy Vulkan flight fence.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		__xkVkDestroyFence(renderer->vkFlightFences[i]);
 	}
 
 	// Destroy Vulkan available semaphores.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		__xkVkDestroySemaphore(renderer->vkAvailableSemaphores[i]);
 	}
 
 	// Destroy Vulkan finished semaphores.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		__xkVkDestroySemaphore(renderer->vkFinishedSemaphores[i]);
 	}
 
 	// Destroy Vulkan command buffers.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		__xkVkDestroyCommandBuffer(renderer->vkCommandBuffers[i]);
 	}	
 
 	// Destroy Vulkan renderer swap chain image views.
-	for(uint32_t i = 0; i < XKVULKAN_MAX_FRAMES_IN_FLIGHT; i++) {
+	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
 		__xkVkDestroyImageView(renderer->vkSwapChainImageViews[i]);
 	}
 
@@ -343,6 +343,9 @@ void xkVkEndRenderer(XkVkRenderer renderer) {
   }  
 
 	/// TODO: submit Vulkan command buffer.
+
+	// Register frame index.
+	renderer->frameIndex = (renderer->frameIndex + 1) % XKVULKAN_FRAME_COUNT;
 
 _catch:
 	return;

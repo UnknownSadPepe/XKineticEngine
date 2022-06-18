@@ -5,6 +5,15 @@
 struct XkDX12Renderer {
 	XkRendererConfig config;
 
+	ID3D12CommandQueue*						d3d12CommandQueue;
+	ID3D12CommandAllocator*				d3d12CommandAllocators[XKDIRECTX12_FRAME_COUNT];
+	ID3D12Fence1*									d3d12Fence;
+	ID3D12GraphicsCommandList6*		d3d12GraphicsCommandList6;
+
+	UINT frameIndex;
+
+	UINT fenceValue;
+	HANDLE hFenceEvent;
   /// TODO: implementation.
 };
 
@@ -39,6 +48,48 @@ XkResult xkDX12CreateRenderer(XkDX12Renderer* pRenderer, XkRendererConfig* const
 		goto _catch;
 	}
 
+	// Create DirectX12 command queue.
+	result = __xkDX12CreateCommandQueue(&renderer->d3d12CommandQueue, D3D12_COMMAND_LIST_TYPE_DIRECT);
+	if(result != XK_SUCCESS) {
+		result = XK_ERROR_CREATE_FAILED;
+		xkLogError("Failed to create DirectX12 command queue");
+		goto _catch;
+	}
+
+	// Create DirectX12 command allocators.
+	for(XkSize i = 0; i < XKDIRECTX12_FRAME_COUNT; i++) {
+		result = __xkDX12CreateCommandAllocator(&renderer->d3d12CommandAllocators[i], D3D12_COMMAND_LIST_TYPE_DIRECT);
+		if(result != XK_SUCCESS) {
+			result = XK_ERROR_CREATE_FAILED;
+			xkLogError("Failed to create DirectX12 command allocator");
+			goto _catch;
+		}
+	}
+
+	// Create DirectX12 command list.
+	result = __xkDX12CreateCommandList(&renderer->d3d12GraphicsCommandList6, renderer->d3d12CommandAllocators[0], D3D12_COMMAND_LIST_TYPE_DIRECT);
+	if(result != XK_SUCCESS) {
+		result = XK_ERROR_CREATE_FAILED;
+		xkLogError("Failed to create DirectX12 command list");
+		goto _catch;
+	}
+
+	// Create DirectX12 fence.
+	result = __xkDX12CreateFence(&renderer->d3d12Fence);
+	if(result != XK_SUCCESS) {
+		result = XK_ERROR_CREATE_FAILED;
+		xkLogError("Failed to create DirectX12 fence");
+		goto _catch;
+	}
+
+	// Create fence event.
+	renderer->hFenceEvent = CreateEventEx(NULL, NULL, 0, EVENT_ALL_ACCESS);
+	if (!renderer->hFenceEvent) {
+		result = XK_ERROR_CREATE_FAILED;
+		xkLogError("Failed to create DirectX12 fence event");
+		goto _catch;
+	}
+
 	/// TODO: implementation.
 
 _catch:
@@ -46,6 +97,23 @@ _catch:
 }
 
 void xkDX12DestroyRenderer(XkDX12Renderer renderer) {
+	// Destroy fence event.
+	CloseHandle(renderer->hFenceEvent);
+
+	// Destroy DirectX12 fence.
+	__xkDX12DestroyFence(renderer->d3d12Fence);
+
+	// Destroy DirectX12 command list
+	__xkDX12DestroyCommandList(renderer->d3d12GraphicsCommandList6);
+
+	// Destroy DirectX12 command allocators.
+	for(XkSize i = 0; i < XKDIRECTX12_FRAME_COUNT; i++) {
+		__xkDX12DestroyCommandAllocator(renderer->d3d12CommandAllocators[i]);
+	}
+
+	// Destroy DirectX12 command queue.
+	__xkDX12DestroyCommandQueue(renderer->d3d12CommandQueue);
+
 	/// TODO: implementation.
 	xkFreeMemory(renderer);
 
@@ -78,11 +146,40 @@ void xkDX12CullModeRenderer(XkDX12Renderer renderer, XkCullMode cullMode) {
 }
 
 void xkDX12BeginRenderer(XkDX12Renderer renderer) {
-	/// TODO: implementation.
+	// DirectX12 GPU has not finished executing the command list.
+	if (ID3D12Fence1_GetCompletedValue(renderer->d3d12Fence) < renderer->fenceValue) {
+		// Set DirectX12 fence event.
+		ID3D12Fence1_SetEventOnCompletion(renderer->d3d12Fence, renderer->fenceValue, renderer->hFenceEvent);
+
+		// Wait for DirectX12 fence event.
+		WaitForSingleObject(renderer->hFenceEvent, INFINITE);
+	}
+
+	/// Template DirectX12 current command allocator.
+	ID3D12CommandAllocator* d3d12CommandAllocator = renderer->d3d12CommandAllocators[renderer->frameIndex];
+
+	// Reset DirectX12 current command allocator.
+	ID3D12CommandAllocator_Reset(d3d12CommandAllocator);
+
+	// Reset DirectX12 command list.
+	ID3D12GraphicsCommandList_Reset(renderer->d3d12GraphicsCommandList6, d3d12CommandAllocator, NULL);
 }
 
 void xkDX12EndRenderer(XkDX12Renderer renderer) {
-	/// TODO: implementation.
+	// Reset DirectX12 command list, to start recording commands at next frame.
+	ID3D12GraphicsCommandList_Close(renderer->d3d12GraphicsCommandList6);
+
+	// Execute DirectX12 command lists.
+	ID3D12CommandList d3d12CommandLists[] = {renderer->d3d12GraphicsCommandList6};
+	ID3D12CommandQueue_ExecuteCommandLists(renderer->d3d12CommandQueue, 1, &d3d12CommandLists[0]);
+
+	UINT* pFenceValue = &renderer->fenceValue;
+	*pFenceValue++;
+
+	ID3D12CommandQueue_Signal(renderer->d3d12CommandQueue, renderer->d3d12Fence, pFenceValue);
+
+	// Register frame index.
+	renderer->frameIndex = (renderer->frameIndex + 1) % XKDIRECTX12_FRAME_COUNT;
 }
 
 void xkDX12ResizeRenderer(XkDX12Renderer renderer, XkSize width, XkSize height) {

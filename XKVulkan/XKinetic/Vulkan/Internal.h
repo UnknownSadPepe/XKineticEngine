@@ -11,7 +11,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Platform/Window.h"
 
-#define XKVULKAN_MAX_FRAMES_IN_FLIGHT 2
+#define XKVULKAN_FRAME_COUNT 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,8 +48,6 @@ typedef struct {
 	VkInstance vkInstance;
 #ifdef XKVULKAN_DEBUG
 	VkDebugUtilsMessengerEXT vkDebugMessenger;
-#else 
-	VkDebugReportCallbackEXT vkDebugReport;
 #endif // XKVULKAN_DEBUG
 
 	VkSurfaceKHR vkHelperSurface;
