@@ -4,23 +4,22 @@ XkResult __xkVkCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pVkIma
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan image create info.
-	const VkImageCreateInfo vkImageCreateInfo = {
-    .sType                  = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-    .pNext                  = VK_NULL_HANDLE,
-	  .flags                  = 0,
-	  .imageType              = vkImageType,
-	  .format                 = vkImageFormat,
-	  .extent                 = vkExtent,
-	  .mipLevels              = mipLevels,
-	  .arrayLayers            = 1,
-	  .samples                = vkSamples,
-	  .tiling                 = vkTiling,
-	  .usage                  = vkUsage,
-	  .sharingMode            = VK_SHARING_MODE_EXCLUSIVE,
-    .queueFamilyIndexCount  = 0,
-    .pQueueFamilyIndices    = VK_NULL_HANDLE,
-	  .initialLayout          = VK_IMAGE_LAYOUT_UNDEFINED
-  };
+	VkImageCreateInfo vkImageCreateInfo       = {0};
+  vkImageCreateInfo.sType                   = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  vkImageCreateInfo.pNext                   = VK_NULL_HANDLE;
+	vkImageCreateInfo.flags                   = 0;
+	vkImageCreateInfo.imageType               = vkImageType;
+	vkImageCreateInfo.format                  = vkImageFormat;
+	vkImageCreateInfo.extent                  = vkExtent;
+	vkImageCreateInfo.mipLevels               = mipLevels;
+	vkImageCreateInfo.arrayLayers             = 1;
+	vkImageCreateInfo.samples                 = vkSamples;
+	vkImageCreateInfo.tiling                  = vkTiling;
+	vkImageCreateInfo.usage                   = vkUsage;
+	vkImageCreateInfo.sharingMode             = VK_SHARING_MODE_EXCLUSIVE;
+  vkImageCreateInfo.queueFamilyIndexCount   = 0;
+  vkImageCreateInfo.pQueueFamilyIndices     = VK_NULL_HANDLE;
+	vkImageCreateInfo.initialLayout           = VK_IMAGE_LAYOUT_UNDEFINED;
 	
   // Create Vulkan image.
   VkResult vkResult = vkCreateImage(_xkVkContext.vkLogicalDevice, &vkImageCreateInfo, VK_NULL_HANDLE, pVkImage);
@@ -38,12 +37,11 @@ XkResult __xkVkCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pVkIma
 	vkGetImageMemoryRequirements(_xkVkContext.vkLogicalDevice, *pVkImage, &vkMemoryRequirements);
 
   // Initialize Vulkan image memory allocate info.
-  const VkMemoryAllocateInfo vkMemoryAllocateInfo = {
-	  .sType            = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    .pNext            = VK_NULL_HANDLE,
-	  .allocationSize   = vkMemoryRequirements.size,
-	  .memoryTypeIndex  = __xkVkFindMemoryType(vkMemoryRequirements.memoryTypeBits, vkMemoryProperties)
-  };
+  VkMemoryAllocateInfo vkMemoryAllocateInfo = {0};
+	vkMemoryAllocateInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  vkMemoryAllocateInfo.pNext                = VK_NULL_HANDLE;
+	vkMemoryAllocateInfo.allocationSize       = vkMemoryRequirements.size;
+	vkMemoryAllocateInfo.memoryTypeIndex      = __xkVkFindMemoryType(vkMemoryRequirements.memoryTypeBits, vkMemoryProperties);
 
   // Allocate Vulkan image memory.
   vkResult = vkAllocateMemory(_xkVkContext.vkLogicalDevice, &vkMemoryAllocateInfo, VK_NULL_HANDLE, pVkImageMemory);
@@ -71,6 +69,7 @@ _catch:
 void __xkVkDestroyImage(VkImage vkImage, VkDeviceMemory  vkImageMemory) {
   // Destroy Vulkan image.
 	vkDestroyImage(_xkVkContext.vkLogicalDevice, vkImage, VK_NULL_HANDLE);
+  
   // Free Vulkan image memory.
   vkFreeMemory(_xkVkContext.vkLogicalDevice, vkImageMemory, VK_NULL_HANDLE);
 }

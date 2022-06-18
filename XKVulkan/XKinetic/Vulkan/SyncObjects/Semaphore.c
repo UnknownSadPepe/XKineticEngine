@@ -4,11 +4,10 @@ XkResult __xkVkCreateSemaphore(VkSemaphore* pVkSemaphore) {
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan semaphore create info.
-  const VkSemaphoreCreateInfo vkSemaphoreCreateInfo = {
-    .sType    = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-    .pNext    = VK_NULL_HANDLE,
-    .flags    = 0
-  };
+  VkSemaphoreCreateInfo vkSemaphoreCreateInfo = {0};
+  vkSemaphoreCreateInfo.sType                 = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+  vkSemaphoreCreateInfo.pNext                 = VK_NULL_HANDLE;
+  vkSemaphoreCreateInfo.flags                 = 0;
 
   // Create Vulkan semaphore.
   VkResult vkResult = vkCreateSemaphore(_xkVkContext.vkLogicalDevice, &vkSemaphoreCreateInfo, VK_NULL_HANDLE, pVkSemaphore);

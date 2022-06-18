@@ -262,8 +262,8 @@ void xkVkClearRenderer(XkVkRenderer renderer) {
 
   vkCmdSetViewport(vkCommandBuffer, 0, 1, &vkViewport);
   vkCmdSetScissor(vkCommandBuffer, 0, 1, &renderer->vkScissor);
-	//vkCmdSetPrimitiveTopologyEXT(vkCommandBuffer, renderer->vkPrimitiveTopology);
-	//vkCmdSetCullModeEXT(vkCommandBuffer, renderer->vkCullMode);
+	vkCmdSetPrimitiveTopology(vkCommandBuffer, renderer->vkPrimitiveTopology);
+	vkCmdSetCullMode(vkCommandBuffer, renderer->vkCullMode);
 }
 
 void xkVkTopologyRenderer(XkVkRenderer renderer, XkTopology topology) {
@@ -311,15 +311,15 @@ void xkVkBeginRenderer(XkVkRenderer renderer) {
 
 	// Initialize Vulkan render pass begin info.
 	VkRenderPassBeginInfo vkRenderPassBeginInfo = {0};
-  vkRenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	vkRenderPassBeginInfo.pNext = VK_NULL_HANDLE;
-	vkRenderPassBeginInfo.renderPass = renderer->vkRenderPass;
-	vkRenderPassBeginInfo.framebuffer = vkFrameBuffer;
-	vkRenderPassBeginInfo.renderArea.offset.x = 0;
-	vkRenderPassBeginInfo.renderArea.offset.y = 0;
-	vkRenderPassBeginInfo.renderArea.extent = renderer->vkExtent;
-	vkRenderPassBeginInfo.clearValueCount = renderer->clearValueCount;
-	vkRenderPassBeginInfo.pClearValues = renderer->vkClearValues;
+  vkRenderPassBeginInfo.sType 								= VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	vkRenderPassBeginInfo.pNext 								= VK_NULL_HANDLE;
+	vkRenderPassBeginInfo.renderPass 						= renderer->vkRenderPass;
+	vkRenderPassBeginInfo.framebuffer				 		= vkFrameBuffer;
+	vkRenderPassBeginInfo.renderArea.offset.x 	= 0;
+	vkRenderPassBeginInfo.renderArea.offset.y 	= 0;
+	vkRenderPassBeginInfo.renderArea.extent 		= renderer->vkExtent;
+	vkRenderPassBeginInfo.clearValueCount 			= renderer->clearValueCount;
+	vkRenderPassBeginInfo.pClearValues 					= renderer->vkClearValues;
 
 	// Begin Vulkan render pass.
   vkCmdBeginRenderPass(vkCommandBuffer, &vkRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);

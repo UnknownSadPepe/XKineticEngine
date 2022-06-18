@@ -2,7 +2,6 @@
 
 #if defined(XK_WIN32)
 
-#define WINAPI_FAMILY_PARTITION
 #include <limits.h>
 #include <windows.h>
 #include <windowsx.h>
@@ -443,20 +442,17 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
 	XkUInt8* pTarget = NULL;
 	XkUInt8* pSource = pIcon->pixels;
 
-  BITMAPV5HEADER bi;
-  ZeroMemory(&bi, sizeof(bi));
-	bi = (BITMAPV5HEADER){
-		.bV5Size = sizeof(bi),
-  	.bV5Width = pIcon->width,
-  	.bV5Height = -pIcon->height,
-  	.bV5Planes = 1,
-  	.bV5BitCount = 32,
-  	.bV5Compression = BI_BITFIELDS,
-  	.bV5RedMask = 0x00ff0000,
-  	.bV5GreenMask = 0x0000ff00,
-  	.bV5BlueMask = 0x000000ff,
-  	.bV5AlphaMask = 0xff000000
-	};	
+  BITMAPV5HEADER bi = {0};
+  bi.bV5Size = sizeof(bi);
+  bi.bV5Width = pIcon->width;
+  bi.bV5Height = -pIcon->height;
+  bi.bV5Planes = 1;
+  bi.bV5BitCount = 32;
+  bi.bV5Compression = BI_BITFIELDS;
+  bi.bV5RedMask = 0x00ff0000;
+  bi.bV5GreenMask = 0x0000ff00;
+  bi.bV5BlueMask = 0x000000ff;
+  bi.bV5AlphaMask = 0xff000000;
 
 	HDC dc = GetDC(NULL);
 	HBITMAP color = CreateDIBSection(dc, (BITMAPINFO*) &bi, DIB_RGB_COLORS, (void**) &pTarget, NULL, (DWORD)0);
@@ -483,15 +479,12 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	pSource += 4;
   }
 
-  ICONINFO ii;
-  ZeroMemory(&ii, sizeof(ii));
-	ii = (ICONINFO){
-    .fIcon    = icon,
-    .xHotspot = xHot,
-    .yHotspot = yHot,
-    .hbmMask  = mask,
-    .hbmColor = color
-	};
+  ICONINFO ii = {0};
+  ii.fIcon = icon;
+  ii.xHotspot = xHot;
+  ii.yHotspot = yHot;
+  ii.hbmMask = mask;
+  ii.hbmColor = color;
 
   HICON handle = CreateIconIndirect(&ii);
 
@@ -783,7 +776,10 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
       HDROP drop = (HDROP)wParam;
 
       const UINT count = DragQueryFileA(drop, 0xffffffff, NULL, 0);
-      CHAR* paths = xkAllocateMemory(count * sizeof(CHAR*));
+      CHAR** paths = xkAllocateMemory(count * sizeof(CHAR*));
+      if (!paths) {
+        break;
+      }
 
       POINT point;
       DragQueryPoint(drop, &point);
@@ -792,6 +788,10 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
       for(UINT iFile = 0; iFile < count; iFile++) {
         const UINT length = DragQueryFileA(drop, iFile, NULL, 0);
         CHAR* buffer = xkAllocateMemory((length + 1) * length);
+        if (!buffer) {
+          xkFreeMemory(paths);
+          break;
+        }
 
         DragQueryFileA(drop, iFile, buffer, length + 1);
         paths[iFile] = buffer;

@@ -16,21 +16,20 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL __xkVkMessageCallback(VkDebugUtilsMessageS
 }
 
 void __xkVkPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT* pVkDebugMessengerCreateInfo) {
-  *pVkDebugMessengerCreateInfo = (VkDebugUtilsMessengerCreateInfoEXT) {
-    .sType                = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-    .pNext                = VK_NULL_HANDLE,
-    .flags                = 0,
-    .messageSeverity      = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-    .messageType          = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
-    .pfnUserCallback      = __xkVkMessageCallback,
-    .pUserData            = VK_NULL_HANDLE
-  };
+  *pVkDebugMessengerCreateInfo                      = (VkDebugUtilsMessengerCreateInfoEXT){0};
+  pVkDebugMessengerCreateInfo->sType                = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+  pVkDebugMessengerCreateInfo->pNext                = VK_NULL_HANDLE;
+  pVkDebugMessengerCreateInfo->flags                = 0;
+  pVkDebugMessengerCreateInfo->messageSeverity      = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+  pVkDebugMessengerCreateInfo->messageType          = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+  pVkDebugMessengerCreateInfo->pfnUserCallback      = __xkVkMessageCallback;
+  pVkDebugMessengerCreateInfo->pUserData            = VK_NULL_HANDLE;
 }
 
 XkResult __xkVkCreateDebugMessenger(void) {
   XkResult result = XK_SUCCESS;
 
-  // Get Vulkan 'vkCreateDebugUtilsMessengerEXT' proc adderss.
+  // Get Vulkan 'vkCreateDebugUtilsMessengerEXT' process adderss.
   PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkCreateDebugUtilsMessengerEXT");
   if(!vkCreateDebugUtilsMessenger) {
     result = XK_ERROR_UNKNOWN;
@@ -55,7 +54,7 @@ _catch:
 }
 
 void __xkVkDestroyDebugMessenger(void) {
-    // Get Vulkan 'vkDestroyDebugUtilsMessengerEXT' proc adderss.
+    // Get Vulkan 'vkDestroyDebugUtilsMessengerEXT' process adderss.
   PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessenger = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkDestroyDebugUtilsMessengerEXT");
   if(!vkDestroyDebugUtilsMessenger) {
     xkLogError("Vulkan: Failed to get instance proc address vkDestroyDebugUtilsMessengerEXT: %s", __xkVkGetErrorString(VK_ERROR_EXTENSION_NOT_PRESENT));

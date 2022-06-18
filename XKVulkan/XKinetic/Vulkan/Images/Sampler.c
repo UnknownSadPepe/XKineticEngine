@@ -4,26 +4,25 @@ XkResult __xkVkCreateSampler(VkSampler* pVkSampler, const VkFilter vkFilter, con
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan sampler create info.
-  const VkSamplerCreateInfo vkSamplerCreateInfo = {
-	  .sType                    = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-    .pNext                    = VK_NULL_HANDLE,
-    .flags                    = 0,
-	  .magFilter                = vkFilter,
-	  .minFilter                = vkFilter,
-	  .mipmapMode               = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-	  .addressModeU             = vkAddressMode,
-	  .addressModeV             = vkAddressMode,
-	  .addressModeW             = vkAddressMode,
-	  .mipLodBias               = 0.0f,
-    .anisotropyEnable         = (vkAnisotropic && _xkVkContext.vkDeviceFeatures.samplerAnisotropy) ? VK_TRUE : VK_FALSE,
-	  .maxAnisotropy            = (vkAnisotropic && _xkVkContext.vkDeviceFeatures.samplerAnisotropy) ? _xkVkContext.vkDeviceProperties.limits.maxSamplerAnisotropy : 1.0f,
-	  .compareEnable            = VK_FALSE,
-	  .compareOp                = VK_COMPARE_OP_ALWAYS,
-	  .minLod                   = 0.0f,
-	  .maxLod                   = (float)mipLevels,
-	  .borderColor              = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE,
-	  .unnormalizedCoordinates  = VK_FALSE
-  };
+  VkSamplerCreateInfo vkSamplerCreateInfo       = {0};
+	vkSamplerCreateInfo.sType                     = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  vkSamplerCreateInfo.pNext                     = VK_NULL_HANDLE;
+  vkSamplerCreateInfo.flags                     = 0;
+	vkSamplerCreateInfo.magFilter                 = vkFilter;
+	vkSamplerCreateInfo.minFilter                 = vkFilter;
+	vkSamplerCreateInfo.mipmapMode                = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+	vkSamplerCreateInfo.addressModeU              = vkAddressMode;
+	vkSamplerCreateInfo.addressModeV              = vkAddressMode;
+	vkSamplerCreateInfo.addressModeW              = vkAddressMode;
+	vkSamplerCreateInfo.mipLodBias                = 0.0f;
+  vkSamplerCreateInfo.anisotropyEnable          = (vkAnisotropic && _xkVkContext.vkDeviceFeatures.samplerAnisotropy) ? VK_TRUE : VK_FALSE;
+	vkSamplerCreateInfo.maxAnisotropy             = (vkAnisotropic && _xkVkContext.vkDeviceFeatures.samplerAnisotropy) ? _xkVkContext.vkDeviceProperties.limits.maxSamplerAnisotropy : 1.0f;
+	vkSamplerCreateInfo.compareEnable             = VK_FALSE;
+	vkSamplerCreateInfo.compareOp                 = VK_COMPARE_OP_ALWAYS;
+	vkSamplerCreateInfo.minLod                    = 0.0f;
+	vkSamplerCreateInfo.maxLod                    = (float)mipLevels;
+	vkSamplerCreateInfo.borderColor               = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+	vkSamplerCreateInfo.unnormalizedCoordinates   = VK_FALSE;
 
   // Create Vulkan sampler.
   VkResult vkResult = vkCreateSampler(_xkVkContext.vkLogicalDevice, &vkSamplerCreateInfo, VK_NULL_HANDLE, pVkSampler);

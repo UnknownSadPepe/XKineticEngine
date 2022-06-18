@@ -4,11 +4,10 @@ XkResult __xkVkCreateFence(VkFence* pVkFence) {
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan fence create info.
-  const VkFenceCreateInfo vkFenceCreateInfo = {
-    .sType    = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-    .pNext    = VK_NULL_HANDLE,
-    .flags    = VK_FENCE_CREATE_SIGNALED_BIT
-  };
+  VkFenceCreateInfo vkFenceCreateInfo = {0};
+  vkFenceCreateInfo.sType             = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+  vkFenceCreateInfo.pNext             = VK_NULL_HANDLE;
+  vkFenceCreateInfo.flags             = VK_FENCE_CREATE_SIGNALED_BIT;
 
   // Create Vulkan fence.
   VkResult vkResult = vkCreateFence(_xkVkContext.vkLogicalDevice, &vkFenceCreateInfo, VK_NULL_HANDLE, pVkFence);

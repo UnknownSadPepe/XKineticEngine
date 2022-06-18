@@ -6,13 +6,12 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 
 #if defined(XK_LINUX)
 	// Initialize Vulkan Wayland surface create info.
-  const VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo = {
-		.sType 				= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
-		.pNext 				= VK_NULL_HANDLE,
-		.flags 				= 0,
-		.display 			= __xkWaylandGetDisplay(),
-		.surface 			= __xkWaylandGetSurface(window)
-	};
+  VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo 	= {0};
+	vkWaylandSurfaceCreateInfo.sType 													= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+	vkWaylandSurfaceCreateInfo.pNext 													= VK_NULL_HANDLE;
+	vkWaylandSurfaceCreateInfo.flags 													= 0;
+	vkWaylandSurfaceCreateInfo.display 												= __xkWaylandGetDisplay();
+	vkWaylandSurfaceCreateInfo.surface 												= __xkWaylandGetSurface(window);
 
 	// Create Vulkan Wayland surface.
 	VkResult vkResult = vkCreateWaylandSurfaceKHR(_xkVkContext.vkInstance, &vkWaylandSurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
@@ -23,14 +22,12 @@ XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 	}  
 #elif defined(XK_WIN32)
 	// Initialize Vulkan Win32 surface create info.
-  const VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo = {
-		.sType 				= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-		.pNext 				= VK_NULL_HANDLE,
-		.flags 				= 0,
-		.hinstance 			= __xkWin32GetInstance(),
-		.hwnd 				= __xkWin32GetHWND(window)
-	};
-
+  VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo 				= {0};
+	vkWin32SurfaceCreateInfo.sType 															= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+	vkWin32SurfaceCreateInfo.pNext 															= VK_NULL_HANDLE;
+	vkWin32SurfaceCreateInfo.flags 															= 0;
+	vkWin32SurfaceCreateInfo.hinstance 													= __xkWin32GetInstance();
+	vkWin32SurfaceCreateInfo.hwnd 															= __xkWin32GetHWND(window);
 	// Create Vulkan Win32 surface.
 	VkResult vkResult = vkCreateWin32SurfaceKHR(_xkVkContext.vkInstance, &vkWin32SurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
 	if(vkResult != VK_SUCCESS) {

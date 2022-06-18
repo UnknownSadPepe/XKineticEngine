@@ -22,41 +22,37 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
     minImageCount = vkCapabilities.maxImageCount;
   }
 
-  // Set Vulkan image sharing mode.
-  // Set queue family index count.
   // Set queue family indices.
-  VkSharingMode vkImageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-  uint32_t queueFamilyIndexCount = 1;
   uint32_t queueFamilyIndices[] = {
     _xkVkContext.queueFamilyIndices.graphics,
     _xkVkContext.queueFamilyIndices.present
   };
-  if(_xkVkContext.queueFamilyIndices.graphics != _xkVkContext.queueFamilyIndices.present) {
-    vkImageSharingMode = VK_SHARING_MODE_CONCURRENT;
-    queueFamilyIndexCount = 2;
-  }
   
   // Initialize Vulkan swap chain create info.
-  const VkSwapchainCreateInfoKHR vkSwapChainCreateInfo = {
-    .sType                      = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-    .pNext                      = VK_NULL_HANDLE,
-    .flags                      = 0,
-    .surface                    = vkSurface,
-    .minImageCount              = minImageCount,
-    .imageFormat                = vkSurfaceFormat.format,
-    .imageColorSpace            = vkSurfaceFormat.colorSpace,
-    .imageExtent                = vkCapabilities.currentExtent,
-    .imageArrayLayers           = 1,
-    .imageUsage                 = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-    .imageSharingMode           = vkImageSharingMode,
-    .queueFamilyIndexCount      = queueFamilyIndexCount,
-    .pQueueFamilyIndices        = queueFamilyIndices,
-    .preTransform               = vkCapabilities.currentTransform,
-    .compositeAlpha             = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-    .presentMode                = vkPresentMode,
-    .clipped                    = VK_TRUE,
-    .oldSwapchain               = VK_NULL_HANDLE, /// TODO: implementation 'oldSwapChain'.
-  };
+  VkSwapchainCreateInfoKHR vkSwapChainCreateInfo  = {0};
+  vkSwapChainCreateInfo.sType                     = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+  vkSwapChainCreateInfo.pNext                     = VK_NULL_HANDLE;
+  vkSwapChainCreateInfo.flags                     = 0;
+  vkSwapChainCreateInfo.surface                   = vkSurface;
+  vkSwapChainCreateInfo.minImageCount             = minImageCount;
+  vkSwapChainCreateInfo.imageFormat               = vkSurfaceFormat.format;
+  vkSwapChainCreateInfo.imageColorSpace           = vkSurfaceFormat.colorSpace;
+  vkSwapChainCreateInfo.imageExtent               = vkCapabilities.currentExtent;
+  vkSwapChainCreateInfo.imageArrayLayers          = 1;
+  vkSwapChainCreateInfo.imageUsage                = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+  if(_xkVkContext.queueFamilyIndices.graphics != _xkVkContext.queueFamilyIndices.present) {
+    vkSwapChainCreateInfo.imageSharingMode        = VK_SHARING_MODE_CONCURRENT;
+    vkSwapChainCreateInfo.queueFamilyIndexCount   = 2;
+  } else {
+    vkSwapChainCreateInfo.imageSharingMode        = VK_SHARING_MODE_EXCLUSIVE;
+    vkSwapChainCreateInfo.queueFamilyIndexCount   = 0;
+  }
+  vkSwapChainCreateInfo.pQueueFamilyIndices       = queueFamilyIndices;
+  vkSwapChainCreateInfo.preTransform              = vkCapabilities.currentTransform;
+  vkSwapChainCreateInfo.compositeAlpha            = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+  vkSwapChainCreateInfo.presentMode               = vkPresentMode;
+  vkSwapChainCreateInfo.clipped                   = VK_TRUE;
+  vkSwapChainCreateInfo.oldSwapchain              = VK_NULL_HANDLE; /// TODO: implementation 'oldSwapChain'.
 
   // Create Vulkan swap chain.
   VkResult vkResult = vkCreateSwapchainKHR(_xkVkContext.vkLogicalDevice, &vkSwapChainCreateInfo, VK_NULL_HANDLE, pVkSwapChain);

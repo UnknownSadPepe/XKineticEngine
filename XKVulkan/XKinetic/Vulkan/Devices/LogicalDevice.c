@@ -16,14 +16,14 @@ XkResult __xkVkCreateLogicalDevice(void) {
   uint32_t computeQueueFamily = _xkVkContext.queueFamilyIndices.compute;
 
   if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_GRAPHICS_BIT) {
-		const VkDeviceQueueCreateInfo vkGraphicsQueueCreateInfo = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .pNext = VK_NULL_HANDLE,
-      .flags = 0,
-      .queueFamilyIndex = graphicsQueueFamily,
-      .queueCount = 1,
-      .pQueuePriorities = queuePriorities
-    };
+		VkDeviceQueueCreateInfo vkGraphicsQueueCreateInfo = {0};
+    vkGraphicsQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    vkGraphicsQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
+    vkGraphicsQueueCreateInfo.flags                   = 0;
+    vkGraphicsQueueCreateInfo.queueFamilyIndex        = graphicsQueueFamily;
+    vkGraphicsQueueCreateInfo.queueCount              = 1;
+    vkGraphicsQueueCreateInfo.pQueuePriorities        = queuePriorities;
+
 		vkQueueCreateInfos[queueCreateInfoCount] = vkGraphicsQueueCreateInfo;
 
     ++queueCreateInfoCount;
@@ -32,14 +32,14 @@ XkResult __xkVkCreateLogicalDevice(void) {
 	}
 
   if(_xkVkContext.queueFamilyIndices.supportPresentQueue && presentQueueFamily != graphicsQueueFamily) {
-    const VkDeviceQueueCreateInfo vkPresentQueueCreateInfo = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .pNext = VK_NULL_HANDLE,
-      .flags = 0,
-      .queueFamilyIndex = presentQueueFamily,
-      .queueCount = 1,
-      .pQueuePriorities = queuePriorities
-    };
+		VkDeviceQueueCreateInfo vkPresentQueueCreateInfo = {0};
+    vkPresentQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    vkPresentQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
+    vkPresentQueueCreateInfo.flags                   = 0;
+    vkPresentQueueCreateInfo.queueFamilyIndex        = presentQueueFamily;
+    vkPresentQueueCreateInfo.queueCount              = 1;
+    vkPresentQueueCreateInfo.pQueuePriorities        = queuePriorities;
+
 		vkQueueCreateInfos[queueCreateInfoCount] = vkPresentQueueCreateInfo;
 
     ++queueCreateInfoCount;    
@@ -48,14 +48,14 @@ XkResult __xkVkCreateLogicalDevice(void) {
   }
 
 	if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_TRANSFER_BIT && transferQueueFamily != graphicsQueueFamily && transferQueueFamily != presentQueueFamily) {
-		const VkDeviceQueueCreateInfo vkTransferQueueCreateInfo = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .pNext = VK_NULL_HANDLE,
-      .flags = 0,
-      .queueFamilyIndex = computeQueueFamily,
-      .queueCount = 1,
-      .pQueuePriorities = queuePriorities
-    };
+		VkDeviceQueueCreateInfo vkTransferQueueCreateInfo = {0};
+    vkTransferQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    vkTransferQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
+    vkTransferQueueCreateInfo.flags                   = 0;
+    vkTransferQueueCreateInfo.queueFamilyIndex        = transferQueueFamily;
+    vkTransferQueueCreateInfo.queueCount              = 1;
+    vkTransferQueueCreateInfo.pQueuePriorities        = queuePriorities;
+
 		vkQueueCreateInfos[queueCreateInfoCount] = vkTransferQueueCreateInfo;
 
     ++queueCreateInfoCount;
@@ -64,14 +64,14 @@ XkResult __xkVkCreateLogicalDevice(void) {
 	}
 
 	if(_xkVkContext.queueFamilyIndices.supportedQueues & VK_QUEUE_COMPUTE_BIT && computeQueueFamily != graphicsQueueFamily && computeQueueFamily != presentQueueFamily && computeQueueFamily != transferQueueFamily) {
-		const VkDeviceQueueCreateInfo vkComputeQueueCreateInfo = {
-      .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-      .pNext = VK_NULL_HANDLE,
-      .flags = 0,
-      .queueFamilyIndex = computeQueueFamily,
-      .queueCount = 1,
-      .pQueuePriorities = queuePriorities
-    };
+		VkDeviceQueueCreateInfo vkComputeQueueCreateInfo = {0};
+    vkComputeQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    vkComputeQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
+    vkComputeQueueCreateInfo.flags                   = 0;
+    vkComputeQueueCreateInfo.queueFamilyIndex        = computeQueueFamily;
+    vkComputeQueueCreateInfo.queueCount              = 1;
+    vkComputeQueueCreateInfo.pQueuePriorities        = queuePriorities;
+
 		vkQueueCreateInfos[queueCreateInfoCount] = vkComputeQueueCreateInfo;
 
     ++queueCreateInfoCount;
@@ -170,18 +170,17 @@ XkResult __xkVkCreateLogicalDevice(void) {
   }
 
   // Initialize Vulkan logical device create info.
-  const VkDeviceCreateInfo vkDeviceCreateInfo = {
-    .sType                      = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-    .pNext                      = VK_NULL_HANDLE,
-    .flags                      = 0,
-    .queueCreateInfoCount       = queueCreateInfoCount,
-    .pQueueCreateInfos          = vkQueueCreateInfos,
-    .enabledLayerCount          = _xkVkInstanceLayerCount,
-    .ppEnabledLayerNames        = _xkVkInstanceLayers,
-    .enabledExtensionCount      = _xkVkDeviceExtensionCount,
-    .ppEnabledExtensionNames    = _xkVkDeviceExtensions,
-    .pEnabledFeatures           = &vkEnabledDeviceFeatures
-  };
+  VkDeviceCreateInfo vkDeviceCreateInfo         = {0};
+  vkDeviceCreateInfo.sType                      = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  vkDeviceCreateInfo.pNext                      = VK_NULL_HANDLE;
+  vkDeviceCreateInfo.flags                      = 0;
+  vkDeviceCreateInfo.queueCreateInfoCount       = queueCreateInfoCount;
+  vkDeviceCreateInfo.pQueueCreateInfos          = vkQueueCreateInfos;
+  vkDeviceCreateInfo.enabledLayerCount          = _xkVkInstanceLayerCount;
+  vkDeviceCreateInfo.ppEnabledLayerNames        = _xkVkInstanceLayers;
+  vkDeviceCreateInfo.enabledExtensionCount      = _xkVkDeviceExtensionCount;
+  vkDeviceCreateInfo.ppEnabledExtensionNames    = _xkVkDeviceExtensions;
+  vkDeviceCreateInfo.pEnabledFeatures           = &vkEnabledDeviceFeatures;
 
   // Create Vulkan logical device.
   VkResult vkResult = vkCreateDevice(_xkVkContext.vkPhysicalDevice, &vkDeviceCreateInfo, VK_NULL_HANDLE, &_xkVkContext.vkLogicalDevice);
@@ -225,13 +224,12 @@ XkResult __xkVkBeginSingleCommands(VkCommandBuffer* pVkCommandBuffer) {
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan single command buffer allocate info.
-  const VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {
-    .sType                = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-    .pNext                = VK_NULL_HANDLE,
-    .commandPool          = _xkVkContext.vkCommandPool,
-    .level                = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-    .commandBufferCount   = 1
-  };
+  VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {0};
+  vkCommandBufferAllocateInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  vkCommandBufferAllocateInfo.pNext                       = VK_NULL_HANDLE;
+  vkCommandBufferAllocateInfo.commandPool                 = _xkVkContext.vkCommandPool;
+  vkCommandBufferAllocateInfo.level                       = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+  vkCommandBufferAllocateInfo.commandBufferCount          = 1;
 
   // Allocate Vulkan single command buffer.
   VkResult vkResult = vkAllocateCommandBuffers(_xkVkContext.vkLogicalDevice, &vkCommandBufferAllocateInfo, pVkCommandBuffer);
@@ -244,12 +242,11 @@ XkResult __xkVkBeginSingleCommands(VkCommandBuffer* pVkCommandBuffer) {
   VkCommandBuffer vkCommandBuffer = *pVkCommandBuffer;
 
   // Initialize Vulkan command buffer begin info.
-  const VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
-    .sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-    .pNext              = VK_NULL_HANDLE,
-    .flags              = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
-    .pInheritanceInfo   = VK_NULL_HANDLE
-  };
+  VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {0};
+  vkCommandBufferBeginInfo.sType                    = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+  vkCommandBufferBeginInfo.pNext                    = VK_NULL_HANDLE;
+  vkCommandBufferBeginInfo.flags                    = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+  vkCommandBufferBeginInfo.pInheritanceInfo         = VK_NULL_HANDLE;
 
   // Begin Vulkan command buffer.
   vkResult = vkBeginCommandBuffer(vkCommandBuffer, &vkCommandBufferBeginInfo);
@@ -275,17 +272,16 @@ XkResult __xkVkEndSingleCommands(VkCommandBuffer vkCommandBuffer) {
   }  
 
   // Initialize Vulkan submit info.
-  const VkSubmitInfo vkSubmitInfo = {
-    .sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-    .pNext                  = VK_NULL_HANDLE,
-    .waitSemaphoreCount     = 0,
-    .pWaitSemaphores        = VK_NULL_HANDLE,
-    .pWaitDstStageMask      = VK_NULL_HANDLE,
-    .commandBufferCount     = 1,
-    .pCommandBuffers        = &vkCommandBuffer,
-    .signalSemaphoreCount   = 0,
-    .pSignalSemaphores      = VK_NULL_HANDLE
-  };
+  VkSubmitInfo vkSubmitInfo           = {0};
+  vkSubmitInfo.sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+  vkSubmitInfo.pNext                  = VK_NULL_HANDLE;
+  vkSubmitInfo.waitSemaphoreCount     = 0;
+  vkSubmitInfo.pWaitSemaphores        = VK_NULL_HANDLE;
+  vkSubmitInfo.pWaitDstStageMask      = VK_NULL_HANDLE;
+  vkSubmitInfo.commandBufferCount     = 1;
+  vkSubmitInfo.pCommandBuffers        = &vkCommandBuffer;
+  vkSubmitInfo.signalSemaphoreCount   = 0;
+  vkSubmitInfo.pSignalSemaphores      = VK_NULL_HANDLE;
 
   // Sublit Vulkan queue.
   vkResult = vkQueueSubmit(_xkVkContext.vkGraphicsQueue, 1, &vkSubmitInfo, VK_NULL_HANDLE);
@@ -323,11 +319,10 @@ XkResult __xkVkCopyBuffer(VkBuffer vkDstBuffer, const VkBuffer vkSrcBuffer, cons
   }
 
   // Initialize Vulkan buffer copy info.
-  const VkBufferCopy vkBufferCopyInfo = {
-    .srcOffset  = 0,
-    .dstOffset  = 0,
-    .size       = vkSize
-  };
+  VkBufferCopy vkBufferCopyInfo = {0};
+  vkBufferCopyInfo.srcOffset  = 0;
+  vkBufferCopyInfo.dstOffset  = 0;
+  vkBufferCopyInfo.size       = vkSize;
 
   // Copy Vulkan buffer.
   vkCmdCopyBuffer(vkSingleCommandBuffer, vkSrcBuffer, vkDstBuffer, 1, &vkBufferCopyInfo);
@@ -378,23 +373,24 @@ XkResult __xkVkTransitionImageLayout(VkImage vkImage, const VkFormat vkFormat, c
     goto _catch;   
   }
 
+  // Template Vulkan source and destination stage flags.
   VkPipelineStageFlags vkSrcStage;
   VkPipelineStageFlags vkDstStage;
 
-  // Template Vulkan source and destination access flags.
-  VkAccessFlags vkSrcAccess;
-  VkAccessFlags vkDstAccess;
-
+  // Initialize Vulkan image memory barrier.
+  VkImageMemoryBarrier vkImageMemoryBarrier                 = {0};
+  vkImageMemoryBarrier.sType =                              VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  vkImageMemoryBarrier.pNext =                              VK_NULL_HANDLE;
   // Choose Vulkan access flags and pipeline stages.
   if(vkOldLayout == VK_IMAGE_LAYOUT_UNDEFINED && vkNewLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-    vkSrcAccess = 0;
-    vkDstAccess = VK_ACCESS_TRANSFER_WRITE_BIT;
+    vkImageMemoryBarrier.srcAccessMask = 0;
+    vkImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
     vkSrcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
     vkDstStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
   } else if(vkOldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && vkNewLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-    vkSrcAccess = VK_ACCESS_TRANSFER_WRITE_BIT;
-    vkDstAccess = VK_ACCESS_SHADER_READ_BIT;
+    vkImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    vkImageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
     vkSrcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
     vkDstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
@@ -403,26 +399,16 @@ XkResult __xkVkTransitionImageLayout(VkImage vkImage, const VkFormat vkFormat, c
     xkLogError("unsupported Vulkan layout transition");
     goto _catch;
   }
-
-  // Initialize Vulkan image memory barrier.
-  const VkImageMemoryBarrier vkImageMemoryBarrier = {
-    .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-    .pNext = VK_NULL_HANDLE,
-    .srcAccessMask = vkSrcAccess,
-    .dstAccessMask = vkDstAccess,
-    .oldLayout = vkOldLayout,
-    .newLayout = vkNewLayout,
-    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-    .image = vkImage,
-    .subresourceRange = {
-      .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-      .baseMipLevel = 0,
-      .levelCount = mipLevels,
-      .baseArrayLayer = 0,
-      .layerCount = 1
-    }
-  };
+  vkImageMemoryBarrier.oldLayout =                          vkOldLayout,
+  vkImageMemoryBarrier.newLayout =                          vkNewLayout;
+  vkImageMemoryBarrier.srcQueueFamilyIndex =                VK_QUEUE_FAMILY_IGNORED;
+  vkImageMemoryBarrier.dstQueueFamilyIndex =                VK_QUEUE_FAMILY_IGNORED;
+  vkImageMemoryBarrier.image =                              vkImage;
+  vkImageMemoryBarrier.subresourceRange.aspectMask =        VK_IMAGE_ASPECT_COLOR_BIT;
+  vkImageMemoryBarrier.subresourceRange.baseMipLevel =      0;
+  vkImageMemoryBarrier.subresourceRange.levelCount =        mipLevels;
+  vkImageMemoryBarrier.subresourceRange.baseArrayLayer =    0;
+  vkImageMemoryBarrier.subresourceRange.layerCount =        1;
 
   // Insert a Vulkan memory dependency.
   vkCmdPipelineBarrier(vkSingleCommandBuffer, vkSrcStage, vkDstStage, 0, 0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, 1, &vkImageMemoryBarrier);
@@ -452,19 +438,18 @@ XkResult __xkVkCopyBufferToImage(VkBuffer vkBuffer, VkImage vkImage, const VkExt
   }
 
   // Initialize Vulkan image copy info.
-  const VkBufferImageCopy vkImageCopyInfo = {
-    .bufferOffset         = 0,
-    .bufferRowLength      = 0,
-    .bufferImageHeight    = 0,
-    .imageSubresource     = {
-      .aspectMask       = VK_IMAGE_ASPECT_COLOR_BIT,
-      .mipLevel         = 0,
-      .baseArrayLayer   = 0,
-      .layerCount       = 1
-    },
-    .imageOffset          = {0, 0, 0},
-    .imageExtent          = vkExtent
-  };
+  VkBufferImageCopy vkImageCopyInfo                 = {0};
+  vkImageCopyInfo.bufferOffset                      = 0;
+  vkImageCopyInfo.bufferRowLength                   = 0;
+  vkImageCopyInfo.bufferImageHeight                 = 0;
+  vkImageCopyInfo.imageSubresource.aspectMask       = VK_IMAGE_ASPECT_COLOR_BIT;
+  vkImageCopyInfo.imageSubresource.mipLevel         = 0;
+  vkImageCopyInfo.imageSubresource.baseArrayLayer   = 0;
+  vkImageCopyInfo.imageSubresource.layerCount       = 1;
+  vkImageCopyInfo.imageOffset.x                     = 0;
+  vkImageCopyInfo.imageOffset.y                     = 0;
+  vkImageCopyInfo.imageOffset.z                     = 0;
+  vkImageCopyInfo.imageExtent                       = vkExtent;
 
   // Copy Vulkan image.
   vkCmdCopyBufferToImage(vkSingleCommandBuffer, vkBuffer, vkImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &vkImageCopyInfo);

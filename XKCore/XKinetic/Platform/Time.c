@@ -4,7 +4,8 @@
 
 void xkTimeFormat(XkTime* const pTime, const XkSize rawTime) {
 	time_t rt = (time_t)rawTime;
-	struct tm t = *localtime(&rt);
+	struct tm t = {0};
+	localtime_s(&t, &rt);
 
   pTime->second = (XkSize)t.tm_sec;
   pTime->minute = (XkSize)t.tm_min;

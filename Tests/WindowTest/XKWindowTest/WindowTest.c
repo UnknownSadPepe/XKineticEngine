@@ -162,7 +162,7 @@ static void __xkWindowDropFile(XkWindow window, const XkSize count, const XkStri
 	}
 }
 
-XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
+XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	_xkApplication.config.name = "XKWindowTest";
@@ -260,7 +260,7 @@ _catch:
 	return(result);
 }
 
-void xkDestroyApplication() {
+void xkDestroyApplication(void) {
 	xkDestroyWindow(_xkApplication.window);
 
 	xkWindowTerminate();
@@ -268,7 +268,7 @@ void xkDestroyApplication() {
 	xkLogTerminate();
 }
 
-void xkUpdateApplication() {
+void xkUpdateApplication(void) {
 	while(!_xkApplication.exit) {
 		// Poll window events.
 		xkWaitWindowEvents();

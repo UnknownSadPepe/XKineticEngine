@@ -4,13 +4,12 @@ XkResult __xkVkCreateCommandBuffer(VkCommandBuffer* pVkCommandBuffer, const VkCo
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan command buffer allocate info.
-	const VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {
-    .sType                  = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-    .pNext                  = VK_NULL_HANDLE,
-	  .commandPool            = _xkVkContext.vkCommandPool,
-	  .level                  = vkCommandBufferLevel,
-	  .commandBufferCount     = 1
-  };
+	VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {0};
+  vkCommandBufferAllocateInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+  vkCommandBufferAllocateInfo.pNext                       = VK_NULL_HANDLE;
+	vkCommandBufferAllocateInfo.commandPool                 = _xkVkContext.vkCommandPool;
+	vkCommandBufferAllocateInfo.level                       = vkCommandBufferLevel;
+	vkCommandBufferAllocateInfo.commandBufferCount          = 1;
 	
   // Allocate Vulkan command buffer.
 	VkResult vkResult = vkAllocateCommandBuffers(_xkVkContext.vkLogicalDevice, &vkCommandBufferAllocateInfo, pVkCommandBuffer);

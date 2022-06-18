@@ -4,17 +4,16 @@ XkResult __xkVkCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescrip
   XkResult result = XK_SUCCESS;
 
   // Initiaize Vulkan render pass create info.
-  const VkRenderPassCreateInfo vkRenderPassCreateInfo = {
-    .sType            = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-    .pNext            = VK_NULL_HANDLE,
-    .flags            = 0,
-	  .attachmentCount  = attachmentCount,
-	  .pAttachments     = vkAttachments,
-	  .subpassCount     = subpassCount,
-	  .pSubpasses       = vkSubpasses,
-	  .dependencyCount  = dependencyCount,
-	  .pDependencies    = vkDependencies,
-  };
+  VkRenderPassCreateInfo vkRenderPassCreateInfo = {0};
+  vkRenderPassCreateInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+  vkRenderPassCreateInfo.pNext                  = VK_NULL_HANDLE;
+  vkRenderPassCreateInfo.flags                  = 0;
+	vkRenderPassCreateInfo.attachmentCount        = attachmentCount;
+	vkRenderPassCreateInfo.pAttachments           = vkAttachments;
+	vkRenderPassCreateInfo.subpassCount           = subpassCount;
+	vkRenderPassCreateInfo.pSubpasses             = vkSubpasses;
+	vkRenderPassCreateInfo.dependencyCount        = dependencyCount;
+	vkRenderPassCreateInfo.pDependencies          = vkDependencies;
 	
   // Create Vulkan render pass.
 	VkResult vkResult = vkCreateRenderPass(_xkVkContext.vkLogicalDevice, &vkRenderPassCreateInfo, VK_NULL_HANDLE, pVkRenderPass);

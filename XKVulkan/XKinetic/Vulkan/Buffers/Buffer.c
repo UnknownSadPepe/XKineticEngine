@@ -4,16 +4,15 @@ XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVk
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan buffer create info.
-  const VkBufferCreateInfo vkBufferCreateInfo = {
-    .sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-    .pNext                    = VK_NULL_HANDLE,
-    .flags                    = 0,
-	  .size                     = vkSize,
-	  .usage                    = vkUsage,
-	  .sharingMode              = VK_SHARING_MODE_EXCLUSIVE,
-	  .queueFamilyIndexCount    = 0,
-	  .pQueueFamilyIndices      = VK_NULL_HANDLE
-  };
+  VkBufferCreateInfo vkBufferCreateInfo       = {0};
+  vkBufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+  vkBufferCreateInfo.pNext                    = VK_NULL_HANDLE;
+  vkBufferCreateInfo.flags                    = 0;
+	vkBufferCreateInfo.size                     = vkSize;
+	vkBufferCreateInfo.usage                    = vkUsage;
+	vkBufferCreateInfo.sharingMode              = VK_SHARING_MODE_EXCLUSIVE;
+	vkBufferCreateInfo.queueFamilyIndexCount    = 0;
+	vkBufferCreateInfo.pQueueFamilyIndices      = VK_NULL_HANDLE;
 
   // Create Vulkan buffer.
   VkResult vkResult = vkCreateBuffer(_xkVkContext.vkLogicalDevice, &vkBufferCreateInfo, VK_NULL_HANDLE, pVkBuffer);
@@ -31,12 +30,11 @@ XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVk
 	vkGetBufferMemoryRequirements(_xkVkContext.vkLogicalDevice, vkBuffer, &vkMemoryRequirements);
 
   // Initialize Vulkan buffer memory allocate info.
-  const VkMemoryAllocateInfo vkMemoryAllocateInfo = {
-	  .sType            = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    .pNext            = VK_NULL_HANDLE,
-	  .allocationSize   = vkMemoryRequirements.size,
-	  .memoryTypeIndex  = __xkVkFindMemoryType(vkMemoryRequirements.memoryTypeBits, vkMemoryProperties)
-  };
+  VkMemoryAllocateInfo vkMemoryAllocateInfo = {0};
+	vkMemoryAllocateInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  vkMemoryAllocateInfo.pNext                = VK_NULL_HANDLE;
+	vkMemoryAllocateInfo.allocationSize       = vkMemoryRequirements.size;
+	vkMemoryAllocateInfo.memoryTypeIndex      = __xkVkFindMemoryType(vkMemoryRequirements.memoryTypeBits, vkMemoryProperties);
 
   // Allocate Vulkan buffer memory.
   vkResult = vkAllocateMemory(_xkVkContext.vkLogicalDevice, &vkMemoryAllocateInfo, VK_NULL_HANDLE, pVkBufferMemory);
@@ -69,6 +67,7 @@ _catch:
 void __xkVkDestroyBuffer(VkBuffer vkBuffer, VkDeviceMemory vkBufferMemory) {
   // Destroy Vulkan bufer.
 	vkDestroyBuffer(_xkVkContext.vkLogicalDevice, vkBuffer, VK_NULL_HANDLE);
+  
   // Free Vulkan bufer memory.
   vkFreeMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory, VK_NULL_HANDLE);
 }

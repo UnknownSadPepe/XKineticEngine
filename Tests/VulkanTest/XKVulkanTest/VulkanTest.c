@@ -24,7 +24,7 @@ static void __xkWindowSize(XkWindow window, XkSize width, XkSize height) {
 	xkResizeRenderer(_xkApplication.renderer, width, height);
 }
 
-XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
+XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	_xkApplication.config.name = "XKVulkanTest";
@@ -71,7 +71,7 @@ _catch:
 	return(result);
 }
 
-void xkDestroyApplication() {
+void xkDestroyApplication(void) {
 	xkDestroyWindow(_xkApplication.window);
 	xkDestroyRenderer(_xkApplication.renderer);
 
@@ -80,7 +80,7 @@ void xkDestroyApplication() {
 	xkLogTerminate();
 }
 
-void xkUpdateApplication() {
+void xkUpdateApplication(void) {
 	while(!_xkApplication.exit) {
 		xkClearRenderer(_xkApplication.renderer);
 

@@ -25,7 +25,7 @@ struct XkApplication {
 
 XkApplication _xkApplication;
 
-XkResult xkCreateApplication(const XkSize argc, const XkWString* argv) {
+XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	_xkApplication.config.name = "XKEditor";
@@ -158,7 +158,7 @@ _catch:
 	return(result);
 }
 
-void xkDestroyApplication() {
+void xkDestroyApplication(void) {
 /*
 	xkDestroyTextureSystem(_xkApplication.textureSystem);
 	xkDestroyShaderSystem(_xkApplication.shaderSystem);
@@ -171,6 +171,6 @@ void xkDestroyApplication() {
 	xkLogTerminate();
 }
 
-void xkUpdateApplication() {
+void xkUpdateApplication(void) {
 	/// TODO: implementation.
 }

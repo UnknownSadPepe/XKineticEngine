@@ -51,16 +51,19 @@ XkBool xkJoystickGamepad(XkJoystick joystick) {
 	if(joystick->connected) {
 		return(joystick->mapping != XK_NULL_HANDLE);
 	}
+	return(XK_FALSE);
 }
 
 XkString xkJoystickName(XkJoystick joystick) {
 	if(joystick->connected && joystick->mapping) {
 		return((XkString)joystick->mapping->name);
 	}
+	return(XK_NULL_HANDLE);
 }
 
 XkJoystickID xkJoystickID(XkJoystick joystick) {
-	if(joystick->connected) {
+	if (joystick->connected) {
 		return(joystick->id);
 	}
+	return(-1);
 }

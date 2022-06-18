@@ -4,13 +4,12 @@ XkResult __xkVkCreateShader(VkShaderModule* pVkShaderModule, const uint32_t* cod
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan shader module create info.
-  const VkShaderModuleCreateInfo vkShaderModuleCreateInfo = {
-    .sType        = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-    .pNext        = VK_NULL_HANDLE,
-    .flags        = 0,
-    .codeSize     = size,
-    .pCode        = code,
-  };
+  VkShaderModuleCreateInfo vkShaderModuleCreateInfo = {0};
+  vkShaderModuleCreateInfo.sType                    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+  vkShaderModuleCreateInfo.pNext                    = VK_NULL_HANDLE;
+  vkShaderModuleCreateInfo.flags                    = 0;
+  vkShaderModuleCreateInfo.codeSize                 = size;
+  vkShaderModuleCreateInfo.pCode                    = code;
 
   // Create Vulkan shader module.
   VkResult vkResult = vkCreateShaderModule(_xkVkContext.vkLogicalDevice, &vkShaderModuleCreateInfo, VK_NULL_HANDLE, pVkShaderModule);

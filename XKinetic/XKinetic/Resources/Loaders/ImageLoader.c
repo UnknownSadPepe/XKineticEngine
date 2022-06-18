@@ -41,6 +41,10 @@ XkResult xkLoadImage(XkImageLoader loader, XkImageConfig* const pConfig, XkStrin
 
   /// TODO: implementation.
   pConfig->pixels = stbi_load(fullPath, (int*)&pConfig->width, (int*)&pConfig->height, XK_NULL_HANDLE, 4);
+  if(!pConfig->pixels) {
+    result = XK_ERROR_RESOURCE_NOT_LOAD;
+    goto _catch;
+  }
 
 _catch:
   return(result);

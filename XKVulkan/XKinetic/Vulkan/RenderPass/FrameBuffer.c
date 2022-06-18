@@ -4,17 +4,16 @@ XkResult __xkVkCreateFrameBuffer(VkFramebuffer* pVkFrameBuffer, VkRenderPass vkR
   XkResult result = XK_SUCCESS;
 
   // Initialize Vulkan frame buffer create info.
-  const VkFramebufferCreateInfo vkFrameBufferCreateInfo = {
-    .sType            = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-    .pNext            = VK_NULL_HANDLE,
-    .flags            = 0,
-    .renderPass       = vkRenderPass,
-    .attachmentCount  = attachmentCount,
-    .pAttachments     = vkAttachments,
-    .width            = vkExtent.width,
-    .height           = vkExtent.height,
-    .layers           = 1
-  };
+  VkFramebufferCreateInfo vkFrameBufferCreateInfo = {0};
+  vkFrameBufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+  vkFrameBufferCreateInfo.pNext                   = VK_NULL_HANDLE;
+  vkFrameBufferCreateInfo.flags                   = 0;
+  vkFrameBufferCreateInfo.renderPass              = vkRenderPass;
+  vkFrameBufferCreateInfo.attachmentCount         = attachmentCount;
+  vkFrameBufferCreateInfo.pAttachments            = vkAttachments;
+  vkFrameBufferCreateInfo.width                   = vkExtent.width;
+  vkFrameBufferCreateInfo.height                  = vkExtent.height;
+  vkFrameBufferCreateInfo.layers                  = 1;
 
   // Create Vulkan frame buffer.
   VkResult vkResult = vkCreateFramebuffer(_xkVkContext.vkLogicalDevice, &vkFrameBufferCreateInfo, VK_NULL_HANDLE, pVkFrameBuffer);

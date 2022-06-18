@@ -13,7 +13,7 @@
 extern "C" {
 #endif // __cplusplus
 
-XkResult __xkEntry(const XkSize argc, const XkWString* argv) {
+XkResult __xkEntry(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	result = xkCreateApplication(argc, argv);

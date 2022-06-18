@@ -53,7 +53,6 @@ XkResult __xkDX12InitializeContext(void) {
   ID3D12Object_SetName(_xkDX12Context.d3d12Device8, L"D3D12 Device");
 #endif // XKDIRECTX12_DEBUG
 
-
 #ifdef XKDIRECTX12_DEBUG
   ID3D12Device8_QueryInterface(_xkDX12Context.d3d12Device8, &IID_ID3D12InfoQueue, &_xkDX12Context.d3d12InfoQueue);
 
@@ -89,7 +88,6 @@ void __xkDX12TerminateContext(void) {
 
   if (_xkDX12Context.d3d12Device8) {
     ID3D12Device8_Release(_xkDX12Context.d3d12Device8);
-    //_xkDX12Context.d3d12Device->Release();
     _xkDX12Context.d3d12Device8 = NULL;
   }
 

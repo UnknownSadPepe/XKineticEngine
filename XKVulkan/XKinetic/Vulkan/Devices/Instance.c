@@ -54,13 +54,12 @@ XkResult __xkVkCreateInstance(void) {
   }
 
   // Initialize Vulkan application info.
-  const VkApplicationInfo vkApplicationInfo = {
-    .sType            = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-    .pNext            = VK_NULL_HANDLE,
-    .pEngineName      = "XKineticEngine",
-    .engineVersion    = VK_MAKE_VERSION(0, 0, 1),
-    .apiVersion       = VK_API_VERSION_1_2
-  };
+  VkApplicationInfo vkApplicationInfo = {0};
+  vkApplicationInfo.sType             = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+  vkApplicationInfo.pNext             = VK_NULL_HANDLE;
+  vkApplicationInfo.pEngineName       = "XKineticEngine";
+  vkApplicationInfo.engineVersion     = VK_MAKE_VERSION(0, 0, 1);
+  vkApplicationInfo.apiVersion        = VK_API_VERSION_1_3;
 
 #ifdef XKVULKAN_DEBUG
   VkDebugUtilsMessengerCreateInfoEXT vkDebugUtilsMessengerCreateInfo;
@@ -68,20 +67,19 @@ XkResult __xkVkCreateInstance(void) {
 #endif // XKVULKAN_DEBUG
 
   // Initialize Vulkan instance create info.
-  const VkInstanceCreateInfo vkInstanceCreateInfo = {
-    .sType                      = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+  VkInstanceCreateInfo vkInstanceCreateInfo       = {0};
+  vkInstanceCreateInfo.sType                      = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 #ifdef XKVULKAN_DEBUG
-    .pNext                      = (VkDebugUtilsMessengerCreateInfoEXT*)&vkDebugUtilsMessengerCreateInfo,
+  vkInstanceCreateInfo.pNext                      = (VkDebugUtilsMessengerCreateInfoEXT*)&vkDebugUtilsMessengerCreateInfo;
 #else
-    .pNext                      = VK_NULL_HANDLE,
+  vkInstanceCreateInfo.pNext                      = VK_NULL_HANDLE;
 #endif // XKVULKAN_DEBUG
-    .flags                      = 0,
-    .pApplicationInfo           = &vkApplicationInfo,
-    .enabledLayerCount          = _xkVkInstanceLayerCount,
-    .ppEnabledLayerNames        = _xkVkInstanceLayers,
-    .enabledExtensionCount      = _xkVkInstanceExtensionCount,
-    .ppEnabledExtensionNames    = _xkVkInstanceExtensions
-  };
+  vkInstanceCreateInfo.flags                      = 0,
+  vkInstanceCreateInfo.pApplicationInfo           = &vkApplicationInfo;
+  vkInstanceCreateInfo.enabledLayerCount          = _xkVkInstanceLayerCount;
+  vkInstanceCreateInfo.ppEnabledLayerNames        = _xkVkInstanceLayers;
+  vkInstanceCreateInfo.enabledExtensionCount      = _xkVkInstanceExtensionCount;
+  vkInstanceCreateInfo.ppEnabledExtensionNames    = _xkVkInstanceExtensions;
 
   // Create Vulkan instance.
   VkResult vkResult = vkCreateInstance(&vkInstanceCreateInfo, VK_NULL_HANDLE, &_xkVkContext.vkInstance);
