@@ -46,17 +46,17 @@ typedef struct {
 typedef struct {
     int                     offset;
     int                     type;
-} __Win32JoystickObject;
+} __XkDIJoystickObject;
 
 typedef struct {
-	__Win32JoystickObject*  objects;
+	__XkDIJoystickObject*  objects;
 	int                     objectCount;
 	IDirectInputDevice8W*   device;
 	DWORD                   index;
 	GUID                    guid;
-} __XkWin32Joystick;
+} __XkDIJoystick;
 
-#define XK_PLATFORM_JOYSTICK __XkWin32Joystick win32
+#define XK_PLATFORM_JOYSTICK __XkDIJoystick di
 
 typedef struct {
 	HMODULE handle;
@@ -69,6 +69,12 @@ typedef struct {
 } __XkWin32Platform;
 
 #define XK_PLATFORM __XkWin32Platform win32
+
+typedef struct {
+	IDirectInput8W* di8Input;
+} __XkDI8;
+
+extern __XkDI8 _xkDI8;
 
 #ifdef __cplusplus
 }

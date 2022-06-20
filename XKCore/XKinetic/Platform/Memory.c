@@ -8,9 +8,9 @@ XkHandle xkCopyMemory(XkHandle dstMemory, const XkHandle srcMemory, const XkSize
 	XkUInt8* alignDstMemory = dstMemory;
 
 	// Template memory length.
-	XkSize len = size;
+	XkSize length = size;
 
-  while(--len) {
+  while(--length) {
 		*alignDstMemory++ = *alignSrcMemory++;
   }
   return(dstMemory);
@@ -50,11 +50,29 @@ XkHandle xkZeroMemory(XkHandle memory, const XkSize size) {
 	XkUInt8* alignMemory = memory;
 
 	// Template memory length.
-	XkSize len = size;
+	XkSize length = size;
 
-  while(--len) {
+  while(--length) {
 		*alignMemory++ = 0;
   }
 
   return(memory);
+}
+
+XkBool xkCompareMemory(const XkHandle memory1, const XkHandle memory2, const XkSize size) {
+	// Template memory1.
+	XkUInt8* alignMemory1 = memory1;
+
+	// Template memory2.
+	XkUInt8* alignMemory2 = memory2;
+
+	// Template memory length.
+	XkSize length = size;
+
+	while (--length && *alignMemory1 == *alignMemory2) {
+		++alignMemory1;
+		++alignMemory2;
+	}
+
+	return(*alignMemory1 - *alignMemory2);
 }

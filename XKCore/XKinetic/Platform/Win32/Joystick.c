@@ -4,8 +4,11 @@
 
 #if defined(XK_WIN32)
 
+__XkDI8 _xkDI8;
+
 XkResult xkInitializeJoysticks(void) {
 	XkResult result = XK_SUCCESS;
+
 
 	/// TODO: implementation.
 
@@ -30,8 +33,6 @@ XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
 	// Template joystick.
 	XkJoystick joystick = *pJoystick;
 
-	// Initialize joystick.
-	joystick->id = id;
 
 	/// TODO: implementation.
 
@@ -43,8 +44,6 @@ _catch:
 }
 
 void xkDestroyJoystick(XkJoystick joystick) {
-	/// TODO: implementation.
-
 	// Call joystick disconnect event.
 	__xkInputJoystickEvent(joystick, XK_JOYSTICK_DISCONNECTED);
 

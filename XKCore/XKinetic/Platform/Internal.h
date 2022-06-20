@@ -113,6 +113,8 @@ typedef struct {
 
 	XkInt16 keycodes[512];
 
+	XkJoystick joysticks[XK_JOYSTICK_16 + 1];
+
 	XK_PLATFORM;
 } __XkPlatform;
 

@@ -95,6 +95,7 @@ XKCORE_API void xkDestroyJoystick(XkJoystick);
 XKCORE_API XkBool xkJoystickGamepad(XkJoystick);
 XKCORE_API XkString xkJoystickName(XkJoystick);
 XKCORE_API XkString xkJoystickMappingName(XkJoystick);
+XKCORE_API XkString xkJoystickName(XkJoystick);
 XKCORE_API XkJoystickID xkJoystickID(XkJoystick);
 
 XKCORE_API void xkSetJoystickEventCallback(XkJoystick, const XkJoystickEventPfn);

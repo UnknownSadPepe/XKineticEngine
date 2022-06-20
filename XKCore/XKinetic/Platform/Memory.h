@@ -14,6 +14,8 @@ XKCORE_API XkHandle xkCopyMemory(XkHandle, const XkHandle, const XkSize);
 XKCORE_API XkHandle xkMoveMemory(XkHandle, const XkHandle, const XkSize);
 XKCORE_API XkHandle xkZeroMemory(XkHandle, const XkSize);
 
+XKCORE_API XkBool xkCompareMemory(const XkHandle, const XkHandle, const XkSize);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus
