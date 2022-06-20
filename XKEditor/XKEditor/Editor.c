@@ -3,24 +3,8 @@
 #include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 
-#include "XKinetic/Resources/Loaders/ModelLoader.h"
-#include "XKinetic/Resources/Loaders/ShaderLoader.h"
-#include "XKinetic/Resources/Loaders/ImageLoader.h"
-
-#include "XKinetic/Systems/MeshSystem.h"
-#include "XKinetic/Systems/ShaderSystem.h"
-#include "XKinetic/Systems/TextureSystem.h"
-
 struct XkApplication {
 	XkApplicationConfig config;
-
-	XkModelLoader modelLoader;
-	XkShaderLoader shaderLoader;
-	XkImageLoader imageLoader;
-
-	XkMeshSystem meshSystem;
-	XkShaderSystem shaderSystem;
-	XkTextureSystem textureSystem;
 };
 
 XkApplication _xkApplication;
@@ -33,117 +17,8 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	_xkApplication.config.version.minor = 0;
 	_xkApplication.config.version.patch = 1;
 
-	result = xkLogInitialize();
+	result = xkInitializeLog();
 	if(result != XK_SUCCESS) goto _catch;
-/*
-	// Create shader loader.
-	result = xkCreateShaderLoader(&_xkApplication.shaderLoader, "resources/shaders/");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to create shader loader");
-		goto _catch;
-	}
-
-	// Create shader system.
-	result = xkCreateShaderSystem(&_xkApplication.shaderSystem);
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to initialize shader system");
-		goto _catch;			
-	}
-
-	// Load shader.
-	XkShaderConfig shaderConfig;
-	result = xkLoadShader(_xkApplication.shaderLoader, &shaderConfig, "shader.spv");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to load shader");
-		goto _catch;	
-	}
-
-	// Create shader.
-	XkShaderID shaderID = xkCreateShader(_xkApplication.shaderSystem, &shaderConfig);
-	if(shaderID == 0) {
-		result = XK_ERROR_RESOURCE_NOT_CREATE;
-		xkLogError("Failed to create shader");
-		goto _catch;			
-	}
-
-	// Destroy shader.
-	xkDestroyShader(_xkApplication.shaderSystem, shaderID);
-
-	// Unload shader.
-	xkUnloadShader(_xkApplication.shaderLoader, &shaderConfig);	
-
-	// Create Model loader.
-	result = xkCreateModelLoader(&_xkApplication.modelLoader, "resources/models/");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to create model loader");
-		goto _catch;
-	}
-
-	// Create mesh system.
-	result = xkCreateMeshSystem(&_xkApplication.meshSystem);
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to initialize mesh system");
-		goto _catch;			
-	}
-
-	// Load model.
-	XkModelConfig modelConfig;
-	result = xkLoadModel(_xkApplication.modelLoader, &modelConfig, "model.gltf");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to load model");
-		goto _catch;	
-	}
-
-	// Create model.
-	XkMeshID meshID = xkCreateesh(_xkApplication.meshSystem, &modelConfig);
-	if(meshID == 0) {
-		result = XK_ERROR_RESOURCE_NOT_CREATE;
-		xkLogError("Failed to create mesh");
-		goto _catch;			
-	}
-
-	// Destroy mesh.
-	xkDestroyModel(_xkApplication.meshSystem, meshID);
-
-	// Unload model.
-	xkUnloadModel(_xkApplication.modelLoader, &modelConfig);
-
-	// Create image loader.
-	result = xkCreateImageLoader(&_xkApplication.imageLoader, "resources/textures/");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to create image loader");
-		goto _catch;
-	}
-
-	// Create texture system.
-	result = xkCreateTextureSystem(&_xkApplication.textureSystem);
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to create texture system");
-		goto _catch;			
-	}
-
-	// Load texture.
-	XkImageConfig textureConfig;
-	result = xkLoadTexture(_xkApplication.imageLoader, &textureConfig, "texture.png");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to load texture");
-		goto _catch;	
-	}
-
-	// Create texture.
-	XkTextureID textureID = xkCreateTexture(_xkApplication.textureSystem, &textureConfig);
-	if(textureID == 0) {
-		result = XK_ERROR_RESOURCE_NOT_CREATE;
-		xkLogError("Failed to create texture");
-		goto _catch;			
-	}
-
-	// Destroy texture.
-	xkDestroyTexture(_xkApplication.textureSystem, textureID);
-
-	// Unload texture.
-	xkUnloadTexture(_xkApplication.imageLoader, &textureConfig);
-*/
 
 	XkFreeList freelist;
 	result = xkCreateFreeList(&freelist, sizeof(XkUInt32) * 16);
@@ -152,6 +27,22 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
+	XkUInt32* p1 = xkFreeListAllocate(freelist, sizeof(XkUInt32));
+	xkLogInfo("[%p] %d", p1, *p1);
+
+	XkUInt32* p2 = xkFreeListAllocate(freelist, sizeof(XkUInt32) * 10);
+	for (XkSize i = 0; i < 10; i++) {
+		xkLogInfo("[%p] %d", &p2[i], p2[i]);
+	}
+
+	XkUInt32* p3 = xkFreeListAllocate(freelist, sizeof(XkUInt32) * 4);
+	for (XkSize i = 0; i < 4; i++) {
+		xkLogInfo("[%p] %d", &p3[i], p3[i]);
+	}
+
+	xkFreeListFree(freelist, p2);
+	xkFreeListFree(freelist, p1);
+
 	xkDestroyFreeList(freelist);
 
 _catch:
@@ -159,18 +50,11 @@ _catch:
 }
 
 void xkDestroyApplication(void) {
-/*
-	xkDestroyTextureSystem(_xkApplication.textureSystem);
-	xkDestroyShaderSystem(_xkApplication.shaderSystem);
-	xkDestroyMeshSystem(_xkApplication.meshSystem);
-
-	xkDestroyImageLoader(_xkApplication.imageLoader);
-	xkDestroyShaderLoader(_xkApplication.shaderLoader);
-	xkDestroyModelLoader(_xkApplication.modelLoader);
-*/
-	xkLogTerminate();
+	xkTerminateLog();
 }
 
 void xkUpdateApplication(void) {
-	/// TODO: implementation.
+	while(XK_TRUE) {
+		/// TODO: implementation.
+	}
 }

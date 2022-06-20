@@ -31,7 +31,7 @@ static D3D_FEATURE_LEVEL __xkDXGIAdapter4GetMaximumFeatureLevel(IDXGIAdapter4* d
   d3d12FeatureLevelInfo.pFeatureLevelsRequested    = _xkD3DDeviceFeatureLevels;
 
   ID3D12Device* d3d12Device;
-  HRESULT hResult = D3D12CreateDevice(dxgiAdapter4, _xkD3DMinimumDeviceFeatureLevel, &IID_ID3D12Device, &d3d12Device);
+  HRESULT hResult = D3D12CreateDevice((IUnknown*)dxgiAdapter4, _xkD3DMinimumDeviceFeatureLevel, &IID_ID3D12Device, &d3d12Device);
   if(FAILED(hResult)) {
     return((D3D_FEATURE_LEVEL)0);
   }
@@ -46,7 +46,7 @@ static IDXGIAdapter4* __xkDXGIChooseAdapter4(void) {
 
   // Choose best DXGI adapter by performance.
   for(UINT i = 0; IDXGIFactory7_EnumAdapterByGpuPreference(_xkDX12Context.dxgiFactory7, i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, &IID_IDXGIAdapter4, &dxgiAdapter4) != DXGI_ERROR_NOT_FOUND; i++) {
-    HRESULT hResult = D3D12CreateDevice(dxgiAdapter4, _xkD3DMinimumDeviceFeatureLevel, &IID_ID3D12Device, NULL);
+    HRESULT hResult = D3D12CreateDevice((IUnknown*)dxgiAdapter4, _xkD3DMinimumDeviceFeatureLevel, &IID_ID3D12Device, NULL);
     if(SUCCEEDED(hResult)) {
       const D3D_FEATURE_LEVEL d3dDeviceMaximumFeatureLevel = __xkDXGIAdapter4GetMaximumFeatureLevel(dxgiAdapter4);
       if (d3dDeviceMaximumFeatureLevel > _xkD3DMinimumDeviceFeatureLevel) {

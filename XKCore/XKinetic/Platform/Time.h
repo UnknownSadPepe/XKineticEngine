@@ -17,9 +17,9 @@ typedef struct {
 	XkSize yDay;
 } XkTime;
 
-XK_EXPORT XkSize xkGetTime(void);
-XK_EXPORT void xkTimeFormat(XkTime* const, const XkSize);
-XK_EXPORT XkSize xkTimeStringFormat(XkTime* const, XkString, const XkSize, const XkString);
+XKCORE_API XkSize xkGetTime(void);
+XKCORE_API void xkTimeFormat(XkTime* const, const XkSize);
+XKCORE_API XkSize xkTimeStringFormat(XkTime* const, XkString, const XkSize, const XkString);
 
 #ifdef __cplusplus
 }

@@ -6,15 +6,16 @@
 typedef struct {
 	XkHandle data;
 	XkKey key;
-} XkNode;
+} XkHashTableNode;
 
 struct XkHashTable {
 	XkSize length;
 	XkSize capacity;
 	XkSize stride;
+
 	XkSize totalSize;
 
-	XkNode* nodes;
+	XkHashTableNode* nodes;
 	
 	XkHandle memory;
 };
@@ -35,38 +36,40 @@ static XkSize __xkHashIndex(XkHashTable table, const XkKey key) {
 XkResult __xkCreateHashTable(XkHashTable* pTable, const XkSize capacity, const XkSize stride) {
   XkResult result = XK_SUCCESS;
 
+	// Allocate hash table.
 	*pTable = xkAllocateMemory(sizeof(struct XkHashTable));
 	if(!(*pTable)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
+	// Template hash table.
 	XkHashTable table = *pTable;
 
-	const XkSize size = capacity * stride;
-	const XkSize alignSize = (size + (stride - 1)) & ~(stride - 1);
-	xkLogDebug("hash align size: %d", alignSize);
+	// Align stride with hash table alignment.
+	const XkSize alignStride = (stride + (stride - 1)) & ~(stride - 1);
 
-	const XkSize nodesSize = sizeof(XkNode) * capacity;
-	xkLogDebug("hash nodes size: %d", nodesSize);
+	// Initialize hash table total size.
+	const XkSize totalSize = capacity * alignStride;
 
-	XkHandle memory =	xkAllocateMemory(nodesSize + alignSize);
-	if(!memory) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
+	// Initialize total hash table nodes count.
+	const XkSize totalNodesSize = sizeof(XkHashTableNode) * capacity;
 
-  table->length = 0;
-	table->capacity = capacity;
-	table->stride = stride;
-	table->totalSize = alignSize;
-	table->nodes = (XkUInt8)memory + alignSize;
-	table->memory = memory;
+	// Initialize hash table.
+  table->length 		= 0;
+	table->capacity 	= capacity;
+	table->stride 		= stride;
+	table->totalSize 	= totalSize;
+
+	// Allocate hash table memory.
+	table->memory =	xkAllocateMemory(totalNodesSize + totalSize);
 	if(!table->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
+	// Initalize hash table nodes.
+	table->nodes = (XkHashTableNode*)((XkUInt8*)table->memory + totalSize);
 
 _catch:
   return(result);

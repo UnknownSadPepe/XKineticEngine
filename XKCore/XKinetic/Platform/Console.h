@@ -49,9 +49,9 @@ typedef enum {
  XK_COLOR_BWHITE_BIT
 } XkConsoleColor;
 
-XK_EXPORT void xkWriteConsole(const XkConsoleHandle, const XkString, const XkSize);
-XK_EXPORT void xkWriteConsoleColored(const XkConsoleHandle, const XkConsoleColor, const XkString, const XkSize);
-XK_EXPORT void xkReadConsole(XkString, const XkSize);
+XKCORE_API void xkWriteConsole(const XkConsoleHandle, const XkString, const XkSize);
+XKCORE_API void xkWriteConsoleColored(const XkConsoleHandle, const XkConsoleColor, const XkString, const XkSize);
+XKCORE_API void xkReadConsole(XkString, const XkSize);
 
 #ifdef __cplusplus
 }

@@ -5,26 +5,35 @@
 struct XkDX12Renderer {
 	XkRendererConfig config;
 
+	IDXGISwapChain4*							dxgiSwapChain;
+	ID3D12Resource*								d3d12BackBffers[XKDIRECTX12_FRAME_COUNT];
+
+	ID3D12DescriptorHeap*					d3d12DesriptorHeap;
+	D3D12_CPU_DESCRIPTOR_HANDLE		d3d12CpuDesriptorHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE		d3d12GpuDesriptorHandle;
+
 	ID3D12CommandQueue*						d3d12CommandQueue;
 	ID3D12CommandAllocator*				d3d12CommandAllocators[XKDIRECTX12_FRAME_COUNT];
-	ID3D12Fence1*									d3d12Fence;
-	ID3D12GraphicsCommandList6*		d3d12GraphicsCommandList6;
+	ID3D12Fence*									d3d12Fence;
+	ID3D12GraphicsCommandList6*		d3d12CommandList6;
+
+	FLOAT													clearColorValues[4];
+	D3D12_VIEWPORT								d3d12Viewport;
+	D3D12_RECT										d3d12Scissor;
 
 	UINT frameIndex;
 
-	UINT fenceValue;
+	UINT64 fenceValue;
+	UINT64 frameFenceValues[XKDIRECTX12_FRAME_COUNT];
 	HANDLE hFenceEvent;
-  /// TODO: implementation.
 };
 
 struct XkDX12Buffer {
-	ID3D12Resource* dx12Resource;
-  /// TODO: implementation.
+	ID3D12Resource* d3d12Resource;
 };
 
 struct XkDX12Texture2D {
-	ID3D12Resource* dx12Resource;
-  /// TODO: implementation.
+	ID3D12Resource* d3d12Resource;
 };
 
 XkResult xkDX12CreateRenderer(XkDX12Renderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window) {
@@ -67,7 +76,7 @@ XkResult xkDX12CreateRenderer(XkDX12Renderer* pRenderer, XkRendererConfig* const
 	}
 
 	// Create DirectX12 command list.
-	result = __xkDX12CreateCommandList(&renderer->d3d12GraphicsCommandList6, renderer->d3d12CommandAllocators[0], D3D12_COMMAND_LIST_TYPE_DIRECT);
+	result = __xkDX12CreateCommandList(&renderer->d3d12CommandList6, renderer->d3d12CommandAllocators[0], D3D12_COMMAND_LIST_TYPE_DIRECT);
 	if(result != XK_SUCCESS) {
 		result = XK_ERROR_CREATE_FAILED;
 		xkLogError("Failed to create DirectX12 command list");
@@ -104,7 +113,7 @@ void xkDX12DestroyRenderer(XkDX12Renderer renderer) {
 	__xkDX12DestroyFence(renderer->d3d12Fence);
 
 	// Destroy DirectX12 command list
-	__xkDX12DestroyCommandList(renderer->d3d12GraphicsCommandList6);
+	__xkDX12DestroyCommandList(renderer->d3d12CommandList6);
 
 	// Destroy DirectX12 command allocators.
 	for(XkSize i = 0; i < XKDIRECTX12_FRAME_COUNT; i++) {
@@ -122,7 +131,10 @@ void xkDX12DestroyRenderer(XkDX12Renderer renderer) {
 }
 
 void xkDX12ClearColorRenderer(XkDX12Renderer renderer, XkVec4 color) {
-	/// TODO: implementation.
+	renderer->clearColorValues[0] = color.r;
+	renderer->clearColorValues[1] = color.g;
+	renderer->clearColorValues[2] = color.b;
+	renderer->clearColorValues[3] = color.a;
 }
 
 void xkDX12ClearDepthRenderer(XkDX12Renderer renderer, XkFloat32 depth) {
@@ -147,7 +159,7 @@ void xkDX12CullModeRenderer(XkDX12Renderer renderer, XkCullMode cullMode) {
 
 void xkDX12BeginRenderer(XkDX12Renderer renderer) {
 	// DirectX12 GPU has not finished executing the command list.
-	if (ID3D12Fence1_GetCompletedValue(renderer->d3d12Fence) < renderer->fenceValue) {
+	if(ID3D12Fence1_GetCompletedValue(renderer->d3d12Fence) < renderer->fenceValue) {
 		// Set DirectX12 fence event.
 		ID3D12Fence1_SetEventOnCompletion(renderer->d3d12Fence, renderer->fenceValue, renderer->hFenceEvent);
 
@@ -162,40 +174,49 @@ void xkDX12BeginRenderer(XkDX12Renderer renderer) {
 	ID3D12CommandAllocator_Reset(d3d12CommandAllocator);
 
 	// Reset DirectX12 command list.
-	ID3D12GraphicsCommandList_Reset(renderer->d3d12GraphicsCommandList6, d3d12CommandAllocator, NULL);
+	ID3D12GraphicsCommandList_Reset(renderer->d3d12CommandList6, d3d12CommandAllocator, NULL);
 }
 
 void xkDX12EndRenderer(XkDX12Renderer renderer) {
 	// Reset DirectX12 command list, to start recording commands at next frame.
-	ID3D12GraphicsCommandList_Close(renderer->d3d12GraphicsCommandList6);
+	ID3D12GraphicsCommandList_Close(renderer->d3d12CommandList6);
 
 	// Execute DirectX12 command lists.
-	ID3D12CommandList d3d12CommandLists[] = {renderer->d3d12GraphicsCommandList6};
-	ID3D12CommandQueue_ExecuteCommandLists(renderer->d3d12CommandQueue, 1, &d3d12CommandLists[0]);
+	//ID3D12CommandList d3d12CommandLists[] = {renderer->d3d12CommandList6};
+	//ID3D12CommandQueue_ExecuteCommandLists(renderer->d3d12CommandQueue, 1, &d3d12CommandLists[0]);
 
-	UINT* pFenceValue = &renderer->fenceValue;
-	*pFenceValue++;
+	renderer->fenceValue++;
 
-	ID3D12CommandQueue_Signal(renderer->d3d12CommandQueue, renderer->d3d12Fence, pFenceValue);
+	ID3D12CommandQueue_Signal(renderer->d3d12CommandQueue, renderer->d3d12Fence, renderer->fenceValue);
 
 	// Register frame index.
 	renderer->frameIndex = (renderer->frameIndex + 1) % XKDIRECTX12_FRAME_COUNT;
 }
 
 void xkDX12ResizeRenderer(XkDX12Renderer renderer, XkSize width, XkSize height) {
-	/// TODO: implementation.
+	renderer->d3d12Viewport.TopLeftX	= 0.0f;
+	renderer->d3d12Viewport.TopLeftY	= 0.0f;
+	renderer->d3d12Viewport.Width			= (FLOAT)width;
+	renderer->d3d12Viewport.Height		= (FLOAT)height;
+	renderer->d3d12Viewport.MinDepth	= 0.0f;
+	renderer->d3d12Viewport.MaxDepth	= 1.0f;
 }
 
 void xkDX12ScissorRenderer(XkDX12Renderer renderer, XkInt32 x, XkInt32 y, XkSize width, XkSize height) {
-	/// TODO: implementation.
+	renderer->d3d12Scissor.left				= x;
+	renderer->d3d12Scissor.top				= y;
+	renderer->d3d12Scissor.right			= width;
+	renderer->d3d12Scissor.bottom			= height;
 }
 
 void xkDX12Draw(XkDX12Renderer renderer, XkSize vertexCount) {
-	/// TODO: implementation.
+	// Draw DirectX12.
+	//ID3D12GraphicsCommandList6_DrawInstanced(renderer->d3d12CommandList6, vertexCount, 1, 0, 0);
 }
 
 void xkDX12DrawIndexed(XkDX12Renderer renderer, XkSize indexCount) {
-	/// TODO: implementation.
+	// Draw indexed DirectX12.
+	//ID3D12GraphicsCommandList6_DrawIndexedInstanced(renderer->d3d12CommandList6, indexCount, 1, 0, 0, 0);
 }
 
 XkResult xkDX12CreateBuffer(XkDX12Buffer* pBuffer, const XkBufferUsage usage, const XkSize size, XkHandle data, XkDX12Renderer renderer) {

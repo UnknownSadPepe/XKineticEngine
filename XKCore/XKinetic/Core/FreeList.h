@@ -17,9 +17,6 @@ XKCORE_API void xkClearFreeList(XkFreeList);
 XKCORE_API XkHandle xkFreeListAllocate(XkFreeList, const XkSize);
 XKCORE_API void xkFreeListFree(XkFreeList, XkHandle);
 
-XKCORE_API XkSize xkFreeListLength(XkFreeList);
-XKCORE_API XkSize xkFreeListCapacity(XkFreeList);
-
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -38,25 +38,28 @@ static const CHAR XK_WIN32_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
 
 static DWORD __xkWin32GetWindowStyle(const XkWindow);
 static DWORD __xkWin32GetWindowExStyle(const XkWindow);
-static void __xkWin32GetFullWindowSize(DWORD, DWORD, int, int, int*, int*);
-static HICON __xkWin32CreateIcon(const XkWindowIcon*, int, int, XkBool);
-static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
-static LRESULT CALLBACK __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
-static XkWindowMod __xkWin32GetKeyMod(void);
-
-static WCHAR* __xkWin32WideStringFromUTF8(const CHAR*);
-static CHAR* __xkWin32UTF8FromWideString(const WCHAR*);
-
 static void __xkWin32UpdateWindowStyle(const XkWindow);
 
-static void __xkWin32InitializeKeycodes();
+static void __xkWin32GetFullWindowSize(DWORD, DWORD, int, int, int*, int*);
+
+static XkWindowMod __xkWin32GetKeyMod(void);
+
+static HICON __xkWin32CreateIcon(const XkWindowIcon*, XkInt32, XkInt32, XkBool);
+static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
 
 static void __xkWin32DisableCursor(const XkWindow);
 static void __xkWin32HideCursor(const XkWindow);
 static void __xkWin32EnableCursor(const XkWindow);
 static void __xkWin32UpdateCursor(const XkWindow);
 
-XkResult xkWindowInitialize(void) {
+static WCHAR* __xkWin32WideStringFromUTF8(const CHAR*);
+static CHAR* __xkWin32UTF8FromWideString(const WCHAR*);
+
+static void __xkWin32InitializeKeycodes();
+
+static LRESULT CALLBACK __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
+
+XkResult xkInitializeWindow(void) {
 	XkResult result = XK_SUCCESS;
 
   // Get Win32 instance handle.
@@ -91,30 +94,33 @@ _catch:
 	return(result);
 }
 
-void xkWindowTerminate(void) {
+void xkTerminateWindow(void) {
 	// Unregister Win32 window class.
 	UnregisterClassA(XK_WIN32_WINDOW_CLASS_NAME, _xkPlatform.win32.instance); 
 }
 
 HINSTANCE __xkWin32GetInstance(void) {
-    return(_xkPlatform.win32.instance);
+  return(_xkPlatform.win32.instance);
 }
 
 HWND __xkWin32GetHWND(XkWindow window) {
-    return(window->win32.handle);
+  return(window->win32.handle);
 }
 
 XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
 
+  // Allocate window.
 	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
 	if(!(*pWindow)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}
 	
+  // Template window.
 	XkWindow window = *pWindow;
 
+  // Check window hints support.
   if(
     (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FLOATING_BIT) || 
     (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FULLSCREEN_BIT) ||
@@ -123,21 +129,27 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
     __xkErrorHandle("Win32: Unsupported window hints");
   }
 
-	if(hint & XK_WINDOW_DECORATED_BIT) window->decorated = XK_TRUE;
-	if(hint & XK_WINDOW_RESIZABLE_BIT) window->resizable = XK_TRUE;
-	if(hint & XK_WINDOW_FLOATING_BIT) window->floating = XK_TRUE;
-  if(hint & XK_WINDOW_FULLSCREEN_BIT) window->fullscreen = XK_TRUE;
+  // Initialize window hints.
+	if(hint & XK_WINDOW_DECORATED_BIT)  window->decorated   = XK_TRUE;
+	if(hint & XK_WINDOW_RESIZABLE_BIT)  window->resizable   = XK_TRUE;
+	if(hint & XK_WINDOW_FLOATING_BIT)   window->floating    = XK_TRUE;
+  if(hint & XK_WINDOW_FULLSCREEN_BIT) window->fullscreen  = XK_TRUE;
 
+  // Initialize window.
   window->minWidth  = 0;
   window->minHeight = 0;
   window->maxWidth  = 0;
   window->maxHeight = 0;
   window->cursorMode = XK_CURSOR_NORMAL;
+  window->win32.hCursor = INVALID_HANDLE_VALUE;
+  /// NOTE: needs to be free.
   window->title = xkDuplicateString(title);
 
-  DWORD style = __xkWin32GetWindowStyle(window);
+  // Get Win32 window styles.
+  DWORD style   = __xkWin32GetWindowStyle(window);
   DWORD exStyle = __xkWin32GetWindowExStyle(window);
 
+  // Get Win32 window posisions; full size.
   int xpos = CW_USEDEFAULT;
   int ypos = CW_USEDEFAULT;
   int fullWidth = width;
@@ -162,9 +174,6 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 
   // Enable Win32 drag files.
   if(hint & XK_WINDOW_DRAG_DROP_BIT) {
-    // Change Win32 message filter.
-    //ChangeWindowMessageFilterEx(window->win32.handle, WM_DROPFILES, MSGFLT_ALLOW, NULL);
-
     // Accept Win32 drag files.
     DragAcceptFiles(window->win32.handle, TRUE);
   }
@@ -195,23 +204,30 @@ void xkDestroyWindow(XkWindow window) {
   // Destroy Win32 window.
 	DestroyWindow(window->win32.handle);
 
+  // Free window title.
 	xkFreeMemory(window->title);
 
+  // Free window.
 	xkFreeMemory(window);
 }
 
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
 	int cmdShow = 0;
-
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT: {
-      window->fullscreen = XK_FALSE; 
+      if(window->fullscreen) {
+        window->fullscreen = XK_FALSE;
+        __xkWin32UpdateWindowStyle(window);
+      }
       ShowWindow(window->win32.handle, SW_SHOWDEFAULT); 
       break;
     }
 
 		case XK_WINDOW_SHOW_MAXIMIZED: {
-      window->fullscreen = XK_FALSE; 
+      if (window->fullscreen) {
+        window->fullscreen = XK_FALSE;
+        __xkWin32UpdateWindowStyle(window);
+      }
       ShowWindow(window->win32.handle, SW_SHOWMAXIMIZED);
       break;
     }
@@ -224,7 +240,6 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 		case XK_WINDOW_SHOW_FULLSCREEN: {
       window->fullscreen = XK_TRUE;
       __xkWin32UpdateWindowStyle(window);
-      SetWindowPos(window->win32.handle, HWND_TOPMOST , 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_SHOWWINDOW);
       break;
     }
 
@@ -236,34 +251,45 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 }
 
 void xkFocusWindow(XkWindow window) {
+  // Bring Win32 window to top.
   BringWindowToTop(window->win32.handle);
+
+  // Set Win32 foreground window.
   SetForegroundWindow(window->win32.handle);
+
+  // Set Win32 window focus.
 	SetFocus(window->win32.handle);
 }
 
 void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
-	RECT rect = { 0, 0, width, height };
-
+  // Get Win32 window rect.
+	RECT rect = {0, 0, width, height};
   AdjustWindowRectEx(&rect, __xkWin32GetWindowStyle(window), FALSE, __xkWin32GetWindowExStyle(window));
 
+  // Set Win32 window size.
 	SetWindowPos(window->win32.handle, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
 }
 
 void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
-  RECT area;
-  GetClientRect(window->win32.handle, &area);
+  // Get Win32 window rect.
+  RECT rect;
+  GetClientRect(window->win32.handle, &rect);
 
   if(pWidth)
-  	*pWidth = area.right;
+  	*pWidth = rect.right;
   if(pHeight)
-  	*pHeight = area.bottom;
+  	*pHeight = rect.bottom;
 }
 
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
-	RECT area;
-	GetWindowRect(window->win32.handle, &area);
-  MoveWindow(window->win32.handle, area.left, area.top, area.right - area.left, area.bottom - area.top, FALSE);
+  // Get Win32 window rect.
+	RECT rect;
+	GetWindowRect(window->win32.handle, &rect);
 
+  // Set Win32 window size.
+  MoveWindow(window->win32.handle, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, FALSE);
+
+  // Set window min/max values.
   window->minWidth  = minWidth;
   window->minHeight = minHeight;
   window->maxWidth  = maxWidth;
@@ -271,53 +297,70 @@ void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize 
 }
 
 void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
+  // Set Win32 window position.
 	SetWindowPos(window->win32.handle, NULL, xPos , yPos, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
 }
 
 void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
-	POINT pos = { 0, 0 };
-  ClientToScreen(window->win32.handle, &pos);
+  // Get Win32 window position.
+	POINT position = {0, 0};
+  ClientToScreen(window->win32.handle, &position);
 
   if(pXPos)
-  	*pXPos = pos.x;
+  	*pXPos = position.x;
   if(pYPos)
-  	*pYPos = pos.y;
+  	*pYPos = position.y;
 }
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
+  /// NOTE: I allocate title in create method.
   if(window->title) {
+    // Free window title.
     xkFreeMemory(window->title);
 	}
+  // Duplicate new window title.
   window->title = xkDuplicateString(title);
 
+  // Set Win32 window title.
 	SetWindowTextA(window->win32.handle, title);
 }
 
 void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
+  // Choose big icon.
   const XkWindowIcon* pBigImage = __xkWin32ChooseImage(pIcon, count, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+
+  // Choose small icon.
   const XkWindowIcon* pSmallImage = __xkWin32ChooseImage(pIcon, count, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
 
+  // Create Win32 big icon.
   HICON hBigIcon = __xkWin32CreateIcon(pBigImage, 0, 0, TRUE);
   if(hBigIcon == INVALID_HANDLE_VALUE) {
     __xkErrorHandle("Win32: Failed to create small icon");
     goto _catch;
   }
+
+  // Create Win32 small icon.
   HICON hSmallIcon = __xkWin32CreateIcon(pSmallImage, 0, 0, TRUE);
   if(hBigIcon == INVALID_HANDLE_VALUE) {
     __xkErrorHandle("Win32: Failed to create small icon");
     goto _catch;
   }
   
+  // Send Win32 messages to WndProc.
   SendMessageW(window->win32.handle, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
   SendMessageW(window->win32.handle, WM_SETICON, ICON_BIG, (LPARAM)hSmallIcon);
 
+  // Destroy old big icon, if i have.
   if(window->win32.hBigIcon) {
     DestroyIcon(window->win32.hBigIcon);
   }
+
+  // Destroy old small icon, if i have.
   if(window->win32.hSmallIcon) {
     DestroyIcon(window->win32.hSmallIcon);
   }
 
+  // Set new Win32 window icons.
   window->win32.hBigIcon = hBigIcon;
   window->win32.hSmallIcon = hSmallIcon;
 
@@ -338,22 +381,23 @@ void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
 }
 
 void xkSetCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
+  // Get Win32 window position.
   POINT position = {(int)xPos, (int)yPos};
-
   ClientToScreen(window->win32.handle, &position);
+
+  // Set Win32 cursor position.
   SetCursorPos(position.x, position.y);
 }
 
 void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
+  // Get Win32 cursor position.
   POINT position;
-
   if(GetCursorPos(&position)) {
     ScreenToClient(window->win32.handle, &position);
 
     if(pXPos) {
       *pXPos = position.x;     
     }
-
     if(pYPos) {
       *pYPos = position.y;
     }
@@ -361,17 +405,34 @@ void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* con
 }
 
 void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
-  HCURSOR hCursor = (HCURSOR)__xkWin32CreateIcon(pIcon, 0/*GetSystemMetrics(SM_CXCURSOR)*/, 0/*GetSystemMetrics(SM_CYCURSOR)*/, XK_FALSE);
-  if(!hCursor) {
-    __xkErrorHandle("Win32: Failed to create cursor icon");
-    goto _catch;
-  }
+  if (pIcon) {
+    // Create Win32 cursor icon.
+    HCURSOR hCursor = (HCURSOR)__xkWin32CreateIcon(pIcon, 0/*GetSystemMetrics(SM_CXCURSOR)*/, 0/*GetSystemMetrics(SM_CYCURSOR)*/, XK_FALSE);
+    if (!hCursor) {
+      __xkErrorHandle("Win32: Failed to create cursor icon");
+      goto _catch;
+    }
 
-  if(window->win32.hCursor) {
-    DestroyCursor(window->win32.hCursor);
-  }
+    // Destroy old cursor, if i have.
+    if (window->win32.hCursor) {
+      DestroyCursor(window->win32.hCursor);
+    }
 
-  window->win32.hCursor = hCursor;
+    // Set new Win32 cursor.
+    window->win32.hCursor = hCursor;
+
+    __xkWin32UpdateCursor(window);
+  } else {
+    // Destroy old cursor, if i have.
+    if (window->win32.hCursor) {
+      DestroyCursor(window->win32.hCursor);
+    }
+
+    // Set null Win32 cursor.
+    window->win32.hCursor = INVALID_HANDLE_VALUE;
+
+    __xkWin32UpdateCursor(window);
+  }
 
 _catch:
   return;
@@ -417,31 +478,82 @@ static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
 static DWORD __xkWin32GetWindowExStyle(const XkWindow window) {
 	DWORD style = WS_EX_APPWINDOW;
 
-  if(window->fullscreen || window->floating)
+  if(window->fullscreen || window->floating) {
     style |= WS_EX_TOPMOST;
+  }
 
   return(style);
 }
 
-static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, const XkSize count, const XkInt32 width, const XkInt32 height) {
-  int leastDiff = INT_MAX;
-  const XkWindowIcon* pSelect = NULL;
+static void __xkWin32UpdateWindowStyle(const XkWindow window) {
+  if(window->fullscreen) {
+    DWORD style = GetWindowLong(window->win32.handle, GWL_STYLE);
+    style &= ~WS_OVERLAPPEDWINDOW;
 
-  for(XkSize i = 0;  i < count;  i++) {
-  	const int currDiff = (pIcons[i].width * pIcons[i].height - width * height);
-    if(currDiff < leastDiff) {
-      pSelect = pIcons + i;
-      leastDiff = currDiff;
-    }
+    SetWindowLong(window->win32.handle, GWL_STYLE, style);
+
+    HDC hDC = GetWindowDC(NULL);
+    SetWindowPos(window->win32.handle, HWND_TOPMOST, 0, 0, GetDeviceCaps(hDC, HORZRES), GetDeviceCaps(hDC, VERTRES), SWP_FRAMECHANGED);
+  } else {
+    DWORD style = GetWindowLong(window->win32.handle, GWL_STYLE);
+    style |= WS_OVERLAPPEDWINDOW;
+
+    SetWindowLong(window->win32.handle, GWL_STYLE, style);
+
+    SetWindowPos(window->win32.handle, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+  }
+}
+
+static void __xkWin32GetFullWindowSize(DWORD style, DWORD exStyle, int contentWidth, int contentHeight, int* fullWidth, int* fullHeight) {
+  // Get Display rect.
+  RECT rect = {0, 0, contentWidth, contentHeight};
+  AdjustWindowRectEx(&rect, style, FALSE, exStyle);
+
+  *fullWidth = rect.right - rect.left;
+  *fullHeight = rect.bottom - rect.top;
+}
+
+static XkWindowMod __xkWin32GetKeyMod(void) {
+  XkWindowMod mod = 0;
+
+  // Shift mod. 
+  if (GetKeyState(VK_SHIFT) & 0x8000) {
+    mod |= XK_MOD_SHIFT_BIT;
   }
 
-  return(pSelect);
+  // Control mod.
+  if (GetKeyState(VK_CONTROL) & 0x8000) {
+    mod |= XK_MOD_CONTROL_BIT;
+  }
+
+  // Alt mod.
+  if (GetKeyState(VK_MENU) & 0x8000) {
+    mod |= XK_MOD_ALT_BIT;
+  }
+
+  // Super mod.
+  if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000) {
+    mod |= XK_MOD_SUPER_BIT;
+  }
+
+  // Caps Lock mod.
+  if (GetKeyState(VK_CAPITAL) & 1) {
+    mod |= XK_MOD_CAPS_LOCK_BIT;
+  }
+
+  // Num lock mod.
+  if (GetKeyState(VK_NUMLOCK) & 1) {
+    mod |= XK_MOD_NUM_LOCK_BIT;
+  }
+
+  return(mod);
 }
 
 static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, const XkInt32 yHot, const XkBool icon) {
 	XkUInt8* pTarget = NULL;
 	XkUInt8* pSource = pIcon->pixels;
 
+  // Initialize Win32 bitmap shader.
   BITMAPV5HEADER bi = {0};
   bi.bV5Size = sizeof(bi);
   bi.bV5Width = pIcon->width;
@@ -454,8 +566,13 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   bi.bV5BlueMask = 0x000000ff;
   bi.bV5AlphaMask = 0xff000000;
 
+  // Get Win32 DC.
 	HDC dc = GetDC(NULL);
+
+  // Create Win32 DIB section.
 	HBITMAP color = CreateDIBSection(dc, (BITMAPINFO*) &bi, DIB_RGB_COLORS, (void**) &pTarget, NULL, (DWORD)0);
+
+  // Release Win32 DC.
   ReleaseDC(NULL, dc);
 
   if(!color) {
@@ -463,6 +580,7 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	return(NULL);
   }
 
+  // Create Win32 bitmap.
   HBITMAP mask = CreateBitmap(pIcon->width, pIcon->height, 1, 1, NULL);
   if(!mask) {
     __xkErrorHandle("Win32: Failed to create mask bitmap");
@@ -470,6 +588,7 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	return(NULL);
   }
 
+  // Copy icon pixels to DIB section memory.
   for(int i = 0;  i < pIcon->width * pIcon->height;  i++) {
   	pTarget[0] = pSource[2];
   	pTarget[1] = pSource[1];
@@ -479,6 +598,7 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	pSource += 4;
   }
 
+  // Initialize Win32 icon info.
   ICONINFO ii = {0};
   ii.fIcon = icon;
   ii.xHotspot = xHot;
@@ -486,6 +606,7 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   ii.hbmMask = mask;
   ii.hbmColor = color;
 
+  // Create Win32 icon.
   HICON handle = CreateIconIndirect(&ii);
 
   if(!handle) {
@@ -496,403 +617,68 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
     }
   }
 
+  // Delete Win32 DIB section.
   DeleteObject(color);
+
+  // Delete Win32 bitmap.
   DeleteObject(mask);
 
   return(handle); 	
 }
 
-static void __xkWin32GetFullWindowSize(DWORD style, DWORD exStyle, int contentWidth, int contentHeight, int* fullWidth, int* fullHeight) {
-  RECT rect = {0, 0, contentWidth, contentHeight};
+static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, const XkSize count, const XkInt32 width, const XkInt32 height) {
+  int leastDiff = INT_MAX;
+  const XkWindowIcon* pSelect = NULL;
 
-  AdjustWindowRectEx(&rect, style, FALSE, exStyle);
-
-  *fullWidth = rect.right - rect.left;
-  *fullHeight = rect.bottom - rect.top;
-}
-
-static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam) {
-	XkWindow window = GetPropA(hWindow, "XKinetic");
-	if(!window) {
-		return DefWindowProcA(hWindow, message, wParam, lParam);
-	}
-
-	switch(message) {
-    case WM_KEYDOWN:
-    case WM_KEYUP:
-    case WM_SYSKEYDOWN:
-    case WM_SYSKEYUP: {
-      XkWindowAction action = (HIWORD(lParam) & KF_UP) ? XK_RELEASE : XK_PRESS;
-      XkWindowMod mod = __xkWin32GetKeyMod();
-
-			int scancode = (HIWORD(lParam) & (KF_EXTENDED | 0xff));
-			// Alt+PrtSc has a different scancode than just PrtSc.
-      if(scancode == 0x54)
-        scancode = 0x137;
-
-      // Ctrl+Pause has a different scancode than just Pause.
-      if(scancode == 0x146)
-        scancode = 0x45;
-
-			int key = _xkPlatform.keycodes[scancode];
-
-			if(wParam == VK_CONTROL) {
-				if(HIWORD(lParam) & KF_EXTENDED) {
-          key = XK_KEY_RIGHT_CONTROL;
-        } else {
- 					MSG next;
-          const DWORD time = GetMessageTime();
-
-          if(PeekMessageW(&next, NULL, 0, 0, PM_NOREMOVE)) {
-          	if(next.message == WM_KEYDOWN || next.message == WM_SYSKEYDOWN || next.message == WM_KEYUP || next.message == WM_SYSKEYUP) {
-              if (next.wParam == VK_MENU && (HIWORD(next.lParam) & KF_EXTENDED) && next.time == time) {
-                break;
-              }
-            }
-          }
-
-          key = XK_KEY_LEFT_CONTROL;
-				}
-			} else if(wParam == VK_PROCESSKEY) {
-				break;
-			}
-
-			if(action == XK_RELEASE && wParam == VK_SHIFT) {
-				__xkInputWindowKey(window, XK_KEY_LEFT_SHIFT, action, mod);
-				__xkInputWindowKey(window, XK_KEY_RIGHT_SHIFT, action, mod);
-			} else if(wParam == VK_SNAPSHOT) {
-				__xkInputWindowKey(window, key, XK_PRESS, mod);
-				__xkInputWindowKey(window, key, XK_RELEASE, mod);
-			} else {
-				__xkInputWindowKey(window, key, action, mod);
-			}
-
-			break;
-		}
-
-		case WM_LBUTTONDOWN: {
-      // Left mouse button press.
-      __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_PRESS, __xkWin32GetKeyMod());
-      break;
+  for (XkSize i = 0; i < count; i++) {
+    const int currDiff = (pIcons[i].width * pIcons[i].height - width * height);
+    if (currDiff < leastDiff) {
+      pSelect = pIcons + i;
+      leastDiff = currDiff;
     }
+  }
 
-    case WM_LBUTTONUP: { 
-      // Left mouse button release. 
-      __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_RELEASE, __xkWin32GetKeyMod());
-      break;
-    }
-
-    case WM_RBUTTONDOWN: {
-      // Right mouse button press.
-      __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_PRESS, __xkWin32GetKeyMod());
-      break;
-    }
-
-    case WM_RBUTTONUP: {
-      // Right mouse button release.
-      __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_RELEASE, __xkWin32GetKeyMod());
-      break;
-    }
-
-    case WM_MBUTTONDOWN: {
-      // Middle mouse button press.
-      __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_PRESS, __xkWin32GetKeyMod());
-      break;
-    }
-
-    case WM_MBUTTONUP: {
-      // Middle mouse button release.
-      __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_RELEASE, __xkWin32GetKeyMod());
-      break;
-    }
-
-    case WM_XBUTTONDOWN: {
-      // Additional mouse button press.
-      XkWindowButton button;
-
-      if(GET_XBUTTON_WPARAM(wParam) == XBUTTON1) {
-        button = XK_BUTTON_1;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON2) {
-        button = XK_BUTTON_2;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON3) {
-        button = XK_BUTTON_3;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON4) {
-        button = XK_BUTTON_4;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON5) {
-        button = XK_BUTTON_5;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON6) {
-        button = XK_BUTTON_6;
-      }
-
-      __xkInputWindowButton(window, button, XK_PRESS, __xkWin32GetKeyMod());
-
-      break;
-    }
-
-    case WM_XBUTTONUP: {
-      // Additional mouse button release.
-      XkWindowButton button;
-
-      if(GET_XBUTTON_WPARAM(wParam) == XBUTTON1) {
-        button = XK_BUTTON_1;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON2) {
-        button = XK_BUTTON_2;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON3) {
-        button = XK_BUTTON_3;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON4) {
-        button = XK_BUTTON_4;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON5) {
-        button = XK_BUTTON_5;
-      } else if(GET_XBUTTON_WPARAM(wParam) == XBUTTON6) {
-
-        button = XK_BUTTON_6;
-      }
-
-      __xkInputWindowButton(window, button, XK_PRESS, __xkWin32GetKeyMod());
-
-      break;
-		}
-
-		case WM_MOUSEMOVE: {
-      if(window->cursorMode != XK_CURSOR_DISABLED) {
-        const int x = GET_X_LPARAM(lParam);
-        const int y = GET_Y_LPARAM(lParam);
-
-			  __xkInputWindowCursor(window, x, y);
-      }
-      
-			if(!window->win32.cursorTracked) {
-        TRACKMOUSEEVENT tme = {0};
-        tme.cbSize = sizeof(TRACKMOUSEEVENT);
-        tme.dwFlags = TME_LEAVE;
-        tme.hwndTrack = window->win32.handle;
-        TrackMouseEvent(&tme);
-
-				__xkInputWindowCursorEnter(window, XK_TRUE);	
-				window->win32.cursorTracked = XK_TRUE;
-			}
-      break;
-		}
-
-    case WM_MOUSELEAVE: {
-      __xkInputWindowCursorEnter(window, XK_FALSE);
-			window->win32.cursorTracked = XK_FALSE;
-      break;
-    }
-
-    case WM_MOUSEWHEEL: {
-      __xkInputWindowScroll(window, 0.0, (SHORT)HIWORD(wParam) / (double)WHEEL_DELTA);
-      break;
-		}
-
-    case WM_MOUSEHWHEEL: {
-      __xkInputWindowScroll(window, -((SHORT)HIWORD(wParam) / (double)WHEEL_DELTA), 0.0);
-      break;
-		}
-
-		case WM_CLOSE: {
-			__xkInputWindowClose(window);
-      break;
-		}
-
-		case WM_MOVE: {
-			__xkInputWindowPosition(window, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-      break;
-		}
-
-		case WM_SIZE: {
-			const int width = LOWORD(lParam);
-      const int height = HIWORD(lParam);
-
-			if(wParam == SIZE_MINIMIZED) {
-        __xkInputWindowShow(window, XK_WINDOW_SHOW_MINIMIZED);
-			}
-
-			if(wParam == SIZE_MAXIMIZED) {
-        __xkInputWindowShow(window, XK_WINDOW_SHOW_MAXIMIZED);
-			}
-
-      __xkInputWindowSize(window, width, height);
-
-      break;
-		}
-
-    case WM_GETMINMAXINFO: {
-      int xoff, yoff;
-      MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-
-      if(window->fullscreen) {
-        break;
-      }
-
-      __xkWin32GetFullWindowSize(__xkWin32GetWindowStyle(window), __xkWin32GetWindowExStyle(window), 0, 0, &xoff, &yoff);
-
-      if(window->minWidth != 0 && window->minHeight != 0) {
-        mmi->ptMinTrackSize.x = window->minWidth + xoff;
-        mmi->ptMinTrackSize.y = window->minHeight + yoff;
-      }
-
-      if(window->maxWidth != 0 && window->maxHeight != 0) {
-        mmi->ptMaxTrackSize.x = window->maxWidth + xoff;
-        mmi->ptMaxTrackSize.y = window->maxHeight + yoff;
-      }
-
-      if(!window->decorated) {
-        MONITORINFO mi;
-        const HMONITOR mh = MonitorFromWindow(window->win32.handle, MONITOR_DEFAULTTONEAREST);
-
-        ZeroMemory(&mi, sizeof(mi));
-        mi.cbSize = sizeof(mi);
-        GetMonitorInfoW(mh, &mi);
-
-        mmi->ptMaxPosition.x = mi.rcWork.left - mi.rcMonitor.left;
-        mmi->ptMaxPosition.y = mi.rcWork.top - mi.rcMonitor.top;
-        mmi->ptMaxSize.x = mi.rcWork.right - mi.rcWork.left;
-        mmi->ptMaxSize.y = mi.rcWork.bottom - mi.rcWork.top;
-      }
-
-      break;
-    }
-
-		case WM_SETFOCUS: {
-			__xkInputWindowFocus(window, XK_TRUE);
-      break;
-		}
-
-		case WM_KILLFOCUS: {
-			__xkInputWindowFocus(window, XK_FALSE);
-      break;
-		}
-
-    case WM_SETCURSOR: {
-      if(LOWORD(lParam) == HTCLIENT) {
-        __xkWin32UpdateCursor(window);
-      }
-
-      break;
-    }
-
-    case WM_DROPFILES: {
-      HDROP drop = (HDROP)wParam;
-
-      const UINT count = DragQueryFileA(drop, 0xffffffff, NULL, 0);
-      CHAR** paths = xkAllocateMemory(count * sizeof(CHAR*));
-      if (!paths) {
-        break;
-      }
-
-      POINT point;
-      DragQueryPoint(drop, &point);
-      __xkInputWindowCursor(window, point.x, point.y);
-
-      for(UINT iFile = 0; iFile < count; iFile++) {
-        const UINT length = DragQueryFileA(drop, iFile, NULL, 0);
-        CHAR* buffer = xkAllocateMemory((length + 1) * length);
-        if (!buffer) {
-          xkFreeMemory(paths);
-          break;
-        }
-
-        DragQueryFileA(drop, iFile, buffer, length + 1);
-        paths[iFile] = buffer;
-      }
-
-      __xkInputWindowDropFile(window, (XkSize)count, (XkString*)paths);
-
-      for(XkSize i = 0; i < count; i++) {
-        xkFreeMemory(paths[i]);
-      }
-      xkFreeMemory(paths);
-
-      DragFinish(drop);
-
-      break;
-    }
-
-    default:
-      return DefWindowProc(hWindow, message, wParam, lParam);
-	}
-
-  return(0);
+  return(pSelect);
 }
 
 static void __xkWin32DisableCursor(const XkWindow window) {
+  // Get Win32 window rect.
+  RECT rect;
+  GetClientRect(window->win32.handle, &rect);
+
+  // Clip Win32 cursor to window center.
+  RECT cursorRect = {rect.left, rect.top, rect.right, rect.bottom};
+  ClipCursor(&cursorRect);
+
+  // Hide Win32 cursor.
   ShowCursor(FALSE);
-  RECT rect = {0, 0, 0, 0};
-  ClipCursor(&rect);
 }
 
 static void __xkWin32HideCursor(const XkWindow window) {
+  // Unclip Win32 cursor.
   ClipCursor(NULL);
+
+  // Hide Win32 cursor.
   ShowCursor(FALSE);
 }
 
 static void __xkWin32EnableCursor(const XkWindow window) {
+  // Unclip Win32 cursor.
   ClipCursor(NULL);
+
+  // Show Win32 cursor.
   ShowCursor(TRUE);
 }
 
 static void __xkWin32UpdateCursor(const XkWindow window) {
-  if(window->win32.hCursor != INVALID_HANDLE_VALUE) {
+  if (window->win32.hCursor != INVALID_HANDLE_VALUE) {
     // Set custom cursor.
     SetCursor(window->win32.hCursor);
-  } else {
+  }
+  else {
     // Set default cursor.
     SetCursor(LoadCursorA(NULL, IDC_ARROW));
-  }  
-}
-
-static void __xkWin32UpdateWindowStyle(const XkWindow window) {
-  RECT rect;
-  DWORD style = GetWindowLongW(window->win32.handle, GWL_STYLE);
-  style &= ~(WS_OVERLAPPEDWINDOW | WS_POPUP);
-  style |= __xkWin32GetWindowStyle(window);
-
-  GetClientRect(window->win32.handle, &rect);
-
-  AdjustWindowRectEx(&rect, style, FALSE, __xkWin32GetWindowExStyle(window));
-
-  ClientToScreen(window->win32.handle, (POINT*)&rect.left);
-  ClientToScreen(window->win32.handle, (POINT*)&rect.right);
-
-  SetWindowLongW(window->win32.handle, GWL_STYLE, style);
-  SetWindowPos(window->win32.handle, HWND_TOP, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE | SWP_NOZORDER);
-}
-
-static XkWindowMod __xkWin32GetKeyMod(void) {
-  XkWindowMod mod = 0;
-
-  // Shift mod. 
-  if(GetKeyState(VK_SHIFT) & 0x8000) {
-    mod |= XK_MOD_SHIFT_BIT;
   }
-
-  // Control mod.
-  if(GetKeyState(VK_CONTROL) & 0x8000) {
-    mod |= XK_MOD_CONTROL_BIT;
-  }
-
-  // Alt mod.
-  if(GetKeyState(VK_MENU) & 0x8000) {
-    mod |= XK_MOD_ALT_BIT;
-  }
-
-  // Super mod.
-  if((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000)  {
-    mod |= XK_MOD_SUPER_BIT;
-  }
-
-  // Caps Lock mod.
-  if(GetKeyState(VK_CAPITAL) & 1) {
-    mod |= XK_MOD_CAPS_LOCK_BIT;
-  }
-
-  // Num lock mod.
-	if(GetKeyState(VK_NUMLOCK) & 1) {
-    mod |= XK_MOD_NUM_LOCK_BIT;
-  }
-
-  return(mod);
 }
 
 WCHAR* __xkWin32WideStringFromUTF8(const CHAR* source) {
@@ -932,6 +718,7 @@ CHAR* __xkWin32UTF8FromWideString(const WCHAR* source) {
 }
 
 static void __xkWin32InitializeKeycodes(void) {
+  // Zero keycodes.
   xkZeroMemory(_xkPlatform.keycodes, sizeof(_xkPlatform.keycodes));
 
   _xkPlatform.keycodes[0x00B] = XK_KEY_0;
@@ -1055,6 +842,325 @@ static void __xkWin32InitializeKeycodes(void) {
   _xkPlatform.keycodes[0x059] = XK_KEY_KP_EQUAL;
   _xkPlatform.keycodes[0x037] = XK_KEY_KP_MULTIPLY;
   _xkPlatform.keycodes[0x04A] = XK_KEY_KP_SUBTRACT;
+}
+
+static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam) {
+  XkWindow window = GetPropA(hWindow, "XKinetic");
+  if (!window) {
+    return DefWindowProcA(hWindow, message, wParam, lParam);
+  }
+
+  switch (message) {
+  case WM_KEYDOWN:
+  case WM_KEYUP:
+  case WM_SYSKEYDOWN:
+  case WM_SYSKEYUP: {
+    XkWindowAction action = (HIWORD(lParam) & KF_UP) ? XK_RELEASE : XK_PRESS;
+    XkWindowMod mod = __xkWin32GetKeyMod();
+
+    int scancode = (HIWORD(lParam) & (KF_EXTENDED | 0xff));
+    // Alt+PrtSc has a different scancode than just PrtSc.
+    if (scancode == 0x54)
+      scancode = 0x137;
+
+    // Ctrl+Pause has a different scancode than just Pause.
+    if (scancode == 0x146)
+      scancode = 0x45;
+
+    int key = (int)_xkPlatform.keycodes[scancode];
+
+    if (wParam == VK_CONTROL) {
+      if (HIWORD(lParam) & KF_EXTENDED) {
+        key = XK_KEY_RIGHT_CONTROL;
+      }
+      else {
+        MSG next;
+        const DWORD time = GetMessageTime();
+
+        if (PeekMessageW(&next, NULL, 0, 0, PM_NOREMOVE)) {
+          if (next.message == WM_KEYDOWN || next.message == WM_SYSKEYDOWN || next.message == WM_KEYUP || next.message == WM_SYSKEYUP) {
+            if (next.wParam == VK_MENU && (HIWORD(next.lParam) & KF_EXTENDED) && next.time == time) {
+              break;
+            }
+          }
+        }
+
+        key = XK_KEY_LEFT_CONTROL;
+      }
+    }
+    else if (wParam == VK_PROCESSKEY) {
+      break;
+    }
+
+    if (action == XK_RELEASE && wParam == VK_SHIFT) {
+      __xkInputWindowKey(window, XK_KEY_LEFT_SHIFT, action, mod);
+      __xkInputWindowKey(window, XK_KEY_RIGHT_SHIFT, action, mod);
+    }
+    else if (wParam == VK_SNAPSHOT) {
+      __xkInputWindowKey(window, key, XK_PRESS, mod);
+      __xkInputWindowKey(window, key, XK_RELEASE, mod);
+    }
+    else {
+      __xkInputWindowKey(window, key, action, mod);
+    }
+
+    break;
+  }
+
+  case WM_LBUTTONDOWN: {
+    // Left mouse button press.
+    __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_PRESS, __xkWin32GetKeyMod());
+    break;
+  }
+
+  case WM_LBUTTONUP: {
+    // Left mouse button release. 
+    __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_RELEASE, __xkWin32GetKeyMod());
+    break;
+  }
+
+  case WM_RBUTTONDOWN: {
+    // Right mouse button press.
+    __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_PRESS, __xkWin32GetKeyMod());
+    break;
+  }
+
+  case WM_RBUTTONUP: {
+    // Right mouse button release.
+    __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_RELEASE, __xkWin32GetKeyMod());
+    break;
+  }
+
+  case WM_MBUTTONDOWN: {
+    // Middle mouse button press.
+    __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_PRESS, __xkWin32GetKeyMod());
+    break;
+  }
+
+  case WM_MBUTTONUP: {
+    // Middle mouse button release.
+    __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_RELEASE, __xkWin32GetKeyMod());
+    break;
+  }
+
+  case WM_XBUTTONDOWN: {
+    // Additional mouse button press.
+    XkWindowButton button;
+
+    if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) {
+      button = XK_BUTTON_1;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2) {
+      button = XK_BUTTON_2;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON3) {
+      button = XK_BUTTON_3;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON4) {
+      button = XK_BUTTON_4;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON5) {
+      button = XK_BUTTON_5;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON6) {
+      button = XK_BUTTON_6;
+    }
+
+    __xkInputWindowButton(window, button, XK_PRESS, __xkWin32GetKeyMod());
+
+    break;
+  }
+
+  case WM_XBUTTONUP: {
+    // Additional mouse button release.
+    XkWindowButton button;
+
+    if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) {
+      button = XK_BUTTON_1;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2) {
+      button = XK_BUTTON_2;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON3) {
+      button = XK_BUTTON_3;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON4) {
+      button = XK_BUTTON_4;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON5) {
+      button = XK_BUTTON_5;
+    }
+    else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON6) {
+
+      button = XK_BUTTON_6;
+    }
+
+    __xkInputWindowButton(window, button, XK_PRESS, __xkWin32GetKeyMod());
+
+    break;
+  }
+
+  case WM_MOUSEMOVE: {
+    if (window->cursorMode != XK_CURSOR_DISABLED) {
+      const int x = GET_X_LPARAM(lParam);
+      const int y = GET_Y_LPARAM(lParam);
+
+      __xkInputWindowCursor(window, x, y);
+    }
+
+    if (!window->win32.cursorTracked) {
+      TRACKMOUSEEVENT tme = { 0 };
+      tme.cbSize = sizeof(TRACKMOUSEEVENT);
+      tme.dwFlags = TME_LEAVE;
+      tme.hwndTrack = window->win32.handle;
+      TrackMouseEvent(&tme);
+
+      __xkInputWindowCursorEnter(window, XK_TRUE);
+      window->win32.cursorTracked = XK_TRUE;
+    }
+    break;
+  }
+
+  case WM_MOUSELEAVE: {
+    __xkInputWindowCursorEnter(window, XK_FALSE);
+    window->win32.cursorTracked = XK_FALSE;
+    break;
+  }
+
+  case WM_MOUSEWHEEL: {
+    __xkInputWindowScroll(window, 0.0, (SHORT)HIWORD(wParam) / (double)WHEEL_DELTA);
+    break;
+  }
+
+  case WM_MOUSEHWHEEL: {
+    __xkInputWindowScroll(window, -((SHORT)HIWORD(wParam) / (double)WHEEL_DELTA), 0.0);
+    break;
+  }
+
+  case WM_CLOSE: {
+    __xkInputWindowClose(window);
+    break;
+  }
+
+  case WM_MOVE: {
+    __xkInputWindowPosition(window, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+    break;
+  }
+
+  case WM_SIZE: {
+    const int width = LOWORD(lParam);
+    const int height = HIWORD(lParam);
+
+    if (wParam == SIZE_MINIMIZED) {
+      __xkInputWindowShow(window, XK_WINDOW_SHOW_MINIMIZED);
+    }
+
+    if (wParam == SIZE_MAXIMIZED) {
+      __xkInputWindowShow(window, XK_WINDOW_SHOW_MAXIMIZED);
+    }
+
+    __xkInputWindowSize(window, width, height);
+
+    break;
+  }
+
+  case WM_GETMINMAXINFO: {
+    int xoff, yoff;
+    MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+
+    if (window->fullscreen) {
+      break;
+    }
+
+    __xkWin32GetFullWindowSize(__xkWin32GetWindowStyle(window), __xkWin32GetWindowExStyle(window), 0, 0, &xoff, &yoff);
+
+    if (window->minWidth != 0 && window->minHeight != 0) {
+      mmi->ptMinTrackSize.x = window->minWidth + xoff;
+      mmi->ptMinTrackSize.y = window->minHeight + yoff;
+    }
+
+    if (window->maxWidth != 0 && window->maxHeight != 0) {
+      mmi->ptMaxTrackSize.x = window->maxWidth + xoff;
+      mmi->ptMaxTrackSize.y = window->maxHeight + yoff;
+    }
+
+    if (!window->decorated) {
+      MONITORINFO mi;
+      const HMONITOR mh = MonitorFromWindow(window->win32.handle, MONITOR_DEFAULTTONEAREST);
+
+      ZeroMemory(&mi, sizeof(mi));
+      mi.cbSize = sizeof(mi);
+      GetMonitorInfoW(mh, &mi);
+
+      mmi->ptMaxPosition.x = mi.rcWork.left - mi.rcMonitor.left;
+      mmi->ptMaxPosition.y = mi.rcWork.top - mi.rcMonitor.top;
+      mmi->ptMaxSize.x = mi.rcWork.right - mi.rcWork.left;
+      mmi->ptMaxSize.y = mi.rcWork.bottom - mi.rcWork.top;
+    }
+
+    break;
+  }
+
+  case WM_SETFOCUS: {
+    __xkInputWindowFocus(window, XK_TRUE);
+    break;
+  }
+
+  case WM_KILLFOCUS: {
+    __xkInputWindowFocus(window, XK_FALSE);
+    break;
+  }
+
+  case WM_SETCURSOR: {
+    if (LOWORD(lParam) == HTCLIENT) {
+      __xkWin32UpdateCursor(window);
+    }
+
+    break;
+  }
+
+  case WM_DROPFILES: {
+    HDROP drop = (HDROP)wParam;
+
+    const UINT count = DragQueryFileA(drop, 0xffffffff, NULL, 0);
+    CHAR** paths = xkAllocateMemory(count * sizeof(CHAR*));
+    if (!paths) {
+      break;
+    }
+
+    POINT point;
+    DragQueryPoint(drop, &point);
+    __xkInputWindowCursor(window, point.x, point.y);
+
+    for (UINT iFile = 0; iFile < count; iFile++) {
+      const UINT length = DragQueryFileA(drop, iFile, NULL, 0);
+      CHAR* buffer = xkAllocateMemory((length + 1) * length);
+      if (!buffer) {
+        xkFreeMemory(paths);
+        break;
+      }
+
+      DragQueryFileA(drop, iFile, buffer, length + 1);
+      paths[iFile] = buffer;
+    }
+
+    __xkInputWindowDropFile(window, (XkSize)count, (XkString*)paths);
+
+    for (XkSize i = 0; i < count; i++) {
+      xkFreeMemory(paths[i]);
+    }
+    xkFreeMemory(paths);
+
+    DragFinish(drop);
+
+    break;
+  }
+
+  default:
+    return DefWindowProc(hWindow, message, wParam, lParam);
+  }
+
+  return(0);
 }
 
 #endif // XK_WIN32

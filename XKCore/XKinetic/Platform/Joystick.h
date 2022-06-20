@@ -86,28 +86,28 @@ typedef void(*XkJoystickAxisPfn)(XkJoystick, const XkJoystickAxis, const XkFloat
 typedef void(*XkJoystickButtonPfn)(XkJoystick, const XkJoystickButton, const XkJoystickAction);
 typedef void(*XkJoystickHatPfn)(XkJoystick, const XkJoystickHat, const XkJoystickAction);
 
-XK_EXPORT XkResult xkInitializeJoysticks(void);
-XK_EXPORT void xkTerminateJoysticks(void);
+XKCORE_API XkResult xkInitializeJoysticks(void);
+XKCORE_API void xkTerminateJoysticks(void);
 
-XK_EXPORT XkResult xkCreateJoystick(XkJoystick*, const XkJoystickID);
-XK_EXPORT void xkDestroyJoystick(XkJoystick);
+XKCORE_API XkResult xkCreateJoystick(XkJoystick*, const XkJoystickID);
+XKCORE_API void xkDestroyJoystick(XkJoystick);
 
-XK_EXPORT XkBool xkJoystickGamepad(XkJoystick);
-XK_EXPORT XkString xkJoystickName(XkJoystick);
-XK_EXPORT XkString xkJoystickMappingName(XkJoystick);
-XK_EXPORT XkJoystickID xkJoystickID(XkJoystick);
+XKCORE_API XkBool xkJoystickGamepad(XkJoystick);
+XKCORE_API XkString xkJoystickName(XkJoystick);
+XKCORE_API XkString xkJoystickMappingName(XkJoystick);
+XKCORE_API XkJoystickID xkJoystickID(XkJoystick);
 
-XK_EXPORT void xkSetJoystickEventCallback(XkJoystick, const XkJoystickEventPfn);
-XK_EXPORT void xkSetJoystickAxisCallback(XkJoystick, const XkJoystickAxisPfn);
-XK_EXPORT void xkSetJoystickButtonCallback(XkJoystick, const XkJoystickButtonPfn);
-XK_EXPORT void xkSetJoystickHatCallback(XkJoystick, const XkJoystickHatPfn);
+XKCORE_API void xkSetJoystickEventCallback(XkJoystick, const XkJoystickEventPfn);
+XKCORE_API void xkSetJoystickAxisCallback(XkJoystick, const XkJoystickAxisPfn);
+XKCORE_API void xkSetJoystickButtonCallback(XkJoystick, const XkJoystickButtonPfn);
+XKCORE_API void xkSetJoystickHatCallback(XkJoystick, const XkJoystickHatPfn);
 
-XK_EXPORT void xkPollJoystickEvents(void);
+XKCORE_API void xkPollJoystickEvents(void);
 
-XK_IMPORT void __xkInputJoystickEvent(XkJoystick, const XkJoystickEvent);
-XK_IMPORT void __xkInputJoystickAxis(XkJoystick, const XkJoystickAxis, const XkFloat32);
-XK_IMPORT void __xkInputJoystickButton(XkJoystick, const XkJoystickButton, const XkJoystickAction);
-XK_IMPORT void __xkInputJoystickHat(XkJoystick, const XkJoystickHat, const XkJoystickAction);
+XK_EXPORT void __xkInputJoystickEvent(XkJoystick, const XkJoystickEvent);
+XK_EXPORT void __xkInputJoystickAxis(XkJoystick, const XkJoystickAxis, const XkFloat32);
+XK_EXPORT void __xkInputJoystickButton(XkJoystick, const XkJoystickButton, const XkJoystickAction);
+XK_EXPORT void __xkInputJoystickHat(XkJoystick, const XkJoystickHat, const XkJoystickAction);
 
 #ifdef __cplusplus
 }

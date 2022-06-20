@@ -20,18 +20,22 @@ void xkTerminateJoysticks(void) {
 XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
 	XkResult result = XK_SUCCESS;
 
+	// Allocate joystick.
 	*pJoystick = xkAllocateMemory(sizeof(struct XkJoystick));
 	if(!(*pJoystick)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
+	// Template joystick.
 	XkJoystick joystick = *pJoystick;
 
+	// Initialize joystick.
 	joystick->id = id;
 
 	/// TODO: implementation.
 
+	// Call joystick connect event.
 	__xkInputJoystickEvent(joystick, XK_JOYSTICK_CONNECTED);
 
 _catch:
@@ -40,12 +44,20 @@ _catch:
 
 void xkDestroyJoystick(XkJoystick joystick) {
 	/// TODO: implementation.
+
+	// Call joystick disconnect event.
 	__xkInputJoystickEvent(joystick, XK_JOYSTICK_DISCONNECTED);
+
+	// Free joystick.
 	xkFreeMemory(joystick);
 }
 
 XkString xkJoystickMappingName(XkJoystick joystick) {
 	return("Linux");
+}
+
+void xkPollJoystickEvents(void) {
+	/// TODO: implementation.
 }
 
 #endif // XK_LINUX

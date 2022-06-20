@@ -3,6 +3,7 @@
 #include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 #include "XKinetic/Platform/Window.h"
+#include "XKinetic/Platform/Joystick.h"
 
 #include "XKinetic/Resources/Loaders/ImageLoader.h"
 
@@ -10,6 +11,8 @@ struct XkApplication {
 	XkApplicationConfig config;
 
 	XkWindow window;
+	XkJoystick joystick1;
+	XkJoystick joystick2;
 
 	XkBool exit;
 
@@ -73,6 +76,10 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 			xkSetWindowCursorMode(window, XK_CURSOR_HIDDEN);
 		} else if(key == XK_KEY_B) {
 			xkSetWindowCursorMode(window, XK_CURSOR_DISABLED);
+		}
+
+		if (key == XK_KEY_X) {
+			xkSetWindowCursor(window, XK_NULL_HANDLE);
 		}
 
 		if(key == XK_KEY_F) {
@@ -162,6 +169,34 @@ static void __xkWindowDropFile(XkWindow window, const XkSize count, const XkStri
 	}
 }
 
+static void __xkJoystickEvent(XkJoystick joystick, const XkJoystickEvent event) {
+	const XkJoystickID id = xkJoystickID(joystick);
+
+	if(event == XK_JOYSTICK_CONNECTED) {
+		xkLogNotice("joystick%d disconnected", id);
+	} else if(event == XK_JOYSTICK_DISCONNECTED) {
+		xkLogNotice("joystick%d disconnected", id);
+	}
+}
+
+static void __xkJoystickAxis(XkJoystick joystick, const XkJoystickAxis axis, const XkFloat32 value) {
+	const XkJoystickID id = xkJoystickID(joystick);
+
+	xkLogNotice("joystick%d axis: %d: value: %d", axis, value);
+}
+
+static void __xkJoystickButton(XkJoystick joystick, const XkJoystickButton button, const XkJoystickAction action) {
+	const XkJoystickID id = xkJoystickID(joystick);
+
+	xkLogNotice("joystick%d button: %d: action: %d", button, action);
+}
+
+static void __xkJoystickHat(XkJoystick joystick, const XkJoystickHat hat, const XkJoystickAction action) {
+	const XkJoystickID id = xkJoystickID(joystick);
+
+	xkLogNotice("joystick%d hat: %d: action: %d", hat, action);
+}
+
 XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
@@ -171,11 +206,34 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	_xkApplication.config.version.patch = 1;
 	_xkApplication.exit = XK_FALSE;
 
-	result = xkLogInitialize();
+	result = xkInitializeLog();
 	if(result != XK_SUCCESS) goto _catch;
 
-	result = xkWindowInitialize();
+	result = xkInitializeWindow();
 	if(result != XK_SUCCESS) goto _catch;
+
+	result = xkInitializeJoysticks();
+	if (result != XK_SUCCESS) goto _catch;
+
+	result = xkCreateJoystick(&_xkApplication.joystick1, XK_JOYSTICK_1);
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to create joystick1: %d", result);
+	} else {
+		xkSetJoystickEventCallback(_xkApplication.joystick1, __xkJoystickEvent);
+		xkSetJoystickAxisCallback(_xkApplication.joystick1, __xkJoystickAxis);	
+		xkSetJoystickButtonCallback(_xkApplication.joystick1, __xkJoystickButton);
+		xkSetJoystickHatCallback(_xkApplication.joystick1, __xkJoystickHat);
+	}
+
+	result = xkCreateJoystick(&_xkApplication.joystick2, XK_JOYSTICK_2);
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to create joystick2: %d", result);
+	} else {
+		xkSetJoystickEventCallback(_xkApplication.joystick1, __xkJoystickEvent);
+		xkSetJoystickAxisCallback(_xkApplication.joystick1, __xkJoystickAxis);	
+		xkSetJoystickButtonCallback(_xkApplication.joystick1, __xkJoystickButton);
+		xkSetJoystickHatCallback(_xkApplication.joystick1, __xkJoystickHat);
+	}	
 
 	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT | XK_WINDOW_DRAG_DROP_BIT);
 	if(result != XK_SUCCESS) {
@@ -261,16 +319,35 @@ _catch:
 }
 
 void xkDestroyApplication(void) {
+	if(_xkApplication.joystick1) {
+		xkDestroyJoystick(_xkApplication.joystick1);
+	}
+
+	if(_xkApplication.joystick2) {
+		xkDestroyJoystick(_xkApplication.joystick2);
+	}
+
 	xkDestroyWindow(_xkApplication.window);
 
-	xkWindowTerminate();
+	xkTerminateJoysticks();
 
-	xkLogTerminate();
+	xkTerminateWindow();
+
+	xkTerminateLog();
 }
 
 void xkUpdateApplication(void) {
 	while(!_xkApplication.exit) {
 		// Poll window events.
 		xkWaitWindowEvents();
+
+		// Poll joysticks events.
+		if(_xkApplication.joystick1) {
+			xkPollJoystickEvents(_xkApplication.joystick1);
+		}
+
+		if(_xkApplication.joystick2) {
+			xkPollJoystickEvents(_xkApplication.joystick2);
+		}
 	}
 }

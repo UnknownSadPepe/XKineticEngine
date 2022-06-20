@@ -201,63 +201,63 @@ typedef struct {
 
 typedef struct XkWindowCursor* XkWindowCursor;
 
-XK_EXPORT XkResult xkWindowInitialize(void);
-XK_EXPORT void xkWindowTerminate(void);
+XKCORE_API XkResult xkInitializeWindow(void);
+XKCORE_API void xkTerminateWindow(void);
 
-XK_EXPORT XkResult xkCreateWindow(XkWindow*, const XkString, const XkSize, const XkSize, const XkWindowHint);
-XK_EXPORT void xkDestroyWindow(XkWindow);
+XKCORE_API XkResult xkCreateWindow(XkWindow*, const XkString, const XkSize, const XkSize, const XkWindowHint);
+XKCORE_API void xkDestroyWindow(XkWindow);
 
-XK_EXPORT void xkShowWindow(XkWindow, const XkWindowShow);
+XKCORE_API void xkShowWindow(XkWindow, const XkWindowShow);
 
-XK_EXPORT void xkFocusWindow(XkWindow);
+XKCORE_API void xkFocusWindow(XkWindow);
 
-XK_EXPORT void xkSetWindowSize(XkWindow, const XkSize, const XkSize);
-XK_EXPORT void xkGetWindowSize(XkWindow, XkSize* const, XkSize* const);
+XKCORE_API void xkSetWindowSize(XkWindow, const XkSize, const XkSize);
+XKCORE_API void xkGetWindowSize(XkWindow, XkSize* const, XkSize* const);
 
-XK_EXPORT void xkSetWindowSizeLimits(XkWindow, const XkSize, const XkSize, const XkSize, const XkSize);
+XKCORE_API void xkSetWindowSizeLimits(XkWindow, const XkSize, const XkSize, const XkSize, const XkSize);
 
-XK_EXPORT void xkSetWindowPosition(XkWindow, const XkInt32, const XkInt32);
-XK_EXPORT void xkGetWindowPosition(XkWindow, XkInt32* const, XkInt32* const);
+XKCORE_API void xkSetWindowPosition(XkWindow, const XkInt32, const XkInt32);
+XKCORE_API void xkGetWindowPosition(XkWindow, XkInt32* const, XkInt32* const);
 
-XK_EXPORT void xkSetWindowTitle(XkWindow, const XkString);
-XK_EXPORT XkString xkGetWindowTitle(XkWindow);
+XKCORE_API void xkSetWindowTitle(XkWindow, const XkString);
+XKCORE_API XkString xkGetWindowTitle(XkWindow);
 
-XK_EXPORT void xkSetWindowIcon(XkWindow, const XkSize, const XkWindowIcon*);
+XKCORE_API void xkSetWindowIcon(XkWindow, const XkSize, const XkWindowIcon*);
 
-XK_EXPORT void xkSetWindowCursorMode(XkWindow, const XkWindowCursorMode);
-XK_EXPORT XkWindowCursorMode xkGetWindowCursorMode(XkWindow);
+XKCORE_API void xkSetWindowCursorMode(XkWindow, const XkWindowCursorMode);
+XKCORE_API XkWindowCursorMode xkGetWindowCursorMode(XkWindow);
 
-XK_EXPORT void xkSetCursorPosition(XkWindow, const XkFloat64, const XkFloat64);
-XK_EXPORT void xkGetCursorPosition(XkWindow, XkFloat64* const, XkFloat64* const);
+XKCORE_API void xkSetCursorPosition(XkWindow, const XkFloat64, const XkFloat64);
+XKCORE_API void xkGetCursorPosition(XkWindow, XkFloat64* const, XkFloat64* const);
 
-XK_EXPORT void xkSetWindowCursor(XkWindow, const XkWindowIcon*);
+XKCORE_API void xkSetWindowCursor(XkWindow, const XkWindowIcon*);
 
-XK_EXPORT void xkSetWindowShowCallback(XkWindow, const XkWindowShowPfn);
-XK_EXPORT void xkSetWindowKeyCallback(XkWindow, const XkWindowKeyPfn);
-XK_EXPORT void xkSetWindowButtonCallback(XkWindow, const XkWindowButtonPfn);
-XK_EXPORT void xkSetWindowCursorCallback(XkWindow, const XkWindowCursorPfn);
-XK_EXPORT void xkSetWindowCursorEnterCallback(XkWindow, const XkWindowCursorEnterPfn);
-XK_EXPORT void xkSetWindowScrollCallback(XkWindow, const XkWindowScrollPfn);
-XK_EXPORT void xkSetWindowCloseCallback(XkWindow, const XkWindowClosePfn);
-XK_EXPORT void xkSetWindowPositionCallback(XkWindow, const XkWindowPositionPfn);
-XK_EXPORT void xkSetWindowSizeCallback(XkWindow, const XkWindowSizePfn);
-XK_EXPORT void xkSetWindowFocusCallback(XkWindow, const XkWindowFocusPfn);
-XK_EXPORT void xkSetWindowDropFileCallback(XkWindow, const XkWindowDropFilePfn);
+XKCORE_API void xkSetWindowShowCallback(XkWindow, const XkWindowShowPfn);
+XKCORE_API void xkSetWindowKeyCallback(XkWindow, const XkWindowKeyPfn);
+XKCORE_API void xkSetWindowButtonCallback(XkWindow, const XkWindowButtonPfn);
+XKCORE_API void xkSetWindowCursorCallback(XkWindow, const XkWindowCursorPfn);
+XKCORE_API void xkSetWindowCursorEnterCallback(XkWindow, const XkWindowCursorEnterPfn);
+XKCORE_API void xkSetWindowScrollCallback(XkWindow, const XkWindowScrollPfn);
+XKCORE_API void xkSetWindowCloseCallback(XkWindow, const XkWindowClosePfn);
+XKCORE_API void xkSetWindowPositionCallback(XkWindow, const XkWindowPositionPfn);
+XKCORE_API void xkSetWindowSizeCallback(XkWindow, const XkWindowSizePfn);
+XKCORE_API void xkSetWindowFocusCallback(XkWindow, const XkWindowFocusPfn);
+XKCORE_API void xkSetWindowDropFileCallback(XkWindow, const XkWindowDropFilePfn);
 
-XK_EXPORT void xkPollWindowEvents(void);
-XK_EXPORT void xkWaitWindowEvents(void);
+XKCORE_API void xkPollWindowEvents(void);
+XKCORE_API void xkWaitWindowEvents(void);
 
-XK_IMPORT void __xkInputWindowShow(XkWindow, const XkWindowShow);
-XK_IMPORT void __xkInputWindowKey(XkWindow, const XkWindowKey, const XkWindowAction, const XkWindowMod);
-XK_IMPORT void __xkInputWindowButton(XkWindow, const XkWindowButton, const XkWindowAction, const XkWindowMod);
-XK_IMPORT void __xkInputWindowCursor(XkWindow, const XkFloat64, const XkFloat64);
-XK_IMPORT void __xkInputWindowCursorEnter(XkWindow, const XkBool);
-XK_IMPORT void __xkInputWindowScroll(XkWindow, const XkFloat64, const XkFloat64);
-XK_IMPORT void __xkInputWindowClose(XkWindow);
-XK_IMPORT void __xkInputWindowPosition(XkWindow, const XkInt32, const XkInt32);
-XK_IMPORT void __xkInputWindowSize(XkWindow, const XkSize, const XkSize);
-XK_IMPORT void __xkInputWindowFocus(XkWindow, const XkBool);
-XK_IMPORT void __xkInputWindowDropFile(XkWindow, const XkSize, const XkString*);
+XK_EXPORT void __xkInputWindowShow(XkWindow, const XkWindowShow);
+XK_EXPORT void __xkInputWindowKey(XkWindow, const XkWindowKey, const XkWindowAction, const XkWindowMod);
+XK_EXPORT void __xkInputWindowButton(XkWindow, const XkWindowButton, const XkWindowAction, const XkWindowMod);
+XK_EXPORT void __xkInputWindowCursor(XkWindow, const XkFloat64, const XkFloat64);
+XK_EXPORT void __xkInputWindowCursorEnter(XkWindow, const XkBool);
+XK_EXPORT void __xkInputWindowScroll(XkWindow, const XkFloat64, const XkFloat64);
+XK_EXPORT void __xkInputWindowClose(XkWindow);
+XK_EXPORT void __xkInputWindowPosition(XkWindow, const XkInt32, const XkInt32);
+XK_EXPORT void __xkInputWindowSize(XkWindow, const XkSize, const XkSize);
+XK_EXPORT void __xkInputWindowFocus(XkWindow, const XkBool);
+XK_EXPORT void __xkInputWindowDropFile(XkWindow, const XkSize, const XkString*);
 
 #ifdef __cplusplus
 }

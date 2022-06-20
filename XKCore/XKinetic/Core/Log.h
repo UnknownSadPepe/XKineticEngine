@@ -6,8 +6,8 @@
 extern "C" {
 #endif // __cplusplus
 
-XK_EXPORT XkResult xkLogInitialize(void);
-XK_EXPORT void xkLogTerminate(void);
+XK_EXPORT XkResult xkInitializeLog(void);
+XK_EXPORT void xkTerminateLog(void);
 
 XKCORE_API void xkLogFatal(const XkString, ...);
 XKCORE_API void xkLogError(const XkString, ...);

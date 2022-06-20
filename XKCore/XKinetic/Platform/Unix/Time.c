@@ -6,6 +6,7 @@
 #include <sys/time.h>
 
 XkSize xkGetTime(void) {
+	// Get Unix time
 	struct timeval tmv;
 	gettimeofday(&tmv, NULL);
 	return((XkSize)tmv.tv_sec);

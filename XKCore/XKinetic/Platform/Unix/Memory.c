@@ -16,42 +16,51 @@ typedef struct {
 static const XkSize XK_ALIGN = 16;
 
 XkHandle xkAllocateMemory(const XkSize size) {
+	// Align memory allocate size.
 	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (XK_ALIGN - 1)) & ~ (XK_ALIGN - 1);
 
+	// Map Unix heap memory.
 	XkHandle memory = mmap(0, alignSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if(!memory) {
 		__xkErrorHandle("Unix: Failed to allocate memory");
 		return(XK_NULL_HANDLE);
 	}
 
+	// Initialize header.
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)memory;
 	pHeader->size = alignSize;
-	pHeader->memory = memory;
+	pHeader->memory = memory + sizeof(__XkMemoryHeader);
 
-	return(memory + sizeof(__XkMemoryHeader));
+	return(pHeader->memory);
 }
 
 XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
+	// Align memory allocate size.
 	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (XK_ALIGN - 1)) & ~ (XK_ALIGN - 1);
 
+	// Initialize header.
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)(((XkUInt8*)memory) - sizeof(__XkMemoryHeader));
 
-	XkHandle newMemory = mremap(pHeader->memory, pHeader->size, alignSize, 0, MREMAP_FIXED);
+	// Remap Unix heap memory.
+	XkHandle newMemory = mremap(pHeader, pHeader->size, alignSize, 0, MREMAP_FIXED);
 	if(!newMemory) {
 		__xkErrorHandle("Unix: Failed to reallocate memory");
 		return(XK_NULL_HANDLE);
 	}
 
+	// Initialize heder.
 	pHeader->size = alignSize;
-	pHeader->memory = newMemory;
+	pHeader->memory = newMemory + sizeof(__XkMemoryHeader);
 
-	return(newMemory + sizeof(__XkMemoryHeader));
+	return(pHeader->memory);
 }
 
 void xkFreeMemory(const XkHandle memory) {
+	// Initialize header.
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)(((XkUInt8*)memory) - sizeof(__XkMemoryHeader));
 
-	munmap(pHeader->memory, pHeader->size);
+	// Unmap Unix heap memory.
+	munmap(memory, pHeader->size);
 }
 
 #endif // XK_UNIX

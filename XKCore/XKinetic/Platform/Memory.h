@@ -6,13 +6,13 @@
 extern "C" {
 #endif // __cplusplus
 
-XK_EXPORT XkHandle xkAllocateMemory(const XkSize);
-XK_EXPORT XkHandle xkReallocateMemory(const XkHandle, const XkSize);
-XK_EXPORT void xkFreeMemory(const XkHandle);
+XKCORE_API XkHandle xkAllocateMemory(const XkSize);
+XKCORE_API XkHandle xkReallocateMemory(const XkHandle, const XkSize);
+XKCORE_API void xkFreeMemory(const XkHandle);
 
-XK_EXPORT XkHandle xkCopyMemory(XkHandle, const XkHandle, const XkSize);
-XK_EXPORT XkHandle xkMoveMemory(XkHandle, const XkHandle, const XkSize);
-XK_EXPORT XkHandle xkZeroMemory(XkHandle, const XkSize);
+XKCORE_API XkHandle xkCopyMemory(XkHandle, const XkHandle, const XkSize);
+XKCORE_API XkHandle xkMoveMemory(XkHandle, const XkHandle, const XkSize);
+XKCORE_API XkHandle xkZeroMemory(XkHandle, const XkSize);
 
 #ifdef __cplusplus
 }

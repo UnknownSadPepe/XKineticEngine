@@ -4,15 +4,14 @@
 #include <windows.h>
 #include "XKinetic/XKCore.h"
 
-extern XK_IMPORT XkResult __xkEntry(const XkSize, const XkString*);
+extern XkResult __xkEntry(const XkSize, const XkString*);
 
-int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, INT nCmdShow) {
+INT CALLBACK WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ PSTR pCmdLine, _In_ INT nCmdShow) {
 	int res = EXIT_SUCCESS;
 
 	AllocConsole();
-
+	
 	int argc;
-	/// TODO: CommandLineToArgvA().
 	LPWSTR* wArgv = CommandLineToArgvW(GetCommandLineW(), &argc);
 
 	XkResult result = __xkEntry((const XkSize)argc, (const XkString*)wArgv);

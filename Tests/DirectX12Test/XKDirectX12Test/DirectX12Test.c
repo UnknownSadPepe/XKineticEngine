@@ -33,10 +33,10 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	_xkApplication.config.version.patch = 1;
 	_xkApplication.exit = XK_FALSE;
 
-	result = xkLogInitialize();
+	result = xkInitializeLog();
 	if(result != XK_SUCCESS) goto _catch;
 
-	result = xkWindowInitialize();
+	result = xkInitializeWindow();
 	if(result != XK_SUCCESS) goto _catch;
 
 	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
@@ -74,9 +74,9 @@ void xkDestroyApplication(void) {
 	xkDestroyWindow(_xkApplication.window);
 	xkDestroyRenderer(_xkApplication.renderer);
 
-	xkWindowTerminate();
+	xkTerminateWindow();
 
-	xkLogTerminate();
+	xkTerminateLog();
 }
 
 void xkUpdateApplication(void) {

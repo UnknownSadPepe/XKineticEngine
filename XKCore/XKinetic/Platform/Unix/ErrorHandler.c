@@ -10,9 +10,11 @@
 void __xkErrorHandler(const XkString format, ...) {
 	XkChar buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {0};
 
+	// Format string.
 	va_list args;
 	va_start(args, format);
 	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
+	// Print to console.
 	fprintf(stderr, "XKinetic Error Handler: %s\n", buffer);
 	va_end(args);
 }

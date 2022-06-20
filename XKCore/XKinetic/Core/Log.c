@@ -25,9 +25,10 @@ static struct {
 #define XK_LOG_ARG_BUFFER_SIZE 1024
 #define XK_LOG_BUFFER_SIZE (XK_LOG_TIME_BUFFER_SIZE + XK_LOG_TYPE_BUFFER_SIZE + XK_LOG_ARG_BUFFER_SIZE)
 
-XkResult xkLogInitialize(void) {
+XkResult xkInitializeLog(void) {
 	XkResult result = XK_SUCCESS;
 
+	// Open logging file.
 	result = xkOpenFile(&_xkLogger.file, "XKineticLogs.log", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
 	if(result != XK_SUCCESS) goto _catch;
 
@@ -35,7 +36,8 @@ _catch:
 	return(result);
 }
 
-void xkLogTerminate(void) {
+void xkTerminateLog(void) {
+	// Close logging file.
 	xkCloseFile(_xkLogger.file);
 }
 
@@ -94,8 +96,11 @@ void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 	static const XkString typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};
 	XkChar buffer[XK_LOG_BUFFER_SIZE] = {0};
 
+	// Select stream.
 	XkConsoleHandle stream = type <= XK_LOG_TYPE_ERROR ? XK_CONSOLE_STDERR : XK_CONSOLE_STDOUT;
-	XkConsoleColor color;
+
+	// Select color.
+	XkConsoleColor color = 0;
 	switch(type) {
 		case XK_LOG_TYPE_FATAL:		color = XK_COLOR_BRED_BIT; break;
 		case XK_LOG_TYPE_ERROR:		color = XK_COLOR_FRED_BIT; break;
@@ -104,20 +109,25 @@ void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 		case XK_LOG_TYPE_INFO:		color = XK_COLOR_FWHITE_BIT; break;
 		case XK_LOG_TYPE_NOTICE:	color = XK_COLOR_FCYAN_BIT; break;
 		case XK_LOG_TYPE_DEBUG:		color = XK_COLOR_FBLUE_BIT; break;
+		default:									color = 0; break;
 	}
 
+	// Format time buffer.
 	XkChar timeBuffer[XK_LOG_TIME_BUFFER_SIZE];
 	XkSize rawTime = xkGetTime();
 	XkTime tm;
 	xkTimeFormat(&tm, rawTime);
 	xkTimeStringFormat(&tm, timeBuffer, XK_LOG_TIME_BUFFER_SIZE, "%x-%X");
 
+	// Format argument buffer.
 	XkChar argBuffer[XK_LOG_ARG_BUFFER_SIZE];
 	xkStringNFFormat(argBuffer, XK_LOG_ARG_BUFFER_SIZE, format, args);
 
 	const XkSize size = xkStringNFormat(buffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s\n", timeBuffer, typeBuffer[type], argBuffer);
 
+	// Write to console.
 	xkWriteConsoleColored(stream, color, buffer, size);
 
+	// Write to logging file.
 	xkWriteFile(_xkLogger.file, buffer, size);
 }

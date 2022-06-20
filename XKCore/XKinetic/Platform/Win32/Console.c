@@ -1,4 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Console.h"
+
 
 #if defined(XK_WIN32)
 
@@ -10,15 +12,22 @@
 #endif // COMMON_LVB_UNDERSCORE
 
 void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const XkSize size) {
-	HANDLE stream;
+	// Select stream.
+	HANDLE stream = INVALID_HANDLE_VALUE;
 	switch(handle) {
 		case XK_CONSOLE_STDOUT: {
 			stream = GetStdHandle(STD_OUTPUT_HANDLE);
-			if(!stream) return;
+			if(stream == INVALID_HANDLE_VALUE) return;
 		}
+
 		case XK_CONSOLE_STDERR: {
 			stream =  GetStdHandle(STD_ERROR_HANDLE);
-			if(!stream) return;;
+			if(stream == INVALID_HANDLE_VALUE) return;
+		}
+
+		default: {
+			stream = INVALID_HANDLE_VALUE;
+			if(stream == INVALID_HANDLE_VALUE) return;
 		}
 	}
 	LPDWORD numberWritten = 0;
@@ -26,23 +35,31 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const X
 }
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
-	CONSOLE_SCREEN_BUFFER_INFO CBI;
+	CONSOLE_SCREEN_BUFFER_INFO CBI = {0};
 
-	HANDLE stream;
+	// Select stream.
+	HANDLE stream = INVALID_HANDLE_VALUE;
 	switch(handle) {
 		case XK_CONSOLE_STDOUT: {
 			stream = GetStdHandle(STD_OUTPUT_HANDLE);
-			if(!stream) return;
+			if(stream == INVALID_HANDLE_VALUE) return;
 			GetConsoleScreenBufferInfo(stream, &CBI); break;
 		}
+
 		case XK_CONSOLE_STDERR: {
 			stream =  GetStdHandle(STD_ERROR_HANDLE);
-			if(!stream) return;
+			if(stream == INVALID_HANDLE_VALUE) return;
 			GetConsoleScreenBufferInfo(stream, &CBI); break;
+		}
+
+		default: {
+			stream = INVALID_HANDLE_VALUE;
+			if(stream == INVALID_HANDLE_VALUE) return;
 		}
 	}	
 
-	WORD attribute;
+	// Select color.
+	WORD attribute = 0;
 	switch(color) { 
 		case XK_COLOR_FBLACK_BIT: attribute		= 0; break;
 		case XK_COLOR_FRED_BIT: attribute			= FOREGROUND_RED; break;
@@ -79,6 +96,11 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 		case XK_COLOR_BPURPLE_BIT: attribute	=	BACKGROUND_RED | BACKGROUND_BLUE; break;
 		case XK_COLOR_BCYAN_BIT: attribute		= BACKGROUND_GREEN | BACKGROUND_BLUE; break;
 		case XK_COLOR_BWHITE_BIT: attribute		=	BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE; break;
+
+		default: {
+			attribute = CBI.wAttributes;
+			break;
+		}
 	}
 
 	SetConsoleTextAttribute(stream, attribute);

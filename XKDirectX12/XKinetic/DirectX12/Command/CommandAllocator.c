@@ -15,7 +15,7 @@ XkResult __xkDX12CreateCommandAllocator(ID3D12CommandAllocator** ppD3D12CommandA
 	ID3D12CommandAllocator* d3d12CommandAllocator = *ppD3D12CommandAllocator;
 
 #ifdef XKDIRECTX12_DEBUG
-	// Set DirectX12 command queue name.
+	// Set DirectX12 command allocator name.
 	ID3D12CommandQueue_SetName(d3d12CommandAllocator,
 		d3d12Type == D3D12_COMMAND_LIST_TYPE_DIRECT ? L"DirectX12 Graphics Command Allocator" :
 		d3d12Type == D3D12_COMMAND_LIST_TYPE_COMPUTE ? L"DirectX12 Compute Commans Allocator" :

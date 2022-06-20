@@ -111,7 +111,7 @@ struct XkModule {
 typedef struct {
 	XkBool initialized;
 
-	XkInt16 keycodes[256];
+	XkInt16 keycodes[512];
 
 	XK_PLATFORM;
 } __XkPlatform;
@@ -127,7 +127,7 @@ extern __XkPlatform _xkPlatform;
 #endif // XK_WIN32
 
 #define __xkErrorHandle(format) __xkErrorHandler("%s %s %d", format, __FILE__, __LINE__)
-XK_IMPORT void __xkErrorHandler(const XkString pFormat, ...);
+XK_EXPORT void __xkErrorHandler(const XkString pFormat, ...);
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,7 @@ XkResult __xkDX12InitializeContext(void) {
   XkResult result = XK_SUCCESS;
 
 #ifdef XKDIRECTX12_DEBUG
+  // Always enable the debug layer before doing anything DirectX12 related.
   result = __xkDX12CreateDebugLayer();
   if(result != XK_SUCCESS) {
     xkLogError("Failed to create DirectX12 debug layer");
@@ -41,7 +42,12 @@ XkResult __xkDX12InitializeContext(void) {
 
 #ifdef XKDIRECTX12_DEBUG
   // Query DirectX12 info queue.
-  __xkDX12QueryInfoQueueInterface();
+  result = __xkDX12QueryInfoQueueInterface();
+  if(result != XK_SUCCESS) {
+    xkLogError("Failed to query DirectX12 info queue interface");
+    result = XK_ERROR_INITIALIZE_FAILED;
+    goto _catch;
+  }
 
   // Enable DirectX12 info queue. 
   __xkDX12EnableInfoQueue();

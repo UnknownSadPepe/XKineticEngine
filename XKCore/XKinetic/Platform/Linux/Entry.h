@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include "XKinetic/XKCore.h"
 
-extern XK_IMPORT XkResult __xkEntry(const XkSize, const XkString*);
+extern XkResult __xkEntry(const XkSize, const XkString*);
 
 int main(int argc, char** argv) {
 	int res = 0;

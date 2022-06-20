@@ -70,75 +70,75 @@ typedef struct {
 
 extern __XkVkContext _xkVkContext;
 
-XK_IMPORT XkString __xkVkGetErrorString(VkResult); 
+XK_EXPORT XkString __xkVkGetErrorString(VkResult); 
 
-XK_IMPORT XkResult __xkVkInitializeContext(void);
-XK_IMPORT void __xkVkTerminateContext(void);
+XK_EXPORT XkResult __xkVkInitializeContext(void);
+XK_EXPORT void __xkVkTerminateContext(void);
 
-XK_IMPORT XkResult __xkVkCreateInstance(void);
-XK_IMPORT void __xkVkDestroyInstance(void);
+XK_EXPORT XkResult __xkVkCreateInstance(void);
+XK_EXPORT void __xkVkDestroyInstance(void);
 
 #ifdef XKVULKAN_DEBUG
-XK_IMPORT void __xkVkPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT*);
-XK_IMPORT XkResult __xkVkCreateDebugMessenger(void);
-XK_IMPORT void __xkVkDestroyDebugMessenger(void);
+XK_EXPORT void __xkVkPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT*);
+XK_EXPORT XkResult __xkVkCreateDebugMessenger(void);
+XK_EXPORT void __xkVkDestroyDebugMessenger(void);
 #endif // XKVULKAN_DEBUG
 
-XK_IMPORT XkResult __xkVkCreateSurface(VkSurfaceKHR*, XkWindow);
-XK_IMPORT void __xkVkDestroySurface(VkSurfaceKHR);
+XK_EXPORT XkResult __xkVkCreateSurface(VkSurfaceKHR*, XkWindow);
+XK_EXPORT void __xkVkDestroySurface(VkSurfaceKHR);
 
-XK_IMPORT XkResult __xkVkPickPhysicalDevice(void);
+XK_EXPORT XkResult __xkVkPickPhysicalDevice(void);
 
-XK_IMPORT XkResult __xkVkCreateLogicalDevice(void);
-XK_IMPORT void __xkVkDestroyLogicalDevice(void);
+XK_EXPORT XkResult __xkVkCreateLogicalDevice(void);
+XK_EXPORT void __xkVkDestroyLogicalDevice(void);
 
-XK_IMPORT uint32_t __xkVkFindMemoryType(uint32_t, const VkMemoryPropertyFlags);
+XK_EXPORT uint32_t __xkVkFindMemoryType(uint32_t, const VkMemoryPropertyFlags);
 
-XK_IMPORT XkResult __xkVkCreateCommandPool(void);
-XK_IMPORT void __xkVkDestroyCommandPool(void);
+XK_EXPORT XkResult __xkVkCreateCommandPool(void);
+XK_EXPORT void __xkVkDestroyCommandPool(void);
 
-XK_IMPORT XkResult __xkVkCreateSwapChain(VkSwapchainKHR*, VkSurfaceKHR, VkExtent2D* const, VkFormat* const, VkImage*, uint32_t* const);
-XK_IMPORT void __xkVkDestroySwapChain(VkSwapchainKHR);
+XK_EXPORT XkResult __xkVkCreateSwapChain(VkSwapchainKHR*, VkSurfaceKHR, VkExtent2D* const, VkFormat* const, VkImage*, uint32_t* const);
+XK_EXPORT void __xkVkDestroySwapChain(VkSwapchainKHR);
 
-XK_IMPORT XkResult __xkVkCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescription*, const uint32_t, VkSubpassDescription*, const uint32_t, VkSubpassDependency*, const uint32_t);
-XK_IMPORT void __xkVkDestroyeRenderPass(VkRenderPass);
+XK_EXPORT XkResult __xkVkCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescription*, const uint32_t, VkSubpassDescription*, const uint32_t, VkSubpassDependency*, const uint32_t);
+XK_EXPORT void __xkVkDestroyeRenderPass(VkRenderPass);
 
-XK_IMPORT XkResult __xkVkCreateFrameBuffer(VkFramebuffer*, VkRenderPass, const VkExtent2D, VkImageView*, const uint32_t);
-XK_IMPORT void __xkVkDestroyFrameBuffer(VkFramebuffer);
+XK_EXPORT XkResult __xkVkCreateFrameBuffer(VkFramebuffer*, VkRenderPass, const VkExtent2D, VkImageView*, const uint32_t);
+XK_EXPORT void __xkVkDestroyFrameBuffer(VkFramebuffer);
 
-XK_IMPORT XkResult __xkVkCreateCommandBuffer(VkCommandBuffer*, const VkCommandBufferLevel);
-XK_IMPORT void __xkVkDestroyCommandBuffer(VkCommandBuffer);
+XK_EXPORT XkResult __xkVkCreateCommandBuffer(VkCommandBuffer*, const VkCommandBufferLevel);
+XK_EXPORT void __xkVkDestroyCommandBuffer(VkCommandBuffer);
 
-XK_IMPORT XkResult __xkVkBeginSingleCommands(VkCommandBuffer*);
-XK_IMPORT XkResult __xkVkEndSingleCommands(VkCommandBuffer);
+XK_EXPORT XkResult __xkVkBeginSingleCommands(VkCommandBuffer*);
+XK_EXPORT XkResult __xkVkEndSingleCommands(VkCommandBuffer);
 
-XK_IMPORT XkResult __xkVkCreateSemaphore(VkSemaphore*);
-XK_IMPORT void __xkVkDestroySemaphore(VkSemaphore);
+XK_EXPORT XkResult __xkVkCreateSemaphore(VkSemaphore*);
+XK_EXPORT void __xkVkDestroySemaphore(VkSemaphore);
 
-XK_IMPORT XkResult __xkVkCreateFence(VkFence*);
-XK_IMPORT void __xkVkDestroyFence(VkFence);
+XK_EXPORT XkResult __xkVkCreateFence(VkFence*);
+XK_EXPORT void __xkVkDestroyFence(VkFence);
 
-XK_IMPORT XkResult __xkVkCreateShader(VkShaderModule*, const uint32_t*, const size_t);
-XK_IMPORT void __xkVkDestroyShader(VkShaderModule);
+XK_EXPORT XkResult __xkVkCreateShader(VkShaderModule*, const uint32_t*, const size_t);
+XK_EXPORT void __xkVkDestroyShader(VkShaderModule);
 
-XK_IMPORT XkResult __xkVkCreateBuffer(VkBuffer* const, VkDeviceMemory* const, const VkDeviceSize, const VkBufferUsageFlags, const VkMemoryPropertyFlags, const void*);
-XK_IMPORT void __xkVkDestroyBuffer(VkBuffer, VkDeviceMemory);
+XK_EXPORT XkResult __xkVkCreateBuffer(VkBuffer* const, VkDeviceMemory* const, const VkDeviceSize, const VkBufferUsageFlags, const VkMemoryPropertyFlags, const void*);
+XK_EXPORT void __xkVkDestroyBuffer(VkBuffer, VkDeviceMemory);
 
-XK_IMPORT XkResult __xkVkCopyBuffer(VkBuffer, const VkBuffer, const VkDeviceSize);
+XK_EXPORT XkResult __xkVkCopyBuffer(VkBuffer, const VkBuffer, const VkDeviceSize);
 
-XK_IMPORT XkResult __xkVkMapBuffer(VkDeviceMemory, const VkDeviceSize, const void*); 
+XK_EXPORT XkResult __xkVkMapBuffer(VkDeviceMemory, const VkDeviceSize, const void*); 
 
-XK_IMPORT XkResult __xkVkCreateImage(VkImage* const, VkDeviceMemory* const, const VkImageType, const VkFormat, const VkExtent3D, const VkSampleCountFlagBits, const VkImageTiling, const VkImageUsageFlags, const VkMemoryPropertyFlags, const uint32_t);
-XK_IMPORT void __xkVkDestroyImage(VkImage, VkDeviceMemory);
+XK_EXPORT XkResult __xkVkCreateImage(VkImage* const, VkDeviceMemory* const, const VkImageType, const VkFormat, const VkExtent3D, const VkSampleCountFlagBits, const VkImageTiling, const VkImageUsageFlags, const VkMemoryPropertyFlags, const uint32_t);
+XK_EXPORT void __xkVkDestroyImage(VkImage, VkDeviceMemory);
 
-XK_IMPORT XkResult __xkVkTransitionImageLayout(VkImage, const VkFormat, const VkImageLayout, const VkImageLayout, const uint32_t);
-XK_IMPORT XkResult __xkVkCopyBufferToImage(VkBuffer, VkImage, const VkExtent3D);
+XK_EXPORT XkResult __xkVkTransitionImageLayout(VkImage, const VkFormat, const VkImageLayout, const VkImageLayout, const uint32_t);
+XK_EXPORT XkResult __xkVkCopyBufferToImage(VkBuffer, VkImage, const VkExtent3D);
 
-XK_IMPORT XkResult __xkVkCreateImageView(VkImageView* const, VkImage, const VkFormat, const VkImageAspectFlags, const uint32_t);
-XK_IMPORT void __xkVkDestroyImageView(VkImageView);
+XK_EXPORT XkResult __xkVkCreateImageView(VkImageView* const, VkImage, const VkFormat, const VkImageAspectFlags, const uint32_t);
+XK_EXPORT void __xkVkDestroyImageView(VkImageView);
 
-XK_IMPORT XkResult __xkVkCreateSampler(VkSampler*, const VkFilter, const VkSamplerAddressMode, const VkBool32, const uint32_t);
-XK_IMPORT void __xkVkDestroySampler(VkSampler);
+XK_EXPORT XkResult __xkVkCreateSampler(VkSampler*, const VkFilter, const VkSamplerAddressMode, const VkBool32, const uint32_t);
+XK_EXPORT void __xkVkDestroySampler(VkSampler);
 
 #ifdef __cplusplus
 }

@@ -1,7 +1,17 @@
 #include "XKinetic/DirectX12/Internal.h"
 
-void __xkDX12QueryInfoQueueInterface(void) {
-  ID3D12Device8_QueryInterface(_xkDX12Context.d3d12Device8, &IID_ID3D12InfoQueue, &_xkDX12Context.d3d12InfoQueue);
+XkResult __xkDX12QueryInfoQueueInterface(void) {
+  XkResult result = XK_SUCCESS;
+
+  HRESULT hResult = ID3D12Device8_QueryInterface(_xkDX12Context.d3d12Device8, &IID_ID3D12InfoQueue, &_xkDX12Context.d3d12InfoQueue);
+  if(FAILED(hResult)) {
+    result = XK_ERROR_UNKNOWN;
+    xkLogError("DirectX12: Failed to query info queue interface");
+    goto _catch;
+  }
+
+_catch:
+  return(result);
 }
 
 void __xkDX12EnableInfoQueue(void) {

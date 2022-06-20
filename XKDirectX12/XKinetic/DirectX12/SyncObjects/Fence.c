@@ -1,6 +1,6 @@
 #include "XKinetic/DirectX12/Internal.h"
 
-XkResult __xkDX12CreateFence(ID3D12Fence1** ppD3D12Fence) {
+XkResult __xkDX12CreateFence(ID3D12Fence** ppD3D12Fence) {
 	XkResult result = XK_SUCCESS;
 
 	// Create DirectX12 fence.
@@ -12,18 +12,18 @@ XkResult __xkDX12CreateFence(ID3D12Fence1** ppD3D12Fence) {
 	}
 
 	// Template DirectX12 fence.
-	ID3D12Fence1* d3d12Fence = *ppD3D12Fence;
+	ID3D12Fence* d3d12Fence = *ppD3D12Fence;
 
 #ifdef XKDIRECTX12_DEBUG
-	// Set DirectX12 command list name.
-	ID3D12Fence1_SetName(d3d12Fence, L"DirectX12 Fence");
+	// Set DirectX12 fence name.
+	ID3D12Fence_SetName(d3d12Fence, L"DirectX12 Fence");
 #endif // XKDIRECTX12_DEBUG
 
 _catch:
 	return(result);
 }
 
-void __xkDX12DestroyFence(ID3D12Fence1* pD3D12Fence) {
+void __xkDX12DestroyFence(ID3D12Fence* pD3D12Fence) {
 	// Release DirectX12 fence.
 	ID3D12Fence_Release(pD3D12Fence);
 }

@@ -19,9 +19,9 @@ typedef struct XkApplication XkApplication;
 
 extern XkApplication _xkApplication;
 
-XK_IMPORT XkResult xkCreateApplication(const XkSize, const XkWString*);
-XK_IMPORT void xkDestroyApplication();
-XK_IMPORT void xkUpdateApplication();
+extern XkResult xkCreateApplication(const XkSize, const XkString*);
+extern void xkDestroyApplication(void);
+extern void xkUpdateApplication(void);
 
 #ifdef __cplusplus
 }

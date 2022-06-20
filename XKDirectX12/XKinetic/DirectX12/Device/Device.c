@@ -4,7 +4,7 @@ XkResult __xkDX12CreateDevice(void) {
   XkResult result = XK_SUCCESS;
 
   // Create DirectX12 device.
-  HRESULT hResult = D3D12CreateDevice(_xkDX12Context.dxgiAdapter4, _xkDX12Context.d3dDeviceMaximumFeatureLevel, &IID_ID3D12Device8, &_xkDX12Context.d3d12Device8);
+  HRESULT hResult = D3D12CreateDevice((IUnknown*)_xkDX12Context.dxgiAdapter4, _xkDX12Context.d3dDeviceMaximumFeatureLevel, &IID_ID3D12Device8, &_xkDX12Context.d3d12Device8);
   if(FAILED(hResult)) {
     result = XK_ERROR_UNKNOWN;
     xkLogError("DirectX12: Failed to create device");

@@ -27,8 +27,7 @@ const char* _xkVkInstanceLayers[] = {
 
 const uint32_t _xkVkInstanceLayerCount = 1;
 #else
-const char* _xkVkInstanceLayers[] = {
-};
+const char* _xkVkInstanceLayers[] = {0};
 
 const uint32_t _xkVkInstanceLayerCount = 0;
 #endif // XKVULKAN_DEBUG

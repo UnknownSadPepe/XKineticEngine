@@ -11,9 +11,12 @@
 void __xkErrorHandler(const XkString format, ...) {
 	XkChar buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {0};
 
+	// Format string.
 	va_list args;
 	va_start(args, format);
+	// Print to console.
 	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
+	// Win32 message box.
 	MessageBox(NULL, buffer, "XKinetic Error Handler", MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_TOPMOST);
 	va_end(args);
 }

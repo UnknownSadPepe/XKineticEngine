@@ -1,6 +1,8 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
 
+__XkPlatform _xkPlatform;
+
 XkWindowCursorMode xkGetWindowCursorMode(XkWindow window) {
 	return(window->cursorMode);
 }

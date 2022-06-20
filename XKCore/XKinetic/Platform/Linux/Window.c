@@ -173,7 +173,7 @@ static const struct wl_surface_listener _xkWlSurfaceListener = {
   __xkWlSurfaceHandleLeave
 };
 
-XkResult xkWindowInitialize(void) {
+XkResult xkInitializeWindow(void) {
 	XkResult result = XK_SUCCESS;
 
 	// Connect Wayland server.
@@ -280,7 +280,7 @@ _catch:
 	return(result);
 }
 
-void xkWindowTerminate(void) {
+void xkTerminateWindow(void) {
  	if(_xkPlatform.handle.xkbComposeState) {
     xkb_compose_state_unref(_xkPlatform.handle.xkbComposeState);
   }

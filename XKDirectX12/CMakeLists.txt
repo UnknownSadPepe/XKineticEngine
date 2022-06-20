@@ -17,4 +17,4 @@ if(CMAKE_BUILD_TYPE EQUAL "Debug")
   target_compile_definitions(XKDirectX12 PRIVATE __XKDIRECTX12_DEBUG__)
 endif()
 
-target_link_libraries(XKDirectX12 PRIVATE d3d12.lib dxgi.lib dxguid.lib uuid.lib)
+target_link_libraries(XKDirectX12 PRIVATE d3d12.lib dxgi.lib dxguid.lib d3dcompiler)

@@ -118,14 +118,17 @@ struct XkTexture2D {
 XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window, XkRendererApi api) {
 	XkResult result = XK_SUCCESS;
 
+	// Allocate renderer.
 	*pRenderer = xkAllocateMemory(sizeof(struct XkRenderer));
 	if(!(*pRenderer)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
+	// Template renderer.
 	XkRenderer renderer = *pRenderer;
 
+	// Select renderer api.
 	switch(api) {
 		case XK_RENDERER_API_DEFAULT:
 #if defined(XK_WIN32)
@@ -160,6 +163,7 @@ XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig
 #endif // XK_WIN32
 	}
 
+	// Create renderer api.
 	result = renderer->callbacks.create(&renderer->handle, pConfig, window);
 	if(result != XK_SUCCESS) goto _catch;
 
@@ -168,8 +172,13 @@ _catch:
 }
 
 void xkDestroyRenderer(XkRenderer renderer) {
+	// Destroy renderer api.
 	renderer->callbacks.destroy(renderer->handle);
+
+	// Unload renderer api module.
 	xkUnloadModule(renderer->module);
+
+	// Free renderer.
 	xkFreeMemory(renderer);
 }
 

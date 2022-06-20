@@ -23,7 +23,7 @@ typedef struct {
 	};
 } XkDVec3;
 
-XK_INLINE XkVec3 xkVec3Add(const XkVec3 a, const XkVec3 b) {
+XK_INLINE XKMATH_API XkVec3 xkVec3Add(const XkVec3 a, const XkVec3 b) {
 	return((XkVec3){
 		.x = a.x + b.x,
 		.y = a.y + b.y,
@@ -31,7 +31,7 @@ XK_INLINE XkVec3 xkVec3Add(const XkVec3 a, const XkVec3 b) {
 	});
 }
 
-XK_INLINE XkDVec3 xkDVec3Add(const XkDVec3 a, const XkDVec3 b) {
+XK_INLINE XKMATH_API XkDVec3 xkDVec3Add(const XkDVec3 a, const XkDVec3 b) {
 	return((XkDVec3){
 		.x = a.x + b.x,
 		.y = a.y + b.y,
@@ -39,7 +39,7 @@ XK_INLINE XkDVec3 xkDVec3Add(const XkDVec3 a, const XkDVec3 b) {
 	});
 }
 
-XK_INLINE XkVec3 xkVec3Sub(const XkVec3 a, const XkVec3 b) {
+XK_INLINE XKMATH_API XkVec3 xkVec3Sub(const XkVec3 a, const XkVec3 b) {
 	return((XkVec3){
 		.x = a.x - b.x,
 		.y = a.y - b.y,
@@ -47,7 +47,7 @@ XK_INLINE XkVec3 xkVec3Sub(const XkVec3 a, const XkVec3 b) {
 	});
 }
 
-XK_INLINE XkDVec3 xkDVec3Sub(const XkDVec3 a, const XkDVec3 b) {
+XK_INLINE XKMATH_API XkDVec3 xkDVec3Sub(const XkDVec3 a, const XkDVec3 b) {
 	return((XkDVec3){
 		.x = a.x - b.x,
 		.y = a.y - b.y,
@@ -55,7 +55,7 @@ XK_INLINE XkDVec3 xkDVec3Sub(const XkDVec3 a, const XkDVec3 b) {
 	});
 }
 
-XK_INLINE XkVec3 xkVec3Mul(const XkVec3 a, const XkVec3 b) {
+XK_INLINE XKMATH_API XkVec3 xkVec3Mul(const XkVec3 a, const XkVec3 b) {
 	return((XkVec3){
 		.x = a.x * b.x,
 		.y = a.y * b.y,
@@ -63,7 +63,7 @@ XK_INLINE XkVec3 xkVec3Mul(const XkVec3 a, const XkVec3 b) {
 	});
 }
 
-XK_INLINE XkDVec3 xkDVec3Mul(const XkDVec3 a, const XkDVec3 b) {
+XK_INLINE XKMATH_API XkDVec3 xkDVec3Mul(const XkDVec3 a, const XkDVec3 b) {
 	return((XkDVec3){
 		.x = a.x * b.x,
 		.y = a.y * b.y,
@@ -71,7 +71,7 @@ XK_INLINE XkDVec3 xkDVec3Mul(const XkDVec3 a, const XkDVec3 b) {
 	});
 }
 
-XK_INLINE XkVec3 xkVec3Div(const XkVec3 a, const XkVec3 b) {
+XK_INLINE XKMATH_API XkVec3 xkVec3Div(const XkVec3 a, const XkVec3 b) {
 	return((XkVec3){
 		.x = a.x / b.x,
 		.y = a.y / b.y,
@@ -79,7 +79,7 @@ XK_INLINE XkVec3 xkVec3Div(const XkVec3 a, const XkVec3 b) {
 	});
 }
 
-XK_INLINE XkDVec3 xkDVec3Div(const XkDVec3 a, const XkDVec3 b) {
+XK_INLINE XKMATH_API XkDVec3 xkDVec3Div(const XkDVec3 a, const XkDVec3 b) {
 	return((XkDVec3){
 		.x = a.x / b.x,
 		.y = a.y / b.y,
