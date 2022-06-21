@@ -590,6 +590,10 @@ void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* con
 	}
 }
 
+void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
+	/// TODO: implementation.
+}
+
 void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 	/// TODO: implementation.
 }

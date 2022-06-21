@@ -103,7 +103,7 @@ XKCORE_API void xkSetJoystickAxisCallback(XkJoystick, const XkJoystickAxisPfn);
 XKCORE_API void xkSetJoystickButtonCallback(XkJoystick, const XkJoystickButtonPfn);
 XKCORE_API void xkSetJoystickHatCallback(XkJoystick, const XkJoystickHatPfn);
 
-XKCORE_API void xkPollJoystickEvents(void);
+XKCORE_API void xkPollJoystickEvents(XkJoystick);
 
 XK_EXPORT void __xkInputJoystickEvent(XkJoystick, const XkJoystickEvent);
 XK_EXPORT void __xkInputJoystickAxis(XkJoystick, const XkJoystickAxis, const XkFloat32);

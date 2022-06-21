@@ -56,7 +56,7 @@ XkString xkJoystickMappingName(XkJoystick joystick) {
 	return("Linux");
 }
 
-void xkPollJoystickEvents(void) {
+void xkPollJoystickEvents(XkJoystick joystick) {
 	/// TODO: implementation.
 }
 

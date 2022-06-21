@@ -55,7 +55,7 @@ XkString xkJoystickMappingName(XkJoystick joystick) {
 	return("Windows");
 }
 
-void xkPollJoystickEvents(void) {
+void xkPollJoystickEvents(XkJoystick joystick) {
 	/// TODO: implementation.
 }
 
