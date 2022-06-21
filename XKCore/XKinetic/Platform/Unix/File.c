@@ -117,9 +117,9 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 	}
 
 	// Seek Unix file.
-	size_t seek = lseek(file->handle.handle, (long)offset, whence)
+	size_t size = lseek(file->handle.handle, (long)offset, whence);
 
-	return((XkSize)seek);
+	return((XkSize)size);
 }
 
 void xkWriteFile(XkFile file, const XkString buffer, const XkSize size) {

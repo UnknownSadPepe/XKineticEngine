@@ -26,9 +26,15 @@ typedef struct {
 
 	struct zwp_relative_pointer_v1*    		zwpRelativePointer;
 	struct zwp_locked_pointer_v1*      		zwpLockedPointer;
-} __XkLinuxWindow;
 
-#define XK_PLATFORM_WINDOW __XkLinuxWindow handle
+	XkSize width;
+	XkSize height;
+
+	XkFloat64 cursorPosX;
+	XkFloat64 cursorPosY;
+} __XkWaylandWindow;
+
+#define XK_PLATFORM_WINDOW __XkWaylandWindow wayland
 
 typedef struct {
 	int                     handle;
@@ -42,12 +48,12 @@ typedef struct {
 #define XK_PLATFORM_JOYSTICK __XkLinuxJoystick handle
 
 typedef struct {
-  XkSize 										image_count;
+  XkSize 										imageCount;
   struct wl_cursor_image** 	wlImages;
   char* 										name;
-} __XkLinuxWindowCursor;
+} __XkWaylandWindowCursor;
 
-#define XK_PLATFORM_WINDOW_CURSOR __XkLinuxWindowCursor handle
+#define XK_PLATFORM_WINDOW_CURSOR __XkWaylandWindowCursor wayland
 
 typedef struct {
 	struct wl_display* wlDisplay;
@@ -94,9 +100,9 @@ typedef struct {
   xkb_mod_index_t         xkbCapsLockIndex;
   xkb_mod_index_t         xkbNumLockIndex;
   unsigned int            xkbModifiers;
-} __XkLinuxPlatform;
+} __XkWaylandPlatform;
 
-#define XK_PLATFORM __XkLinuxPlatform handle
+#define XK_PLATFORM __XkWaylandPlatform wayland
 
 #ifdef __cplusplus
 }

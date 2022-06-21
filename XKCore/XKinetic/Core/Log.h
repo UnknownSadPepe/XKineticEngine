@@ -1,6 +1,7 @@
 #pragma once
 
 #include "XKinetic/XKCore.h"
+#include "XKinetic/Core/Arg.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -111,42 +111,42 @@ static const struct zxdg_toplevel_decoration_v1_listener __xkXdgDecorationListen
 static void __xkWlRegistryGlobal(void* data, struct wl_registry* wlRegistry, uint32_t name, const char* interface, uint32_t version) {
   if(xkCompareString((XkString)interface, "wl_compositor")) {
 		// Wayland compositor.
-		_xkPlatform.handle.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
+		_xkPlatform.wayland.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
 	} else if(xkCompareString((XkString)interface, "wl_subcompositor")) {
 		// Wayland subcompositor.
-		_xkPlatform.handle.wlSubcompositor = wl_registry_bind(wlRegistry, name, &wl_subcompositor_interface, 1);
+		_xkPlatform.wayland.wlSubcompositor = wl_registry_bind(wlRegistry, name, &wl_subcompositor_interface, 1);
 	} else if(xkCompareString((XkString)interface, "wl_shm")) { 
 		// Wayland shared memory.
-		_xkPlatform.handle.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, 1);
+		_xkPlatform.wayland.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, 1);
   } else if(xkCompareString((XkString)interface, "wl_seat")) {
 		// Wayland seat.
-    _xkPlatform.handle.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, 4);
+    _xkPlatform.wayland.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, 4);
 	} else if(xkCompareString((XkString)interface, "wl_output")) {
 		// Wayland output.
-			_xkPlatform.handle.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
+			_xkPlatform.wayland.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
   } else if(xkCompareString((XkString)interface, "xdg_wm_base")) {
 		// Xdg Base.
-    _xkPlatform.handle.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, 1);
-		xdg_wm_base_add_listener(_xkPlatform.handle.xdgBase, &_xkXdgWmBaseListener, NULL);
+    _xkPlatform.wayland.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, 1);
+		xdg_wm_base_add_listener(_xkPlatform.wayland.xdgBase, &_xkXdgWmBaseListener, NULL);
   } else if(xkCompareString((XkString)interface, "zxdg_decoration_manager_v1")) {
 		// Xdg decoration manager.
-    _xkPlatform.handle.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, 1);
+    _xkPlatform.wayland.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, 1);
   } else if(xkCompareString((XkString)interface, "wp_viewporter")) {
 		// Wp viewporter.
-    _xkPlatform.handle.wpViewporter = wl_registry_bind(wlRegistry, name, &wp_viewporter_interface, 1);
+    _xkPlatform.wayland.wpViewporter = wl_registry_bind(wlRegistry, name, &wp_viewporter_interface, 1);
   } else if(xkCompareString((XkString)interface, "zwp_relative_pointer_manager_v1")) {
   	// ZWp relative pointer manager.
-     _xkPlatform.handle.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, 1);
+     _xkPlatform.wayland.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, 1);
   } else if (xkCompareString((XkString)interface, "zwp_pointer_constraints_v1")) {
   	// ZWp pointer constraints.
-    _xkPlatform.handle.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, 1);
+    _xkPlatform.wayland.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, 1);
   } else if (xkCompareString((XkString)interface, "zwp_idle_inhibit_manager_v1")) {
   	// ZWp idle inhibit manager.
-    _xkPlatform.handle.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, 1);
+    _xkPlatform.wayland.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, 1);
   } else if(xkCompareString((XkString)interface, "wl_data_device_manager") == 0) {
   	// Wayland data device manager.
-		if(!_xkPlatform.handle.wlDataDeviceManager) {
-			_xkPlatform.handle.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, 1);
+		if(!_xkPlatform.wayland.wlDataDeviceManager) {
+			_xkPlatform.wayland.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, 1);
     }
 	}
 }
@@ -177,78 +177,78 @@ XkResult xkInitializeWindow(void) {
 	XkResult result = XK_SUCCESS;
 
 	// Connect Wayland server.
-	_xkPlatform.handle.wlDisplay = wl_display_connect(NULL);
-	if(!_xkPlatform.handle.wlDisplay) {
+	_xkPlatform.wayland.wlDisplay = wl_display_connect(NULL);
+	if(!_xkPlatform.wayland.wlDisplay) {
 		__xkErrorHandle("Wayland: Failed to connect display");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Get Wayland display registry.
-	_xkPlatform.handle.wlRegistry = wl_display_get_registry(_xkPlatform.handle.wlDisplay);
-	if(!_xkPlatform.handle.wlRegistry) {
+	_xkPlatform.wayland.wlRegistry = wl_display_get_registry(_xkPlatform.wayland.wlDisplay);
+	if(!_xkPlatform.wayland.wlRegistry) {
 		__xkErrorHandle("Wayland: Failed to get display registry");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Add Wayland display registry listener.
-  wl_registry_add_listener(_xkPlatform.handle.wlRegistry, &_xkWlRegistryListener, NULL);
+  wl_registry_add_listener(_xkPlatform.wayland.wlRegistry, &_xkWlRegistryListener, NULL);
 
 	__xkWlCreateKeycodes();
 
 	// Create XKB context.
-	_xkPlatform.handle.xkbContext = xkb_context_new(0);
- 	if(!_xkPlatform.handle.xkbContext) {
+	_xkPlatform.wayland.xkbContext = xkb_context_new(0);
+ 	if(!_xkPlatform.wayland.xkbContext) {
 		__xkErrorHandle("XKB: Failed to create context");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
  	}
 
 	// Sync so we got all registry objects.
-  wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
+  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
 
 	// Sync so we got all initial output events.
-  wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
+  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
 
 // Check Wayland compositor register object.
-	if(!_xkPlatform.handle.wlCompositor) {
+	if(!_xkPlatform.wayland.wlCompositor) {
 		__xkErrorHandle("Wayland: Failed to create compositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Check Wayland subcompositor register object.
-	if(!_xkPlatform.handle.wlSubcompositor) {
+	if(!_xkPlatform.wayland.wlSubcompositor) {
 		__xkErrorHandle("Wayland: Failed to create subcompositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Check Xdg base register object.
-	if(!_xkPlatform.handle.xdgBase) {
+	if(!_xkPlatform.wayland.xdgBase) {
 		__xkErrorHandle("Wayland: Failed to create XDG base");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Create Wayland compositor surface.
-  _xkPlatform.handle.wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
-	if(!_xkPlatform.handle.wlSurface) {
+  _xkPlatform.wayland.wlSurface = wl_compositor_create_surface(_xkPlatform.wayland.wlCompositor);
+	if(!_xkPlatform.wayland.wlSurface) {
 		__xkErrorHandle("Wayland: Failed to create compositor surface");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Check XDG Wm base.
-  if(!_xkPlatform.handle.xdgBase) {
+  if(!_xkPlatform.wayland.xdgBase) {
 		__xkErrorHandle("Wayland: Failed to find xdg-shell in your compositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
   // Create Wayland cursor.
-  if(_xkPlatform.handle.wlPointer && _xkPlatform.handle.wlShm) {
+  if(_xkPlatform.wayland.wlPointer && _xkPlatform.wayland.wlShm) {
   	const XkString cursorTheme = getenv("XCURSOR_THEME");
   	const XkString cursorSizeStr = getenv("XCURSOR_SIZE");
   	int cursorSize = 32;
@@ -261,15 +261,15 @@ XkResult xkInitializeWindow(void) {
   	}
 
   	// Load Wayland cursor theme.
-		_xkPlatform.handle.wlCursorTheme = wl_cursor_theme_load(cursorTheme, cursorSize, _xkPlatform.handle.wlShm);
-	  if(!_xkPlatform.handle.wlCursorTheme) {
+		_xkPlatform.wayland.wlCursorTheme = wl_cursor_theme_load(cursorTheme, cursorSize, _xkPlatform.wayland.wlShm);
+	  if(!_xkPlatform.wayland.wlCursorTheme) {
 			__xkErrorHandle("Wayland: Failed to load default cursor theme");
 			result = XK_ERROR_UNKNOWN;
 			goto _catch;
   	}
 
-		_xkPlatform.handle.wlCursorThemeHiDPI = wl_cursor_theme_load(cursorTheme, 2 * cursorSize, _xkPlatform.handle.wlShm);
-	  if(!_xkPlatform.handle.wlCursorThemeHiDPI) {
+		_xkPlatform.wayland.wlCursorThemeHiDPI = wl_cursor_theme_load(cursorTheme, 2 * cursorSize, _xkPlatform.wayland.wlShm);
+	  if(!_xkPlatform.wayland.wlCursorThemeHiDPI) {
 			__xkErrorHandle("Wayland: Failed to load hidpi cursor theme");
 			result = XK_ERROR_UNKNOWN;
 			goto _catch;
@@ -281,93 +281,93 @@ _catch:
 }
 
 void xkTerminateWindow(void) {
- 	if(_xkPlatform.handle.xkbComposeState) {
-    xkb_compose_state_unref(_xkPlatform.handle.xkbComposeState);
+ 	if(_xkPlatform.wayland.xkbComposeState) {
+    xkb_compose_state_unref(_xkPlatform.wayland.xkbComposeState);
   }
-	if(_xkPlatform.handle.xkbKeymap) {
- 		xkb_keymap_unref(_xkPlatform.handle.xkbKeymap);
+	if(_xkPlatform.wayland.xkbKeymap) {
+ 		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
   }
-  if(_xkPlatform.handle.xkbState) {
- 		xkb_state_unref(_xkPlatform.handle.xkbState);
+  if(_xkPlatform.wayland.xkbState) {
+ 		xkb_state_unref(_xkPlatform.wayland.xkbState);
   }
-  if(_xkPlatform.handle.xkbContext) {
-  	xkb_context_unref(_xkPlatform.handle.xkbContext);
-  }
-
-	if(_xkPlatform.handle.wlCursorTheme) {
-		wl_cursor_theme_destroy(_xkPlatform.handle.wlCursorTheme);
-	}
-	if(_xkPlatform.handle.wlCursorThemeHiDPI) {
-		wl_cursor_theme_destroy(_xkPlatform.handle.wlCursorThemeHiDPI);
-	}
-
-	if(_xkPlatform.handle.wlCursorSurface){
-		wl_surface_destroy(_xkPlatform.handle.wlCursorSurface);
-	}
-
- 	if (_xkPlatform.handle.wlSubcompositor){
-		wl_subcompositor_destroy(_xkPlatform.handle.wlSubcompositor);
- 	}
-  if (_xkPlatform.handle.wlCompositor){
-		wl_compositor_destroy(_xkPlatform.handle.wlCompositor);
+  if(_xkPlatform.wayland.xkbContext) {
+  	xkb_context_unref(_xkPlatform.wayland.xkbContext);
   }
 
- 	if (_xkPlatform.handle.wlShm){
-		wl_shm_destroy(_xkPlatform.handle.wlShm);
- 	}
-
- 	if (_xkPlatform.handle.wpViewporter){
-		wp_viewporter_destroy(_xkPlatform.handle.wpViewporter);
- 	}
-
- 	if(_xkPlatform.handle.xdgBase) {
-		xdg_wm_base_destroy(_xkPlatform.handle.xdgBase);
+	if(_xkPlatform.wayland.wlCursorTheme) {
+		wl_cursor_theme_destroy(_xkPlatform.wayland.wlCursorTheme);
 	}
- 	if (_xkPlatform.handle.xdgDecorationManager){
-		zxdg_decoration_manager_v1_destroy(_xkPlatform.handle.xdgDecorationManager);
- 	}
-
- 	if (_xkPlatform.handle.wlSelectionOffer){
-		wl_data_offer_destroy(_xkPlatform.handle.wlSelectionOffer);
- 	}
- 	if (_xkPlatform.handle.wlDragOffer){
-		wl_data_offer_destroy(_xkPlatform.handle.wlDragOffer);
- 	}
- 	if (_xkPlatform.handle.wlSelectionSource){
-		wl_data_source_destroy(_xkPlatform.handle.wlSelectionSource);
- 	}
- 	if (_xkPlatform.handle.wlDataDevice){
-		wl_data_device_destroy(_xkPlatform.handle.wlDataDevice);
- 	}
- 	if (_xkPlatform.handle.wlDataDeviceManager){
-		wl_data_device_manager_destroy(_xkPlatform.handle.wlDataDeviceManager);
- 	}
- 	if (_xkPlatform.handle.wlPointer){
-		wl_pointer_destroy(_xkPlatform.handle.wlPointer);
- 	}
- 	if (_xkPlatform.handle.wlKeyboard){
-		wl_keyboard_destroy(_xkPlatform.handle.wlKeyboard);
- 	}
- 	if (_xkPlatform.handle.wlSeat){
-		wl_seat_destroy(_xkPlatform.handle.wlSeat);
- 	}
-
- 	if (_xkPlatform.handle.zwpRelativePointerManager){
-		zwp_relative_pointer_manager_v1_destroy(_xkPlatform.handle.zwpRelativePointerManager);
- 	}
- 	if (_xkPlatform.handle.zwpPointerConstraints){
-		zwp_pointer_constraints_v1_destroy(_xkPlatform.handle.zwpPointerConstraints);
- 	}
- 	if (_xkPlatform.handle.zwpIdleInhibitManager) {
-		zwp_idle_inhibit_manager_v1_destroy(_xkPlatform.handle.zwpIdleInhibitManager);
- 	}
-
-	if(_xkPlatform.handle.wlRegistry) {
-  	wl_registry_destroy(_xkPlatform.handle.wlRegistry);
+	if(_xkPlatform.wayland.wlCursorThemeHiDPI) {
+		wl_cursor_theme_destroy(_xkPlatform.wayland.wlCursorThemeHiDPI);
 	}
-	if(_xkPlatform.handle.wlDisplay) {
-  	wl_display_flush(_xkPlatform.handle.wlDisplay);
-		wl_display_disconnect(_xkPlatform.handle.wlDisplay);
+
+	if(_xkPlatform.wayland.wlCursorSurface){
+		wl_surface_destroy(_xkPlatform.wayland.wlCursorSurface);
+	}
+
+ 	if (_xkPlatform.wayland.wlSubcompositor){
+		wl_subcompositor_destroy(_xkPlatform.wayland.wlSubcompositor);
+ 	}
+  if (_xkPlatform.wayland.wlCompositor){
+		wl_compositor_destroy(_xkPlatform.wayland.wlCompositor);
+  }
+
+ 	if (_xkPlatform.wayland.wlShm){
+		wl_shm_destroy(_xkPlatform.wayland.wlShm);
+ 	}
+
+ 	if (_xkPlatform.wayland.wpViewporter){
+		wp_viewporter_destroy(_xkPlatform.wayland.wpViewporter);
+ 	}
+
+ 	if(_xkPlatform.wayland.xdgBase) {
+		xdg_wm_base_destroy(_xkPlatform.wayland.xdgBase);
+	}
+ 	if (_xkPlatform.wayland.xdgDecorationManager){
+		zxdg_decoration_manager_v1_destroy(_xkPlatform.wayland.xdgDecorationManager);
+ 	}
+
+ 	if (_xkPlatform.wayland.wlSelectionOffer){
+		wl_data_offer_destroy(_xkPlatform.wayland.wlSelectionOffer);
+ 	}
+ 	if (_xkPlatform.wayland.wlDragOffer){
+		wl_data_offer_destroy(_xkPlatform.wayland.wlDragOffer);
+ 	}
+ 	if (_xkPlatform.wayland.wlSelectionSource){
+		wl_data_source_destroy(_xkPlatform.wayland.wlSelectionSource);
+ 	}
+ 	if (_xkPlatform.wayland.wlDataDevice){
+		wl_data_device_destroy(_xkPlatform.wayland.wlDataDevice);
+ 	}
+ 	if (_xkPlatform.wayland.wlDataDeviceManager){
+		wl_data_device_manager_destroy(_xkPlatform.wayland.wlDataDeviceManager);
+ 	}
+ 	if (_xkPlatform.wayland.wlPointer){
+		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
+ 	}
+ 	if (_xkPlatform.wayland.wlKeyboard){
+		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
+ 	}
+ 	if (_xkPlatform.wayland.wlSeat){
+		wl_seat_destroy(_xkPlatform.wayland.wlSeat);
+ 	}
+
+ 	if (_xkPlatform.wayland.zwpRelativePointerManager){
+		zwp_relative_pointer_manager_v1_destroy(_xkPlatform.wayland.zwpRelativePointerManager);
+ 	}
+ 	if (_xkPlatform.wayland.zwpPointerConstraints){
+		zwp_pointer_constraints_v1_destroy(_xkPlatform.wayland.zwpPointerConstraints);
+ 	}
+ 	if (_xkPlatform.wayland.zwpIdleInhibitManager) {
+		zwp_idle_inhibit_manager_v1_destroy(_xkPlatform.wayland.zwpIdleInhibitManager);
+ 	}
+
+	if(_xkPlatform.wayland.wlRegistry) {
+  	wl_registry_destroy(_xkPlatform.wayland.wlRegistry);
+	}
+	if(_xkPlatform.wayland.wlDisplay) {
+  	wl_display_flush(_xkPlatform.wayland.wlDisplay);
+		wl_display_disconnect(_xkPlatform.wayland.wlDisplay);
 	}
 }
 
@@ -411,30 +411,30 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
   window->title = xkDuplicateString(title);
 
 	// Create Wayland window surface.
-	window->handle.wlSurface = wl_compositor_create_surface(_xkPlatform.handle.wlCompositor);
-  if(!window->handle.wlSurface) {
+	window->wayland.wlSurface = wl_compositor_create_surface(_xkPlatform.wayland.wlCompositor);
+  if(!window->wayland.wlSurface) {
 		__xkErrorHandle("Wayland: Failed to create surface");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Add Wayland surface listener.
-  wl_surface_add_listener(window->handle.wlSurface, &_xkWlSurfaceListener, window);
+  wl_surface_add_listener(window->wayland.wlSurface, &_xkWlSurfaceListener, window);
 
 	// Set Wayland surface user data.
-	wl_surface_set_user_data(window->handle.wlSurface, window);
+	wl_surface_set_user_data(window->wayland.wlSurface, window);
 
 	// Create Wayland EGL window.
-	window->handle.eglWindow = wl_egl_window_create(window->handle.wlSurface, (int)width, (int)height);
-  if(!window->handle.wlSurface) {
+	window->wayland.eglWindow = wl_egl_window_create(window->wayland.wlSurface, (int)width, (int)height);
+  if(!window->wayland.wlSurface) {
 		__xkErrorHandle("Wayland: Failed to create EGL window");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Commit pending Wayland surface state.
-  wl_surface_commit(window->handle.wlSurface);
-  wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
+  wl_surface_commit(window->wayland.wlSurface);
+  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
 
 _catch:
 	return(result);
@@ -442,28 +442,28 @@ _catch:
 
 void xkDestroyWindow(XkWindow window) {
 	/// TODO: implementation
-	if(window->handle.zwpIdleInhibitor) {
-		zwp_idle_inhibitor_v1_destroy(window->handle.zwpIdleInhibitor);
+	if(window->wayland.zwpIdleInhibitor) {
+		zwp_idle_inhibitor_v1_destroy(window->wayland.zwpIdleInhibitor);
 	}
 
-	if(window->handle.xdgDecoration) {
-		zxdg_toplevel_decoration_v1_destroy(window->handle.xdgDecoration);
+	if(window->wayland.xdgDecoration) {
+		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
 	}
 
-	if(window->handle.xdgToplevel) {
-		xdg_toplevel_destroy(window->handle.xdgToplevel);
+	if(window->wayland.xdgToplevel) {
+		xdg_toplevel_destroy(window->wayland.xdgToplevel);
 	}
 
-	if(window->handle.xdgSurface) {
-		xdg_surface_destroy(window->handle.xdgSurface);
+	if(window->wayland.xdgSurface) {
+		xdg_surface_destroy(window->wayland.xdgSurface);
 	}
 
-	if(window->handle.wlSurface) {
-		wl_surface_destroy(window->handle.wlSurface);
+	if(window->wayland.wlSurface) {
+		wl_surface_destroy(window->wayland.wlSurface);
 	}
 
-	if(window->handle.eglWindow) {
-		wl_egl_window_destroy(window->handle.eglWindow);
+	if(window->wayland.eglWindow) {
+		wl_egl_window_destroy(window->wayland.eglWindow);
 	}
 
 	xkFreeMemory(window->title);
@@ -474,50 +474,46 @@ void xkDestroyWindow(XkWindow window) {
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
 	/// TODO: implementation
 
-	if(!window->handle.xdgToplevel) {
+	if(!window->wayland.xdgToplevel) {
 		__xkXdgCreateSurface(window);
 	}
 
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT:
 			if(window->fullscreen) {
-				xdg_toplevel_unset_fullscreen(window->handle.xdgToplevel);
+				xdg_toplevel_unset_fullscreen(window->wayland.xdgToplevel);
 				window->fullscreen = XK_FALSE;
 			}
-			if(window->maximized) {
-				xdg_toplevel_unset_maximized(window->handle.xdgToplevel);
-				window->maximized = XK_FALSE;
-			}
+			xdg_toplevel_unset_maximized(window->wayland.xdgToplevel);
 			__xkZwpSetIdleInhibitor(window, XK_FALSE);
 			__xkXdgSetDecorations(window);
 			break;
 
 		case XK_WINDOW_SHOW_MAXIMIZED:
-			xdg_toplevel_set_maximized(window->handle.xdgToplevel);
+			xdg_toplevel_set_maximized(window->wayland.xdgToplevel);
 			__xkZwpSetIdleInhibitor(window, XK_FALSE);
 			__xkXdgSetDecorations(window);
-			window->maximized = XK_TRUE;
 			break;
 
 		case XK_WINDOW_SHOW_MINIMIZED:
-			xdg_toplevel_set_minimized(window->handle.xdgToplevel);
+			xdg_toplevel_set_minimized(window->wayland.xdgToplevel);
 			break;
 
 		case XK_WINDOW_SHOW_FULLSCREEN:
-			xdg_toplevel_set_fullscreen(window->handle.xdgToplevel, _xkPlatform.handle.wlOutput);
+			xdg_toplevel_set_fullscreen(window->wayland.xdgToplevel, _xkPlatform.wayland.wlOutput);
     	__xkZwpSetIdleInhibitor(window, XK_TRUE);
     	window->fullscreen = XK_TRUE;
 			break;
 
 		case XK_WINDOW_HIDE:
-      wl_surface_attach(window->handle.wlSurface, NULL, 0, 0);
-      wl_surface_commit(window->handle.wlSurface);
+      wl_surface_attach(window->wayland.wlSurface, NULL, 0, 0);
+      wl_surface_commit(window->wayland.wlSurface);
 			break;
 	}
 
 	// Commit pending Wayland surface state.
- 	wl_surface_commit(window->handle.wlSurface);
- 	wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
+ 	wl_surface_commit(window->wayland.wlSurface);
+ 	wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
 }
 
 void xkFocusWindow(XkWindow window) {
@@ -527,22 +523,27 @@ void xkFocusWindow(XkWindow window) {
 
 void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
 	/// TODO: implementation
-	window->width = width;
-	window->width = height;
+	window->wayland.width = width;
+	window->wayland.width = height;
 }
 
 void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
 	if(pWidth)
-		*pWidth = window->width;
+		*pWidth = window->wayland.width;
   if(pHeight)
-    *pHeight = window->height;
+    *pHeight = window->wayland.height;
 }
 
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
-	if(window->handle.xdgToplevel) {
-  	xdg_toplevel_set_min_size(window->handle.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
-		xdg_toplevel_set_max_size(window->handle.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
-		wl_surface_commit(window->handle.wlSurface);
+	if(window->wayland.xdgToplevel) {
+  	xdg_toplevel_set_min_size(window->wayland.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
+		xdg_toplevel_set_max_size(window->wayland.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
+		wl_surface_commit(window->wayland.wlSurface);
+
+		window->minWidth 	= minWidth;
+		window->minHeight = minHeight;
+		window->maxWidth 	= maxWidth;
+		window->maxHeight = maxHeight;
 	}
 }
 
@@ -557,13 +558,13 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
 }
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
-  if(window->handle.xdgToplevel) {
+  if(window->wayland.xdgToplevel) {
   	if(window->title) {
 			xkFreeMemory(window->title);
 		}
   	window->title = xkDuplicateString(title);
 
-		xdg_toplevel_set_title(window->handle.xdgToplevel, title);
+		xdg_toplevel_set_title(window->wayland.xdgToplevel, title);
   }
 }
 
@@ -573,16 +574,19 @@ void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pI
 }
 
 void xkSetCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
-	zwp_locked_pointer_v1_set_cursor_position_hint(window->handle.zwpLockedPointer, wl_fixed_from_double(xPos), wl_fixed_from_double(yPos));
-	wl_surface_commit(window->handle.wlSurface);
+	zwp_locked_pointer_v1_set_cursor_position_hint(window->wayland.zwpLockedPointer, wl_fixed_from_double(xPos), wl_fixed_from_double(yPos));
+	wl_surface_commit(window->wayland.wlSurface);
+
+	window->wayland.cursorPosX = xPos;
+	window->wayland.cursorPosX = yPos;
 }
 
 void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
 	if(pXPos) {
-		*pXPos = window->xCursorPos;
+		*pXPos = window->wayland.cursorPosX;
 	}
 	if(pYPos) {
-		*pYPos = window->yCursorPos;
+		*pYPos = window->wayland.cursorPosY;
 	}
 }
 
@@ -591,13 +595,13 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 }
 
 void xkPollWindowEvents(void) {
-	while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
+	while(wl_display_dispatch(_xkPlatform.wayland.wlDisplay)) {
 		/// TODO: implementation.
 	}
 }
 
 void xkWaitWindowEvents(void) {
-	while(wl_display_dispatch(_xkPlatform.handle.wlDisplay)) {
+	while(wl_display_dispatch(_xkPlatform.wayland.wlDisplay)) {
 		/// TODO: implementation
 	}
 }
@@ -606,43 +610,43 @@ static XkBool __xkXdgCreateSurface(XkWindow window) {
 	XkBool result = XK_TRUE;
 
 	// Get Xdg surface from Wayland surface.
-	window->handle.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.handle.xdgBase, window->handle.wlSurface);
-	if(!window->handle.xdgSurface) {
+	window->wayland.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.wayland.xdgBase, window->wayland.wlSurface);
+	if(!window->wayland.xdgSurface) {
 		result = XK_FALSE;
 		__xkErrorHandle("Wayland: Failed to create Xdg surface");
 		goto _catch;
   }
 
 	// Add Xdg surface listener.
-  xdg_surface_add_listener(window->handle.xdgSurface, &_xkXdgSurfaceListener, window);
+  xdg_surface_add_listener(window->wayland.xdgSurface, &_xkXdgSurfaceListener, window);
 
 	// Get Xdg toplevel.
-	window->handle.xdgToplevel = xdg_surface_get_toplevel(window->handle.xdgSurface);
-  if(!window->handle.xdgToplevel) {
+	window->wayland.xdgToplevel = xdg_surface_get_toplevel(window->wayland.xdgSurface);
+  if(!window->wayland.xdgToplevel) {
 		result = XK_FALSE;
 		__xkErrorHandle("Wayland: Failed to create Xdg toplevel");
 		goto _catch;
   }
 
 	// Add Xdg toplevel listener.
-  xdg_toplevel_add_listener(window->handle.xdgToplevel, &_xkXdgToplevelListener, window);
+  xdg_toplevel_add_listener(window->wayland.xdgToplevel, &_xkXdgToplevelListener, window);
 
 	// Set Xdg window title.
-  xdg_toplevel_set_title(window->handle.xdgToplevel, window->title);
+  xdg_toplevel_set_title(window->wayland.xdgToplevel, window->title);
 			
 	// Commit pending Wayland surface state.
-  wl_surface_commit(window->handle.wlSurface);
-  wl_display_roundtrip(_xkPlatform.handle.wlDisplay);
+  wl_surface_commit(window->wayland.wlSurface);
+  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
 
 _catch:
 	return(result);
 }
 
 static void __xkXdgSetDecorations(XkWindow window) {
-	if(_xkPlatform.handle.xdgDecorationManager) {
-		window->handle.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.handle.xdgDecorationManager, window->handle.xdgToplevel);
-  	zxdg_toplevel_decoration_v1_add_listener(window->handle.xdgDecoration, &__xkXdgDecorationListener, window);
-  	zxdg_toplevel_decoration_v1_set_mode(window->handle.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+	if(_xkPlatform.wayland.xdgDecorationManager) {
+		window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
+  	zxdg_toplevel_decoration_v1_add_listener(window->wayland.xdgDecoration, &__xkXdgDecorationListener, window);
+  	zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
   } else {
 		__xkErrorHandle("Wayland: Failed to create XDG decorations");
 		goto _catch;
@@ -653,16 +657,16 @@ _catch:
 }
 
 static void __xkZwpSetIdleInhibitor(XkWindow window, XkBool enabled) {
-	if(enabled && !window->handle.zwpIdleInhibitor && _xkPlatform.handle.zwpIdleInhibitManager) {
-		window->handle.zwpIdleInhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(_xkPlatform.handle.zwpIdleInhibitManager, window->handle.wlSurface);
+	if(enabled && !window->wayland.zwpIdleInhibitor && _xkPlatform.wayland.zwpIdleInhibitManager) {
+		window->wayland.zwpIdleInhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(_xkPlatform.wayland.zwpIdleInhibitManager, window->wayland.wlSurface);
 
-		if(!window->handle.zwpIdleInhibitor) {
+		if(!window->wayland.zwpIdleInhibitor) {
 			__xkErrorHandle("Wayland: Failed to create idle inhibitor");
 			goto _catch;
 		}
-  } else if(!enabled && window->handle.zwpIdleInhibitor) {
-      zwp_idle_inhibitor_v1_destroy(window->handle.zwpIdleInhibitor);
-      window->handle.zwpIdleInhibitor = XK_NULL_HANDLE;
+  } else if(!enabled && window->wayland.zwpIdleInhibitor) {
+      zwp_idle_inhibitor_v1_destroy(window->wayland.zwpIdleInhibitor);
+      window->wayland.zwpIdleInhibitor = XK_NULL_HANDLE;
   }
 
 _catch:
