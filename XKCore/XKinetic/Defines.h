@@ -34,13 +34,15 @@
 
 #if defined(__GNUC__) || defined(__clang__) || defined(__TINYC__)
 	#define XK_INLINE __attribute__((always_inline)) inline
-	#define XK_NOINLINE __attribute__((noinline)) 	
+	#define XK_NOINLINE __attribute__((noinline))
+	#define XK_CLEANUP(function) __attribute__((cleanup(function)))
 
 	#define __xkBreak() __builtin_trap()
 #elif defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
 	#include <intrin.h>
 	#define XK_INLINE __forceinline
 	#define XK_NOINLINE __declspec(noinline)
+	#define XK_CLEANUP(function) __attribute__((cleanup(function)))
 
 	#define __xkBreak() __debugbreak()
 #else 

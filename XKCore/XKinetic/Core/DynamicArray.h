@@ -22,7 +22,7 @@ XKCORE_API void xkResizeDynamicArray(XkDynamicArray, const XkSize);
 XKCORE_API void __xkDynamicArrayPush(XkDynamicArray, const XkHandle);
 #define xkDynamicArrayPush(array, value)		\
 {																						\
-	typeof(value) tmp = value;								\
+	__auto_type tmp = value;									\
 	__xkDynamicArrayPush(array, &tmp);				\
 }
 
@@ -45,7 +45,7 @@ XKCORE_API XkHandle xkDynamicArrayGet(XkDynamicArray, const XkSize);
 XKCORE_API void __xkDynamicArraySet(XkDynamicArray, const XkSize, XkHandle);
 #define xkDynamicArraySet(array, value)			\
 {																						\
-	typeof(value) tmp = value;								\
+	__auto_type tmp = value;									\
 	__xkDynamicArraySet(array, &tmp);					\
 }
 

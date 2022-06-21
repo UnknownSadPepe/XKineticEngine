@@ -16,6 +16,8 @@ XKCORE_API XkHandle xkZeroMemory(XkHandle, const XkSize);
 
 XKCORE_API XkBool xkCompareMemory(const XkHandle, const XkHandle, const XkSize);
 
+#define XK_MEMORY_CLEANUP XK_CLEANUP(xkFreeMemory)
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

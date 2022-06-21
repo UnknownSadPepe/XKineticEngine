@@ -6,7 +6,7 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef XkInt64 XkKey;
+typedef XkString XkKey;
 
 typedef struct XkHashTable* XkHashTable;
 
@@ -24,7 +24,7 @@ XKCORE_API void xkClearHashTable(XkHashTable);
 XKCORE_API void __xkHashTableInsert(XkHashTable, const XkKey, const XkHandle);
 #define xkHashTableInsert(table, key, value)		  \
 {																						      \
-	typeof(value) tmp = value;								      \
+	__auto_type tmp = value;												\
 	__xkHashTableInsert(table, key, &tmp);				  \
 }
 
@@ -37,7 +37,7 @@ XKCORE_API XkHandle xkHashTableGet(XkHashTable, const XkKey);
 XKCORE_API void __xkHashTableSet(XkHashTable, const XkKey, XkHandle);
 #define xkHashTableSet(table, key, value)					\
 {																						      \
-	typeof(value) tmp = value;								      \
+	__auto_type tmp = value;												\
 	__xkHashTableSet(table, key, &tmp);							\
 }
 

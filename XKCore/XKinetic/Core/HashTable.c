@@ -3,19 +3,12 @@
 
 #include "XKinetic/Core/Log.h"
 
-typedef struct {
-	XkHandle data;
-	XkKey key;
-} XkHashTableNode;
-
 struct XkHashTable {
 	XkSize length;
 	XkSize capacity;
 	XkSize stride;
 
 	XkSize totalSize;
-
-	XkHashTableNode* nodes;
 	
 	XkHandle memory;
 };
@@ -23,14 +16,19 @@ struct XkHashTable {
 #define XK_HASH_TABLE_REALLOCATE_COEFFICIENT 2
 
 static XkSize __xkHashIndex(XkHashTable table, const XkKey key) {
-	XkSize hashIndex = key % table->capacity;
+	// SDBM hahs function.
+  XkSize hash = 0;
+	
+  for(XkChar* us = (XkChar*)key; *us; ++us) {
+		hash = *us + (hash << 6) + (hash << 16) - hash;
+  }
 
-	while(table->nodes[hashIndex].data != XK_NULL_HANDLE && table->nodes[hashIndex].key != -1) {
-    ++hashIndex;
-    hashIndex %= table->capacity;
-	}
+	// Mod it against the size of the table.
+	hash %= table->capacity;
 
-	return(hashIndex);
+	xkLogNotice("hash: %d", hash);
+
+  return(hash);
 }
 
 XkResult __xkCreateHashTable(XkHashTable* pTable, const XkSize capacity, const XkSize stride) {
@@ -52,9 +50,6 @@ XkResult __xkCreateHashTable(XkHashTable* pTable, const XkSize capacity, const X
 	// Initialize hash table total size.
 	const XkSize totalSize = capacity * alignStride;
 
-	// Initialize total hash table nodes count.
-	const XkSize totalNodesSize = sizeof(XkHashTableNode) * capacity;
-
 	// Initialize hash table.
   table->length 		= 0;
 	table->capacity 	= capacity;
@@ -62,57 +57,69 @@ XkResult __xkCreateHashTable(XkHashTable* pTable, const XkSize capacity, const X
 	table->totalSize 	= totalSize;
 
 	// Allocate hash table memory.
-	table->memory =	xkAllocateMemory(totalNodesSize + totalSize);
+	table->memory =	xkAllocateMemory(totalSize);
 	if(!table->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
-
-	// Initalize hash table nodes.
-	table->nodes = (XkHashTableNode*)((XkUInt8*)table->memory + totalSize);
 
 _catch:
   return(result);
 }
 
 void xkDestroyHashTable(XkHashTable table) {
-	xkFreeMemory(table->nodes);
+	// Free hash table memory.
 	xkFreeMemory(table->memory);
+
+	// Free hash table
 	xkFreeMemory(table);
 }
 
 void xkResizeHashTable(XkHashTable table, const XkSize newCapacity) {
-	const XkSize size = newCapacity * table->stride;
-	const XkSize alignSize = (size + (table->stride - 1)) & ~ (table->stride - 1);
+	// Initialize hash table new total size.
+	const XkSize newTotalSize = newCapacity * table->stride;
+	
+	// Reallocate hash table memory.
+	table->memory = xkReallocateMemory(table->memory, newTotalSize);
 
-	table->memory = xkReallocateMemory(table->memory, alignSize);
+	// Initialize hash table
 	table->capacity = newCapacity;
-	table->totalSize = alignSize;
+	table->totalSize = newTotalSize;
 }
 
 void xkClearHashTable(XkHashTable table) {
+	// Null hash table allocated length.
 	table->length = 0;
+
+	// Zero hash table memory.
 	xkZeroMemory(table->memory, table->totalSize);	
 }
 
 void __xkHashTableInsert(XkHashTable table, const XkKey key, const XkHandle data) {
+	// Check if there is not enough space in hash table.
 	if(table->length >= table->capacity) {
+		// Resize hash table.
 		xkResizeHashTable(table, table->capacity * XK_HASH_TABLE_REALLOCATE_COEFFICIENT);
 	}
 
+	// Get memory index by key.
 	XkSize index = __xkHashIndex(table, key);
 
-	xkCopyMemory(table->nodes[index].data, data, table->stride);
+	// Copy data to indexed memory.
+	xkCopyMemory(table->memory + (table->stride * (index)), data, table->stride);
 
+	// Increment hash table allocated length.
 	table->length++;
 }
 
 void xkHashTableErase(XkHashTable table, XkKey key) {
+	// Get memory index by key.
 	XkSize index = __xkHashIndex(table, key);
 
-  table->nodes[index].key = -1; 
-  table->nodes[index].data = XK_NULL_HANDLE; 
+	// Copy data to indexed memory.
+	xkZeroMemory(table->memory + (table->stride * (index)), table->stride);
 
+	// Decrement hash table allocated length.
 	table->length--;
 }
 
@@ -125,14 +132,17 @@ XkSize xkHashTableCapacity(XkHashTable table) {
 }
 
 XkHandle xkHashTableGet(XkHashTable table, const XkKey key) {
+	// Get memory index by key.
 	XkSize index = __xkHashIndex(table, key);
 
-	return(&table->nodes[index].data);
+	return(table->memory + (table->stride * (index)));
 }
 
 void __xkHashTableSet(XkHashTable table, const XkKey key, XkHandle data) {
-  XkSize hashIndex = __xkHashIndex(table, key);
+	// Get memory index by key.
+	XkSize index = __xkHashIndex(table, key);
 
-	xkCopyMemory(table->nodes[hashIndex].data, data, table->stride);
+	// Copy data to indexed memory.
+	xkCopyMemory(table->memory + (table->stride * (index)), data, table->stride);
 }
 
