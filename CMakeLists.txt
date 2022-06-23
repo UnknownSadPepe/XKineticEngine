@@ -9,6 +9,8 @@ set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+set(CMAKE_GENERATOR_PLATFORM x64)
+
 # Set project build type.
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -21,7 +23,7 @@ elseif(CMAKE_BUILD_TYPE EQUAL "Release")
 endif()
 
 # Initialize project options.
-option(BUILD_TESTS "Build tests applications" OFF)
+option(XKINETIC_TESTS "Build tests applications" OFF)
 
 # Set project build dir.
 set(BUILD_DIR ${CMAKE_SOURCE_DIR}/Target/${CMAKE_BUILD_TYPE})
@@ -57,6 +59,6 @@ add_subdirectory(XKinetic)
 add_subdirectory(XKEditor)
 
 # Add Tests subdirectory.
-if(BUILD_TESTS)
+if(XKINETIC_TESTS)
 	add_subdirectory(Tests)
 endif()

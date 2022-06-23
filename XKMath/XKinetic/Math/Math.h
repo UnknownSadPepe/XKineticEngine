@@ -1,5 +1,9 @@
 #pragma once
 
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	#include <immintrin.h>
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
+
 #include "XKinetic/XKMath.h"
 
 // An approximate representation of PI.
@@ -144,10 +148,6 @@ XKMATH_API XkUInt64 xkLUPow(const XkUInt64, const XkUInt64);
 
 XKMATH_API XkFloat32 xkFSqrt(const XkFloat32);
 XKMATH_API XkFloat64 xkDSqrt(const XkFloat64);
-XKMATH_API XkInt32 xkISqrt(const XkInt32);
-XKMATH_API XkUInt32 xkUSqrt(const XkUInt32);
-XKMATH_API XkInt64 xkLISqrt(const XkInt64);
-XKMATH_API XkUInt64 xkLUSqrt(const XkUInt64);
 #define xkSqrt(x) _Generic((x), \
 	XkFloat32: xkFSqrt, \
   XkFloat64: xkDSqrt)(x)
@@ -155,10 +155,6 @@ XKMATH_API XkUInt64 xkLUSqrt(const XkUInt64);
 
 XKMATH_API XkFloat32 xkFCbrt(const XkFloat32);
 XKMATH_API XkFloat64 xkDCbrt(const XkFloat64);
-XKMATH_API XkInt32 xkICbrt(const XkInt32);
-XKMATH_API XkUInt32 xkUCbrt(const XkUInt32);
-XKMATH_API XkInt64 xkLICbrt(const XkInt64);
-XKMATH_API XkUInt64 xkLUCbrt(const XkUInt64);
 #define xkCbrt(x) _Generic((x), \
 	XkFloat32: xkFCbrt, \
   XkFloat64: xkDCbrt)(x)

@@ -7,14 +7,55 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef XkFloat32 XkMat2[2][2];
-typedef XkFloat32 XkMat2x3[2][3];
-typedef XkFloat32 XkMat2x4[2][4];
+typedef union {
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	__m128 avx[2];
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
 
-typedef XkFloat64 XkDMat2[2][2];
-typedef XkFloat64 XkDMat2x3[2][3];
-typedef XkFloat64 XkDMat2x4[2][4];
+	XkFloat32 handle[2][2];
+} XkMat2;
+
+typedef union {
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	__m128 avx[3];
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
+
+	XkFloat32 handle[2][3];
+} XkMat2x3;
+
+typedef union {
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	__m128 avx[4];
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
+
+	XkFloat32 handle[2][4];
+} XkMat2x4;
+
+typedef union {
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	__m128d avx[2];
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
+
+	XkFloat64 handle[2][2];
+} XkDMat2;
+
+typedef union {
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	__m128d avx[3];
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
+
+	XkFloat64 handle[2][3];
+} XkDMat2x3;
+
+typedef union {
+#if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
+	__m128d avx[4];
+#endif // __XKMATH_AVX__ || __XKMATH_AVX2__
+
+	XkFloat64 handle[2][4];
+} XkDMat2x4;
 
 #ifdef __cplusplus
 }
 #endif // __cplusplus
+

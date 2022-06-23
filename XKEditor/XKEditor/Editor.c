@@ -3,6 +3,14 @@
 #include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 
+#include "XKinetic/Math/Math.h"
+#include "XKinetic/Math/Vec2.h"
+#include "XKinetic/Math/Vec3.h"
+#include "XKinetic/Math/Vec4.h"
+#include "XKinetic/Math/Mat2.h"
+#include "XKinetic/Math/Mat3.h"
+#include "XKinetic/Math/Mat4.h"
+
 struct XkApplication {
 	XkApplicationConfig config;
 };
@@ -20,76 +28,49 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	result = xkInitializeLog();
 	if(result != XK_SUCCESS) goto _catch;
 
-	XkFreeList freelist;
-	result = xkCreateFreeList(&freelist, sizeof(XkUInt32) * 16);
-	if(result != XK_SUCCESS) {
-		xkLogError("failed to create freelist");
-		goto _catch;
+	{
+		XkVec2 vec2_1 = {0};
+		vec2_1.x = 666.0f;
+		vec2_1.y = 555.0f;
+
+		XkVec2 vec2_2 = {0};
+		vec2_2.x = 333.0f;
+		vec2_2.y = 222.0f;
+
+		vec2_2 = xkVec2Add(vec2_1, vec2_2);
+
+		xkLogInfo("vec2(%ld) x: %f; y: %f", sizeof(XkVec2) * 8, vec2_2.x, vec2_2.y);
 	}
 
-	XkUInt32* pf1 = xkFreeListAllocate(freelist, sizeof(XkUInt32));
-	xkLogInfo("freelist: {%p} %d", pf1, *pf1);
+	{
+		XkDVec2 vec2_1 = {0};
+		vec2_1.x = 666.0;
+		vec2_1.y = 555.0;
 
-	XkUInt32* pf2 = xkFreeListAllocate(freelist, sizeof(XkUInt32) * 10);
-	for (XkSize i = 0; i < 10; i++) {
-		xkLogInfo("freelist: {%p} %d", &pf2[i], pf2[i]);
+		XkDVec2 vec2_2 = {0};
+		vec2_2.x = 333.0;
+		vec2_2.y = 222.0;
+
+		vec2_2 = xkDVec2Add(vec2_1, vec2_2);
+
+		xkLogInfo("dvec2(%ld) x: %f; y: %f", sizeof(XkDVec2) * 8, vec2_2.x, vec2_2.y);
 	}
 
-	XkUInt32* pf3 = xkFreeListAllocate(freelist, sizeof(XkUInt32) * 4);
-	for (XkSize i = 0; i < 4; i++) {
-		xkLogInfo("freelist: {%p} %d", &pf3[i], pf3[i]);
+	{
+		XkDVec3 vec3_1 = {0};
+		vec3_1.x = 666.0;
+		vec3_1.y = 555.0;
+		vec3_1.z = 444.0;
+
+		XkDVec3 vec3_2 = {0};
+		vec3_2.x = 333.0;
+		vec3_2.y = 222.0;
+		vec3_2.z = 111.0;
+
+		vec3_2 = xkDVec3Add(vec3_1, vec3_2);
+
+		xkLogInfo("dvec2(%ld) x: %f; y: %f; z: %f", sizeof(XkDVec3) * 8, vec3_2.x, vec3_2.y, vec3_2.z);
 	}
-
-	xkFreeListFree(freelist, pf2);
-	xkFreeListFree(freelist, pf1);
-
-	xkDestroyFreeList(freelist);
-
-	XkHashTable hashtable;
-	result = xkCreateHashTableCapacity(&hashtable, 16, XkUInt32);
-	if(result != XK_SUCCESS) {
-		xkLogError("failed to create hashtable");
-		goto _catch;
-	}
-
-	xkHashTableInsert(hashtable, "mom", 666);
-	xkHashTableInsert(hashtable, "dad", 777);
-	xkHashTableInsert(hashtable, "son", 999);
-	xkHashTableInsert(hashtable, "sys", 888);
-	xkHashTableInsert(hashtable, "hello", 5);
-	xkHashTableInsert(hashtable, "fuck", 2);
-	xkHashTableInsert(hashtable, "duck", 1);
-	xkHashTableInsert(hashtable, "kyplinov", 444);
-
-	XkUInt32* ph1 = xkHashTableGet(hashtable, "mom");
-	XkString ph2 = xkHashTableGet(hashtable, "dad");
-	XkString ph3 = xkHashTableGet(hashtable, "son");
-	XkUInt32* ph4 = xkHashTableGet(hashtable, "sys");
-	XkUInt32* ph5 = xkHashTableGet(hashtable, "hello");
-	XkUInt32* ph6 = xkHashTableGet(hashtable, "fuck");
-	XkUInt32* ph7 = xkHashTableGet(hashtable, "duck");
-	XkUInt32* ph8 = xkHashTableGet(hashtable, "kyplinov");
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "mom", ph1, *ph1);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "dad", ph2, *ph2);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "son", ph3, *ph3);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "sys", ph4, *ph4);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "hello", ph5, *ph5);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "fuck", ph6, *ph6);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "duck", ph7, *ph7);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "kyplinov", ph8, *ph8);
-	
-	xkHashTableSet(hashtable, "duck", 999);
-
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "mom", ph1, *ph1);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "dad", ph2, *ph2);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "son", ph3, *ph3);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "sys", ph4, *ph4);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "hello", ph5, *ph5);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "fuck", ph6, *ph6);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "duck", ph7, *ph7);
-	xkLogInfo("hashtable: [%s]\t{%p} %d", "kyplinov", ph8, *ph8);
-
-	xkDestroyHashTable(hashtable);
 
 _catch:
 	return(result);
