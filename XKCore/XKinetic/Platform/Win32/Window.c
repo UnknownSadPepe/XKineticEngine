@@ -1137,10 +1137,6 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
       break;
     }
 
-    POINT point;
-    DragQueryPoint(drop, &point);
-    __xkInputWindowCursor(window, point.x, point.y);
-
     for (UINT iFile = 0; iFile < count; iFile++) {
       const UINT length = DragQueryFileA(drop, iFile, NULL, 0);
       CHAR* buffer = xkAllocateMemory((length + 1) * length);

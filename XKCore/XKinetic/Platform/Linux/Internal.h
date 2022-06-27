@@ -39,24 +39,36 @@ typedef struct {
   char* 										name;
 } __XkWaylandWindowCursor;
 
+typedef struct {
+	struct wl_data_offer*       wlOffer;
+	XkBool                    	UTF8;
+	XkBool                    	URI;
+} __XkWaylandOffer;
+
 #define XK_PLATFORM_WINDOW_CURSOR __XkWaylandWindowCursor wayland
 
 typedef struct {
 	struct wl_display*										wlDisplay;
   struct wl_registry*										wlRegistry;
 
-  struct wl_shm*												wlShm;
-
   struct wl_compositor*									wlCompositor;
 
-	struct wl_output*											wlOutput;
+  struct wl_shm*												wlShm;
 
-	struct xdg_wm_base*										xdgBase;
-	struct zxdg_decoration_manager_v1*		xdgDecorationManager;
+	struct wl_output*											wlOutput;
 
 	struct wl_seat*             					wlSeat;
 	struct wl_keyboard*         					wlKeyboard;
 	struct wl_pointer*										wlPointer;
+
+	struct wl_data_device_manager*      	wlDataDeviceManager;
+	struct wl_data_device*      					wlDataDevice;
+
+	struct wl_data_offer*       					wlDragOffer;
+	struct wl_data_offer*									wlSelectionOffer;
+
+	struct xdg_wm_base*										xdgBase;
+	struct zxdg_decoration_manager_v1*		xdgDecorationManager;
 
 	struct xkb_context*     							xkbContext;
 	struct xkb_keymap* 										xkbKeymap;
@@ -73,6 +85,10 @@ typedef struct {
 
 	void*																	keyboardWindowFocus;
 	void*																	pointerWindowFocus;
+	void* 																dragWindowFocus;
+
+	__XkWaylandOffer*       							offers;
+	XkSize 																offerCount;
 } __XkWaylandPlatform;
 
 #define XK_PLATFORM __XkWaylandPlatform wayland

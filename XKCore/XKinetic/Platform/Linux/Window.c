@@ -11,6 +11,10 @@
 #include <unistd.h>
 
 #include <linux/input.h>
+#include <errno.h>
+#include <poll.h>
+
+#include <string.h>
 
 #include "wayland-client-protocol.h"
 #include "xdg-shell-client-protocol.h"
@@ -35,6 +39,64 @@ static void __xkXDGDestroyDecorations(XkWindow);
 
 struct wl_buffer* __xkWaylandCreateShmBuffer(const int, const int, const int, const int);
 static void __xkWaylandResizeWindow(XkWindow);
+
+static XkBool __xkWaylandFlushDisplay(void);
+
+static char* __xkWaylandReadDataOfferAsString(struct wl_data_offer*, const char*);
+
+XkString* __xkParseURI(XkString text, XkSize* count) {
+	const char* prefix = "file://";
+	char** paths = NULL;
+	char* line;
+
+	*count = 0;
+
+	while((line = strtok(text, "\r\n"))) {
+		char* path;
+
+		__xkErrorHandler("parse");
+
+		text = NULL;
+
+		if(line[0] == '#') {
+			continue;
+		}
+
+		if(strncmp(line, prefix, strlen(prefix)) == 0) {
+			line += strlen(prefix);
+
+			while(*line != '/') {
+				++line;
+			}
+    }
+
+    ++(*count);
+
+		path = xkAllocateMemory(strlen(line) + 1);
+		if(!paths) {
+				paths = xkAllocateMemory(*count * sizeof(char*));
+		} else {
+			paths = xkReallocateMemory(paths, *count * sizeof(char*));
+		}
+		paths[*count - 1] = path;
+
+		while(*line) {
+			if(line[0] == '%' && line[1] && line[2]) {
+				const char digits[3] = { line[1], line[2], '\0' };
+				*path = (char) strtol(digits, NULL, 16);
+				line += 2;
+			} else {
+				*path = *line;
+			}
+
+			++path;
+			++line;
+    }
+	}
+
+	return(paths);
+}
+
 
 static void __xkWaylandCreateKeyTable(void);
 
@@ -407,6 +469,163 @@ static const struct wl_keyboard_listener _xkWaylandKeyboardListener = {
 #endif
 };
 
+static void __xkWaylandDataOfferHandleOffer(void* data, struct wl_data_offer* wlDataOffer, const char* mimeType) {
+	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
+		if(_xkPlatform.wayland.offers[i].wlOffer == wlDataOffer) {
+			if(xkCompareString((XkString)mimeType, (XkString)"text/plain;charset=utf-8") == 1) {
+				_xkPlatform.wayland.offers[i].UTF8 = XK_TRUE;
+			} else if (xkCompareString((XkString)mimeType, (XkString)"text/uri-list") == 1) {
+				_xkPlatform.wayland.offers[i].URI = XK_TRUE;
+			}
+
+			break;
+		}
+	}
+}
+
+static void __xkWaylandDataOfferHandleSourceActions(void* data, struct wl_data_offer* wlDataOffer, uint32_t source_actions) {
+	/// NOTE: Nothing to do here.
+}
+
+static void __xkWaylandDataOfferHandleSourceAction(void* data, struct wl_data_offer* wlDataOffer, uint32_t dnd_action) {
+	/// NOTE: Nothing to do here.
+}
+
+static const struct wl_data_offer_listener _xkWaylandDataOfferListener = {
+	__xkWaylandDataOfferHandleOffer,
+	__xkWaylandDataOfferHandleSourceActions,
+	__xkWaylandDataOfferHandleSourceAction
+};
+
+static void __xkWaylandDataDeviceHandleDataOffer(void* data, struct wl_data_device* wlDataDevice, struct wl_data_offer* wlDataOffer) {
+	__XkWaylandOffer* offers = NULL;
+
+	if(_xkPlatform.wayland.offers) {
+		offers = xkReallocateMemory(_xkPlatform.wayland.offers, sizeof(__XkWaylandOffer) * _xkPlatform.wayland.offerCount + 1);
+		if(!offers) {
+			__xkErrorHandle("Wayland: Failed to reallocate offers");
+			return;
+		}
+	} else {
+		offers = xkAllocateMemory(sizeof(__XkWaylandOffer) * _xkPlatform.wayland.offerCount + 1);
+		if(!offers) {
+			__xkErrorHandle("Wayland: Failed to allocate offers");
+			return;
+		}
+	}
+
+	_xkPlatform.wayland.offers = offers;
+	++_xkPlatform.wayland.offerCount;
+
+	_xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1] = (__XkWaylandOffer){wlDataOffer};
+
+	wl_data_offer_add_listener(wlDataOffer, &_xkWaylandDataOfferListener, NULL);
+}
+
+static void __xkWaylandDataDeviceHandleEnter(void* data, struct wl_data_device* wlDataDevice, uint32_t serial, struct wl_surface* wlSurface, wl_fixed_t x, wl_fixed_t y, struct wl_data_offer* wlDataOffer) {
+	// Happens in the case we destroyed the surface.
+	if(!wlSurface) {
+		return;
+	}
+
+	XkWindow window = wl_surface_get_user_data(wlSurface);
+	if(!window) {
+		return;
+	}
+
+	if(_xkPlatform.wayland.wlDragOffer) {
+		wl_data_offer_destroy(_xkPlatform.wayland.wlDragOffer);
+		_xkPlatform.wayland.wlDragOffer = NULL;
+		_xkPlatform.wayland.dragWindowFocus = NULL;
+	}
+
+	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
+		if(_xkPlatform.wayland.offers[i].wlOffer == wlDataOffer) {
+			if(_xkPlatform.wayland.offers[i].URI) {
+				_xkPlatform.wayland.wlDragOffer = wlDataOffer;
+				_xkPlatform.wayland.dragWindowFocus = window;
+			}
+
+			_xkPlatform.wayland.offers[i] = _xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1];
+			--_xkPlatform.wayland.offerCount;
+			break;
+		}
+	}
+
+	if (_xkPlatform.wayland.wlDragOffer) {
+		wl_data_offer_accept(wlDataOffer, serial, "text/uri-list");
+	} else {
+		wl_data_offer_accept(wlDataOffer, serial, NULL);
+		wl_data_offer_destroy(wlDataOffer);
+	}
+}
+
+static void __xkWaylandDataDeviceHandleLeave(void* data, struct wl_data_device* wlDataDevice) {
+	if(_xkPlatform.wayland.wlDragOffer) {
+		wl_data_offer_destroy(_xkPlatform.wayland.wlDragOffer);
+		_xkPlatform.wayland.wlDragOffer = NULL;
+		_xkPlatform.wayland.dragWindowFocus = NULL;
+	}
+}
+
+static void __xkWaylandDataDeviceHandleMotion(void* data, struct wl_data_device* wlDataDevice, uint32_t time, wl_fixed_t x, wl_fixed_t y) {
+	/// NOTE: Nothing to do here.
+}
+
+static void __xkWaylandDataDeviceHandleDrop(void* data, struct wl_data_device* wlDataDevice) {
+	if(!_xkPlatform.wayland.wlDragOffer) {
+		return;
+	}
+
+	XkString string = __xkWaylandReadDataOfferAsString(_xkPlatform.wayland.wlDragOffer, "text/uri-list");
+	if(string) {
+		XkSize count;
+		XkString* paths = __xkParseURI(string, &count);
+		if(paths) {
+			XkWindow window = _xkPlatform.wayland.dragWindowFocus;
+			__xkInputWindowDropFile(window, count, (XkString*)paths);
+		}
+
+		for(XkSize i = 0; i < count; i++) {
+			xkFreeMemory(paths[i]);
+		}
+
+    xkFreeMemory(paths);
+
+		xkFreeMemory(string);
+	}
+}
+
+static void __xkWaylandDataDeviceHandleSelection(void* data, struct wl_data_device* wlDataDevice, struct wl_data_offer* wlDataOffer) {
+	if(_xkPlatform.wayland.wlSelectionOffer) {
+		wl_data_offer_destroy(_xkPlatform.wayland.wlSelectionOffer);
+		_xkPlatform.wayland.wlSelectionOffer = NULL;
+	}
+
+	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
+		if(_xkPlatform.wayland.offers[i].wlOffer == wlDataOffer) {
+			if(_xkPlatform.wayland.offers[i].UTF8) {
+				_xkPlatform.wayland.wlSelectionOffer = wlDataOffer;
+			} else {
+				wl_data_offer_destroy(wlDataOffer);
+			}
+
+			_xkPlatform.wayland.offers[i] = _xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1];
+			--_xkPlatform.wayland.offerCount;
+			break;
+		}
+	}
+}
+
+const struct wl_data_device_listener _xkWaylandDataDeviceListener = {
+	__xkWaylandDataDeviceHandleDataOffer,
+	__xkWaylandDataDeviceHandleEnter,
+	__xkWaylandDataDeviceHandleLeave,
+	__xkWaylandDataDeviceHandleMotion,
+	__xkWaylandDataDeviceHandleDrop,
+	__xkWaylandDataDeviceHandleSelection,
+};
+
 static void __xkWaylandSeatHandleCapabilities(void* data, struct wl_seat* wlSeat, enum wl_seat_capability wlCapability) {
 	if((wlCapability & WL_SEAT_CAPABILITY_POINTER) && !_xkPlatform.wayland.wlPointer) {
 		_xkPlatform.wayland.wlPointer = wl_seat_get_pointer(wlSeat);
@@ -450,6 +669,9 @@ static void __xkWaylandRegistryGlobal(void* data, struct wl_registry* wlRegistry
 		// Wayland seat.
 		_xkPlatform.wayland.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, version);
 		 wl_seat_add_listener(_xkPlatform.wayland.wlSeat, &_xkWaylandSeatListener, NULL);
+	} else if(xkCompareString((XkString)interface, (XkString)wl_data_device_manager_interface.name) == 1) {
+		// Wayland data device mamager.
+		_xkPlatform.wayland.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, version);
   } else if(xkCompareString((XkString)interface, (XkString)xdg_wm_base_interface.name) == 1) {
 		// XDG Base.
     _xkPlatform.wayland.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, version);
@@ -537,6 +759,20 @@ XkResult xkInitializeWindow(void) {
 		goto _catch;
 	}
 
+	// Check Wayland seat register object.
+	if(!_xkPlatform.wayland.wlSeat) {
+		__xkErrorHandle("Wayland: Failed to register seat");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
+	// Check Wauland data device manager register object.
+	if(!_xkPlatform.wayland.wlDataDeviceManager) {
+		__xkErrorHandle("Wayland: Failed to register data device manager");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
 	// Check XDG base register object.
 	if(!_xkPlatform.wayland.xdgBase) {
 		__xkErrorHandle("Wayland: Failed to register XDG base");
@@ -550,6 +786,17 @@ XkResult xkInitializeWindow(void) {
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
+
+  // Create Wayland data device.
+	_xkPlatform.wayland.wlDataDevice = wl_data_device_manager_get_data_device(_xkPlatform.wayland.wlDataDeviceManager, _xkPlatform.wayland.wlSeat);
+  if(!_xkPlatform.wayland.wlDataDevice) {
+		__xkErrorHandle("Wayland: Failed to create data device");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+  }
+
+	// Add Wayland data device listener.
+	wl_data_device_add_listener(_xkPlatform.wayland.wlDataDevice, &_xkWaylandDataDeviceListener, NULL);
 
 _catch:
 	return(result);
@@ -582,6 +829,26 @@ void xkTerminateWindow(void) {
 		xkb_context_unref(_xkPlatform.wayland.xkbContext);
 
 		_xkPlatform.wayland.xkbContext = NULL;
+  }
+
+	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
+		wl_data_offer_destroy(_xkPlatform.wayland.offers[i].wlOffer);
+	}
+
+	xkFreeMemory(_xkPlatform.wayland.offers);
+
+  // Destroy Wayland data device.
+	if (_xkPlatform.wayland.wlDataDevice) {
+		wl_data_device_destroy(_xkPlatform.wayland.wlDataDevice);
+
+		_xkPlatform.wayland.wlDataDevice = NULL;
+	}
+
+  // Destroy Wayland data device manager.
+  if(_xkPlatform.wayland.wlDataDeviceManager) {
+  	wl_data_device_manager_destroy(_xkPlatform.wayland.wlDataDeviceManager);
+
+  	_xkPlatform.wayland.wlDataDeviceManager = NULL;
   }
 
 	// Destroy Wayland pointer.
@@ -1093,6 +1360,77 @@ static void __xkWaylandResizeWindow(XkWindow window) {
 
 	// Commit surface
 	wl_surface_commit(window->wayland.wlSurface);
+}
+
+static XkBool __xkWaylandFlushDisplay(void) {
+	while(wl_display_flush(_xkPlatform.wayland.wlDisplay) == -1) {
+		struct pollfd fd = {wl_display_get_fd(_xkPlatform.wayland.wlDisplay), POLLOUT};
+
+		while(poll(&fd, 1, -1) == -1) {
+			if(errno != EINTR && errno != EAGAIN) {
+				return(XK_FALSE);
+			}
+		}
+	}
+
+	return(XK_TRUE);
+}
+
+static char* __xkWaylandReadDataOfferAsString(struct wl_data_offer* wlDataOffer, const char* mimeType) {
+	int fds[2];
+
+	if(pipe2(fds, O_CLOEXEC) == -1) {
+		__xkErrorHandle("Wayland: Failed to create pipe for data offer");
+		return NULL;
+	}
+
+	wl_data_offer_receive(wlDataOffer, mimeType, fds[1]);
+	__xkWaylandFlushDisplay();
+
+	close(fds[1]);
+
+	char* string = NULL;
+	size_t size = 0;
+	size_t length = 0;
+
+	while(XK_TRUE) {
+		const size_t readSize = 4096;
+		const size_t requiredSize = length + readSize + 1;
+		if(requiredSize > size) {
+			char* longer = NULL;
+			if(!string) {
+				longer = xkAllocateMemory(requiredSize);
+			} else {
+				longer = xkReallocateMemory(string, requiredSize);
+			}
+			if(!longer) {
+				__xkErrorHandle("Wayland: Failed to reallocate data offer string");
+				close(fds[0]);
+				return NULL;
+			}
+
+			string = longer;
+			size = requiredSize;
+		}
+
+		const ssize_t result = read(fds[0], string + length, readSize);
+		if(result == 0) {
+			break;
+		} else if (result == -1) {
+			__xkErrorHandle("Wayland: Failed to read from data offer pipe");
+
+			close(fds[0]);
+			return NULL;
+		}
+
+		length += result;
+	}
+
+	close(fds[0]);
+
+	string[length] = '\0';
+
+	return(string);
 }
 
 static void __xkWaylandCreateKeyTable(void) {
