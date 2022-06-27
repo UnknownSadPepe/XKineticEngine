@@ -28,6 +28,8 @@
 
 static XkBool __xkXDGCreateSurface(XkWindow);
 static void __xkXDGDestorySurface(XkWindow);
+static XkBool __xkXDGCreateDecorations(XkWindow);
+static void __xkXDGDestroyDecorations(XkWindow);
 
 struct wl_buffer* __xkWaylandCreateShmBuffer(const int, const int, const int, const int);
 static void __xkWaylandSetContentAreaOpaque(XkWindow);
@@ -330,6 +332,13 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 		goto _catch;		
 	}
 
+	if(window->decorated) {
+		if(__xkXDGCreateDecorations(window)) {
+			result = XK_ERROR_UNKNOWN;
+			goto _catch;		
+		}
+	}
+
 	// Set XDG window title.
 	if(title) {
   	xdg_toplevel_set_title(window->wayland.xdgToplevel, window->title);
@@ -371,6 +380,10 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 				__xkXDGCreateSurface(window);
 			}
 
+			if(!window->wayland.xdgDecoration) {
+				__xkXDGCreateDecorations(window);
+			}
+
 			xdg_toplevel_unset_maximized(window->wayland.xdgToplevel);
 			xdg_toplevel_unset_fullscreen(window->wayland.xdgToplevel);
 			break;
@@ -378,6 +391,10 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 		case XK_WINDOW_SHOW_MAXIMIZED:
 			if(!window->wayland.xdgToplevel) {
 				__xkXDGCreateSurface(window);
+			}
+
+			if(!window->wayland.xdgDecoration) {
+				__xkXDGCreateDecorations(window);
 			}
 
 			// Minimize Wayland window.
@@ -389,6 +406,10 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 				__xkXDGCreateSurface(window);
 			}
 
+			if(!window->wayland.xdgDecoration) {
+				__xkXDGCreateDecorations(window);
+			}
+
 			// Maximize Wayland window.
 			xdg_toplevel_set_minimized(window->wayland.xdgToplevel);
 			break;
@@ -396,6 +417,10 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 		case XK_WINDOW_SHOW_FULLSCREEN:
 			if(!window->wayland.xdgToplevel) {
 				__xkXDGCreateSurface(window);
+			}
+
+			if(window->wayland.xdgDecoration) {
+				__xkXDGDestroyDecorations(window);
 			}
 
 			// Fullscreen Wayland window.
@@ -406,6 +431,10 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 			// Destroy XDG components.
 			if(window->wayland.xdgToplevel) {
 				__xkXDGDestorySurface(window);
+			}
+
+			if(window->wayland.xdgDecoration) {
+				__xkXDGDestroyDecorations(window);
 			}
 
 			// Set null Wayland surface contents.
@@ -533,8 +562,7 @@ static XkBool __xkXDGCreateSurface(XkWindow window) {
 
   // Set XDG window decorations.
 	if(window->decorated) {
-		window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
-  	zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+
 	}
 
 _catch:
@@ -542,13 +570,6 @@ _catch:
 }
 
 static void __xkXDGDestorySurface(XkWindow window) {
-	// Destroy XDG decoration.
-	if(window->wayland.xdgDecoration) {
-		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
-
-		window->wayland.xdgDecoration = NULL;
-	}
-
 	// Destroy XDG toplevel.
 	if(window->wayland.xdgToplevel) {
 		xdg_toplevel_destroy(window->wayland.xdgToplevel);
@@ -561,6 +582,31 @@ static void __xkXDGDestorySurface(XkWindow window) {
 		xdg_surface_destroy(window->wayland.xdgSurface);
 
 		window->wayland.xdgSurface = NULL;
+	}
+}
+
+static XkBool __xkXDGCreateDecorations(XkWindow window) {
+	XkBool result = XK_FALSE;
+
+	window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
+	if(!window->wayland.xdgDecoration) {
+		result = XK_TRUE;
+		__xkErrorHandle("XDG: Failed to create decorations");
+		goto _catch;
+	}
+
+  zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+
+_catch:
+	return(result);
+}
+
+static void __xkXDGDestroyDecorations(XkWindow window) {
+	// Destroy XDG decoration.
+	if(window->wayland.xdgDecoration) {
+		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
+
+		window->wayland.xdgDecoration = NULL;
 	}
 }
 
