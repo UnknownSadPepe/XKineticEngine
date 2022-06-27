@@ -10,6 +10,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+#include <linux/input.h>
+
 #include "wayland-client-protocol.h"
 #include "xdg-shell-client-protocol.h"
 #include "xdg-decoration-client-protocol.h"
@@ -34,6 +36,8 @@ static void __xkXDGDestroyDecorations(XkWindow);
 struct wl_buffer* __xkWaylandCreateShmBuffer(const int, const int, const int, const int);
 static void __xkWaylandSetContentAreaOpaque(XkWindow);
 static void __xkWaylandResizeWindow(XkWindow);
+
+static void __xkWaylandCreateKeyTable(void);
 
 static void __xkXDGWmBasePing(void* data, struct xdg_wm_base* xdgBase, uint32_t serial) {
 	xdg_wm_base_pong(xdgBase, serial);
@@ -133,21 +137,239 @@ static const struct xdg_toplevel_listener _xkXDGToplevelListener = {
   __xkXDGToplevelHandleClose
 };
 
+static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKeyboard, uint32_t format, int fd, uint32_t size) {
+	// Check keyboard keymap format.
+	if(format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
+		close(fd);
+		return;
+	}
+
+	// Allocate keymap string.
+	char* string = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
+	if(string == MAP_FAILED) {
+		close(fd);
+		return;
+	}
+
+	// Create XKB keymap
+  _xkPlatform.wayland.xkbKeymap = xkb_keymap_new_from_string(_xkPlatform.wayland.xkbContext, string, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+
+  // Free keymap string.
+	munmap(string, size);
+
+	// Close keymap file.
+	close(fd);
+
+	if(!_xkPlatform.wayland.xkbKeymap) {
+		__xkErrorHandle("XKB: Failed to compile keymap");
+		return;
+	}
+ 
+ 	// Create XKB state.
+	_xkPlatform.wayland.xkbState = xkb_state_new(_xkPlatform.wayland.xkbKeymap);
+	if(!_xkPlatform.wayland.xkbState) {
+		__xkErrorHandle("XKB: Failed to create state");
+		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+		return;
+	}
+
+	// Look up the preferred locale.
+	const char* locale = getenv("LC_ALL");
+	if(!locale) {
+		locale = getenv("LC_CTYPE");
+	}
+  if(!locale) {
+		locale = getenv("LANG");
+	}
+	if(!locale) {
+		locale = "C";
+	}
+
+	struct xkb_compose_table* xkbComposeTable = xkb_compose_table_new_from_locale(_xkPlatform.wayland.xkbContext, locale, XKB_COMPOSE_COMPILE_NO_FLAGS);
+	if(!xkbComposeTable) {
+		__xkErrorHandle("XKB: Failed to create compose table");
+		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+		return;
+	}
+
+	_xkPlatform.wayland.xkbComposeState = xkb_compose_state_new(xkbComposeTable, XKB_COMPOSE_STATE_NO_FLAGS);
+	if(!_xkPlatform.wayland.xkbComposeState) {
+		__xkErrorHandle("XKB: Failed to create compose state");
+		xkb_compose_table_unref(xkbComposeTable);
+		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+		return;
+	}
+
+	// Destroy XKB compose table.
+	xkb_compose_table_unref(xkbComposeTable);
+
+	// Destroy old XKB keymap.
+	if(_xkPlatform.wayland.xkbKeymap) {
+		//xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+
+		//_xkPlatform.wayland.xkbKeymap = NULL;
+	}
+
+	// Destroy old XKB state.
+	if(_xkPlatform.wayland.xkbState) {
+		//xkb_state_unref(_xkPlatform.wayland.xkbState);
+
+		//_xkPlatform.wayland.xkbState = NULL;
+	}
+
+	__xkErrorHandler("keymap");
+
+  // Initialize XKB mod indices.
+	_xkPlatform.wayland.xkbControlIndex  = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Control");
+	_xkPlatform.wayland.xkbAltIndex      = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod1");
+	_xkPlatform.wayland.xkbShiftIndex    = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Shift");
+	_xkPlatform.wayland.xkbSuperIndex    = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod4");
+	_xkPlatform.wayland.xkbCapsLockIndex = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Lock");
+	_xkPlatform.wayland.xkbNumLockIndex  = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod2");
+}
+
+static void __xkWaylandKeyboardHandleEnter(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, struct wl_surface* wlSurface, struct wl_array* wlKeys) {
+	// Happens in the case we destroyed the surface.
+	if(!wlSurface) {
+		return;
+	}
+
+	XkWindow window = wl_surface_get_user_data(wlSurface);
+	if(!window) {
+		return;
+  }
+
+	_xkPlatform.wayland.keyboardWindowFocus = window;
+
+
+	// Input window focus.
+	__xkInputWindowFocus(window, XK_TRUE);
+}
+
+static void __xkWaylandKeyboardHandleLeave(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, struct wl_surface* wlSurface) {
+	XkWindow window = _xkPlatform.wayland.keyboardWindowFocus;
+	if(!window) {
+		return;
+	}
+
+	_xkPlatform.wayland.keyboardWindowFocus = NULL;
+
+	// Input window focus.
+	__xkInputWindowFocus(window, XK_FALSE);
+}
+
+static void __xkWaylandKeyboardHandleKey(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, uint32_t time, uint32_t scancode, uint32_t state) {
+	XkWindow window = _xkPlatform.wayland.keyboardWindowFocus;
+	if(!window) {
+		return;
+	}
+
+	const int key = _xkPlatform.keycodes[scancode];
+	const int action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+
+	__xkInputWindowKey(window, key, action, _xkPlatform.wayland.modifiers);
+}
+
+static void __xkWaylandKeyboardHandleModifiers(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, uint32_t modsDepressed, uint32_t modsLatched, uint32_t modsLocked, uint32_t group) {
+	if(!_xkPlatform.wayland.xkbKeymap) {
+		return;
+	}
+
+	// Update XKB state mask.
+	xkb_state_update_mask(_xkPlatform.wayland.xkbState, modsDepressed, modsLatched, modsLocked, 0, 0, group);
+
+	_xkPlatform.wayland.modifiers = 0;
+
+	struct {
+		xkb_mod_index_t xkbIndex;
+		unsigned int bit;
+	} modifiers[] = {
+		{_xkPlatform.wayland.xkbControlIndex,  XK_MOD_CONTROL_BIT},
+		{_xkPlatform.wayland.xkbAltIndex,      XK_MOD_ALT_BIT},
+		{_xkPlatform.wayland.xkbShiftIndex,    XK_MOD_SHIFT_BIT},
+		{_xkPlatform.wayland.xkbSuperIndex,    XK_MOD_SUPER_BIT},
+		{_xkPlatform.wayland.xkbCapsLockIndex, XK_MOD_CAPS_LOCK_BIT},
+		{_xkPlatform.wayland.xkbNumLockIndex,  XK_MOD_NUM_LOCK_BIT}
+	};
+
+	for(size_t i = 0; i < sizeof(modifiers) / sizeof(modifiers[0]); i++) {
+		if(xkb_state_mod_index_is_active(_xkPlatform.wayland.xkbState, modifiers[i].xkbIndex, XKB_STATE_MODS_EFFECTIVE) == 1) {
+			_xkPlatform.wayland.modifiers |= modifiers[i].bit;
+		}
+	}
+}
+
+#ifdef WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION
+
+static void __xkWaylandKeyboardHandleRepeatInfo(void* data, struct wl_keyboard* wlKeyboard, int32_t rate, int32_t delay) {
+	if(wlKeyboard != _xkPlatform.wayland.wlKeyboard) {
+		return;
+	}
+
+	/// NOTE: Nothing to do here.
+}
+
+#endif
+
+static const struct wl_keyboard_listener _xkWaylandKeyboardListener = {
+  __xkWaylandKeyboardHandleKeymap,
+  __xkWaylandKeyboardHandleEnter,
+  __xkWaylandKeyboardHandleLeave,
+  __xkWaylandKeyboardHandleKey,
+  __xkWaylandKeyboardHandleModifiers,
+#ifdef WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION
+  __xkWaylandKeyboardHandleRepeatInfo,
+#endif
+};
+
+static void __xkWaylandSeatHandleCapabilities(void* data, struct wl_seat* wlSeat, enum wl_seat_capability wlCapability) {
+	if((wlCapability & WL_SEAT_CAPABILITY_POINTER) && !_xkPlatform.wayland.wlPointer) {
+		_xkPlatform.wayland.wlPointer = wl_seat_get_pointer(wlSeat);
+		//wl_pointer_add_listener(_xkPlatform.wayland.wlPointer, &_xkWaylandPointerListener, NULL);
+	} else if(!(wlCapability & WL_SEAT_CAPABILITY_POINTER) && _xkPlatform.wayland.wlPointer) {
+		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
+
+		_xkPlatform.wayland.wlPointer = NULL;
+	}
+
+	if((wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && !_xkPlatform.wayland.wlKeyboard) {
+		_xkPlatform.wayland.wlKeyboard = wl_seat_get_keyboard(wlSeat);
+		wl_keyboard_add_listener(_xkPlatform.wayland.wlKeyboard, &_xkWaylandKeyboardListener, NULL);
+	} else if(!(wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && _xkPlatform.wayland.wlKeyboard) {
+		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
+
+		_xkPlatform.wayland.wlKeyboard = NULL;
+	}
+}
+
+static void __xkWaylandSeatHandleName(void* data, struct wl_seat* wlSeat, const char* name) {
+	/// NOTE: Nothing to do here.
+}
+
+static const struct wl_seat_listener _xkWaylandSeatListener = {
+	__xkWaylandSeatHandleCapabilities,
+	__xkWaylandSeatHandleName
+};
+
 static void __xkWaylandRegistryGlobal(void* data, struct wl_registry* wlRegistry, uint32_t name, const char* interface, uint32_t version) {
-  if(xkCompareString((XkString)interface, "wl_compositor") == 1) {
+  if(xkCompareString((XkString)interface, (XkString)wl_compositor_interface.name) == 1) {
 		// Wayland compositor.
 		_xkPlatform.wayland.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
-	} else if(xkCompareString((XkString)interface, "wl_shm") == 1) {
+	} else if(xkCompareString((XkString)interface, (XkString)wl_shm_interface.name) == 1) {
 		// Wayland shared memory.
 		_xkPlatform.wayland.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, version);
-	} else if(xkCompareString((XkString)interface, "wl_output") == 1) {
+	} else if(xkCompareString((XkString)interface, (XkString)wl_output_interface.name) == 1) {
 		// Wayland output.
-			_xkPlatform.wayland.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
-  } else if(xkCompareString((XkString)interface, "xdg_wm_base") == 1) {
+		_xkPlatform.wayland.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
+	} else if(xkCompareString((XkString)interface, (XkString)wl_seat_interface.name) == 1) {
+		// Wayland seat.
+		_xkPlatform.wayland.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, version);
+		 wl_seat_add_listener(_xkPlatform.wayland.wlSeat, &_xkWaylandSeatListener, NULL);
+  } else if(xkCompareString((XkString)interface, (XkString)xdg_wm_base_interface.name) == 1) {
 		// XDG Base.
     _xkPlatform.wayland.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, version);
 		xdg_wm_base_add_listener(_xkPlatform.wayland.xdgBase, &_xkXDGWmBaseListener, NULL);
-  } else if(xkCompareString((XkString)interface, "zxdg_decoration_manager_v1") == 1) {
+  } else if(xkCompareString((XkString)interface, (XkString)zxdg_decoration_manager_v1_interface.name) == 1) {
 		// XDG decoration manager.
     _xkPlatform.wayland.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, version);
 	}
@@ -191,6 +413,17 @@ XkResult xkInitializeWindow(void) {
 
 	// Add Wayland display registry listener.
   wl_registry_add_listener(_xkPlatform.wayland.wlRegistry, &_xkWaylandRegistryListener, NULL);
+
+  // Create key table.
+  __xkWaylandCreateKeyTable();
+
+  // Create XKB context.
+	_xkPlatform.wayland.xkbContext = xkb_context_new(0);
+	if(!_xkPlatform.wayland.xkbContext) {
+		__xkErrorHandle("XKB: Failed to initialize context");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
 
 	// Sync so we got all registry objects.
   wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
@@ -238,40 +471,103 @@ _catch:
 }
 
 void xkTerminateWindow(void) {
+	// Destroy XKB compose state.
+	if(_xkPlatform.wayland.xkbComposeState) {
+		xkb_compose_state_unref(_xkPlatform.wayland.xkbComposeState);
+
+		_xkPlatform.wayland.xkbComposeState = NULL;
+	}
+
+	// Destroy XKB keymap.
+	if(_xkPlatform.wayland.xkbKeymap) {
+		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+
+		_xkPlatform.wayland.xkbKeymap = NULL;
+	}
+
+	// Destroy XKB state.
+	if(_xkPlatform.wayland.xkbState) {
+		xkb_state_unref(_xkPlatform.wayland.xkbState);
+
+		_xkPlatform.wayland.xkbState = NULL;
+	}
+
+	// Destroy XKB context.
+  if(_xkPlatform.wayland.xkbContext) {
+		xkb_context_unref(_xkPlatform.wayland.xkbContext);
+
+		_xkPlatform.wayland.xkbContext = NULL;
+  }
+
+	// Destroy Wayland pointer.
+  if(_xkPlatform.wayland.wlPointer) {
+		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
+
+		_xkPlatform.wayland.wlPointer = NULL;
+  }
+
+  // Destroy Wayland keyboard.
+  if(_xkPlatform.wayland.wlKeyboard) {
+		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
+
+		_xkPlatform.wayland.wlKeyboard = NULL;
+  }
+
+	// Destroy Wayland seat.
+	if(_xkPlatform.wayland.wlSeat) {
+		wl_seat_destroy(_xkPlatform.wayland.wlSeat);
+
+		_xkPlatform.wayland.wlSeat = NULL;
+	}
+
 	// Destroy Wayland output.
 	if(_xkPlatform.wayland.wlOutput) {
 		wl_output_destroy(_xkPlatform.wayland.wlOutput);
+
+		_xkPlatform.wayland.wlOutput = NULL;
 	}
 
 	// Destroy Wayland shared memory.
 	if(_xkPlatform.wayland.wlShm) {
 		wl_shm_destroy(_xkPlatform.wayland.wlShm);
+
+		_xkPlatform.wayland.wlShm = NULL;
 	}
 
 	// Destroy Wayland compositor.
   if(_xkPlatform.wayland.wlCompositor){
 		wl_compositor_destroy(_xkPlatform.wayland.wlCompositor);
+
+		_xkPlatform.wayland.wlCompositor = NULL;
   }
 	
 	// Destroy XDG base.
  	if(_xkPlatform.wayland.xdgBase) {
 		xdg_wm_base_destroy(_xkPlatform.wayland.xdgBase);
+
+		_xkPlatform.wayland.xdgBase = NULL;
 	}
 
 	// Destroy XDG decoration manager.
  	if(_xkPlatform.wayland.xdgDecorationManager){
 		zxdg_decoration_manager_v1_destroy(_xkPlatform.wayland.xdgDecorationManager);
+
+		_xkPlatform.wayland.xdgDecorationManager = NULL;
  	}
 
 	// Destroy Wayland register.
 	if(_xkPlatform.wayland.wlRegistry) {
   	wl_registry_destroy(_xkPlatform.wayland.wlRegistry);
+
+ 		_xkPlatform.wayland.wlRegistry = NULL;
 	}
 
 	// Destroy Wayland display.
 	if(_xkPlatform.wayland.wlDisplay) {
   	wl_display_flush(_xkPlatform.wayland.wlDisplay);
 		wl_display_disconnect(_xkPlatform.wayland.wlDisplay);
+
+ 		_xkPlatform.wayland.wlDisplay = NULL;
 	}
 }
 
@@ -326,6 +622,9 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
+
+	// Needs in keyboard listener.
+ 	wl_surface_set_user_data(window->wayland.wlSurface, window);
 
 	if(__xkXDGCreateSurface(window)) {
 		result = XK_ERROR_UNKNOWN;
@@ -686,7 +985,130 @@ static void __xkWaylandSetContentAreaOpaque(XkWindow window) {
 }
 
 static void __xkWaylandResizeWindow(XkWindow window) {
-	//__xkWaylandSetContentAreaOpaque(window);
+	__xkWaylandSetContentAreaOpaque(window);
+}
+
+static void __xkWaylandCreateKeyTable(void) {
+	xkZeroMemory(_xkPlatform.keycodes, sizeof(_xkPlatform.keycodes));
+
+	_xkPlatform.keycodes[KEY_GRAVE]      = XK_KEY_GRAVE_ACCENT;
+	_xkPlatform.keycodes[KEY_1]          = XK_KEY_1;
+	_xkPlatform.keycodes[KEY_2]          = XK_KEY_2;
+	_xkPlatform.keycodes[KEY_3]          = XK_KEY_3;
+	_xkPlatform.keycodes[KEY_4]          = XK_KEY_4;
+	_xkPlatform.keycodes[KEY_5]          = XK_KEY_5;
+	_xkPlatform.keycodes[KEY_6]          = XK_KEY_6;
+	_xkPlatform.keycodes[KEY_7]          = XK_KEY_7;
+	_xkPlatform.keycodes[KEY_8]          = XK_KEY_8;
+	_xkPlatform.keycodes[KEY_9]          = XK_KEY_9;
+	_xkPlatform.keycodes[KEY_0]          = XK_KEY_0;
+	_xkPlatform.keycodes[KEY_SPACE]      = XK_KEY_SPACE;
+	_xkPlatform.keycodes[KEY_MINUS]      = XK_KEY_MINUS;
+	_xkPlatform.keycodes[KEY_EQUAL]      = XK_KEY_EQUAL;
+	_xkPlatform.keycodes[KEY_Q]          = XK_KEY_Q;
+	_xkPlatform.keycodes[KEY_W]          = XK_KEY_W;
+	_xkPlatform.keycodes[KEY_E]          = XK_KEY_E;
+	_xkPlatform.keycodes[KEY_R]          = XK_KEY_R;
+	_xkPlatform.keycodes[KEY_T]          = XK_KEY_T;
+	_xkPlatform.keycodes[KEY_Y]          = XK_KEY_Y;
+	_xkPlatform.keycodes[KEY_U]          = XK_KEY_U;
+	_xkPlatform.keycodes[KEY_I]          = XK_KEY_I;
+	_xkPlatform.keycodes[KEY_O]          = XK_KEY_O;
+	_xkPlatform.keycodes[KEY_P]          = XK_KEY_P;
+	_xkPlatform.keycodes[KEY_LEFTBRACE]  = XK_KEY_LEFT_BRACKET;
+	_xkPlatform.keycodes[KEY_RIGHTBRACE] = XK_KEY_RIGHT_BRACKET;
+	_xkPlatform.keycodes[KEY_A]          = XK_KEY_A;
+	_xkPlatform.keycodes[KEY_S]          = XK_KEY_S;
+	_xkPlatform.keycodes[KEY_D]          = XK_KEY_D;
+	_xkPlatform.keycodes[KEY_F]          = XK_KEY_F;
+	_xkPlatform.keycodes[KEY_G]          = XK_KEY_G;
+	_xkPlatform.keycodes[KEY_H]          = XK_KEY_H;
+	_xkPlatform.keycodes[KEY_J]          = XK_KEY_J;
+	_xkPlatform.keycodes[KEY_K]          = XK_KEY_K;
+	_xkPlatform.keycodes[KEY_L]          = XK_KEY_L;
+	_xkPlatform.keycodes[KEY_SEMICOLON]  = XK_KEY_SEMICOLON;
+	_xkPlatform.keycodes[KEY_APOSTROPHE] = XK_KEY_APOSTROPHE;
+	_xkPlatform.keycodes[KEY_Z]          = XK_KEY_Z;
+	_xkPlatform.keycodes[KEY_X]          = XK_KEY_X;
+	_xkPlatform.keycodes[KEY_C]          = XK_KEY_C;
+	_xkPlatform.keycodes[KEY_V]          = XK_KEY_V;
+	_xkPlatform.keycodes[KEY_B]          = XK_KEY_B;
+	_xkPlatform.keycodes[KEY_N]          = XK_KEY_N;
+	_xkPlatform.keycodes[KEY_M]          = XK_KEY_M;
+	_xkPlatform.keycodes[KEY_COMMA]      = XK_KEY_COMMA;
+	_xkPlatform.keycodes[KEY_DOT]        = XK_KEY_PERIOD;
+	_xkPlatform.keycodes[KEY_SLASH]      = XK_KEY_SLASH;
+	_xkPlatform.keycodes[KEY_BACKSLASH]  = XK_KEY_BACKSLASH;
+	_xkPlatform.keycodes[KEY_ESC]        = XK_KEY_ESCAPE;
+	_xkPlatform.keycodes[KEY_TAB]        = XK_KEY_TAB;
+	_xkPlatform.keycodes[KEY_LEFTSHIFT]  = XK_KEY_LEFT_SHIFT;
+	_xkPlatform.keycodes[KEY_RIGHTSHIFT] = XK_KEY_RIGHT_SHIFT;
+	_xkPlatform.keycodes[KEY_LEFTCTRL]   = XK_KEY_LEFT_CONTROL;
+	_xkPlatform.keycodes[KEY_RIGHTCTRL]  = XK_KEY_RIGHT_CONTROL;
+	_xkPlatform.keycodes[KEY_LEFTALT]    = XK_KEY_LEFT_ALT;
+	_xkPlatform.keycodes[KEY_RIGHTALT]   = XK_KEY_RIGHT_ALT;
+	_xkPlatform.keycodes[KEY_LEFTMETA]   = XK_KEY_LEFT_SUPER;
+	_xkPlatform.keycodes[KEY_RIGHTMETA]  = XK_KEY_RIGHT_SUPER;
+	_xkPlatform.keycodes[KEY_COMPOSE]    = XK_KEY_MENU;
+	_xkPlatform.keycodes[KEY_NUMLOCK]    = XK_KEY_NUM_LOCK;
+	_xkPlatform.keycodes[KEY_CAPSLOCK]   = XK_KEY_CAPS_LOCK;
+	_xkPlatform.keycodes[KEY_PRINT]      = XK_KEY_PRINT_SCREEN;
+	_xkPlatform.keycodes[KEY_SCROLLLOCK] = XK_KEY_SCROLL_LOCK;
+	_xkPlatform.keycodes[KEY_PAUSE]      = XK_KEY_PAUSE;
+	_xkPlatform.keycodes[KEY_DELETE]     = XK_KEY_DELETE;
+	_xkPlatform.keycodes[KEY_BACKSPACE]  = XK_KEY_BACKSPACE;
+	_xkPlatform.keycodes[KEY_ENTER]      = XK_KEY_ENTER;
+	_xkPlatform.keycodes[KEY_HOME]       = XK_KEY_HOME;
+	_xkPlatform.keycodes[KEY_END]        = XK_KEY_END;
+	_xkPlatform.keycodes[KEY_PAGEUP]     = XK_KEY_PAGE_UP;
+	_xkPlatform.keycodes[KEY_PAGEDOWN]   = XK_KEY_PAGE_DOWN;
+	_xkPlatform.keycodes[KEY_INSERT]     = XK_KEY_INSERT;
+	_xkPlatform.keycodes[KEY_LEFT]       = XK_KEY_LEFT;
+	_xkPlatform.keycodes[KEY_RIGHT]      = XK_KEY_RIGHT;
+	_xkPlatform.keycodes[KEY_DOWN]       = XK_KEY_DOWN;
+	_xkPlatform.keycodes[KEY_UP]         = XK_KEY_UP;
+	_xkPlatform.keycodes[KEY_F1]         = XK_KEY_F1;
+	_xkPlatform.keycodes[KEY_F2]         = XK_KEY_F2;
+	_xkPlatform.keycodes[KEY_F3]         = XK_KEY_F3;
+	_xkPlatform.keycodes[KEY_F4]         = XK_KEY_F4;
+	_xkPlatform.keycodes[KEY_F5]         = XK_KEY_F5;
+	_xkPlatform.keycodes[KEY_F6]         = XK_KEY_F6;
+	_xkPlatform.keycodes[KEY_F7]         = XK_KEY_F7;
+	_xkPlatform.keycodes[KEY_F8]         = XK_KEY_F8;
+	_xkPlatform.keycodes[KEY_F9]         = XK_KEY_F9;
+	_xkPlatform.keycodes[KEY_F10]        = XK_KEY_F10;
+	_xkPlatform.keycodes[KEY_F11]        = XK_KEY_F11;
+	_xkPlatform.keycodes[KEY_F12]        = XK_KEY_F12;
+	_xkPlatform.keycodes[KEY_F13]        = XK_KEY_F13;
+	_xkPlatform.keycodes[KEY_F14]        = XK_KEY_F14;
+	_xkPlatform.keycodes[KEY_F15]        = XK_KEY_F15;
+	_xkPlatform.keycodes[KEY_F16]        = XK_KEY_F16;
+	_xkPlatform.keycodes[KEY_F17]        = XK_KEY_F17;
+	_xkPlatform.keycodes[KEY_F18]        = XK_KEY_F18;
+	_xkPlatform.keycodes[KEY_F19]        = XK_KEY_F19;
+	_xkPlatform.keycodes[KEY_F20]        = XK_KEY_F20;
+	_xkPlatform.keycodes[KEY_F21]        = XK_KEY_F21;
+	_xkPlatform.keycodes[KEY_F22]        = XK_KEY_F22;
+	_xkPlatform.keycodes[KEY_F23]        = XK_KEY_F23;
+	_xkPlatform.keycodes[KEY_F24]        = XK_KEY_F24;
+	_xkPlatform.keycodes[KEY_KPSLASH]    = XK_KEY_KP_DIVIDE;
+	_xkPlatform.keycodes[KEY_KPASTERISK] = XK_KEY_KP_MULTIPLY;
+	_xkPlatform.keycodes[KEY_KPMINUS]    = XK_KEY_KP_SUBTRACT;
+	_xkPlatform.keycodes[KEY_KPPLUS]     = XK_KEY_KP_ADD;
+	_xkPlatform.keycodes[KEY_KP0]        = XK_KEY_KP_0;
+	_xkPlatform.keycodes[KEY_KP1]        = XK_KEY_KP_1;
+	_xkPlatform.keycodes[KEY_KP2]        = XK_KEY_KP_2;
+	_xkPlatform.keycodes[KEY_KP3]        = XK_KEY_KP_3;
+	_xkPlatform.keycodes[KEY_KP4]        = XK_KEY_KP_4;
+	_xkPlatform.keycodes[KEY_KP5]        = XK_KEY_KP_5;
+	_xkPlatform.keycodes[KEY_KP6]        = XK_KEY_KP_6;
+	_xkPlatform.keycodes[KEY_KP7]        = XK_KEY_KP_7;
+	_xkPlatform.keycodes[KEY_KP8]        = XK_KEY_KP_8;
+	_xkPlatform.keycodes[KEY_KP9]        = XK_KEY_KP_9;
+	_xkPlatform.keycodes[KEY_KPDOT]      = XK_KEY_KP_DECIMAL;
+	_xkPlatform.keycodes[KEY_KPEQUAL]    = XK_KEY_KP_EQUAL;
+	_xkPlatform.keycodes[KEY_KPENTER]    = XK_KEY_KP_ENTER;
+	_xkPlatform.keycodes[KEY_102ND]      = XK_KEY_WORLD_2;
 }
 
 #endif // XK_LINUX
