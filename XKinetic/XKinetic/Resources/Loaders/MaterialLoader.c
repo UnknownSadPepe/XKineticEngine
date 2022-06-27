@@ -19,14 +19,14 @@ XkResult xkCreateMaterialLoader(XkMaterialLoader* pLoader, XkString path) {
 
   xkNCopyString(loader->path, path, XK_MATERIAL_LOADER_PATH_MAX_SIZE);
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyMaterialLoader(XkMaterialLoader loader) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   xkFreeMemory(loader);
 }
 
@@ -36,12 +36,12 @@ XkResult xkLoadMaterial(XkMaterialLoader loader, XkMaterialConfig* const pConfig
   XkChar fullPath[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
   xkStringNFormat(fullPath, XK_MATERIAL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result); 
 }
 
 void xkUnloadMaterial(XkMaterialLoader loader, XkMaterialConfig* const pConfig) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }

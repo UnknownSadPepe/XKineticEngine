@@ -133,11 +133,11 @@ void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 }
 
 void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 #endif // XK_UNIX

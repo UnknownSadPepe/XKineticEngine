@@ -123,9 +123,7 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
   // Check window hints support.
   if(
     (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FLOATING_BIT) || 
-    (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FULLSCREEN_BIT) ||
-    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FLOATING_BIT) ||
-    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FULLSCREEN_BIT)) {
+    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FLOATING_BIT)) {
     __xkErrorHandle("Win32: Unsupported window hints");
   }
 
@@ -133,7 +131,6 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	if(hint & XK_WINDOW_DECORATED_BIT)  window->decorated   = XK_TRUE;
 	if(hint & XK_WINDOW_RESIZABLE_BIT)  window->resizable   = XK_TRUE;
 	if(hint & XK_WINDOW_FLOATING_BIT)   window->floating    = XK_TRUE;
-  if(hint & XK_WINDOW_FULLSCREEN_BIT) window->fullscreen  = XK_TRUE;
 
   // Initialize window.
   window->minWidth  = 0;

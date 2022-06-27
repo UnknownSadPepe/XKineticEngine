@@ -52,7 +52,7 @@ XkResult __xkVkPickPhysicalDevice(void) {
   xkLogDebug("Vulkan Physical Device transfer queue: %d", _xkVkContext.queueFamilyIndices.transfer);
   xkLogDebug("Vulkan Physical Device compute queue: %d", _xkVkContext.queueFamilyIndices.compute);
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);

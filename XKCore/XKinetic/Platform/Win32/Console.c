@@ -1,7 +1,6 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Console.h"
 
-
 #if defined(XK_WIN32)
 
 #include <windows.h>
@@ -30,6 +29,8 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const X
 			if(stream == INVALID_HANDLE_VALUE) return;
 		}
 	}
+
+	// Write console buffer.
 	LPDWORD numberWritten = 0;
 	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
 }
@@ -103,9 +104,14 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 		}
 	}
 
+	// Set console color.
 	SetConsoleTextAttribute(stream, attribute);
+
+	// Write console buffer.
 	LPDWORD numberWritten = 0;
 	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
+
+	// Reset console buffer.
 	SetConsoleTextAttribute(stream, CBI.wAttributes);
 }
 
@@ -113,6 +119,7 @@ void xkReadConsole(XkString buffer, const XkSize size) {
 	HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
 	if(stdin == INVALID_HANDLE_VALUE) return;
 
+	// Read console buffer.
 	DWORD numberReaden;
 	ReadConsoleA(stdin, buffer, (DWORD)size, &numberReaden, NULL);
 }

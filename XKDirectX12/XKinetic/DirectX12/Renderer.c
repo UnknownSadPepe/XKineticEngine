@@ -99,7 +99,7 @@ XkResult xkDX12CreateRenderer(XkDX12Renderer* pRenderer, XkRendererConfig* const
 		goto _catch;
 	}
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 _catch:
 	return(result);
@@ -123,7 +123,7 @@ void xkDX12DestroyRenderer(XkDX12Renderer renderer) {
 	// Destroy DirectX12 command queue.
 	__xkDX12DestroyCommandQueue(renderer->d3d12CommandQueue);
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 	xkFreeMemory(renderer);
 
 	// Terminate DirectX12 context.
@@ -138,23 +138,23 @@ void xkDX12ClearColorRenderer(XkDX12Renderer renderer, XkVec4 color) {
 }
 
 void xkDX12ClearDepthRenderer(XkDX12Renderer renderer, XkFloat32 depth) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12ClearStencilRenderer(XkDX12Renderer renderer, XkUInt32 stencil) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12ClearRenderer(XkDX12Renderer renderer) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12TopologyRenderer(XkDX12Renderer renderer, XkTopology topology) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12CullModeRenderer(XkDX12Renderer renderer, XkCullMode cullMode) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12BeginRenderer(XkDX12Renderer renderer) {
@@ -230,26 +230,26 @@ XkResult xkDX12CreateBuffer(XkDX12Buffer* pBuffer, const XkBufferUsage usage, co
 
 	XkDX12Buffer buffer = *pBuffer;
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 _catch:
 	return(result);
 }
 
 void xkDX12DestroyBuffer(XkDX12Buffer buffer) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12MapBuffer(XkDX12Buffer buffer, const XkHandle data) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12BindVertexBuffer(XkDX12Buffer buffer) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 void xkDX12BindIndexBuffer(XkDX12Buffer buffer) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 XkResult xkDX12CreateTexture2D(XkDX12Texture2D* pTexture, XkHandle data, const XkSize width, const XkSize height, XkDX12Renderer renderer) {
@@ -263,13 +263,13 @@ XkResult xkDX12CreateTexture2D(XkDX12Texture2D* pTexture, XkHandle data, const X
 
 	XkDX12Texture2D texture = *pTexture;
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 _catch:
 	return(result);
 }
 
 void xkDX12DestroyTexture2D(XkDX12Texture2D texture) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 	xkFreeMemory(texture);
 }

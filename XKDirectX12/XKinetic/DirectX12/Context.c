@@ -53,7 +53,7 @@ XkResult __xkDX12InitializeContext(void) {
   __xkDX12EnableInfoQueue();
 #endif // XKDIRECTX12_DEBUG
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);
@@ -79,5 +79,5 @@ void __xkDX12TerminateContext(void) {
   __xkDX12ReportLiveDeviceObjects();
 #endif // XKDIRECTX12_DEBUG
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }

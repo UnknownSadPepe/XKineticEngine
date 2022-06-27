@@ -5,7 +5,14 @@ file(GLOB_RECURSE CORE_SRC ${CORE_SRC_DIR}/*.c)
 add_library(XKCore SHARED ${CORE_SRC})
 
 target_include_directories(XKCore PRIVATE ${CORE_SRC_DIR})
-target_include_directories(XKCore PRIVATE  ${PROJECT_SOURCE_DIR}/External/mingw)
+
+if(WIN32)
+	target_include_directories(XKCore PRIVATE  ${PROJECT_SOURCE_DIR}/External/mingw)
+endif()
+
+if(UNIX AND NOT APPLE)
+	target_include_directories(XKCore PRIVATE  ${PROJECT_SOURCE_DIR}/External/wayland)
+endif()
 
 target_compile_definitions(XKCore PRIVATE __XKCORE_BUILD__)
 
@@ -41,33 +48,29 @@ if(UNIX AND NOT APPLE)
 
   wayland_generate(
     "${WAYLAND_CLIENT_PKGDATADIR}/wayland.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-client-protocol")
+		"${PROJECT_SOURCE_DIR}/External/wayland/wayland-client-protocol")
 
   wayland_generate(
     "${WAYLAND_PROTOCOLS_BASE}/stable/xdg-shell/xdg-shell.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-xdg-shell-client-protocol")
+		"${PROJECT_SOURCE_DIR}/External/wayland/xdg-shell-client-protocol")
 
   wayland_generate(
     "${WAYLAND_PROTOCOLS_BASE}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-xdg-decoration-client-protocol")
-
-  wayland_generate(
-    "${WAYLAND_PROTOCOLS_BASE}/stable/viewporter/viewporter.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-viewporter-client-protocol")
+		"${PROJECT_SOURCE_DIR}/External/wayland/xdg-decoration-client-protocol")
 
   wayland_generate(
     "${WAYLAND_PROTOCOLS_BASE}/unstable/relative-pointer/relative-pointer-unstable-v1.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-relative-pointer-unstable-v1-client-protocol")
+		"${PROJECT_SOURCE_DIR}/External/wayland/wayland-relative-pointer-unstable-v1-client-protocol")
 
   wayland_generate(
     "${WAYLAND_PROTOCOLS_BASE}/unstable/pointer-constraints/pointer-constraints-unstable-v1.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-pointer-constraints-unstable-v1-client-protocol")
+		"${PROJECT_SOURCE_DIR}/External/wayland/wayland-pointer-constraints-unstable-v1-client-protocol")
 
   wayland_generate(
     "${WAYLAND_PROTOCOLS_BASE}/unstable/idle-inhibit/idle-inhibit-unstable-v1.xml"
-    "${CORE_SRC_DIR}/XKinetic/Platform/Linux/wayland-idle-inhibit-unstable-v1-client-protocol")
+		"${PROJECT_SOURCE_DIR}/External/wayland/wayland-idle-inhibit-unstable-v1-client-protocol")
 
-	target_link_libraries(XKCore PRIVATE wayland-client wayland-cursor wayland-egl xkbcommon)
+	target_link_libraries(XKCore PRIVATE wayland-client wayland-cursor xkbcommon)
 endif()
 
 # Link Win32 specific libraries.

@@ -137,7 +137,7 @@ XK_INLINE XKMATH_API XkDVec3 xkDVec3Div(const XkDVec3 a, const XkDVec3 b) {
 
 XK_INLINE XKMATH_API XkBool xkVec3Compare(const XkVec3 a, const XkVec3 b) {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
-	/// TODO: implementation.
+	/// TODO: Implementation.
 #else
 	if(xkAbs(a.x - b.x) > XK_FLOAT32_EPSILON) return(XK_FALSE);
   if(xkAbs(a.y - b.y) > XK_FLOAT32_EPSILON) return(XK_FALSE);
@@ -149,7 +149,7 @@ XK_INLINE XKMATH_API XkBool xkVec3Compare(const XkVec3 a, const XkVec3 b) {
 
 XK_INLINE XKMATH_API XkBool xkDVec3Compare(const XkDVec3 a, const XkDVec3 b) {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
-	/// TODO: implementation.
+	/// TODO: Implementation.
 #else
 	if(xkAbs(a.x - b.x) > XK_FLOAT64_EPSILON) return(XK_FALSE);
   if(xkAbs(a.y - b.y) > XK_FLOAT64_EPSILON) return(XK_FALSE);
@@ -209,7 +209,7 @@ XK_INLINE XKMATH_API XkFloat32 xkVec3Dot(const XkVec3 a, const XkVec3 b) {
 	XkFloat32 result = 0.0f;
 
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
-	/// TODO: implementation.
+	/// TODO: Implementation.
 #else
   result = (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 #endif // __XKMATH_AVX__ || __XKMATH_AVX2__
@@ -221,7 +221,7 @@ XK_INLINE XKMATH_API XkFloat64 xkDVec3Dot(const XkDVec3 a, const XkDVec3 b) {
 	XkFloat64 result = 0.0;
 
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
-	/// TODO: implementation.
+	/// TODO: Implementation.
 #else
   result = (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
 #endif // __XKMATH_AVX__ || __XKMATH_AVX2__

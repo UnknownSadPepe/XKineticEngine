@@ -11,7 +11,7 @@ struct XkMeshSystem {
 
 struct XkMesh {
   XkMeshID ID;
-  /// TODO: implementation.
+  /// TODO: Implementation.
 };
 
 XkResult xkCreateMeshSystem(XkMeshSystem* pSystem) {
@@ -30,19 +30,19 @@ XkResult xkCreateMeshSystem(XkMeshSystem* pSystem) {
   result = xkCreatePoolAllocator(&system->meshs, XK_MESH_SYSTEM_ARRAY_SIZE, struct XkMesh);
   if(result != XK_SUCCESS) goto _catch;
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyMeshSystem(XkMeshSystem system) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   xkDestroyPoolAllocator(system->meshs);
 }
 
 XkMeshID xkCreateMesh(XkMeshSystem system, XkModelConfig* const pConfig) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   XkMeshID id = 0;
 
   id = ++system->meshID;
@@ -52,5 +52,5 @@ _catch:
 }
 
 void xkDestroyMesh(XkMeshSystem system, XkMeshID id) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }

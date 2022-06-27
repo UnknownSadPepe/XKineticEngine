@@ -19,14 +19,14 @@ XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkString path) {
 
   xkNCopyString(loader->path, path, XK_MODEL_LOADER_PATH_MAX_SIZE);
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyModelLoader(XkModelLoader loader) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   xkFreeMemory(loader);
 }
 
@@ -36,7 +36,7 @@ XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkStrin
   XkChar fullPath[XK_MODEL_LOADER_PATH_MAX_SIZE];
   xkStringNFormat(fullPath, XK_MODEL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
   pConfig->vertexCount = 0;
   pConfig->vertices = XK_NULL_HANDLE;
   pConfig->indexCount = 0;
@@ -47,5 +47,5 @@ _catch:
 }
 
 void xkUnloadModel(XkModelLoader loader, XkModelConfig* const pConfig) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }

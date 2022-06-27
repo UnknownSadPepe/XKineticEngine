@@ -10,14 +10,14 @@ XkResult xkInitializeJoysticks(void) {
 	XkResult result = XK_SUCCESS;
 
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 _catch:
 	return(result);
 }
 
 void xkTerminateJoysticks(void) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
@@ -34,7 +34,7 @@ XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
 	XkJoystick joystick = *pJoystick;
 
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 	// Call joystick connect event.
 	__xkInputJoystickEvent(joystick, XK_JOYSTICK_CONNECTED);
@@ -56,7 +56,7 @@ XkString xkJoystickMappingName(XkJoystick joystick) {
 }
 
 void xkPollJoystickEvents(XkJoystick joystick) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 }
 
 #endif // XK_WIN32

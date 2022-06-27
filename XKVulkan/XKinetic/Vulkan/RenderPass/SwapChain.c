@@ -52,7 +52,7 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
   vkSwapChainCreateInfo.compositeAlpha            = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
   vkSwapChainCreateInfo.presentMode               = vkPresentMode;
   vkSwapChainCreateInfo.clipped                   = VK_TRUE;
-  vkSwapChainCreateInfo.oldSwapchain              = VK_NULL_HANDLE; /// TODO: implementation 'oldSwapChain'.
+  vkSwapChainCreateInfo.oldSwapchain              = VK_NULL_HANDLE; /// TODO: Implementation 'oldSwapChain'.
 
   // Create Vulkan swap chain.
   VkResult vkResult = vkCreateSwapchainKHR(_xkVkContext.vkLogicalDevice, &vkSwapChainCreateInfo, VK_NULL_HANDLE, pVkSwapChain);

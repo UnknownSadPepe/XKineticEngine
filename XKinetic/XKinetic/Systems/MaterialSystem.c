@@ -11,7 +11,7 @@ struct XkMaterialSystem {
 
 struct XkMaterial {
   XkMaterialID ID;
-  /// TODO: implementation.
+  /// TODO: Implementation.
 };
 
 XkResult xkCreateMaterialSystem(XkMaterialSystem* pSystem) {
@@ -30,19 +30,19 @@ XkResult xkCreateMaterialSystem(XkMaterialSystem* pSystem) {
   result = xkCreatePoolAllocator(&system->materials, XK_MATERIAL_SYSTEM_ARRAY_SIZE, struct XkMaterial);
   if(result != XK_SUCCESS) goto _catch;
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyMaterialSystem(XkMaterialSystem system) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   xkDestroyPoolAllocator(system->materials);
 }
 
 XkMaterialID xkCreateMaterial(XkMaterialSystem system, XkMaterialConfig* const pConfig) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   XkMaterialID id = 0;
 
   id = ++system->materialID;
@@ -52,5 +52,5 @@ _catch:
 }
 
 void xkDestroyMaterial(XkMaterialSystem system, XkMaterialID id) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }

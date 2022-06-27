@@ -144,6 +144,7 @@ static void __xkWindowScroll(XkWindow window, XkFloat64 x, XkFloat64 y) {
 }
 
 static void __xkWindowClose(XkWindow window) {
+	xkLogNotice("close");
 	_xkApplication.exit = XK_TRUE;
 }
 
@@ -255,6 +256,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
 	xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
 
+	/*
 	// Create image loader.
 	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
 	if(result != XK_SUCCESS) {
@@ -313,7 +315,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 
 	// Unload window small icon.
 	xkUnloadImage(_xkApplication.imageLoader, &smallIconConfig);
-
+*/
 _catch:
 	return(result);
 }
@@ -337,17 +339,19 @@ void xkDestroyApplication(void) {
 }
 
 void xkUpdateApplication(void) {
-	while(!_xkApplication.exit) {
+	while(_xkApplication.exit == XK_FALSE) {
 		// Poll window events.
-		xkWaitWindowEvents();
+		xkPollWindowEvents();
+
+		xkLogNotice("update");
 
 		// Poll joysticks events.
-		if(_xkApplication.joystick1) {
-			xkPollJoystickEvents(_xkApplication.joystick1);
-		}
+		//if(_xkApplication.joystick1) {
+		//	xkPollJoystickEvents(_xkApplication.joystick1);
+		//}
 
-		if(_xkApplication.joystick2) {
-			xkPollJoystickEvents(_xkApplication.joystick2);
-		}
+		//if(_xkApplication.joystick2) {
+		//	xkPollJoystickEvents(_xkApplication.joystick2);
+		//}
 	}
 }

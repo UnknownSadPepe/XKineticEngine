@@ -15,3 +15,7 @@ target_link_libraries(${PROJECT_NAME} XKCore XKMath)
 if(CMAKE_BUILD_TYPE EQUAL "Debug")
   target_compile_definitions(${PROJECT_NAME} PRIVATE __XK_DEBUG__)
 endif()
+
+if(UNIX AND NOT APPLE)
+  target_link_libraries(${PROJECT_NAME} m)
+endif()

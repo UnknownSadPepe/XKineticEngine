@@ -1,9 +1,9 @@
 #include "XKinetic/Scene/SceneManager.h"
 
 void xkLoadScene(XkString name) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }
 
 void xkUnloadScene(XkString name) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }

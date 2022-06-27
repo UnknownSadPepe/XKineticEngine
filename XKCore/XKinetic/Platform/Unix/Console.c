@@ -113,14 +113,16 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 	}
 	// Write console color.
 	write(stream, pColor, colorSize);
+
 	// Write console buffer.
 	write(stream, buffer, size);
+
 	// Reset console color.
 	write(stream, XK_UNIX_COLOR_RESET, 5);
 }
 
 void xkReadConsole(XkString buffer, const XkSize size) {
-	// Read console.
+	// Read console buffer.
 	read(0, buffer, size);
 }
 

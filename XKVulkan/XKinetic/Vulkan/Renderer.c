@@ -80,7 +80,7 @@ XkString __xkVkGetErrorString(VkResult error) {
 }
 
 XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 	XkResult result = XK_SUCCESS;
 
 	*pRenderer = xkAllocateMemory(sizeof(struct XkVkRenderer));
@@ -177,14 +177,14 @@ XkResult xkVkCreateRenderer(XkVkRenderer* pRenderer, XkRendererConfig* const pCo
   	}		
 	}
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 _catch:
 	return(result);
 }
 
 void xkVkDestroyRenderer(XkVkRenderer renderer) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 	
 	// Destroy Vulkan flight fence.
 	for(uint32_t i = 0; i < XKVULKAN_FRAME_COUNT; i++) {
@@ -246,7 +246,7 @@ void xkVkClearStencilRenderer(XkVkRenderer renderer, XkUInt32 stencil) {
 }
 
 void xkVkClearRenderer(XkVkRenderer renderer) {
-	/// TODO: implementation.
+	/// TODO: Implementation.
 
 	// Template Vulkan command buffer.
 	VkCommandBuffer vkCommandBuffer = renderer->vkCommandBuffers[renderer->frameIndex];
@@ -454,10 +454,10 @@ XkResult xkVkCreateTexture2D(XkVkTexture2D* pTexture, XkHandle data, const XkSiz
 
 	texture->renderer = renderer;
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 	const VkDeviceSize vkSize = (width * height) * 4;
 
-	/// TODO: implementation.
+	/// TODO: Implementation.
 	uint32_t mipLevels = 1; 
 
 	VkExtent3D vkExtent 	= {0};

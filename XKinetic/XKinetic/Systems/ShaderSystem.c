@@ -11,7 +11,7 @@ struct XkShaderSystem {
 
 struct XkShader {
   XkShaderID ID;
-  /// TODO: implementation.
+  /// TODO: Implementation.
 };
 
 XkResult xkCreateShaderSystem(XkShaderSystem* pSystem) {
@@ -30,19 +30,19 @@ XkResult xkCreateShaderSystem(XkShaderSystem* pSystem) {
   result = xkCreatePoolAllocator(&system->shaders, XK_SHADER_SYSTEM_ARRAY_SIZE, struct XkShader);
   if(result != XK_SUCCESS) goto _catch;
 
-  /// TODO: implementation.
+  /// TODO: Implementation.
 
 _catch:
   return(result);
 }
 
 void xkDestroyShaderSystem(XkShaderSystem system) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   xkDestroyPoolAllocator(system->shaders);
 }
 
 XkShaderID xkCreateShader(XkShaderSystem system, XkShaderConfig* const pConfig) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
   XkShaderID id = 0;
 
   id = ++system->shaderID;
@@ -52,5 +52,5 @@ _catch:
 }
 
 void xkDestroyShader(XkShaderSystem system, XkShaderID id) {
-  /// TODO: implementation.
+  /// TODO: Implementation.
 }
