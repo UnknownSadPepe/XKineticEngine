@@ -343,8 +343,6 @@ void xkUpdateApplication(void) {
 		// Poll window events.
 		xkPollWindowEvents();
 
-		xkLogNotice("update");
-
 		// Poll joysticks events.
 		//if(_xkApplication.joystick1) {
 		//	xkPollJoystickEvents(_xkApplication.joystick1);

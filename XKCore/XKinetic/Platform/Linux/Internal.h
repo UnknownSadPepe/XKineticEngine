@@ -20,6 +20,9 @@ typedef struct {
 
 	XkSize width;
 	XkSize height;
+
+	XkFloat64 cursorPosX;
+	XkFloat64 cursorPosY;
 } __XkWaylandWindow;
 
 #define XK_PLATFORM_WINDOW __XkWaylandWindow wayland
@@ -69,6 +72,7 @@ typedef struct {
 	unsigned int            							modifiers;
 
 	void*																	keyboardWindowFocus;
+	void*																	pointerWindowFocus;
 } __XkWaylandPlatform;
 
 #define XK_PLATFORM __XkWaylandPlatform wayland

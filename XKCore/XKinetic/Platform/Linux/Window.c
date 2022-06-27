@@ -34,7 +34,6 @@ static XkBool __xkXDGCreateDecorations(XkWindow);
 static void __xkXDGDestroyDecorations(XkWindow);
 
 struct wl_buffer* __xkWaylandCreateShmBuffer(const int, const int, const int, const int);
-static void __xkWaylandSetContentAreaOpaque(XkWindow);
 static void __xkWaylandResizeWindow(XkWindow);
 
 static void __xkWaylandCreateKeyTable(void);
@@ -55,18 +54,7 @@ static void __xkXDGSurfaceHandleConfigure(void* data, struct xdg_surface* xdgSur
 
   xdg_surface_ack_configure(xdgSurface, serial);
 
-  int width = window->wayland.width;
-  int height = window->wayland.height;
-
- 	struct wl_buffer* wlBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * 4) * height);
- 	if(!wlBuffer) {
- 		return;
- 	}
-
 	__xkWaylandResizeWindow(window);
-
-	wl_surface_attach(window->wayland.wlSurface, wlBuffer, 0, 0);
-	wl_surface_commit(window->wayland.wlSurface);
 
 _catch:
 	return;
@@ -98,7 +86,7 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
   }
 
   // Input window size.
-	if(width != 0 && height != 0) {
+	if((width != 0 && height != 0) && (width != window->wayland.width && height != window->wayland.height)) {
 		window->wayland.width = (XkSize)width;
 		window->wayland.height = (XkSize)height;
 
@@ -135,6 +123,119 @@ static void __xkXDGToplevelHandleClose(void* data, struct xdg_toplevel* xdgTople
 static const struct xdg_toplevel_listener _xkXDGToplevelListener = {
   __xkXDGToplevelHandleConfigure,
   __xkXDGToplevelHandleClose
+};
+
+static void __xkWaylandPointerHandleEnter(void* data, struct wl_pointer* wlPointer, uint32_t serial, struct wl_surface* wlSurface, wl_fixed_t sx, wl_fixed_t sy) {
+	// Happens in the case we destroyed the surface.
+	if(!wlSurface) {
+		return;
+	}
+
+	XkWindow window = wl_surface_get_user_data(wlSurface);
+	if(!window) {
+		return;
+	}
+
+	_xkPlatform.wayland.pointerWindowFocus = window;
+
+	// Input cursor enter.
+	__xkInputWindowCursorEnter(window, XK_TRUE);
+}
+
+static void __xkWaylandPointerHandleLeave(void* data, struct wl_pointer* wlPointer, uint32_t serial, struct wl_surface* wlSurface) {
+	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	if(!window) {
+		return;
+	}
+
+	_xkPlatform.wayland.pointerWindowFocus = NULL;
+
+	// Input cursor enter.
+	__xkInputWindowCursorEnter(window, XK_FALSE);
+}
+
+static void __xkWaylandPointerHandleMotion(void* data,	struct wl_pointer* wlPointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy) {
+	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	if(!window) {
+		return;
+	}
+
+	if(window->cursorMode == XK_CURSOR_DISABLED) {
+		return;
+	}
+
+	double x = wl_fixed_to_double(sx);
+	double y = wl_fixed_to_double(sy);
+
+	window->wayland.cursorPosX = (XkFloat64)x;
+	window->wayland.cursorPosY = (XkFloat64)y;
+
+	// Input cursor.
+	__xkInputWindowCursor(window, (XkFloat64)x, (XkFloat64)y);
+}
+
+static void __xkWaylandPointerHandleButton(void* data, struct wl_pointer* wlPointer, uint32_t serial, uint32_t time, uint32_t btn, uint32_t state) {
+	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	if(!window) {
+		return;
+	}
+
+	const XkWindowButton button = btn - BTN_LEFT;
+	const XkWindowAction action = state == WL_POINTER_BUTTON_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+
+	// Input button.
+	__xkInputWindowButton(window, button, action, _xkPlatform.wayland.modifiers);
+}
+
+static void __xkWaylandPointerHandleAxis(void* data, struct wl_pointer* wlPointer, uint32_t time, uint32_t axis, wl_fixed_t value) {
+	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	if(!window) {
+		return;
+	}
+
+	double x = 0.0;
+	double y = 0.0;
+
+  // The factor 10 is commonly used to convert to "scroll" step means 1.0.
+	const double scrollFactor = 1.0 / 15.0;
+
+	if (axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
+		x = -wl_fixed_to_double(value) * scrollFactor;
+	} else if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
+		__xkErrorHandler("%f", -wl_fixed_to_double(value) * scrollFactor);
+		y = -wl_fixed_to_double(value) * scrollFactor;
+	}
+
+	// Input scroll. 
+	__xkInputWindowScroll(window, (XkFloat64)x, (XkFloat64)y);
+}
+
+static void __xkWaylandPointerHandleFrame(void* data, struct wl_pointer* wlPointer) {
+	/// NOTE: Nothing to do here.
+}
+
+static void __xkWaylandPointerHandleAxisSource(void* data, struct wl_pointer* wl_pointer, uint32_t axis_source) {
+	/// NOTE: Nothing to do here.
+}
+
+void __xkWaylandPointerHandleAxisStop(void* data, struct wl_pointer* wl_pointer, uint32_t time, uint32_t axis) {
+	/// NOTE: Nothing to do here.
+}
+
+void __xkWaylandPointerHandleAxisDiscrete(void* data, struct wl_pointer* wl_pointer, uint32_t axis, int32_t discrete) {
+	/// NOTE: Nothing to do here.
+}
+
+static const struct wl_pointer_listener _xkWaylandPointerListener = {
+	__xkWaylandPointerHandleEnter,
+	__xkWaylandPointerHandleLeave,
+	__xkWaylandPointerHandleMotion,
+	__xkWaylandPointerHandleButton,
+	__xkWaylandPointerHandleAxis,
+	__xkWaylandPointerHandleFrame,
+	__xkWaylandPointerHandleAxisSource,
+	__xkWaylandPointerHandleAxisStop,
+	__xkWaylandPointerHandleAxisDiscrete
 };
 
 static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKeyboard, uint32_t format, int fd, uint32_t size) {
@@ -203,22 +304,6 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 	// Destroy XKB compose table.
 	xkb_compose_table_unref(xkbComposeTable);
 
-	// Destroy old XKB keymap.
-	if(_xkPlatform.wayland.xkbKeymap) {
-		//xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
-
-		//_xkPlatform.wayland.xkbKeymap = NULL;
-	}
-
-	// Destroy old XKB state.
-	if(_xkPlatform.wayland.xkbState) {
-		//xkb_state_unref(_xkPlatform.wayland.xkbState);
-
-		//_xkPlatform.wayland.xkbState = NULL;
-	}
-
-	__xkErrorHandler("keymap");
-
   // Initialize XKB mod indices.
 	_xkPlatform.wayland.xkbControlIndex  = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Control");
 	_xkPlatform.wayland.xkbAltIndex      = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod1");
@@ -264,8 +349,8 @@ static void __xkWaylandKeyboardHandleKey(void* data, struct wl_keyboard* wlKeybo
 		return;
 	}
 
-	const int key = _xkPlatform.keycodes[scancode];
-	const int action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+	const XkWindowKey key = _xkPlatform.keycodes[scancode];
+	const XkWindowAction action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
 
 	__xkInputWindowKey(window, key, action, _xkPlatform.wayland.modifiers);
 }
@@ -325,7 +410,7 @@ static const struct wl_keyboard_listener _xkWaylandKeyboardListener = {
 static void __xkWaylandSeatHandleCapabilities(void* data, struct wl_seat* wlSeat, enum wl_seat_capability wlCapability) {
 	if((wlCapability & WL_SEAT_CAPABILITY_POINTER) && !_xkPlatform.wayland.wlPointer) {
 		_xkPlatform.wayland.wlPointer = wl_seat_get_pointer(wlSeat);
-		//wl_pointer_add_listener(_xkPlatform.wayland.wlPointer, &_xkWaylandPointerListener, NULL);
+		wl_pointer_add_listener(_xkPlatform.wayland.wlPointer, &_xkWaylandPointerListener, NULL);
 	} else if(!(wlCapability & WL_SEAT_CAPABILITY_POINTER) && _xkPlatform.wayland.wlPointer) {
 		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
 
@@ -752,9 +837,11 @@ void xkFocusWindow(XkWindow window) {
 
 void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
 	window->wayland.width = width;
-	window->wayland.width = height;
+	window->wayland.height = height;
 
 	__xkWaylandResizeWindow(window);
+
+	__xkInputWindowSize(window, width, height);
 }
 
 void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
@@ -814,7 +901,13 @@ void xkSetCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 
 }
 
 void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
-	/// TODO: Implementation.
+	if(pXPos) {
+		*pXPos = window->wayland.cursorPosX;
+	}
+
+	if(pYPos) {
+		*pYPos = window->wayland.cursorPosY;
+	}
 }
 
 void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
@@ -887,6 +980,7 @@ static void __xkXDGDestorySurface(XkWindow window) {
 static XkBool __xkXDGCreateDecorations(XkWindow window) {
 	XkBool result = XK_FALSE;
 
+	// Create XDG decorations.
 	window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
 	if(!window->wayland.xdgDecoration) {
 		result = XK_TRUE;
@@ -894,6 +988,7 @@ static XkBool __xkXDGCreateDecorations(XkWindow window) {
 		goto _catch;
 	}
 
+	// Set XDG decorations server size mode.
   zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
 
 _catch:
@@ -966,7 +1061,17 @@ _catch:
 	return(wlBuffer);
 }
 
-static void __xkWaylandSetContentAreaOpaque(XkWindow window) {
+static void __xkWaylandResizeWindow(XkWindow window) {
+	int width = window->wayland.width;
+	int height = window->wayland.height;
+
+	// Create Wayland surface buffer.
+	struct wl_buffer* wlBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4);
+ 	if(!wlBuffer) {
+		__xkErrorHandle("Wayland: Failed to create shared buffer");
+ 		return;
+ 	}
+
 	// Create Wayland region.
 	struct wl_region* wlRegion = wl_compositor_create_region(_xkPlatform.wayland.wlCompositor);
 	if(!wlRegion) {
@@ -982,10 +1087,12 @@ static void __xkWaylandSetContentAreaOpaque(XkWindow window) {
 	
 	// Destroy Wayland region.
 	wl_region_destroy(wlRegion);
-}
 
-static void __xkWaylandResizeWindow(XkWindow window) {
-	__xkWaylandSetContentAreaOpaque(window);
+ 	// Attach Wayland shared buffer to surface.
+	wl_surface_attach(window->wayland.wlSurface, wlBuffer, 0, 0);
+
+	// Commit surface
+	wl_surface_commit(window->wayland.wlSurface);
 }
 
 static void __xkWaylandCreateKeyTable(void) {
