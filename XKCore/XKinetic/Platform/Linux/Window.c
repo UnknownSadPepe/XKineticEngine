@@ -27,7 +27,7 @@
 #include "XKinetic/Core/String.h"
 
 static XkBool __xkXDGCreateSurface(XkWindow);
-static void __xkXDGSetDecorations(XkWindow);
+static void __xkXDGDestorySurface(XkWindow);
 
 struct wl_buffer* __xkWaylandCreateShmBuffer(const int, const int, const int, const int);
 static void __xkWaylandSetContentAreaOpaque(XkWindow);
@@ -203,6 +203,13 @@ XkResult xkInitializeWindow(void) {
 		goto _catch;
 	}
 
+	// Check Wayland shared memory register object.
+	if(!_xkPlatform.wayland.wlShm) {
+		__xkErrorHandle("Wayland: Failed to register shm");
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
 	// Check Wayland output register object.
 	if(!_xkPlatform.wayland.wlOutput) {
 		__xkErrorHandle("Wayland: Failed to register output");
@@ -229,6 +236,16 @@ _catch:
 }
 
 void xkTerminateWindow(void) {
+	// Destroy Wayland output.
+	if(_xkPlatform.wayland.wlOutput) {
+		wl_output_destroy(_xkPlatform.wayland.wlOutput);
+	}
+
+	// Destroy Wayland shared memory.
+	if(_xkPlatform.wayland.wlShm) {
+		wl_shm_destroy(_xkPlatform.wayland.wlShm);
+	}
+
 	// Destroy Wayland compositor.
   if(_xkPlatform.wayland.wlCompositor){
 		wl_compositor_destroy(_xkPlatform.wayland.wlCompositor);
@@ -290,13 +307,11 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	if(hint & XK_WINDOW_FLOATING_BIT) 	window->floating = XK_TRUE;
 
   // Initialize window.
-  window->minWidth  = 0;
-  window->minHeight = 0;
-  window->maxWidth  = 0;
-  window->maxHeight = 0;
-  window->cursorMode = XK_CURSOR_NORMAL;
-	/// NOTE: needs to be free.
-  window->title = xkDuplicateString(title);
+  window->cursorMode 	= XK_CURSOR_NORMAL;
+	if(title) {
+		/// NOTE: needs to be free.
+  	window->title 		= xkDuplicateString(title);
+	}
 
 	// Initialize Wayland window.
 	window->wayland.width = width;
@@ -310,25 +325,30 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 		goto _catch;
 	}
 
+	if(__xkXDGCreateSurface(window)) {
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;		
+	}
+
+	// Set XDG window title.
+	if(title) {
+  	xdg_toplevel_set_title(window->wayland.xdgToplevel, window->title);
+	}
+
+	// Set window not resizable.
+	if(!window->resizable) {
+		xkSetWindowSizeLimits(window, width, height, width, height);
+	}
+
+	/// NOTE: I don't want commit Wayland surface here, because i commit it in show function.
+
 _catch:
 	return(result);
 }
 
 void xkDestroyWindow(XkWindow window) {
-	// Destroy XDG decoration.
-	if(window->wayland.xdgDecoration) {
-		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
-	}
-
-	// Destroy XDG toplevel.
-	if(window->wayland.xdgToplevel) {
-		xdg_toplevel_destroy(window->wayland.xdgToplevel);
-	}
-
-	// Destroy XDG surface.
-	if(window->wayland.xdgSurface) {
-		xdg_surface_destroy(window->wayland.xdgSurface);
-	}
+	// Destroy XDG components.
+	__xkXDGDestorySurface(window);
 
 	// Destroy Wayland surface.
 	if(window->wayland.wlSurface) {
@@ -336,38 +356,65 @@ void xkDestroyWindow(XkWindow window) {
 	}
 
   // Free window title.
-	xkFreeMemory(window->title);
+  if(window->title) {
+		xkFreeMemory(window->title);
+	}
 	
   // Free window.
 	xkFreeMemory(window);
 }
 
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
-	if(!window->wayland.xdgToplevel) {
-		__xkXDGCreateSurface(window);
-	}
-
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT:
+			if(!window->wayland.xdgToplevel) {
+				__xkXDGCreateSurface(window);
+			}
+
+			xdg_toplevel_unset_maximized(window->wayland.xdgToplevel);
+			xdg_toplevel_unset_fullscreen(window->wayland.xdgToplevel);
 			break;
 
 		case XK_WINDOW_SHOW_MAXIMIZED:
+			if(!window->wayland.xdgToplevel) {
+				__xkXDGCreateSurface(window);
+			}
+
+			// Minimize Wayland window.
 			xdg_toplevel_set_maximized(window->wayland.xdgToplevel);
 			break;
 
 		case XK_WINDOW_SHOW_MINIMIZED:
+			if(!window->wayland.xdgToplevel) {
+				__xkXDGCreateSurface(window);
+			}
+
+			// Maximize Wayland window.
 			xdg_toplevel_set_minimized(window->wayland.xdgToplevel);
 			break;
 
 		case XK_WINDOW_SHOW_FULLSCREEN:
+			if(!window->wayland.xdgToplevel) {
+				__xkXDGCreateSurface(window);
+			}
+
+			// Fullscreen Wayland window.
 			xdg_toplevel_set_fullscreen(window->wayland.xdgToplevel, _xkPlatform.wayland.wlOutput);
 			break;
 
 		case XK_WINDOW_HIDE:
+			// Destroy XDG components.
+			if(window->wayland.xdgToplevel) {
+				__xkXDGDestorySurface(window);
+			}
+
+			// Set null Wayland surface contents.
       wl_surface_attach(window->wayland.wlSurface, NULL, 0, 0);
-      wl_surface_commit(window->wayland.wlSurface);
 			break;
 	}
+
+	// Commit Wayland surface.
+  wl_surface_commit(window->wayland.wlSurface);
 }
 
 void xkFocusWindow(XkWindow window) {
@@ -393,22 +440,18 @@ void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeigh
 }
 
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
-	// Set window min/max values.
-	window->minWidth 	= minWidth;
-	window->minHeight = minHeight;
-	window->maxWidth 	= maxWidth;
-	window->maxHeight = maxHeight;
-
-	if(window->wayland.xdgToplevel) {
+	if(minWidth != 0 && minHeight != 0) {
 		// Set XDG toplevel min size.
   	xdg_toplevel_set_min_size(window->wayland.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
+	}
 
+	if(maxWidth != 0 && maxHeight) {
 		// Set XDG toplevel max size.
 		xdg_toplevel_set_max_size(window->wayland.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
-
-		// Commit Wayland surface.
-		wl_surface_commit(window->wayland.wlSurface);
 	}
+
+	// Commit Wayland surface.
+	wl_surface_commit(window->wayland.wlSurface);
 }
 
 void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
@@ -429,10 +472,8 @@ void xkSetWindowTitle(XkWindow window, const XkString title) {
 	// Duplication new window title.
   window->title = xkDuplicateString(title);
 
-  if(window->wayland.xdgToplevel) {
-		// Set XDG toplevel title.
-		xdg_toplevel_set_title(window->wayland.xdgToplevel, title);
-  }
+	// Set XDG toplevel title.
+	xdg_toplevel_set_title(window->wayland.xdgToplevel, title);
 }
 
 void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
@@ -466,12 +507,12 @@ void xkWaitWindowEvents(void) {
 }
 
 static XkBool __xkXDGCreateSurface(XkWindow window) {
-	XkBool result = XK_TRUE;
+	XkBool result = XK_FALSE;
 
-	// Get XDG surface from Wayland surface.
+// Get XDG surface from Wayland surface.
 	window->wayland.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.wayland.xdgBase, window->wayland.wlSurface);
 	if(!window->wayland.xdgSurface) {
-		result = XK_FALSE;
+		result = XK_TRUE;
 		__xkErrorHandle("XDG: Failed to create surface");
 		goto _catch;
   }
@@ -482,7 +523,7 @@ static XkBool __xkXDGCreateSurface(XkWindow window) {
 	// Get XDG toplevel.
 	window->wayland.xdgToplevel = xdg_surface_get_toplevel(window->wayland.xdgSurface);
   if(!window->wayland.xdgToplevel) {
-		result = XK_FALSE;
+		result = XK_TRUE;
 		__xkErrorHandle("XDG: Failed to create toplevel");
 		goto _catch;
   }
@@ -490,21 +531,37 @@ static XkBool __xkXDGCreateSurface(XkWindow window) {
 	// Add XDG toplevel listener.
   xdg_toplevel_add_listener(window->wayland.xdgToplevel, &_xkXDGToplevelListener, window);
 
-	// Set XDG window title.
-  xdg_toplevel_set_title(window->wayland.xdgToplevel, window->title);
-
   // Set XDG window decorations.
 	if(window->decorated) {
 		window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
   	zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
 	}
 
-	// Commit pending Wayland surface state.
-  wl_surface_commit(window->wayland.wlSurface);
-  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
-
 _catch:
 	return(result);
+}
+
+static void __xkXDGDestorySurface(XkWindow window) {
+	// Destroy XDG decoration.
+	if(window->wayland.xdgDecoration) {
+		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
+
+		window->wayland.xdgDecoration = NULL;
+	}
+
+	// Destroy XDG toplevel.
+	if(window->wayland.xdgToplevel) {
+		xdg_toplevel_destroy(window->wayland.xdgToplevel);
+
+		window->wayland.xdgToplevel = NULL;
+	}
+
+	// Destroy XDG surface.
+	if(window->wayland.xdgSurface) {
+		xdg_surface_destroy(window->wayland.xdgSurface);
+
+		window->wayland.xdgSurface = NULL;
+	}
 }
 
 static int __xkWaylandAllocateShmFile(const int size) {
@@ -583,7 +640,7 @@ static void __xkWaylandSetContentAreaOpaque(XkWindow window) {
 }
 
 static void __xkWaylandResizeWindow(XkWindow window) {
-	__xkWaylandSetContentAreaOpaque(window);
+	//__xkWaylandSetContentAreaOpaque(window);
 }
 
 #endif // XK_LINUX

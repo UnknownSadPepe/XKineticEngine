@@ -242,7 +242,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
-	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
+	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_FULLSCREEN);
 
 	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
 	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);

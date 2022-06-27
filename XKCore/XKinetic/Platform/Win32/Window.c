@@ -133,14 +133,16 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	if(hint & XK_WINDOW_FLOATING_BIT)   window->floating    = XK_TRUE;
 
   // Initialize window.
-  window->minWidth  = 0;
-  window->minHeight = 0;
-  window->maxWidth  = 0;
-  window->maxHeight = 0;
-  window->cursorMode = XK_CURSOR_NORMAL;
-  window->win32.hCursor = INVALID_HANDLE_VALUE;
-  /// NOTE: needs to be free.
-  window->title = xkDuplicateString(title);
+  window->win32.minWidth  = 0;
+  window->win32.minHeight = 0;
+  window->win32.maxWidth  = 0;
+  window->win32.maxHeight = 0;
+  window->cursorMode      = XK_CURSOR_NORMAL;
+  window->win32.hCursor   = INVALID_HANDLE_VALUE;
+  if(title) {
+    /// NOTE: needs to be free.
+    window->title         = xkDuplicateString(title);
+  }
 
   // Get Win32 window styles.
   DWORD style   = __xkWin32GetWindowStyle(window);
@@ -199,10 +201,14 @@ void xkDestroyWindow(XkWindow window) {
   }
 
   // Destroy Win32 window.
-	DestroyWindow(window->win32.handle);
+  if(window->win32.handle) {
+	 DestroyWindow(window->win32.handle);
+  }
 
   // Free window title.
-	xkFreeMemory(window->title);
+  if(window->title) {
+    xkFreeMemory(window->title);
+  }
 
   // Free window.
 	xkFreeMemory(window);
@@ -221,7 +227,7 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
     }
 
 		case XK_WINDOW_SHOW_MAXIMIZED: {
-      if (window->fullscreen) {
+      if(window->fullscreen) {
         window->fullscreen = XK_FALSE;
         __xkWin32UpdateWindowStyle(window);
       }
@@ -272,10 +278,13 @@ void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeigh
   RECT rect;
   GetClientRect(window->win32.handle, &rect);
 
-  if(pWidth)
+  if(pWidth) {
   	*pWidth = rect.right;
-  if(pHeight)
+  }
+
+  if(pHeight) {
   	*pHeight = rect.bottom;
+  }
 }
 
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
@@ -287,10 +296,10 @@ void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize 
   MoveWindow(window->win32.handle, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, FALSE);
 
   // Set window min/max values.
-  window->minWidth  = minWidth;
-  window->minHeight = minHeight;
-  window->maxWidth  = maxWidth;
-  window->maxHeight = maxHeight;
+  window->win32.minWidth  = minWidth;
+  window->win32.minHeight = minHeight;
+  window->win32.maxWidth  = maxWidth;
+  window->win32.maxHeight = maxHeight;
 }
 
 void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
@@ -303,10 +312,13 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
 	POINT position = {0, 0};
   ClientToScreen(window->win32.handle, &position);
 
-  if(pXPos)
+  if(pXPos) {
   	*pXPos = position.x;
-  if(pYPos)
+  }
+
+  if(pYPos) {
   	*pYPos = position.y;
+  }
 }
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
@@ -1071,14 +1083,14 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
 
     __xkWin32GetFullWindowSize(__xkWin32GetWindowStyle(window), __xkWin32GetWindowExStyle(window), 0, 0, &xoff, &yoff);
 
-    if (window->minWidth != 0 && window->minHeight != 0) {
-      mmi->ptMinTrackSize.x = window->minWidth + xoff;
-      mmi->ptMinTrackSize.y = window->minHeight + yoff;
+    if (window->win32.minWidth != 0 && window->win32.minHeight != 0) {
+      mmi->ptMinTrackSize.x = window->win32.minWidth + xoff;
+      mmi->ptMinTrackSize.y = window->win32.minHeight + yoff;
     }
 
-    if (window->maxWidth != 0 && window->maxHeight != 0) {
-      mmi->ptMaxTrackSize.x = window->maxWidth + xoff;
-      mmi->ptMaxTrackSize.y = window->maxHeight + yoff;
+    if (window->win32.maxWidth != 0 && window->win32.maxHeight != 0) {
+      mmi->ptMaxTrackSize.x = window->win32.maxWidth + xoff;
+      mmi->ptMaxTrackSize.y = window->win32.maxHeight + yoff;
     }
 
     if (!window->decorated) {

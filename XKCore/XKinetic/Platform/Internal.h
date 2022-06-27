@@ -33,11 +33,6 @@ struct XkMutex {
 };
 
 struct XkWindow {
-	XkSize minWidth;
-	XkSize minHeight;
-	XkSize maxWidth;
-	XkSize maxHeight;
-
 	XkBool decorated;
 	XkBool resizable;
 	XkBool floating;

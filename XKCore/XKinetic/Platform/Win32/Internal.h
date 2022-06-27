@@ -32,6 +32,11 @@ typedef struct {
 #define XK_PLATFORM_MUTEX __XkWin32Mutex win32
 
 typedef struct {
+	XkSize minWidth;
+	XkSize minHeight;
+	XkSize maxWidth;
+	XkSize maxHeight;
+
 	HWND handle;
 
   XkBool cursorTracked;
