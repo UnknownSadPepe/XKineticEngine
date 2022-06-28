@@ -72,6 +72,7 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 
 		if(key == XK_KEY_C) {
 			xkSetWindowCursorMode(window, XK_CURSOR_NORMAL);
+			xkSetCursorPosition(window, 0, 0);
 		} else if(key == XK_KEY_V) {
 			xkSetWindowCursorMode(window, XK_CURSOR_HIDDEN);
 		} else if(key == XK_KEY_B) {
