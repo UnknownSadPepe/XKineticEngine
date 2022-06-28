@@ -462,6 +462,12 @@ void xkWaitWindowEvents(void) {
 	xkPollWindowEvents();
 }
 
+void xkWaitWindowEventsTimeout(const XkFloat64 timeout) {
+  MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)(timeout * 1e3), QS_ALLEVENTS);
+
+  xkPollWindowEvents();
+}
+
 static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 

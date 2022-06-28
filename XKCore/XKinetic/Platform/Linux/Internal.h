@@ -67,7 +67,6 @@ typedef struct {
 	struct wl_pointer*												wlPointer;
 
 	struct wl_cursor_theme*										wlCursorTheme;
-  struct wl_cursor_theme*										wlCursorThemeHiDPI;
   struct wl_surface*												wlCursorSurface;
 
   struct zwp_relative_pointer_manager_v1*		zwpRelativePointerManager;

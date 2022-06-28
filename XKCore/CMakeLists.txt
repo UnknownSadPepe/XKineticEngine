@@ -82,3 +82,9 @@ endif()
 if(UNIX AND NOT APPLE)
   target_link_libraries(XKCore PRIVATE dl rt)
 endif()
+
+#find_package(OpenXR REQUIRED FATAL_ERROR)
+#target_link_libraries(XKCore PRIVATE OpenXR::OpenXR)
+#target_include_directories(XKCore PRIVATE ${OPENXR_INCLUDE_DIRS} $ENV{OPENXR_SDK}/include)
+
+#target_include_directories(XKCore PRIVATE openxr)

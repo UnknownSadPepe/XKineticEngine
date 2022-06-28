@@ -94,7 +94,11 @@ _catch:
 
 void __xkVkDestroyInstance(void) {
   // Destroy Vulkan instance.
-  vkDestroyInstance(_xkVkContext.vkInstance, VK_NULL_HANDLE);
+  if(_xkVkContext.vkInstance) {
+    vkDestroyInstance(_xkVkContext.vkInstance, VK_NULL_HANDLE);
+
+    _xkVkContext.vkInstance = VK_NULL_HANDLE; 
+  }
 }
 
 static XkBool __xkVkCheckInstanceExtensionsSupport(void) {

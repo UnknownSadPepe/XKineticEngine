@@ -14,8 +14,8 @@ XKCORE_API XkString xkConcatString(XkString, XkString);
 XKCORE_API XkString xkNConcatString(XkString, XkString, const XkSize);
 XKCORE_API XkInt32 xkCompareString(XkString, XkString);
 XKCORE_API XkInt32 xkNCompareString(XkString, XkString, const XkSize);
-XKCORE_API XkString xkTokenString(XkString, XkString);
-XKCORE_API XkString xkNTokenString(XkString, XkString, const XkSize);
+XKCORE_API XkSize xkTokenString(XkString, XkString);
+XKCORE_API XkSize xkNTokenString(XkString, XkString, const XkSize);
 XKCORE_API XkString xkDuplicateString(XkString);
 XKCORE_API XkString xkNDuplicateString(XkString, const XkSize);
 

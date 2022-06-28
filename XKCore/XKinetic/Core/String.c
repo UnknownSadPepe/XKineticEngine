@@ -61,29 +61,33 @@ XkInt32 xkNCompareString(XkString string1, XkString string2, const XkSize length
 	return(status);
 }
 
-XkString xkTokenString(XkString string, XkString token) {
+XkSize xkTokenString(XkString string, XkString token) {
+	XkSize count = 0;
+
 	while(*string) {
 		if(xkDelim(*string, token)) {
-			*string = '\0';
-			return(string + 1);
+			*string = '\n';
+			++count;
 		}
 		++string;
 	}
 
-	return(string);
+	return(count);
 }
 
-XkString xkNTokenString(XkString string, XkString token, const XkSize length) {
+XkSize xkNTokenString(XkString string, XkString token, const XkSize length) {
+	XkSize count = 0;
+	
 	XkSize len = length;
 	while(*string && --len) {
 		if(xkDelim(*string, token)) {
 			*string = '\0';
-			return(string + 1);
+			++count;
 		}
 		++string;
 	}
 
-	return(string);
+	return(count);
 }
 
 XkString xkDuplicateString(XkString string) {

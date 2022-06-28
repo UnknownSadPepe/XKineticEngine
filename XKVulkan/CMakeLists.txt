@@ -14,5 +14,5 @@ if(CMAKE_BUILD_TYPE EQUAL "Debug")
 endif()
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
-target_link_libraries(XKVulkan Vulkan::Vulkan XKCore XKMath)
+target_link_libraries(XKVulkan PRIVATE Vulkan::Vulkan XKCore XKMath)
 target_include_directories(XKVulkan PRIVATE ${VULKAN_INCLUDE_DIRS} $ENV{VULKAN_SDK}/include)

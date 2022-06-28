@@ -129,7 +129,7 @@ static void __xkWindowButton(XkWindow window, const XkWindowButton button, const
 }
 
 static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
-	xkLogNotice("cursor x: %f y: %f", x, y);
+	//xkLogNotice("cursor x: %f y: %f", x, y);
 }
 
 static void __xkWindowCursorEnter(XkWindow window, XkBool entered) {
@@ -257,7 +257,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
 	xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
 
-	/*
+/*
 	// Create image loader.
 	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
 	if(result != XK_SUCCESS) {
@@ -344,13 +344,15 @@ void xkUpdateApplication(void) {
 		// Poll window events.
 		xkPollWindowEvents();
 
-		// Poll joysticks events.
-		//if(_xkApplication.joystick1) {
-		//	xkPollJoystickEvents(_xkApplication.joystick1);
-		//}
+		xkLogNotice("update");
 
-		//if(_xkApplication.joystick2) {
-		//	xkPollJoystickEvents(_xkApplication.joystick2);
-		//}
+		// Poll joysticks events.
+		if(_xkApplication.joystick1) {
+			xkPollJoystickEvents(_xkApplication.joystick1);
+		}
+
+		if(_xkApplication.joystick2) {
+			xkPollJoystickEvents(_xkApplication.joystick2);
+		}
 	}
 }
