@@ -4,11 +4,8 @@
 
 #if defined(XK_WIN32)
 
-__XkDI8 _xkDI8;
-
 XkResult xkInitializeJoysticks(void) {
 	XkResult result = XK_SUCCESS;
-
 
 	/// TODO: Implementation.
 
@@ -32,7 +29,6 @@ XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
 
 	// Template joystick.
 	XkJoystick joystick = *pJoystick;
-
 
 	/// TODO: Implementation.
 

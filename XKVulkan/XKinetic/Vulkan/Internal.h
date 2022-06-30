@@ -7,7 +7,7 @@
 #elif defined(XK_WIN32)
 	#define VK_USE_PLATFORM_WIN32_KHR
 	#include <vulkan/vulkan.h>
-#endif // XK_LINUX
+#endif // XK_LINUX || XK_WIN32
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Platform/Window.h"
 

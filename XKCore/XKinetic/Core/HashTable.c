@@ -106,7 +106,7 @@ void __xkHashTableInsert(XkHashTable table, const XkKey key, const XkHandle data
 	XkSize index = __xkHashIndex(table, key);
 
 	// Copy data to indexed memory.
-	xkCopyMemory(table->memory + (table->stride * (index)), data, table->stride);
+	xkCopyMemory((XkUInt8*)table->memory + (table->stride * (index)), data, table->stride);
 
 	// Increment hash table allocated length.
 	table->length++;
@@ -117,7 +117,7 @@ void xkHashTableErase(XkHashTable table, XkKey key) {
 	XkSize index = __xkHashIndex(table, key);
 
 	// Copy data to indexed memory.
-	xkZeroMemory(table->memory + (table->stride * (index)), table->stride);
+	xkZeroMemory((XkUInt8*)table->memory + (table->stride * (index)), table->stride);
 
 	// Decrement hash table allocated length.
 	table->length--;
@@ -135,7 +135,7 @@ XkHandle xkHashTableGet(XkHashTable table, const XkKey key) {
 	// Get memory index by key.
 	XkSize index = __xkHashIndex(table, key);
 
-	return(table->memory + (table->stride * (index)));
+	return((XkUInt8*)table->memory + (table->stride * (index)));
 }
 
 void __xkHashTableSet(XkHashTable table, const XkKey key, XkHandle data) {
@@ -143,6 +143,6 @@ void __xkHashTableSet(XkHashTable table, const XkKey key, XkHandle data) {
 	XkSize index = __xkHashIndex(table, key);
 
 	// Copy data to indexed memory.
-	xkCopyMemory(table->memory + (table->stride * (index)), data, table->stride);
+	xkCopyMemory((XkUInt8*)table->memory + (table->stride * (index)), data, table->stride);
 }
 

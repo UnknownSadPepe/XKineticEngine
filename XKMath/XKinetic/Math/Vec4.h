@@ -168,11 +168,11 @@ XK_INLINE XKMATH_API XkBool xkDVec4Compare(const XkDVec4 a, const XkDVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkFloat32 xkVec4Length(const XkVec4 a) {
-	return(xkSqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w));
+	return xkFSqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
 }
 
 XK_INLINE XKMATH_API XkFloat64 xkDVec4Length(const XkDVec4 a) {
-	return(xkSqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w));
+	return xkDSqrt(a.x * a.x + a.y * a.y + a.z * a.z + a.w * a.w);
 }
 
 XK_INLINE XKMATH_API XkVec4 xkVec4Normalize(const XkVec4 a) {

@@ -7,7 +7,7 @@ const char* _xkVkInstanceExtensions[] = {
 	VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
 #elif defined(XK_WIN32)
 	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
-#endif // XK_LINUX
+#endif // XK_LINUX || XK_WIN32
 
 #ifdef XKVULKAN_DEBUG
 	VK_EXT_DEBUG_UTILS_EXTENSION_NAME
@@ -113,8 +113,15 @@ static XkBool __xkVkCheckInstanceExtensionsSupport(void) {
     goto _catch;    
   }
 
+  VkExtensionProperties* vkAvailableExtensionProperties = XK_NULL_HANDLE;
+  vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * availableExtensionPropertiesCount);
+	if(!vkAvailableExtensionProperties) {
+		xkLogError("Failed to enumerate Vulkan instance extension properties");
+		result = XK_FALSE;
+		goto _catch;
+	}
+
   // Get Vulkan instance extension properties.
-  VkExtensionProperties* vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * availableExtensionPropertiesCount);
   vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &availableExtensionPropertiesCount, vkAvailableExtensionProperties);
 
   // Template available Vulkan extension.
@@ -167,8 +174,15 @@ static XkBool __xkVkCheckInstanceLayersSupport(void) {
     goto _catch;    
   }
 
+  VkLayerProperties* vkAvailableLayerProperties = XK_NULL_HANDLE;
+  vkAvailableLayerProperties = xkAllocateMemory(sizeof(VkLayerProperties) * availableLayerPropertiesCount);
+	if(!vkAvailableLayerProperties) {
+		xkLogError("Failed to enumerate Vulkan instance layer properties");
+		result = XK_FALSE;
+		goto _catch;
+	}
+
   // Get Vulkan instance layer properties.
-  VkLayerProperties* vkAvailableLayerProperties = xkAllocateMemory(sizeof(VkLayerProperties) * availableLayerPropertiesCount);;
   vkEnumerateInstanceLayerProperties(&availableLayerPropertiesCount, vkAvailableLayerProperties);
 
   // Template available Vulkan layer.

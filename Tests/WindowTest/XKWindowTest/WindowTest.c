@@ -257,7 +257,6 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
 	xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
 
-/*
 	// Create image loader.
 	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
 	if(result != XK_SUCCESS) {
@@ -301,10 +300,10 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	xkSetWindowIcon(_xkApplication.window, 2, icons);
 
 	// Set window cursor.
-	XkWindowIcon cursorIcon = {0};
-	cursorIcon.width = cursorConfig.width;
-	cursorIcon.height = cursorConfig.height;
-	cursorIcon.pixels = cursorConfig.pixels;
+	XkWindowIcon cursorIcon 	= {0};
+	cursorIcon.width 					= cursorConfig.width;
+	cursorIcon.height 				= cursorConfig.height;
+	cursorIcon.pixels 				= cursorConfig.pixels;
 
 	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
 
@@ -316,7 +315,7 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 
 	// Unload window small icon.
 	xkUnloadImage(_xkApplication.imageLoader, &smallIconConfig);
-*/
+
 _catch:
 	return(result);
 }
@@ -340,11 +339,9 @@ void xkDestroyApplication(void) {
 }
 
 void xkUpdateApplication(void) {
-	while(_xkApplication.exit == XK_FALSE) {
+	while(!_xkApplication.exit) {
 		// Poll window events.
 		xkPollWindowEvents();
-
-		xkLogNotice("update");
 
 		// Poll joysticks events.
 		if(_xkApplication.joystick1) {

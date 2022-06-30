@@ -65,13 +65,20 @@ static XkBool __xkVkCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice 
   uint32_t availableExtensionPropertiesCount = 0;
   vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &availableExtensionPropertiesCount, VK_NULL_HANDLE);
   if(availableExtensionPropertiesCount == 0) {
-    xkLogError("Failed to enumerate Vulkan Device extension properties");
+    xkLogError("Failed to enumerate Vulkan physical device extension properties");
     result = XK_FALSE;
     goto _catch;    
   }
 
+  VkExtensionProperties* vkAvailableExtensionProperties = XK_NULL_HANDLE;
+  vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * availableExtensionPropertiesCount);
+	if(!vkAvailableExtensionProperties) {
+		xkLogError("Failed to enumerate Vulkan physical device extension properties");
+		result = XK_FALSE;
+		goto _catch;
+	}
+
   // Get Vulkan device extension properties.
-  VkExtensionProperties* vkAvailableExtensionProperties = xkAllocateMemory(sizeof(VkExtensionProperties) * availableExtensionPropertiesCount);
   vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &availableExtensionPropertiesCount, vkAvailableExtensionProperties);
 
   // Template available Vulkan extension.
