@@ -231,10 +231,10 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create joystick2: %d", result);
 	} else {
-		xkSetJoystickEventCallback(_xkApplication.joystick1, __xkJoystickEvent);
-		xkSetJoystickAxisCallback(_xkApplication.joystick1, __xkJoystickAxis);	
-		xkSetJoystickButtonCallback(_xkApplication.joystick1, __xkJoystickButton);
-		xkSetJoystickHatCallback(_xkApplication.joystick1, __xkJoystickHat);
+		xkSetJoystickEventCallback(_xkApplication.joystick2, __xkJoystickEvent);
+		xkSetJoystickAxisCallback(_xkApplication.joystick2, __xkJoystickAxis);	
+		xkSetJoystickButtonCallback(_xkApplication.joystick2, __xkJoystickButton);
+		xkSetJoystickHatCallback(_xkApplication.joystick2, __xkJoystickHat);
 	}	
 
 	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT | XK_WINDOW_DRAG_DROP_BIT);

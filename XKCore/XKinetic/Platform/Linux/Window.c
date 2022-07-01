@@ -6,11 +6,12 @@
 
 #define _GNU_SOURCE
 #define __USE_GNU
+#define _POSIX_C_SOURCE 200112L
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-
 #include <limits.h>
+#include <time.h>
 #include <linux/input.h>
 #include <errno.h>
 #include <poll.h>
@@ -51,6 +52,8 @@ static void __xkZWPUnlockPointer(XkWindow);
 
 static char* __xkWaylandReadDataOfferAsString(struct wl_data_offer*, const char*);
 XkString* __xkParseURI(XkString, XkSize*);
+
+void __xkWaylandSetWindowCursor(XkWindow, struct wl_buffer*, int, int);
 
 static void __xkWaylandCreateKeyTable(void);
 
@@ -159,6 +162,10 @@ static void __xkWaylandPointerHandleEnter(void* data, struct wl_pointer* wlPoint
 
 	// Input cursor enter.
 	__xkInputWindowCursorEnter(window, XK_TRUE);
+
+	if(window->wayland.wlCursorBuffer) {
+		__xkWaylandSetWindowCursor(window, window->wayland.wlCursorBuffer, window->wayland.cursorWidth, window->wayland.cursorHeight);
+	}
 }
 
 static void __xkWaylandPointerHandleLeave(void* data, struct wl_pointer* wlPointer, uint32_t serial, struct wl_surface* wlSurface) {
@@ -285,7 +292,6 @@ static void __xkZWPLockedPointerHandleLocked(void* data, struct zwp_locked_point
 	/// NOTE: Nothing to do here.
 }
 
-
 static void __xkZWPLockedPointerHandleUnlocked(void* data, struct zwp_locked_pointer_v1* zwpLockedPointer) {
 	/// NOTE: Nothing to do here.
 }
@@ -384,7 +390,6 @@ static void __xkWaylandKeyboardHandleEnter(void* data, struct wl_keyboard* wlKey
   }
 
 	_xkPlatform.wayland.keyboardWindowFocus = window;
-
 
 	// Input window focus.
 	__xkInputWindowFocus(window, XK_TRUE);
@@ -1306,7 +1311,15 @@ void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
 	} else if(mode == XK_CURSOR_NORMAL) {
 		// Unlock and show cursor.
 		__xkZWPUnlockPointer(window);
+		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, 0, 0);
 	}
+}
+
+void __xkWaylandSetWindowCursor(XkWindow window, struct wl_buffer* wlCursorBuffer, int width, int height) {
+	wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, 0, 0);
+	wl_surface_attach(_xkPlatform.wayland.wlCursorSurface, wlCursorBuffer, 0, 0);
+	wl_surface_damage(_xkPlatform.wayland.wlCursorSurface, 0, 0, 16, 16);
+	wl_surface_commit(_xkPlatform.wayland.wlCursorSurface);
 }
 
 void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
@@ -1315,21 +1328,16 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 		const int height = pIcon->height;
 
 		// Create Wayland cursor buffer.
-		struct wl_buffer* wlBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4);
- 		if(!wlBuffer) {
-			__xkErrorHandle("Wayland: Failed to create shared cursor buffer");
+		window->wayland.wlCursorBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4);
+ 		if(!window->wayland.wlCursorBuffer) {
+			__xkErrorHandle("Wayland: Failed to create cursor buffer");
  			return;
  		}
 
-		/// TODO: Wayland custom cursor support 
-		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, 0, 0);
-		//wl_surface_set_buffer_scale(_xkPlatform.wayland.wlCursorSurface, 1);
-		wl_surface_attach(_xkPlatform.wayland.wlCursorSurface, wlBuffer, 0, 0);
-		//wl_surface_damage(_xkPlatform.wayland.wlCursorSurface, 0, 0, width, height);
-		wl_surface_commit(_xkPlatform.wayland.wlCursorSurface);
+ 		window->wayland.cursorWidth = width;
+ 		window->wayland.cursorHeight = height;
 
-		// Destroy Wayland cursor buffer.
-		wl_buffer_destroy(wlBuffer);
+ 		__xkWaylandSetWindowCursor(window, window->wayland.wlCursorBuffer, width, height);
 	} else {
 		struct wl_cursor* wlCursor = wl_cursor_theme_get_cursor(_xkPlatform.wayland.wlCursorTheme, "default");
 		if(!wlCursor) {
@@ -1338,13 +1346,14 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 		}
 
 		struct wl_cursor_image* wlImage = wlCursor->images[0];
-		struct wl_buffer* wlBuffer = wl_cursor_image_get_buffer(wlImage);
+		struct wl_buffer* wlCursorBuffer = wl_cursor_image_get_buffer(wlImage);
 
-		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, 0, 0);
-		//wl_surface_set_buffer_scale(_xkPlatform.wayland.wlCursorSurface, 1);
-		wl_surface_attach(_xkPlatform.wayland.wlCursorSurface, wlBuffer, 0, 0);
-		//wl_surface_damage(_xkPlatform.wayland.wlCursorSurface, 0, 0, 0, 0);
-		wl_surface_commit(_xkPlatform.wayland.wlCursorSurface);
+		window->wayland.wlCursorBuffer = wlCursorBuffer;
+
+ 		window->wayland.cursorWidth = wlImage->width;
+ 		window->wayland.cursorHeight = wlImage->height;
+
+ 		__xkWaylandSetWindowCursor(window, wlCursorBuffer, wlImage->width, wlImage->height);
 	}
 }
 
@@ -1433,7 +1442,7 @@ void xkWaitWindowEvents(void) {
 	wl_display_dispatch(_xkPlatform.wayland.wlDisplay);
 }
 
-void xkWaitWindowEventsTimeout(const XkFloat64 timeout) {
+void xkWaitWindowEventsTimeout(XkFloat64 timeout) {
 	__xkWaylandHandleEvents(&timeout);
 }
 

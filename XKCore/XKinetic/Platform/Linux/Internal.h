@@ -23,6 +23,10 @@ typedef struct {
   struct zwp_locked_pointer_v1*					zwpLockedPointer;
 	struct zwp_idle_inhibitor_v1*					zwpIdleInhibitor;
 
+	struct wl_buffer*											wlCursorBuffer;
+	int cursorWidth;
+	int cursorHeight;
+
 	XkSize width;
 	XkSize height;
 
@@ -39,18 +43,10 @@ typedef struct {
 #define XK_PLATFORM_JOYSTICK __XkLinuxJoystick handle
 
 typedef struct {
-  XkSize 										imageCount;
-  struct wl_cursor_image** 	wlImages;
-  char* 										name;
-} __XkWaylandWindowCursor;
-
-typedef struct {
 	struct wl_data_offer*       wlOffer;
 	XkBool                    	UTF8;
 	XkBool                    	URI;
 } __XkWaylandOffer;
-
-#define XK_PLATFORM_WINDOW_CURSOR __XkWaylandWindowCursor wayland
 
 typedef struct {
 	struct wl_display*												wlDisplay;

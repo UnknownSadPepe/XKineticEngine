@@ -3,7 +3,6 @@
 #include <windows.h>
 #include <dinput.h>
 #include <xinput.h>
-#include <dbt.h>
 #include "XKinetic/XKCore.h"
 
 #ifdef __cplusplus
@@ -54,14 +53,14 @@ typedef struct {
 } __XkDIJoystickObject;
 
 typedef struct {
-	__XkDIJoystickObject*  objects;
+	__XkDIJoystickObject*  	objects;
 	int                     objectCount;
 	IDirectInputDevice8W*   device;
 	DWORD                   index;
 	GUID                    guid;
 } __XkDIJoystick;
 
-#define XK_PLATFORM_JOYSTICK __XkDIJoystick di
+#define XK_PLATFORM_JOYSTICK __XkDIJoystick dinput
 
 typedef struct {
 	HMODULE handle;
@@ -70,16 +69,11 @@ typedef struct {
 #define XK_PLATFORM_MODULE __XkWin32Module win32
 
 typedef struct {
-	HINSTANCE instance;
+	HINSTANCE 			instance;
+	IDirectInput8W 	dinput;
 } __XkWin32Platform;
 
 #define XK_PLATFORM __XkWin32Platform win32
-
-typedef struct {
-	IDirectInput8W* di8Input;
-} __XkDI8;
-
-extern __XkDI8 _xkDI8;
 
 #ifdef __cplusplus
 }

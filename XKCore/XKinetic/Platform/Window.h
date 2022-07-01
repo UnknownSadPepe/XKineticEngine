@@ -245,7 +245,7 @@ XKCORE_API void xkSetWindowDropFileCallback(XkWindow, const XkWindowDropFilePfn)
 
 XKCORE_API void xkPollWindowEvents(void);
 XKCORE_API void xkWaitWindowEvents(void);
-XKCORE_API void xkWaitWindowEventsTimeout(const XkFloat64);
+XKCORE_API void xkWaitWindowEventsTimeout(XkFloat64);
 
 XK_EXPORT void __xkInputWindowShow(XkWindow, const XkWindowShow);
 XK_EXPORT void __xkInputWindowKey(XkWindow, const XkWindowKey, const XkWindowAction, const XkWindowMod);

@@ -7,14 +7,23 @@
 XkResult xkInitializeJoysticks(void) {
 	XkResult result = XK_SUCCESS;
 
-	/// TODO: Implementation.
+	// Create DirectInput.
+	HRESULT hResult = DirectInput8Create(_xkPlatform.win32.instance, DIRECTINPUT_VERSION, &IID_IDirectInput8W, (void**)&_xkPlatform.win32.dinput, NULL);
+	if(FAILED(hResult))  {
+		result = XK_ERROR_UNKNOWN;
+		_glfwInputError("DirectInput: Failed to create interface");
+		goto _catch;
+	}
 
 _catch:
 	return(result);
 }
 
 void xkTerminateJoysticks(void) {
-	/// TODO: Implementation.
+	// Release DirectInput.
+	if(_xkPlatform.win32.dinput) {
+		IDirectInput8_Release(_xkPlatform.win32.dinput);
+	}
 }
 
 XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
