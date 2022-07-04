@@ -1,10 +1,20 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkVkCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescription* vkAttachments, const uint32_t attachmentCount, VkSubpassDescription* vkSubpasses, const uint32_t subpassCount, VkSubpassDependency* vkDependencies, const uint32_t dependencyCount) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkVulkanCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescription* vkAttachments, const uint32_t attachmentCount, VkSubpassDescription* vkSubpasses, const uint32_t subpassCount, VkSubpassDependency* vkDependencies, const uint32_t dependencyCount) {
+  xkAssert(pVkRenderPass);
+  xkAssert(vkAttachments);
+  xkAssert(attachmentCount > 0);
+  xkAssert(vkSubpasses);
+  xkAssert(subpassCount > 0);
+  xkAssert(vkDependencies);
+  xkAssert(dependencyCount > 0);
+
   XkResult result = XK_SUCCESS;
 
-  // Initiaize Vulkan render pass create info.
-  VkRenderPassCreateInfo vkRenderPassCreateInfo = {0};
+  VkRenderPassCreateInfo vkRenderPassCreateInfo = {};
   vkRenderPassCreateInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   vkRenderPassCreateInfo.pNext                  = VK_NULL_HANDLE;
   vkRenderPassCreateInfo.flags                  = 0;
@@ -15,11 +25,10 @@ XkResult __xkVkCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDescrip
 	vkRenderPassCreateInfo.dependencyCount        = dependencyCount;
 	vkRenderPassCreateInfo.pDependencies          = vkDependencies;
 	
-  // Create Vulkan render pass.
-	VkResult vkResult = vkCreateRenderPass(_xkVkContext.vkLogicalDevice, &vkRenderPassCreateInfo, VK_NULL_HANDLE, pVkRenderPass);
+	VkResult vkResult = vkCreateRenderPass(_xkVulkanContext.vkLogicalDevice, &vkRenderPassCreateInfo, VK_NULL_HANDLE, pVkRenderPass);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to create Vulkan render pass: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Failed to create Vulkan render pass: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
@@ -27,7 +36,8 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroyeRenderPass(VkRenderPass vkRenderPass) {
-  // Destroy Vulkan render pass.
-  vkDestroyRenderPass(_xkVkContext.vkLogicalDevice, vkRenderPass, VK_NULL_HANDLE);
+void __xkVulkanDestroyeRenderPass(VkRenderPass vkRenderPass) {
+  xkAssert(vkRenderPass);
+  
+  vkDestroyRenderPass(_xkVulkanContext.vkLogicalDevice, vkRenderPass, VK_NULL_HANDLE);
 }

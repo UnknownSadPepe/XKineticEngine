@@ -1,12 +1,15 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKCore.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-typedef struct {
+/* ########## TYPES SECTION ########## */
+typedef struct XkTime_T {
 	XkSize second;
 	XkSize minute;
 	XkSize hour;
@@ -17,10 +20,12 @@ typedef struct {
 	XkSize yDay;
 } XkTime;
 
-XKCORE_API XkSize xkGetTime(void);
-XKCORE_API void xkTimeFormat(XkTime* const, const XkSize);
-XKCORE_API XkSize xkTimeStringFormat(XkTime* const, XkString, const XkSize, const XkString);
+/* ########## FUNCTIONS SECTION ########## */
+extern XKCORE_API XkSize 	xkGetTime();
+extern XKCORE_API void 		xkTimeFormat(XkTime* const, const XkSize);
+extern XKCORE_API XkSize 	xkTimeStringFormat(XkTime* const, XkString, const XkSize, const XkString);
 
+/// NOTE: For using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

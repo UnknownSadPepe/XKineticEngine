@@ -1,49 +1,59 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKVulkan.h"
-#include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Platform/Window.h"
+#include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Renderer/External.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-typedef struct XkVkRenderer* XkVkRenderer;
-typedef struct XkVkBuffer* XkVkBuffer;
-typedef struct XkVkTexture2D* XkVkTexture2D;
+/* ########## TYPES SECTION ########## */
+typedef struct XkVulkanRenderer_T* XkVulkanRenderer;
 
-XKVULKAN_API XkResult xkVkCreateRenderer(XkVkRenderer*, XkRendererConfig* const, XkWindow);
-XKVULKAN_API void xkVkDestroyRenderer(XkVkRenderer);
+typedef struct XkVulkanBuffer_T* XkVulkanBuffer;
 
-XKVULKAN_API void xkVkClearColorRenderer(XkVkRenderer, XkVec4);
-XKVULKAN_API void xkVkClearDepthRenderer(XkVkRenderer, XkFloat32);
-XKVULKAN_API void xkVkClearStencilRenderer(XkVkRenderer, XkUInt32);
-XKVULKAN_API void xkVkClearRenderer(XkVkRenderer);
+typedef struct XkVulkanTexture2d_T* XkVulkanTexture2d;
 
-XKVULKAN_API void xkVkTopologyRenderer(XkVkRenderer, XkTopology);
-XKVULKAN_API void xkVkCullModeRenderer(XkVkRenderer, XkCullMode);
+/* ########## FUNCTIONS SECTION ########## */
+extern XKVULKAN_API XkResult 	xkVulkanInitialize();
+extern XKVULKAN_API void			xkVulkanTerminate();
 
-XKVULKAN_API void xkVkBeginRenderer(XkVkRenderer);
-XKVULKAN_API void xkVkEndRenderer(XkVkRenderer);
+extern XKVULKAN_API XkResult 	xkVulkanCreateRenderer(XkVulkanRenderer*, const XkRendererConfig* const, const XkWindow);
+extern XKVULKAN_API void 			xkVulkanDestroyRenderer(XkVulkanRenderer);
 
-XKVULKAN_API void xkVkResizeRenderer(XkVkRenderer, XkSize, XkSize);
-XKVULKAN_API void xkVkScissorRenderer(XkVkRenderer, XkInt32, XkInt32, XkSize, XkSize);
+extern XKVULKAN_API void 			xkVulkanClearColorRenderer(XkVulkanRenderer, const XkVec4);
+extern XKVULKAN_API void 			xkVulkanClearDepthRenderer(XkVulkanRenderer, const XkFloat32);
+extern XKVULKAN_API void 			xkVulkanClearStencilRenderer(XkVulkanRenderer, const XkUInt32);
+extern XKVULKAN_API void 			xkVulkanClearRenderer(XkVulkanRenderer);
 
-XKVULKAN_API void xkVkDraw(XkVkRenderer, XkSize);
-XKVULKAN_API void xkVkDrawIndexed(XkVkRenderer, XkSize);
+extern XKVULKAN_API void 			xkVulkanTopologyRenderer(XkVulkanRenderer, const XkTopology);
+extern XKVULKAN_API void 			xkVulkanCullModeRenderer(XkVulkanRenderer, const XkCullMode);
 
-XKVULKAN_API XkResult xkVkCreateBuffer(XkVkBuffer*, const XkBufferUsage, const XkSize, const XkHandle, XkVkRenderer);
-XKVULKAN_API void xkVkDestroyBuffer(XkVkBuffer);
+extern XKVULKAN_API void 			xkVulkanBeginRenderer(XkVulkanRenderer);
+extern XKVULKAN_API void 			xkVulkanEndRenderer(XkVulkanRenderer);
 
-XKVULKAN_API void xkVkMapBuffer(XkVkBuffer, const XkHandle);
+extern XKVULKAN_API void 			xkVulkanResizeRenderer(XkVulkanRenderer, const XkSize, const XkSize);
+extern XKVULKAN_API void 			xkVulkanScissorRenderer(XkVulkanRenderer, const XkInt32, const XkInt32, const XkSize, const XkSize);
 
-XKVULKAN_API void xkVkBindVertexBuffer(XkVkBuffer);
-XKVULKAN_API void xkVkBindIndexBuffer(XkVkBuffer);
+extern XKVULKAN_API void 			xkVulkanDraw(XkVulkanRenderer, const XkSize);
+extern XKVULKAN_API void 			xkVulkanDrawIndexed(XkVulkanRenderer, const XkSize);
 
-XKVULKAN_API XkResult xkVkCreateTexture2D(XkVkTexture2D*, XkHandle, const XkSize, const XkSize, XkVkRenderer);
-XKVULKAN_API void xkVkDestroyTexture2D(XkVkTexture2D);
+extern XKVULKAN_API XkResult 	xkVulkanCreateBuffer(XkVulkanBuffer*, const XkBufferUsage, const XkSize, const XkHandle, XkVulkanRenderer);
+extern XKVULKAN_API void 			xkVulkanDestroyBuffer(XkVulkanBuffer);
 
+extern XKVULKAN_API void 			xkVulkanMapBuffer(XkVulkanBuffer, const XkHandle);
+
+extern XKVULKAN_API void 			xkVulkanBindVertexBuffer(XkVulkanBuffer);
+extern XKVULKAN_API void 			xkVulkanBindIndexBuffer(XkVulkanBuffer);
+
+extern XKVULKAN_API XkResult 	xkVulkanCreateTexture2d(XkVulkanTexture2d*, XkHandle, const XkSize, const XkSize, XkVulkanRenderer);
+extern XKVULKAN_API void 			xkVulkanDestroyTexture2d(XkVulkanTexture2d);
+
+/// NOTE: For using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

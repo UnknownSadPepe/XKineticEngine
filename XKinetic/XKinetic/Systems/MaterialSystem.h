@@ -4,6 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Material.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -19,6 +20,7 @@ XK_API void xkDestroyMaterialSystem(XkMaterialSystem);
 XK_API XkMaterialID xkCreateMaterial(XkMaterialSystem, XkMaterialConfig* const);
 XK_API void xkDestroyMaterial(XkMaterialSystem, XkMaterialID);
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -1,10 +1,16 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkVkCreateImageView(VkImageView* const pVkImageView, VkImage vkImage, const VkFormat vkFormat, const VkImageAspectFlags vkAspectMask, const uint32_t mipLevels) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkVulkanCreateImageView(VkImageView* const pVkImageView, VkImage vkImage, const VkFormat vkFormat, const VkImageAspectFlags vkAspectMask, const uint32_t mipLevels) {
+  xkAssert(pVkImageView);
+  xkAssert(vkImage);
+  xkAssert(mipLevels > 0);
+
   XkResult result = XK_SUCCESS;
 
-  // Initialize Vulkan image view create info.
-	VkImageViewCreateInfo vkImageViewCreateInfo             = {0};
+	VkImageViewCreateInfo vkImageViewCreateInfo             = {};
 	vkImageViewCreateInfo.sType                             = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   vkImageViewCreateInfo.pNext                             = VK_NULL_HANDLE;
   vkImageViewCreateInfo.flags                             = 0;
@@ -21,11 +27,10 @@ XkResult __xkVkCreateImageView(VkImageView* const pVkImageView, VkImage vkImage,
   vkImageViewCreateInfo.subresourceRange.baseArrayLayer   = 0; 
   vkImageViewCreateInfo.subresourceRange.layerCount       = 1;
 
-  // Create Vulkan image view.
-	VkResult vkResult = vkCreateImageView(_xkVkContext.vkLogicalDevice, &vkImageViewCreateInfo, VK_NULL_HANDLE, pVkImageView);
+	VkResult vkResult = vkCreateImageView(_xkVulkanContext.vkLogicalDevice, &vkImageViewCreateInfo, VK_NULL_HANDLE, pVkImageView);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to create Vulkan image view: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to create image view: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
@@ -33,8 +38,9 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroyImageView(VkImageView vkImageView) {
-  // Destroy Vulkan image view.
-  vkDestroyImageView(_xkVkContext.vkLogicalDevice, vkImageView, VK_NULL_HANDLE);
+void __xkVulkanDestroyImageView(VkImageView vkImageView) {
+  xkAssert(vkImageView);
+
+  vkDestroyImageView(_xkVulkanContext.vkLogicalDevice, vkImageView, VK_NULL_HANDLE);
 }
 

@@ -1,30 +1,31 @@
-#include "XKinetic/OpenXR/Internal.h"
+/* ########## INCLUDE SECTION ########## */
+#include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-const XrEnvironmentBlendMode _xkXREnvironmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
+/* ########## GLOBAL VARIABLES SECTION ########## */
+const XrEnvironmentBlendMode _xkOpenXREnvironmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
 
-static XkBool __xkXRPickEnvironmentBlendMode(void);
+/* ########## FUNCTIONS DECLARATIONS SECTION ########## */
+static XkBool __xkOpenXRPickEnvironmentBlendMode();
 
-XkResult __xkXRInitializeSystem(void) {
+XkResult __xkOpenXRInitializeSystem() {
   XkResult result = XK_SUCCESS;
 
-  // Initialize OpenXR system info.
-  XrSystemGetInfo xrSystemInfo    = {0};
+  XrSystemGetInfo xrSystemInfo    = {};
   xrSystemInfo.type               = XR_TYPE_SYSTEM_GET_INFO;
   xrSystemInfo.next               = XR_NULL_HANDLE;
   xrSystemInfo.formFactor         = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;
 
-  // Get OpenXR system.
-  XrResult xrResult = xrGetSystem(_xkXRContext.xrInstance, &xrSystemInfo, &_xkXRContext.xrSystemId);
+  XrResult xrResult = xrGetSystem(_xkOpenXRContext.xrInstance, &xrSystemInfo, &_xkOpenXRContext.xrSystemId);
   if(xrResult != XR_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to get OpenXR system: %s", __xkXRGetErrorString(xrResult));
+    xkLogError("OpenXR: Failed to get system: %s", __xkOpenXRGetResultString(xrResult));
     goto _catch;
   }
 
-  // Check OpenXR environment blend mode support.
-  if(!__xkXRCheckEnvironmentBlendModeSupport()) {
+  if(!__xkOpenXRCheckEnvironmentBlendModeSupport()) {
     result = XK_ERROR_UNKNOWN;
-		xkLogError("OpenXR environment blend mode doesn't support");
+		xkLogError("OpenXR: Environment blend mode doesn't support");
     goto _catch; 
   }
 
@@ -32,14 +33,13 @@ _catch:
   return(result);
 }
 
-XkBool __xkXRCheckEnvironmentBlendModeSupport(void) {
+XkBool __xkOpenXRCheckEnvironmentBlendModeSupport() {
   XkBool result = XK_TRUE;
 
-  // Get OpenXR environment blend mode count.
   uint32_t environmentBlendModeCount = 0;
-  xrEnumerateEnvironmentBlendModes(_xkXRContext.xrInstance, _xkXRContext.xrSystemId, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, 0, &environmentBlendModeCount, XR_NULL_HANDLE);
+  xrEnumerateEnvironmentBlendModes(_xkOpenXRContext.xrInstance, _xkOpenXRContext.xrSystemId, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, 0, &environmentBlendModeCount, XR_NULL_HANDLE);
 	if (environmentBlendModeCount == 0) {
-		xkLogError("Failed to enumerate OpenXR environment blend modes");
+		xkLogError("OpenXR: Failed to enumerate environment blend modes");
 		result = XK_FALSE;
 		goto _catch;
 	}
@@ -47,25 +47,22 @@ XkBool __xkXRCheckEnvironmentBlendModeSupport(void) {
   XrEnvironmentBlendMode* xrAvailableEnvironmentBlendModes = XK_NULL_HANDLE;
   xrAvailableEnvironmentBlendModes = xkAllocateMemory(sizeof(XrEnvironmentBlendMode) * environmentBlendModeCount);
 	if(!xrAvailableEnvironmentBlendModes) {
-		xkLogError("Failed to enumerate OpenXR environment blend modes");
+		xkLogError("OpenXR: Failed to allocate environment blend modes");
 		result = XK_FALSE;
 		goto _catch;
 	}
 
-  // Get OpenXR environment blend modes. 
-  xrEnumerateEnvironmentBlendModes(_xkXRContext.xrInstance, _xkXRContext.xrSystemId, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, environmentBlendModeCount, XR_NULL_HANDLE, xrAvailableEnvironmentBlendModes);
+  xrEnumerateEnvironmentBlendModes(_xkOpenXRContext.xrInstance, _xkOpenXRContext.xrSystemId, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, environmentBlendModeCount, XR_NULL_HANDLE, xrAvailableEnvironmentBlendModes);
 
-	// Helper boolean value.
 	XkBool availableBlendModeFind = XK_FALSE;
 
   for(uint32_t i = 0; i < environmentBlendModeCount; i++) {
-    if(xrAvailableEnvironmentBlendModes == _xkXREnvironmentBlendMode) {
+    if(xrAvailableEnvironmentBlendModes == _xkOpenXREnvironmentBlendMode) {
       availableBlendModeFind = XK_TRUE;
       break;
     }
   }
 
-  // If doesn't find available OpenXR environment blend mode.
   if(!availableBlendModeFind) {
     result = XK_FALSE;
 	  goto _catch;

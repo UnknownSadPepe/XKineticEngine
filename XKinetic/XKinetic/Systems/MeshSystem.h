@@ -4,6 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Model.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -19,6 +20,7 @@ XK_API void xkDestroyMeshSystem(XkMeshSystem);
 XK_API XkMeshID xkCreateMesh(XkMeshSystem, XkModelConfig* const);
 XK_API void xkDestroyMesh(XkMeshSystem, XkMeshID);
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

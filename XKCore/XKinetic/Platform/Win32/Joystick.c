@@ -1,13 +1,17 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Joystick.h"
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 
-#if defined(XK_WIN32)
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkInitializeJoysticks(void) {
 	XkResult result = XK_SUCCESS;
 
-	// Create DirectInput.
+	if(_xkPlatform.dinput.initialized) {
+		return;
+	}
+
 	HRESULT hResult = DirectInput8Create(_xkPlatform.win32.instance, DIRECTINPUT_VERSION, &IID_IDirectInput8W, (void**)&_xkPlatform.win32.dinput, NULL);
 	if(FAILED(hResult))  {
 		result = XK_ERROR_UNKNOWN;
@@ -15,53 +19,60 @@ XkResult xkInitializeJoysticks(void) {
 		goto _catch;
 	}
 
+	_xkPlatform.dinput.initialized = XK_TRUE;
+
 _catch:
 	return(result);
 }
 
 void xkTerminateJoysticks(void) {
-	// Release DirectInput.
+	if(!_xkPlatform.dinput.initialized) {
+		return;
+	}
+
 	if(_xkPlatform.win32.dinput) {
 		IDirectInput8_Release(_xkPlatform.win32.dinput);
+
+		_xkPlatform.win32.dinput = NULL;
 	}
+
+	_xkPlatform.dinput.initialized = XK_FALSE;
 }
 
-XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickID id) {
+XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickId id) {
+	xkAssert(pJoystick);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate joystick.
-	*pJoystick = xkAllocateMemory(sizeof(struct XkJoystick));
+	*pJoystick = xkAllocateMemory(sizeof(struct XkJoystick_T));
 	if (!(*pJoystick)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Template joystick.
 	XkJoystick joystick = *pJoystick;
 
-	/// TODO: Implementation.
-
-	// Call joystick connect event.
-	__xkInputJoystickEvent(joystick, XK_JOYSTICK_CONNECTED);
+	joystick->id = id;
 
 _catch:
 	return(result);
+
+_free:
+	if(joystick) {
+		xkFreeMemory(joystick);
+	}
+
+	goto _catch;
 }
 
 void xkDestroyJoystick(XkJoystick joystick) {
-	// Call joystick disconnect event.
-	__xkInputJoystickEvent(joystick, XK_JOYSTICK_DISCONNECTED);
+	xkAssert(joystick);
 
-	// Free joystick.
 	xkFreeMemory(joystick);
 }
 
 XkString xkJoystickMappingName(XkJoystick joystick) {
+	xkAssert(joystick);
+
 	return("Windows");
 }
-
-void xkPollJoystickEvents(XkJoystick joystick) {
-	/// TODO: Implementation.
-}
-
-#endif // XK_WIN32

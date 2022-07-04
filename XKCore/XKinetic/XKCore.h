@@ -1,8 +1,10 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Defines.h"
 #include "XKinetic/Typedefs.h"
 
+/* ########## MACROS SECTION ########## */
 #if defined(_DEBUG) || defined(__XKCORE_DEBUG__)
 	#define XKCORE_DEBUG 
 #endif // _DEBUG || __XKCORE_DEBUG__

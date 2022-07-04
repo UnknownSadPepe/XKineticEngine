@@ -8,6 +8,7 @@
 
 #define XK_TAG_COMPONENT_MAX_SIZE 64
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -54,6 +55,7 @@ typedef struct {
 	XkFloat32 zFar;
 } XkCameraComponent;
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

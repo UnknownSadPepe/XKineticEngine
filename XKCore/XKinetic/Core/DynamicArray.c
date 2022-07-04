@@ -1,7 +1,13 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 #include "XKinetic/Core/DynamicArray.h"
 
-struct XkDynamicArray {
+/* ########## MACROS SECTION ########## */
+#define XK_DYNAMIC_ARRAY_REALLOCATE_COEFFICIENT 2
+
+/* ########## TYPES SECTION ########## */
+struct XkDynamicArray_T {
 	XkSize length;
 	XkSize capacity;
 
@@ -13,177 +19,172 @@ struct XkDynamicArray {
 	XkHandle memory;
 };
 
-#define XK_DYNAMIC_ARRAY_REALLOCATE_COEFFICIENT 2
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult __xkCreateDynamicArray(XkDynamicArray* pArray, const XkSize capacity, const XkSize stride) {
+	xkAssert(pArray);
+	xkAssert(capacity > 0);
+	xkAssert(stride > 0);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate dynamic array.
-	*pArray = xkAllocateMemory(sizeof(struct XkDynamicArray));
+	*pArray = xkAllocateMemory(sizeof(struct XkDynamicArray_T));
 	if(!(*pArray)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Template dynamic array.
 	XkDynamicArray array = *pArray;
 
-	// Initialize dynamic array total size.
 	const XkSize totalSize = capacity * stride;
 
-	// Align total size with dynamic array stride.
+	// Align total size with dynamic array stride for better performance and minimal fragmentation.
 	const XkSize alignTotalSize = (totalSize + (stride - 1)) & ~(stride - 1);
 
-	// Initialize dynamic array.
 	array->length			= 0;
 	array->capacity		= capacity;
 	array->stride			= stride;
 	array->size				= 0;
 	array->totalSize	= alignTotalSize;
-
-	// Allocate dynamic array memory.
 	array->memory			= xkAllocateMemory(alignTotalSize);
 	if(!array->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
+		goto _free;
 	}
 
 _catch:
 	return(result);
+
+_free:
+	if(array) {
+		xkFreeMemory(array);
+	}
+
+	goto _catch;
 }
 
 void xkClearDynamicArray(XkDynamicArray array) {
-	// Null dynamic array allocated length.
-	array->length = 0;
+	xkAssert(array);
 
-	// Null dynamic array allocated size.
+	array->length = 0;
 	array->size = 0;
 
-	// Zero dynamic array memory.
 	xkZeroMemory(array->memory, array->totalSize);	
 }
 
 void xkDestroyDynamicArray(XkDynamicArray array) {
-	// Free dynamic array memory.
+	xkAssert(array);
+
 	xkFreeMemory(array->memory);
 
-	// Free dynamic array.
 	xkFreeMemory(array);
 }
 
 void xkResizeDynamicArray(XkDynamicArray array, XkSize newCapacity) {
-	// Initialize dynamic array total size.
+	xkAssert(array);
+	xkAssert(newCapacity > 0 && newCapacity > array->capacity);
+
 	const XkSize newTotalSize = newCapacity * array->stride;
 
-	// Align new total size with dynamic array stride.
+	// Align new total size with dynamic array stride for better performance and minimal fragmentation.
 	const XkSize alignNewTotalSize = (newTotalSize + (array->stride - 1)) & ~ (array->stride - 1);
 
-	// Initialize dynamic array.
-	array->capacity = newCapacity;
-	array->totalSize = alignNewTotalSize;
-
-	// Reallocate dynamic array memory.
-	array->memory = xkReallocateMemory(array->memory, alignNewTotalSize);
+	array->capacity 	= newCapacity;
+	array->totalSize 	= alignNewTotalSize;
+	array->memory 		= xkReallocateMemory(array->memory, alignNewTotalSize);
 }
 
 void __xkDynamicArrayPush(XkDynamicArray array, const XkHandle data) {
-	// Check if there is not enough space in dynamic array.
+	xkAssert(array);
+	xkAssert(data);
+
 	if(array->length >= array->capacity) {
-		// Resize dynamic array.
 		xkResizeDynamicArray(array, array->capacity * XK_DYNAMIC_ARRAY_REALLOCATE_COEFFICIENT);
 	}
 
-	// Copy data to last dynamic array memory.
 	xkCopyMemory((XkUInt8*)array->memory + (array->stride * array->length), data, array->stride);
 
-	// Increment dynamic array length.
-	array->length++;
-
-	// Increment dynamic array allocated size.
+	++array->length;
 	array->size += array->stride;
 }
 
 void xkDynamicArrayPop(XkDynamicArray array) {
-	// Zero last dynamic array memory.
+	xkAssert(array);
+
 	xkZeroMemory((XkUInt8*)array->memory + (array->stride * array->length), array->stride);
 
-	// Decrement dynamic array length.
-	array->length--;
-
-	// Decrement dynamic array allocated size.
+	--array->length;
 	array->size -= array->stride;
 }
 
 void __xkDynamicArrayInsert(XkDynamicArray array, const XkSize index, XkHandle data) {
-	// Check if index outside dynamic array bounds.
+	xkAssert(array);
+	xkAssert(index >= 0);
+	xkAssert(data);
+
 	if(index >= array->length) {
 		return;
 	}
 
-	// Check if there is not enough space in dynamic array.
 	if (array->length >= array->capacity) {
-		// resize dynamic array.
 		xkResizeDynamicArray(array, array->capacity * XK_DYNAMIC_ARRAY_REALLOCATE_COEFFICIENT);
 	}
 
-	// Check if not the last element.
 	if(index != array->length - 1) {
-
-		// Copy the rest outward.
 		xkCopyMemory((XkUInt8*)array->memory + ((index + 1) * array->stride), (XkUInt8*)array->memory + (index * array->stride), array->stride * (array->length - index));
 	}
 
-	// Increment dynamic array length.
-	array->length++;
-
-	// Increment dynamic array allocated size.
+	++array->length;
 	array->size += array->stride;
 }
 
 void xkDynamicArrayErase(XkDynamicArray array, const XkSize index) {
-	// Check if index outside dynamic array bounds.
+	xkAssert(array);
+	xkAssert(index >= 0 && index < array->capacity - 1);
+
 	if (index >= array->length) {
 		return;
 	}
 
-	// Check if not the last element.
 	if(index != array->length - 1) {
-		// Snip out the data and copy the rest inward.
 		xkCopyMemory((XkUInt8*)array->memory + (index * array->stride), (XkUInt8*)array->memory + ((index + 1) * array->stride), array->stride * (array->length - index));
   }
 
-	// Decrement dynamic array length.
-	array->length--;
-
-	// Decrement dynamic array allocated size.
+	--array->length;
 	array->size -= array->stride;
 }
 
 XkSize xkDynamicArrayLength(XkDynamicArray array) {
+	xkAssert(array);
+
 	return(array->length);
 }
 
 XkSize xkDynamicArrayCapacity(XkDynamicArray array) {
+	xkAssert(array);
+
 	return(array->capacity);
 }
 
 XkHandle xkDynamicArrayGet(XkDynamicArray array, const XkSize index) {
-	// Check if index outside dynamic array bounds.
+	xkAssert(array);
+	xkAssert(index >= 0 && index < array->capacity - 1);
+
 	if (index >= array->length) {
 		return(XK_NULL_HANDLE);
 	}
 
-	// Return indexed dynamic array memory.
 	return(&array->memory + (array->stride * (index + 1)));
 }
 
 void __xkDynamicArraySet(XkDynamicArray array, const XkSize index, XkHandle data) {
-	// Check if index outside dynamic array bounds.
+	xkAssert(array);
+	xkAssert(index >= 0 && index < array->capacity - 1);
+	xkAssert(data);
+
 	if (index >= array->length) {
 		return;
 	}
 
-	// Set indexed dynamic array memory.
 	xkCopyMemory((XkUInt8*)array->memory + (array->stride * (index + 1)), data, array->stride);
 }
 

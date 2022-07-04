@@ -2,6 +2,7 @@
 
 #include "XKinetic/Math/Math.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -43,6 +44,7 @@ static inline void fp_force_evall(long double x)
 	}                                         \
 } while(0)
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

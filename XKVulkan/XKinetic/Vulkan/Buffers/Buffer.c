@@ -1,10 +1,15 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVkBufferMemory, const VkDeviceSize vkSize, const VkBufferUsageFlags vkUsage, const VkMemoryPropertyFlags vkMemoryProperties, const void* data) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkVulkanCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVkBufferMemory, const VkDeviceSize vkSize, const VkBufferUsageFlags vkUsage, const VkMemoryPropertyFlags vkMemoryProperties, const void* data) {
+  xkAssert(pVkBuffer);
+  xkAssert(pVkBufferMemory);
+
   XkResult result = XK_SUCCESS;
 
-  // Initialize Vulkan buffer create info.
-  VkBufferCreateInfo vkBufferCreateInfo       = {0};
+  VkBufferCreateInfo vkBufferCreateInfo       = {};
   vkBufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   vkBufferCreateInfo.pNext                    = VK_NULL_HANDLE;
   vkBufferCreateInfo.flags                    = 0;
@@ -14,49 +19,42 @@ XkResult __xkVkCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const pVk
 	vkBufferCreateInfo.queueFamilyIndexCount    = 0;
 	vkBufferCreateInfo.pQueueFamilyIndices      = VK_NULL_HANDLE;
 
-  // Create Vulkan buffer.
-  VkResult vkResult = vkCreateBuffer(_xkVkContext.vkLogicalDevice, &vkBufferCreateInfo, VK_NULL_HANDLE, pVkBuffer);
+  VkResult vkResult = vkCreateBuffer(_xkVulkanContext.vkLogicalDevice, &vkBufferCreateInfo, VK_NULL_HANDLE, pVkBuffer);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to create Vulkan buffer: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to create buffer: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
-  // Template Vulkan buffer.
   VkBuffer vkBuffer = *pVkBuffer;
 
-	// Get Vulkan buffer memory requirements.
 	VkMemoryRequirements vkMemoryRequirements;
-	vkGetBufferMemoryRequirements(_xkVkContext.vkLogicalDevice, vkBuffer, &vkMemoryRequirements);
+	vkGetBufferMemoryRequirements(_xkVulkanContext.vkLogicalDevice, vkBuffer, &vkMemoryRequirements);
 
-  // Initialize Vulkan buffer memory allocate info.
-  VkMemoryAllocateInfo vkMemoryAllocateInfo = {0};
+  VkMemoryAllocateInfo vkMemoryAllocateInfo = {};
 	vkMemoryAllocateInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   vkMemoryAllocateInfo.pNext                = VK_NULL_HANDLE;
 	vkMemoryAllocateInfo.allocationSize       = vkMemoryRequirements.size;
-	vkMemoryAllocateInfo.memoryTypeIndex      = __xkVkFindMemoryType(vkMemoryRequirements.memoryTypeBits, vkMemoryProperties);
+	vkMemoryAllocateInfo.memoryTypeIndex      = __xkVulkanFindMemoryType(vkMemoryRequirements.memoryTypeBits, vkMemoryProperties);
 
-  // Allocate Vulkan buffer memory.
-  vkResult = vkAllocateMemory(_xkVkContext.vkLogicalDevice, &vkMemoryAllocateInfo, VK_NULL_HANDLE, pVkBufferMemory);
+  vkResult = vkAllocateMemory(_xkVulkanContext.vkLogicalDevice, &vkMemoryAllocateInfo, VK_NULL_HANDLE, pVkBufferMemory);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to allocate Vulkan buffer memory: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to allocate buffer memory: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;   
   }
 
-  // Template Vulkan buffer memory.
   VkDeviceMemory vkBufferMemory = *pVkBufferMemory;
 
 	// If a pointer to the buffer data has been passed, map the Vulkan buffer and copy over the data.
 	if (data) {
-		__xkVkMapBuffer(vkBufferMemory, vkMemoryRequirements.size, data);
+		__xkVulkanMapBuffer(vkBufferMemory, vkMemoryRequirements.size, data);
 	}
 
-  // Bind Vulkan buffer memory.
-	vkResult = vkBindBufferMemory(_xkVkContext.vkLogicalDevice, vkBuffer, vkBufferMemory, 0);
+	vkResult = vkBindBufferMemory(_xkVulkanContext.vkLogicalDevice, vkBuffer, vkBufferMemory, 0);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to bind Vulkan buffer memory: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to bind buffer memory: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;   
   }
 
@@ -64,10 +62,11 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroyBuffer(VkBuffer vkBuffer, VkDeviceMemory vkBufferMemory) {
-  // Destroy Vulkan bufer.
-	vkDestroyBuffer(_xkVkContext.vkLogicalDevice, vkBuffer, VK_NULL_HANDLE);
+void __xkVulkanDestroyBuffer(VkBuffer vkBuffer, VkDeviceMemory vkBufferMemory) {
+  xkAssert(vkBuffer);
+  xkAssert(vkBufferMemory);
+
+	vkDestroyBuffer(_xkVulkanContext.vkLogicalDevice, vkBuffer, VK_NULL_HANDLE);
   
-  // Free Vulkan bufer memory.
-  vkFreeMemory(_xkVkContext.vkLogicalDevice, vkBufferMemory, VK_NULL_HANDLE);
+  vkFreeMemory(_xkVulkanContext.vkLogicalDevice, vkBufferMemory, VK_NULL_HANDLE);
 }

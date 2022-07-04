@@ -1,91 +1,97 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 #include "XKinetic/Core/LinearAllocator.h"
 
-#include "XKinetic/Core/Log.h"
+/* ########## MACROS SECTION ########## */
+#define XK_LINEAR_ALLOCATOR_REALLOCATE_COEFFICIENT 2
 
-struct XkLinearAllocator {
+/* ########## TYPES SECTION ########## */
+struct XkLinearAllocator_T {
 	XkSize size;
 	XkSize totalSize;
 
 	XkHandle memory;
 };
 
+/* ########## GLOBAL VARIABLES SECTION ########## */
 static const XkSize XK_LINEAR_ALLOCATOR_ALIGN = 16;
 
-#define XK_LINEAR_ALLOCATOR_REALLOCATE_COEFFICIENT 2
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateLinearAllocator(XkLinearAllocator* pAllocator, const XkSize totalSize) {
+  xkAssert(pAllocator);
+  xkAssert(totalSize > 0);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate linear allocator.
-	*pAllocator = xkAllocateMemory(sizeof(struct XkLinearAllocator));
+	*pAllocator = xkAllocateMemory(sizeof(struct XkLinearAllocator_T));
 	if(!(*pAllocator)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Template lineara allocator.
 	XkLinearAllocator allocator = *pAllocator;
 
-	// Align total size with linear allocator alignment.
+	// Align total size with linear allocator alignment for better performance and minimal fragmentation.
 	const XkSize alignTotalSize = (totalSize + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
 
-	// Initialize linear allocator.
-	allocator->size = 0;
-	allocator->totalSize = alignTotalSize;
-
-	// Allocate linear allocator memory.
-	allocator->memory = xkAllocateMemory(alignTotalSize);
+	allocator->size 			= 0;
+	allocator->totalSize 	= alignTotalSize;
+	allocator->memory 		= xkAllocateMemory(alignTotalSize);
 	if(!allocator->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
+		goto _free;
 	}
 
 _catch:
 	return(result);
+
+_free:
+  if(allocator) {
+    xkFreeMemory(allocator);
+  }
+
+  goto _catch;
 }
 
 void xkDestroyLinearAllocator(XkLinearAllocator allocator) {
-	// Free linear allocator memory.
+  xkAssert(allocator);
+
 	xkFreeMemory(allocator->memory);
 
-	// Free linear allocator.
 	xkFreeMemory(allocator);
 }
 
 void xkClearLinearAllocator(XkLinearAllocator allocator) {
-	// Null linear allocator allocate size.
+  xkAssert(allocator);
+
 	allocator->size = 0;
 
-	// Zero linear allocator memory.
 	xkZeroMemory(allocator->memory, allocator->totalSize);	
 }
 
 void xkResizeLinearAllocator(XkLinearAllocator allocator, const XkSize newTotalSize) {
-	// Align new total size with linear allocator stride.
+  xkAssert(allocator);
+
+	// Align new total size with linear allocator stride for better performance and minimal fragmentation.
 	const XkSize alignNewTotalSize = (newTotalSize + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
 
-	// Initialize linear allocator.
-	allocator->totalSize = alignNewTotalSize;
-
-	// Reallocate linear allocator memory.
-	allocator->memory = xkReallocateMemory(allocator->memory, alignNewTotalSize);
+	allocator->totalSize 	= alignNewTotalSize;
+	allocator->memory 		= xkReallocateMemory(allocator->memory, alignNewTotalSize);
 }
 
 XkHandle xkAllocateLinearMemory(XkLinearAllocator allocator, const XkSize size) {
-	// Align allocate size with linear allocator stride.
+  xkAssert(allocator);
+
+	// Align allocate size with linear allocator stride for better performance and minimal fragmentation.
 	const XkSize alignSize = (size + (XK_LINEAR_ALLOCATOR_ALIGN - 1)) & ~(XK_LINEAR_ALLOCATOR_ALIGN - 1);
 
-	// Check if there is not enough space in linear allocator.
 	if((allocator->size + alignSize) > allocator->totalSize) {
-		// Resize linear allocator.
 		xkResizeLinearAllocator(allocator, allocator->totalSize * XK_LINEAR_ALLOCATOR_REALLOCATE_COEFFICIENT);
 	}
 
-	// Increment linear allocator allocated size.
 	allocator->size += alignSize;
 
-	// Select new linear allocator allocated  memory.
  	XkHandle newMemory = (XkUInt8*)allocator->memory + (allocator->size + alignSize);
 
 	return(newMemory);

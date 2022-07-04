@@ -16,7 +16,6 @@ endif()
 
 target_compile_definitions(XKCore PRIVATE __XKCORE_BUILD__)
 
-# Check if debug build type, add compile defenition
 if(CMAKE_BUILD_TYPE EQUAL "Debug")
   target_compile_definitions(XKCore PRIVATE __XKCORE_DEBUG__)
 endif()
@@ -34,12 +33,12 @@ if(UNIX AND NOT APPLE)
 
   macro(wayland_generate protocol_file output_file)
     add_custom_command(OUTPUT "${output_file}.h"
-      COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" client-header "${protocol_file}" "${output_file}.h"
+      COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" -c client-header "${protocol_file}" "${output_file}.h"
       DEPENDS "${protocol_file}"
       VERBATIM)
 
     add_custom_command(OUTPUT "${output_file}-code.h"
-      COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" private-code "${protocol_file}" "${output_file}-code.h"
+      COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" -c private-code "${protocol_file}" "${output_file}-code.h"
       DEPENDS "${protocol_file}"
       VERBATIM)
 
@@ -73,18 +72,10 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(XKCore PRIVATE wayland-client wayland-cursor xkbcommon)
 endif()
 
-# Link Win32 specific libraries.
 if(WIN32)
   target_link_libraries(XKCore PRIVATE user32 gdi32)   
 endif()
 
-# Link Unix specific libraries.
 if(UNIX AND NOT APPLE)
   target_link_libraries(XKCore PRIVATE dl rt)
 endif()
-
-#find_package(OpenXR REQUIRED FATAL_ERROR)
-#target_link_libraries(XKCore PRIVATE OpenXR::OpenXR)
-#target_include_directories(XKCore PRIVATE ${OPENXR_INCLUDE_DIRS} $ENV{OPENXR_SDK}/include)
-
-#target_include_directories(XKCore PRIVATE openxr)

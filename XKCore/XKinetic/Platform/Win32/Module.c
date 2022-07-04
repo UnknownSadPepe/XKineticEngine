@@ -1,47 +1,54 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Module.h"
+#include "XKinetic/Core/Assert.h"
 
-#if defined(XK_WIN32)
-
-#include <windows.h>
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkLoadModule(XkModule* pModule, const XkString path) {
+	xkAssert(pModule);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate module.
-	*pModule = xkAllocateMemory(sizeof(struct XkModule));
+	*pModule = xkAllocateMemory(sizeof(struct XkModule_T));
 	if(!(*pModule)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Template module.
 	XkModule module = *pModule;
 
-	// Load Win32 library.
 	module->win32.handle = LoadLibraryA(path);
 	if(module->win32.handle == NULL) {
-		xkFreeMemory(module);
 		__xkErrorHandle("Win32: Failed to load module");
 		result = XK_ERROR_MODULE_NOT_PRESENT;
-		goto _catch;
+		goto _free;
 	}
 
 _catch:
 	return(result);
+
+_free:
+	if(module) {
+		xkFreeMemory(module);
+	}
+
+	goto _catch;
 }
 
 void xkUnloadModule(XkModule module) {
-	// Free Win32 linbary.
+	xkAssert(module);
+
 	FreeLibrary(module->win32.handle);
 
-	// Free module.
 	xkFreeMemory(module);
 }
 
 XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkString name, XkModule module) {
+	xkAssert(pPfnProc);
+	xkAssert(module);
+
 	XkResult result = XK_SUCCESS;
 
-	// Get Win32 process adress.
 	*pPfnProc = (XkProcPfn)GetProcAddress(module->win32.handle, name);
 	if(*pPfnProc == NULL) {
 		__xkErrorHandle("Win32: Failed to get module symbol");
@@ -52,5 +59,3 @@ XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkString name, XkModule mo
 _catch:
 	return(result);
 }
-
-#endif // XK_WIN32

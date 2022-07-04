@@ -4,6 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Image.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -19,6 +20,7 @@ XK_API void xkDestroyTextureSystem(XkTextureSystem);
 XK_API XkTextureID xkCreateTexture(XkTextureSystem, XkImageConfig* const);
 XK_API void xkDestroyTexture(XkTextureSystem, XkTextureID);
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

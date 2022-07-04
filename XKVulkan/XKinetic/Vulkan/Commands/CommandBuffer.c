@@ -1,21 +1,24 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkVkCreateCommandBuffer(VkCommandBuffer* pVkCommandBuffer, const VkCommandBufferLevel vkCommandBufferLevel) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkVulkanCreateCommandBuffer(VkCommandBuffer* pVkCommandBuffer, const VkCommandBufferLevel vkCommandBufferLevel) {
+  xkAssert(pVkCommandBuffer);
+
   XkResult result = XK_SUCCESS;
 
-  // Initialize Vulkan command buffer allocate info.
-	VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {0};
+	VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {};
   vkCommandBufferAllocateInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   vkCommandBufferAllocateInfo.pNext                       = VK_NULL_HANDLE;
-	vkCommandBufferAllocateInfo.commandPool                 = _xkVkContext.vkCommandPool;
+	vkCommandBufferAllocateInfo.commandPool                 = _xkVulkanContext.vkCommandPool;
 	vkCommandBufferAllocateInfo.level                       = vkCommandBufferLevel;
 	vkCommandBufferAllocateInfo.commandBufferCount          = 1;
 	
-  // Allocate Vulkan command buffer.
-	VkResult vkResult = vkAllocateCommandBuffers(_xkVkContext.vkLogicalDevice, &vkCommandBufferAllocateInfo, pVkCommandBuffer);
+	VkResult vkResult = vkAllocateCommandBuffers(_xkVulkanContext.vkLogicalDevice, &vkCommandBufferAllocateInfo, pVkCommandBuffer);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to allocate Vulkan command buffer: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to allocate command buffer: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
@@ -23,7 +26,8 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroyCommandBuffer(VkCommandBuffer vkCommandBuffer) {
-  // Destroy Vulkan command buffer.
-  vkFreeCommandBuffers(_xkVkContext.vkLogicalDevice, _xkVkContext.vkCommandPool, 1, &vkCommandBuffer);
+void __xkVulkanDestroyCommandBuffer(VkCommandBuffer vkCommandBuffer) {
+  xkAssert(vkCommandBuffer);
+
+  vkFreeCommandBuffers(_xkVulkanContext.vkLogicalDevice, _xkVulkanContext.vkCommandPool, 1, &vkCommandBuffer);
 }

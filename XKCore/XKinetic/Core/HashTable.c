@@ -1,9 +1,13 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 #include "XKinetic/Core/HashTable.h"
 
-#include "XKinetic/Core/Log.h"
+/* ########## MACROS SECTION ########## */
+#define XK_HASH_TABLE_REALLOCATE_COEFFICIENT 2
 
-struct XkHashTable {
+/* ########## TYPES SECTION ########## */
+struct XkHashTable_T {
 	XkSize length;
 	XkSize capacity;
 	XkSize stride;
@@ -13,9 +17,10 @@ struct XkHashTable {
 	XkHandle memory;
 };
 
-#define XK_HASH_TABLE_REALLOCATE_COEFFICIENT 2
+/* ########## FUNCTIONS SECTION ########## */
+static XkSize __xkHashIndex(XkHashTable hashtable, const XkHashKey key) {
+	xkAssert(hashtable);
 
-static XkSize __xkHashIndex(XkHashTable table, const XkKey key) {
 	// SDBM hahs function.
   XkSize hash = 0;
 	
@@ -23,126 +28,130 @@ static XkSize __xkHashIndex(XkHashTable table, const XkKey key) {
 		hash = *us + (hash << 6) + (hash << 16) - hash;
   }
 
-	// Mod it against the size of the table.
-	hash %= table->capacity;
-
-	xkLogNotice("hash: %d", hash);
+	// Mod it against the size of the hashtable.
+	hash %= hashtable->capacity;
 
   return(hash);
 }
 
-XkResult __xkCreateHashTable(XkHashTable* pTable, const XkSize capacity, const XkSize stride) {
+XkResult __xkCreateHashTable(XkHashTable* pHashTable, const XkSize capacity, const XkSize stride) {
+	xkAssert(pHashTable);
+	xkAssert(capacity > 0);
+	xkAssert(stride > 0);	
+
   XkResult result = XK_SUCCESS;
 
-	// Allocate hash table.
-	*pTable = xkAllocateMemory(sizeof(struct XkHashTable));
-	if(!(*pTable)) {
+	*pHashTable = xkAllocateMemory(sizeof(struct XkHashTable_T));
+	if(!(*pHashTable)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Template hash table.
-	XkHashTable table = *pTable;
+	XkHashTable hashtable = *pHashTable;
 
-	// Align stride with hash table alignment.
+	// Align stride with hash hashtable alignment for better performance and minimal fragmentation.
 	const XkSize alignStride = (stride + (stride - 1)) & ~(stride - 1);
 
-	// Initialize hash table total size.
 	const XkSize totalSize = capacity * alignStride;
 
-	// Initialize hash table.
-  table->length 		= 0;
-	table->capacity 	= capacity;
-	table->stride 		= stride;
-	table->totalSize 	= totalSize;
-
-	// Allocate hash table memory.
-	table->memory =	xkAllocateMemory(totalSize);
-	if(!table->memory) {
+  hashtable->length 		= 0;
+	hashtable->capacity 	= capacity;
+	hashtable->stride 		= stride;
+	hashtable->totalSize 	= totalSize;
+	hashtable->memory 		=	xkAllocateMemory(totalSize);
+	if(!hashtable->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
+		goto _free;
 	}
 
 _catch:
   return(result);
-}
 
-void xkDestroyHashTable(XkHashTable table) {
-	// Free hash table memory.
-	xkFreeMemory(table->memory);
-
-	// Free hash table
-	xkFreeMemory(table);
-}
-
-void xkResizeHashTable(XkHashTable table, const XkSize newCapacity) {
-	// Initialize hash table new total size.
-	const XkSize newTotalSize = newCapacity * table->stride;
-	
-	// Reallocate hash table memory.
-	table->memory = xkReallocateMemory(table->memory, newTotalSize);
-
-	// Initialize hash table
-	table->capacity = newCapacity;
-	table->totalSize = newTotalSize;
-}
-
-void xkClearHashTable(XkHashTable table) {
-	// Null hash table allocated length.
-	table->length = 0;
-
-	// Zero hash table memory.
-	xkZeroMemory(table->memory, table->totalSize);	
-}
-
-void __xkHashTableInsert(XkHashTable table, const XkKey key, const XkHandle data) {
-	// Check if there is not enough space in hash table.
-	if(table->length >= table->capacity) {
-		// Resize hash table.
-		xkResizeHashTable(table, table->capacity * XK_HASH_TABLE_REALLOCATE_COEFFICIENT);
+_free:
+	if(hashtable) {
+		xkFreeMemory(hashtable);
 	}
 
-	// Get memory index by key.
-	XkSize index = __xkHashIndex(table, key);
-
-	// Copy data to indexed memory.
-	xkCopyMemory((XkUInt8*)table->memory + (table->stride * (index)), data, table->stride);
-
-	// Increment hash table allocated length.
-	table->length++;
+	goto _catch;
 }
 
-void xkHashTableErase(XkHashTable table, XkKey key) {
-	// Get memory index by key.
-	XkSize index = __xkHashIndex(table, key);
+void xkDestroyHashTable(XkHashTable hashtable) {
+	xkAssert(hashtable);
 
-	// Copy data to indexed memory.
-	xkZeroMemory((XkUInt8*)table->memory + (table->stride * (index)), table->stride);
+	xkFreeMemory(hashtable->memory);
 
-	// Decrement hash table allocated length.
-	table->length--;
+	xkFreeMemory(hashtable);
 }
 
-XkSize xkHashTableLength(XkHashTable table) {
-	return(table->length);
+void xkResizeHashTable(XkHashTable hashtable, const XkSize newCapacity) {
+	xkAssert(hashtable);
+	xkAssert(newCapacity > 0 && newCapacity > array->capacity);
+
+	const XkSize newTotalSize = newCapacity * hashtable->stride;
+	
+	hashtable->memory 		= xkReallocateMemory(hashtable->memory, newTotalSize);
+	hashtable->capacity 	= newCapacity;
+	hashtable->totalSize 	= newTotalSize;
 }
 
-XkSize xkHashTableCapacity(XkHashTable table) {
-	return(table->capacity);
+void xkClearHashTable(XkHashTable hashtable) {
+	xkAssert(hashtable);
+
+	hashtable->length = 0;
+
+	xkZeroMemory(hashtable->memory, hashtable->totalSize);	
 }
 
-XkHandle xkHashTableGet(XkHashTable table, const XkKey key) {
-	// Get memory index by key.
-	XkSize index = __xkHashIndex(table, key);
+void __xkHashTableInsert(XkHashTable hashtable, const XkHashKey key, const XkHandle data) {
+	xkAssert(hashtable);
+	xkAssert(data);
 
-	return((XkUInt8*)table->memory + (table->stride * (index)));
+	if(hashtable->length >= hashtable->capacity) {
+		xkResizeHashTable(hashtable, hashtable->capacity * XK_HASH_TABLE_REALLOCATE_COEFFICIENT);
+	}
+
+	XkSize index = __xkHashIndex(hashtable, key);
+
+	xkCopyMemory((XkUInt8*)hashtable->memory + (hashtable->stride * (index)), data, hashtable->stride);
+
+	++hashtable->length;
 }
 
-void __xkHashTableSet(XkHashTable table, const XkKey key, XkHandle data) {
-	// Get memory index by key.
-	XkSize index = __xkHashIndex(table, key);
+void xkHashTableErase(XkHashTable hashtable, XkHashKey key) {
+	xkAssert(hashtable);
 
-	// Copy data to indexed memory.
-	xkCopyMemory((XkUInt8*)table->memory + (table->stride * (index)), data, table->stride);
+	XkSize index = __xkHashIndex(hashtable, key);
+
+	xkZeroMemory((XkUInt8*)hashtable->memory + (hashtable->stride * (index)), hashtable->stride);
+
+	--hashtable->length;
+}
+
+XkSize xkHashTableLength(XkHashTable hashtable) {
+	xkAssert(hashtable);
+
+	return(hashtable->length);
+}
+
+XkSize xkHashTableCapacity(XkHashTable hashtable) {
+	xkAssert(hashtable);
+
+	return(hashtable->capacity);
+}
+
+XkHandle xkHashTableGet(XkHashTable hashtable, const XkHashKey key) {
+	xkAssert(hashtable);
+
+	XkSize index = __xkHashIndex(hashtable, key);
+
+	return((XkUInt8*)hashtable->memory + (hashtable->stride * (index)));
+}
+
+void __xkHashTableSet(XkHashTable hashtable, const XkHashKey key, XkHandle data) {
+	xkAssert(hashtable);
+
+	XkSize index = __xkHashIndex(hashtable, key);
+
+	xkCopyMemory((XkUInt8*)hashtable->memory + (hashtable->stride * (index)), data, hashtable->stride);
 }
 

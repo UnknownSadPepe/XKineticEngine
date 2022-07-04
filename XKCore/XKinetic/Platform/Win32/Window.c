@@ -1,15 +1,11 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
-
-#if defined(XK_WIN32)
-
-#include <limits.h>
-#include <windows.h>
-#include <windowsx.h>
-#include <shellapi.h>
-#include "XKinetic/Platform/Win32/Internal.h"
+#include "XKinetic/Platform/Window.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/String.h"
-#include <stdio.h>
+#include "XKinetic/Core/Assert.h"
 
+/* ########## MACROS SECTION ########## */
 #ifndef XBUTTON3
   #define XBUTTON3 0x0004
 #endif // XBUTTON3
@@ -34,39 +30,44 @@
   #define GET_XBUTTON_WPARAM(wParam) (HIWORD(wParam))
 #endif // GET_XBUTTON_WPARAM
 
-static const CHAR XK_WIN32_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
+/* ########## FUNCTIONS DECLARATIONS SECTION ########## */
+static DWORD                __xkWin32GetWindowStyle(const XkWindow);
+static DWORD                __xkWin32GetWindowExStyle(const XkWindow);
+static void                 __xkWin32UpdateWindowStyle(const XkWindow);
 
-static DWORD __xkWin32GetWindowStyle(const XkWindow);
-static DWORD __xkWin32GetWindowExStyle(const XkWindow);
-static void __xkWin32UpdateWindowStyle(const XkWindow);
+static void                 __xkWin32GetFullWindowSize(DWORD, DWORD, XkSize, XkSize, XkSize* const, XkSize* const);
 
-static void __xkWin32GetFullWindowSize(DWORD, DWORD, int, int, int*, int*);
+static XkMod                __xkWin32GetKeyMod(void);
 
-static XkWindowMod __xkWin32GetKeyMod(void);
+static HICON                __xkWin32CreateIcon(const XkWindowIcon*, XkInt32, XkInt32, XkBool);
+static const XkWindowIcon*  __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
 
-static HICON __xkWin32CreateIcon(const XkWindowIcon*, XkInt32, XkInt32, XkBool);
-static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
+static void                 __xkWin32DisableCursor(const XkWindow);
+static void                 __xkWin32EnableCursor(const XkWindow);
+static void                 __xkWin32HideCursor(const XkWindow);
+static void                 __xkWin32UpdateCursor(const XkWindow);
 
-static void __xkWin32DisableCursor(const XkWindow);
-static void __xkWin32HideCursor(const XkWindow);
-static void __xkWin32EnableCursor(const XkWindow);
-static void __xkWin32UpdateCursor(const XkWindow);
+static WCHAR*               __xkWin32WideStringFromUTF8(const CHAR*);
+static CHAR*                __xkWin32UTF8FromWideString(const WCHAR*);
 
-static WCHAR* __xkWin32WideStringFromUTF8(const CHAR*);
-static CHAR* __xkWin32UTF8FromWideString(const WCHAR*);
+static void                 __xkWin32InitializeKeycodes();
 
-static void __xkWin32InitializeKeycodes();
+static LRESULT CALLBACK     __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
 
-static LRESULT CALLBACK __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
+/* ########## GLOBAL VARIABLES SECTION ########## */
+static const CHAR XK_WIN64_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
 
-XkResult xkInitializeWindow(void) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult xkInitializeWindow() {
 	XkResult result = XK_SUCCESS;
 
-  // Get Win32 instance handle.
+  if(_xkPlatform.initialized) {
+    goto _catch;
+  }
+
 	_xkPlatform.win32.instance = GetModuleHandle(NULL);
 	
-	// Initialize Win32 window class.
-	WNDCLASSEXA wc			= {0};
+	WNDCLASSEXA wc		= {};
 	wc.cbSize					= sizeof(WNDCLASSEXA);
   wc.style					= CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
   wc.lpfnWndProc		= __xkWin32WindowProc;
@@ -76,63 +77,69 @@ XkResult xkInitializeWindow(void) {
 	wc.hIcon					= LoadIcon(NULL, IDI_APPLICATION);
   wc.hCursor				= LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground	= (HBRUSH)(COLOR_WINDOW + 1);
-  wc.lpszClassName	= XK_WIN32_WINDOW_CLASS_NAME;
+  wc.lpszClassName	= XK_WIN64_WINDOW_CLASS_NAME;
 	wc.hCursor				= NULL;
 	wc.lpszMenuName		= NULL;
 
-	// Register Win32 window class.
 	if(!RegisterClassExA(&wc)) {
 		__xkErrorHandle("Win32: Failed to register class");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-  // Initialize Win32 keycodes.
 	__xkWin32InitializeKeycodes();
+
+  _xkPlatform.initialized = XK_TRUE;
 
 _catch:
 	return(result);
 }
 
-void xkTerminateWindow(void) {
-	// Unregister Win32 window class.
-	UnregisterClassA(XK_WIN32_WINDOW_CLASS_NAME, _xkPlatform.win32.instance); 
+void xkTerminateWindow() {
+  if(!_xkPlatform.initialized) {
+    return;
+  }
+
+	UnregisterClassA(XK_WIN64_WINDOW_CLASS_NAME, _xkPlatform.win32.instance); 
+
+  _xkPlatform.initialized = XK_FALSE;
 }
 
-HINSTANCE __xkWin32GetInstance(void) {
+HINSTANCE __xkWin32GetInstance() {
   return(_xkPlatform.win32.instance);
 }
 
 HWND __xkWin32GetHWND(XkWindow window) {
+  xkAssert(window);
+
   return(window->win32.handle);
 }
 
 XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
+  xkAssert(pWindow);
+  xkAssert(width > 0);
+  xkAssert(height > 0);
+
 	XkResult result = XK_SUCCESS;
 
-  // Allocate window.
-	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
+	*pWindow = xkAllocateMemory(sizeof(struct XkWindow_T));
 	if(!(*pWindow)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}
 	
-  // Template window.
 	XkWindow window = *pWindow;
 
-  // Check window hints support.
   if(
-    (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FLOATING_BIT) || 
-    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FLOATING_BIT)) {
+    (hint & XK_WINDOW_HINT_DECORATED_BIT && hint & XK_WINDOW_HINT_FLOATING_BIT) || 
+    (hint & XK_WINDOW_HINT_RESIZABLE_BIT && hint & XK_WINDOW_HINT_FLOATING_BIT)) {
     __xkErrorHandle("Win32: Unsupported window hints");
   }
 
-  // Initialize window hints.
-	if(hint & XK_WINDOW_DECORATED_BIT)  window->decorated   = XK_TRUE;
-	if(hint & XK_WINDOW_RESIZABLE_BIT)  window->resizable   = XK_TRUE;
-	if(hint & XK_WINDOW_FLOATING_BIT)   window->floating    = XK_TRUE;
+	if(hint & XK_WINDOW_HINT_DECORATED_BIT)  window->decorated   = XK_TRUE;
+	if(hint & XK_WINDOW_HINT_RESIZABLE_BIT)  window->resizable   = XK_TRUE;
+	if(hint & XK_WINDOW_HINT_FLOATING_BIT)   window->floating    = XK_TRUE;
 
-  // Initialize window.
   window->win32.minWidth  = 0;
   window->win32.minHeight = 0;
   window->win32.maxWidth  = 0;
@@ -140,57 +147,48 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
   window->cursorMode      = XK_CURSOR_NORMAL;
   window->win32.hCursor   = INVALID_HANDLE_VALUE;
   if(title) {
-    /// NOTE: needs to be free.
+    /// NOTE: Needs to be free.
     window->title         = xkDuplicateString(title);
   }
 
-  // Get Win32 window styles.
   DWORD style   = __xkWin32GetWindowStyle(window);
   DWORD exStyle = __xkWin32GetWindowExStyle(window);
 
-  // Get Win32 window posisions; full size.
-  int xpos = CW_USEDEFAULT;
-  int ypos = CW_USEDEFAULT;
-  int fullWidth = width;
-  int fullHeight = height;
+  XkInt32 xpos        = CW_USEDEFAULT;
+  XkInt32 ypos        = CW_USEDEFAULT;
+  XkSize fullWidth    = 0;
+  XkSize fullHeight   = 0;
   __xkWin32GetFullWindowSize(style, exStyle, width, height, &fullWidth, &fullHeight);
 
-	// Create Win32 window.
-	window->win32.handle = CreateWindowExA(exStyle, XK_WIN32_WINDOW_CLASS_NAME, title, style, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, _xkPlatform.win32.instance, NULL);
+	window->win32.handle = CreateWindowExA(exStyle, XK_WIN64_WINDOW_CLASS_NAME, title, style, (int)xpos, (int)ypos, (int)fullWidth, (int)fullHeight, NULL, NULL, _xkPlatform.win32.instance, NULL);
   if(!window->win32.handle) {
 		__xkErrorHandle("Win32: Failed to create window");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-  // Set Win32 property for get it int WindowProc.
+  /// NOTE: Needs in WndProc.
 	SetPropA(window->win32.handle, "XKinetic", window);
 
-  // Set Win32 window floating.
   if(window->floating) {
     SetWindowPos(window->win32.handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
   }
 
-  // Enable Win32 drag files.
-  if(hint & XK_WINDOW_DRAG_DROP_BIT) {
-    // Accept Win32 drag files.
-    DragAcceptFiles(window->win32.handle, TRUE);
-  }
+  DragAcceptFiles(window->win32.handle, TRUE);
 
 _catch:
 	return(result);
 }
 
 void xkDestroyWindow(XkWindow window) {
-  // Remove Win32 property.
+  xkAssert(window);
+
   RemovePropA(window->win32.handle, "XKinetic");
 
-  // Remove Win32 big window icon.
   if(window->win32.hBigIcon) {
     DestroyIcon(window->win32.hBigIcon);
   }
 
-  // Remove Win32 small window icon.
   if(window->win32.hSmallIcon) {
     DestroyIcon(window->win32.hSmallIcon);
   }
@@ -200,21 +198,20 @@ void xkDestroyWindow(XkWindow window) {
     DestroyCursor(window->win32.hCursor);
   }
 
-  // Destroy Win32 window.
   if(window->win32.handle) {
 	 DestroyWindow(window->win32.handle);
   }
 
-  // Free window title.
   if(window->title) {
     xkFreeMemory(window->title);
   }
 
-  // Free window.
 	xkFreeMemory(window);
 }
 
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
+  xkAssert(window);
+
 	int cmdShow = 0;
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT: {
@@ -254,27 +251,27 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 }
 
 void xkFocusWindow(XkWindow window) {
-  // Bring Win32 window to top.
+  xkAssert(window);
+
   BringWindowToTop(window->win32.handle);
 
-  // Set Win32 foreground window.
   SetForegroundWindow(window->win32.handle);
 
-  // Set Win32 window focus.
 	SetFocus(window->win32.handle);
 }
 
 void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
-  // Get Win32 window rect.
+  xkAssert(window);
+
 	RECT rect = {0, 0, width, height};
   AdjustWindowRectEx(&rect, __xkWin32GetWindowStyle(window), FALSE, __xkWin32GetWindowExStyle(window));
 
-  // Set Win32 window size.
 	SetWindowPos(window->win32.handle, HWND_TOP, 0, 0, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
 }
 
 void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeight) {
-  // Get Win32 window rect.
+  xkAssert(window);
+
   RECT rect;
   GetClientRect(window->win32.handle, &rect);
 
@@ -288,14 +285,13 @@ void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeigh
 }
 
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
-  // Get Win32 window rect.
+  xkAssert(window);
+
 	RECT rect;
 	GetWindowRect(window->win32.handle, &rect);
 
-  // Set Win32 window size.
   MoveWindow(window->win32.handle, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, FALSE);
 
-  // Set window min/max values.
   window->win32.minWidth  = minWidth;
   window->win32.minHeight = minHeight;
   window->win32.maxWidth  = maxWidth;
@@ -303,12 +299,14 @@ void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize 
 }
 
 void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
-  // Set Win32 window position.
+  xkAssert(window);
+
 	SetWindowPos(window->win32.handle, NULL, xPos , yPos, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
 }
 
 void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const pYPos) {
-  // Get Win32 window position.
+  xkAssert(window);
+
 	POINT position = {0, 0};
   ClientToScreen(window->win32.handle, &position);
 
@@ -322,54 +320,55 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
 }
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
-  /// NOTE: I allocate title in create method.
+  xkAssert(window);
+
   if(window->title) {
-    // Free window title.
     xkFreeMemory(window->title);
 	}
-  // Duplicate new window title.
+  /// NOTE: Needs to be free.
   window->title = xkDuplicateString(title);
 
-  // Set Win32 window title.
 	SetWindowTextA(window->win32.handle, title);
 }
 
 void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
-  // Choose big icon.
-  const XkWindowIcon* pBigImage = __xkWin32ChooseImage(pIcon, count, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+  xkAssert(window);
 
-  // Choose small icon.
-  const XkWindowIcon* pSmallImage = __xkWin32ChooseImage(pIcon, count, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+  HICON hBigIcon = INVALID_HANDLE_VALUE;
+  HICON hSmallIcon = INVALID_HANDLE_VALUE;
 
-  // Create Win32 big icon.
-  HICON hBigIcon = __xkWin32CreateIcon(pBigImage, 0, 0, TRUE);
-  if(hBigIcon == INVALID_HANDLE_VALUE) {
-    __xkErrorHandle("Win32: Failed to create small icon");
-    goto _catch;
+  if(count > 0 && pIcon) {
+    const XkWindowIcon* pBigImage = __xkWin32ChooseImage(pIcon, count, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+
+    const XkWindowIcon* pSmallImage = __xkWin32ChooseImage(pIcon, count, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
+
+    HICON hBigIcon = __xkWin32CreateIcon(pBigImage, 0, 0, TRUE);
+    if(hBigIcon == INVALID_HANDLE_VALUE) {
+      __xkErrorHandle("Win32: Failed to create small icon");
+      goto _catch;
+    }
+
+    HICON hSmallIcon = __xkWin32CreateIcon(pSmallImage, 0, 0, TRUE);
+    if(hBigIcon == INVALID_HANDLE_VALUE) {
+      __xkErrorHandle("Win32: Failed to create small icon");
+      goto _catch;
+    }
+  } else {
+    hBigIcon = (HICON)GetClassLongPtrW(window->win32.handle, GCLP_HICON);
+    hSmallIcon = (HICON)GetClassLongPtrW(window->win32.handle, GCLP_HICONS);
   }
 
-  // Create Win32 small icon.
-  HICON hSmallIcon = __xkWin32CreateIcon(pSmallImage, 0, 0, TRUE);
-  if(hBigIcon == INVALID_HANDLE_VALUE) {
-    __xkErrorHandle("Win32: Failed to create small icon");
-    goto _catch;
-  }
-  
-  // Send Win32 messages to WndProc.
   SendMessageW(window->win32.handle, WM_SETICON, ICON_BIG, (LPARAM)hBigIcon);
   SendMessageW(window->win32.handle, WM_SETICON, ICON_BIG, (LPARAM)hSmallIcon);
 
-  // Destroy old big icon, if i have.
   if(window->win32.hBigIcon) {
     DestroyIcon(window->win32.hBigIcon);
   }
 
-  // Destroy old small icon, if i have.
   if(window->win32.hSmallIcon) {
     DestroyIcon(window->win32.hSmallIcon);
   }
 
-  // Set new Win32 window icons.
   window->win32.hBigIcon = hBigIcon;
   window->win32.hSmallIcon = hSmallIcon;
 
@@ -377,7 +376,9 @@ _catch:
   return;
 }
 
-void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
+void xkSetWindowCursorMode(XkWindow window, const XkCursorMode mode) {
+  xkAssert(window);
+
 	window->cursorMode = mode;
 
   if(mode == XK_CURSOR_DISABLED) {
@@ -389,17 +390,18 @@ void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
   }
 }
 
-void xkSetCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
-  // Get Win32 window position.
+void xkSetWindowCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
+  xkAssert(window);
+
   POINT position = {(int)xPos, (int)yPos};
   ClientToScreen(window->win32.handle, &position);
 
-  // Set Win32 cursor position.
   SetCursorPos(position.x, position.y);
 }
 
-void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
-  // Get Win32 cursor position.
+void xkGetWindowCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
+  xkAssert(window);
+
   POINT position;
   if(GetCursorPos(&position)) {
     ScreenToClient(window->win32.handle, &position);
@@ -414,40 +416,31 @@ void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* con
 }
 
 void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
-  if (pIcon) {
-    // Create Win32 cursor icon.
-    HCURSOR hCursor = (HCURSOR)__xkWin32CreateIcon(pIcon, 0/*GetSystemMetrics(SM_CXCURSOR)*/, 0/*GetSystemMetrics(SM_CYCURSOR)*/, XK_FALSE);
+  xkAssert(window);
+
+  HCURSOR hCursor = INVALID_HANDLE_VALUE;
+
+  if(pIcon) {
+    hCursor = (HCURSOR)__xkWin32CreateIcon(pIcon, 0/*GetSystemMetrics(SM_CXCURSOR)*/, 0/*GetSystemMetrics(SM_CYCURSOR)*/, XK_FALSE);
     if (!hCursor) {
       __xkErrorHandle("Win32: Failed to create cursor icon");
       goto _catch;
     }
-
-    // Destroy old cursor, if i have.
-    if (window->win32.hCursor) {
-      DestroyCursor(window->win32.hCursor);
-    }
-
-    // Set new Win32 cursor.
-    window->win32.hCursor = hCursor;
-
-    __xkWin32UpdateCursor(window);
-  } else {
-    // Destroy old cursor, if i have.
-    if (window->win32.hCursor) {
-      DestroyCursor(window->win32.hCursor);
-    }
-
-    // Set null Win32 cursor.
-    window->win32.hCursor = INVALID_HANDLE_VALUE;
-
-    __xkWin32UpdateCursor(window);
   }
+
+  if(window->win32.hCursor) {
+    DestroyCursor(window->win32.hCursor);
+  }
+
+  window->win32.hCursor = hCursor;
+
+  __xkWin32UpdateCursor(window);
 
 _catch:
   return;
 }
 
-void xkPollWindowEvents(void) {
+void xkPollEvents() {
 	MSG msg;
 
 	while(PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -456,19 +449,21 @@ void xkPollWindowEvents(void) {
 	}
 }
 
-void xkWaitWindowEvents(void) {
+void xkWaitEvents() {
 	WaitMessage();
 
-	xkPollWindowEvents();
+	xkPollEvents();
 }
 
 void xkWaitWindowEventsTimeout(XkFloat64 timeout) {
   MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)(timeout * 1e3), QS_ALLEVENTS);
 
-  xkPollWindowEvents();
+  xkPollEvents();
 }
 
 static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
+  xkAssert(window);
+
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
   if(window->fullscreen) {
@@ -491,6 +486,8 @@ static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
 }
 
 static DWORD __xkWin32GetWindowExStyle(const XkWindow window) {
+  xkAssert(window);
+
 	DWORD style = WS_EX_APPWINDOW;
 
   if(window->fullscreen || window->floating) {
@@ -501,6 +498,8 @@ static DWORD __xkWin32GetWindowExStyle(const XkWindow window) {
 }
 
 static void __xkWin32UpdateWindowStyle(const XkWindow window) {
+  xkAssert(window);
+
   if(window->fullscreen) {
     DWORD style = GetWindowLong(window->win32.handle, GWL_STYLE);
     style &= ~WS_OVERLAPPEDWINDOW;
@@ -519,17 +518,16 @@ static void __xkWin32UpdateWindowStyle(const XkWindow window) {
   }
 }
 
-static void __xkWin32GetFullWindowSize(DWORD style, DWORD exStyle, int contentWidth, int contentHeight, int* fullWidth, int* fullHeight) {
-  // Get Display rect.
+static void __xkWin32GetFullWindowSize(DWORD style, DWORD exStyle, XkSize contentWidth, XkSize contentHeight, XkSize* const pFullWidth, XkSize* const pFullHeight) {
   RECT rect = {0, 0, contentWidth, contentHeight};
   AdjustWindowRectEx(&rect, style, FALSE, exStyle);
 
-  *fullWidth = rect.right - rect.left;
-  *fullHeight = rect.bottom - rect.top;
+  *pFullWidth   = rect.right - rect.left;
+  *pFullHeight  = rect.bottom - rect.top;
 }
 
-static XkWindowMod __xkWin32GetKeyMod(void) {
-  XkWindowMod mod = 0;
+static XkMod __xkWin32GetKeyMod() {
+  XkMod mod = 0;
 
   // Shift mod. 
   if (GetKeyState(VK_SHIFT) & 0x8000) {
@@ -565,29 +563,27 @@ static XkWindowMod __xkWin32GetKeyMod(void) {
 }
 
 static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, const XkInt32 yHot, const XkBool icon) {
+  xkAssert(pIcon);
+
 	XkUInt8* pTarget = NULL;
 	XkUInt8* pSource = pIcon->pixels;
 
-  // Initialize Win32 bitmap shader.
-  BITMAPV5HEADER bi = {0};
-  bi.bV5Size = sizeof(bi);
-  bi.bV5Width = pIcon->width;
-  bi.bV5Height = -pIcon->height;
-  bi.bV5Planes = 1;
-  bi.bV5BitCount = 32;
-  bi.bV5Compression = BI_BITFIELDS;
-  bi.bV5RedMask = 0x00ff0000;
-  bi.bV5GreenMask = 0x0000ff00;
-  bi.bV5BlueMask = 0x000000ff;
-  bi.bV5AlphaMask = 0xff000000;
+  BITMAPV5HEADER bi   = {};
+  bi.bV5Size          = sizeof(bi);
+  bi.bV5Width         = pIcon->width;
+  bi.bV5Height        = -pIcon->height;
+  bi.bV5Planes        = 1;
+  bi.bV5BitCount      = 32;
+  bi.bV5Compression   = BI_BITFIELDS;
+  bi.bV5RedMask       = 0x00ff0000;
+  bi.bV5GreenMask     = 0x0000ff00;
+  bi.bV5BlueMask      = 0x000000ff;
+  bi.bV5AlphaMask     = 0xff000000;
 
-  // Get Win32 DC.
 	HDC dc = GetDC(NULL);
 
-  // Create Win32 DIB section.
 	HBITMAP color = CreateDIBSection(dc, (BITMAPINFO*) &bi, DIB_RGB_COLORS, (void**) &pTarget, NULL, (DWORD)0);
 
-  // Release Win32 DC.
   ReleaseDC(NULL, dc);
 
   if(!color) {
@@ -595,7 +591,6 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	return(NULL);
   }
 
-  // Create Win32 bitmap.
   HBITMAP mask = CreateBitmap(pIcon->width, pIcon->height, 1, 1, NULL);
   if(!mask) {
     __xkErrorHandle("Win32: Failed to create mask bitmap");
@@ -603,7 +598,6 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	return(NULL);
   }
 
-  // Copy icon pixels to DIB section memory.
   for(int i = 0;  i < pIcon->width * pIcon->height;  i++) {
   	pTarget[0] = pSource[2];
   	pTarget[1] = pSource[1];
@@ -613,15 +607,13 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
   	pSource += 4;
   }
 
-  // Initialize Win32 icon info.
-  ICONINFO ii = {0};
+  ICONINFO ii = {};
   ii.fIcon = icon;
   ii.xHotspot = xHot;
   ii.yHotspot = yHot;
   ii.hbmMask = mask;
   ii.hbmColor = color;
 
-  // Create Win32 icon.
   HICON handle = CreateIconIndirect(&ii);
 
   if(!handle) {
@@ -632,21 +624,24 @@ static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, 
     }
   }
 
-  // Delete Win32 DIB section.
   DeleteObject(color);
 
-  // Delete Win32 bitmap.
   DeleteObject(mask);
 
   return(handle); 	
 }
 
 static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, const XkSize count, const XkInt32 width, const XkInt32 height) {
-  int leastDiff = INT_MAX;
+  xkAssert(pIcons);
+  xkAssert(count > 0);
+  xkAssert(width > 0);
+  xkAssert(height > 0);
+
+  XkSize leastDiff = XK_SIZE_MAX;
   const XkWindowIcon* pSelect = NULL;
 
   for (XkSize i = 0; i < count; i++) {
-    const int currDiff = (pIcons[i].width * pIcons[i].height - width * height);
+    const XkSize currDiff = (pIcons[i].width * pIcons[i].height - width * height);
     if (currDiff < leastDiff) {
       pSelect = pIcons + i;
       leastDiff = currDiff;
@@ -657,7 +652,8 @@ static const XkWindowIcon* __xkWin32ChooseImage(const XkWindowIcon* pIcons, cons
 }
 
 static void __xkWin32DisableCursor(const XkWindow window) {
-  // Get Win32 window rect.
+  xkAssert(window);
+
   RECT rect;
   GetClientRect(window->win32.handle, &rect);
 
@@ -670,6 +666,8 @@ static void __xkWin32DisableCursor(const XkWindow window) {
 }
 
 static void __xkWin32HideCursor(const XkWindow window) {
+  xkAssert(window);
+
   // Unclip Win32 cursor.
   ClipCursor(NULL);
 
@@ -678,6 +676,8 @@ static void __xkWin32HideCursor(const XkWindow window) {
 }
 
 static void __xkWin32EnableCursor(const XkWindow window) {
+  xkAssert(window);
+
   // Unclip Win32 cursor.
   ClipCursor(NULL);
 
@@ -686,8 +686,9 @@ static void __xkWin32EnableCursor(const XkWindow window) {
 }
 
 static void __xkWin32UpdateCursor(const XkWindow window) {
+  xkAssert(window);
+
   if (window->win32.hCursor != INVALID_HANDLE_VALUE) {
-    // Set custom cursor.
     SetCursor(window->win32.hCursor);
   }
   else {
@@ -697,6 +698,8 @@ static void __xkWin32UpdateCursor(const XkWindow window) {
 }
 
 WCHAR* __xkWin32WideStringFromUTF8(const CHAR* source) {
+  xkAssert(source);
+
   int size = MultiByteToWideChar(CP_UTF8, 0, source, -1, NULL, 0);
   if(size <= 0) {
     __xkErrorHandle("Win32: Failed to convert UTF-8 string to wide string");
@@ -715,6 +718,8 @@ WCHAR* __xkWin32WideStringFromUTF8(const CHAR* source) {
 }
 
 CHAR* __xkWin32UTF8FromWideString(const WCHAR* source) {
+  xkAssert(source);
+
   int size = WideCharToMultiByte(CP_UTF8, 0, source, -1, NULL, 0, NULL, NULL);
   if(size <= 0) {
     __xkErrorHandle("Win32: Failed to convert wide string to UTF-8");
@@ -732,8 +737,7 @@ CHAR* __xkWin32UTF8FromWideString(const WCHAR* source) {
   return(target);
 }
 
-static void __xkWin32InitializeKeycodes(void) {
-  // Zero keycodes.
+static void __xkWin32InitializeKeycodes() {
   xkZeroMemory(_xkPlatform.keycodes, sizeof(_xkPlatform.keycodes));
 
   _xkPlatform.keycodes[0x00B] = XK_KEY_0;
@@ -870,8 +874,8 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
   case WM_KEYUP:
   case WM_SYSKEYDOWN:
   case WM_SYSKEYUP: {
-    XkWindowAction action = (HIWORD(lParam) & KF_UP) ? XK_RELEASE : XK_PRESS;
-    XkWindowMod mod = __xkWin32GetKeyMod();
+    XkAction action = (HIWORD(lParam) & KF_UP) ? XK_RELEASE : XK_PRESS;
+    XkMod mod = __xkWin32GetKeyMod();
 
     int scancode = (HIWORD(lParam) & (KF_EXTENDED | 0xff));
     // Alt+PrtSc has a different scancode than just PrtSc.
@@ -923,44 +927,37 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
   }
 
   case WM_LBUTTONDOWN: {
-    // Left mouse button press.
     __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_PRESS, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_LBUTTONUP: {
-    // Left mouse button release. 
     __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_RELEASE, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_RBUTTONDOWN: {
-    // Right mouse button press.
     __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_PRESS, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_RBUTTONUP: {
-    // Right mouse button release.
     __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_RELEASE, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_MBUTTONDOWN: {
-    // Middle mouse button press.
     __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_PRESS, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_MBUTTONUP: {
-    // Middle mouse button release.
     __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_RELEASE, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_XBUTTONDOWN: {
-    // Additional mouse button press.
-    XkWindowButton button;
+    XkButton button;
 
     if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) {
       button = XK_BUTTON_1;
@@ -987,8 +984,7 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
   }
 
   case WM_XBUTTONUP: {
-    // Additional mouse button release.
-    XkWindowButton button;
+    XkButton button;
 
     if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) {
       button = XK_BUTTON_1;
@@ -1080,7 +1076,8 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
   }
 
   case WM_GETMINMAXINFO: {
-    int xoff, yoff;
+    XkSize xoff; 
+    XkSize yoff;
     MINMAXINFO* mmi = (MINMAXINFO*)lParam;
 
     if (window->fullscreen) {
@@ -1173,5 +1170,3 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
 
   return(0);
 }
-
-#endif // XK_WIN32

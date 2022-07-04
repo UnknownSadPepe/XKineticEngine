@@ -4,6 +4,7 @@
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Scene/Components.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -20,6 +21,7 @@ XK_API XkComponentID xkAddEntityComponent(XkEntity*, XkComponentType);
 XK_API void xkRemoveEntityComponent(XkEntity*, XkComponentID);
 XK_API void xkEntityHasComponent(XkEntity*, XkComponentType);
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

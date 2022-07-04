@@ -1,12 +1,19 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Resources/Loaders/ShaderLoader.h"
+#include "XKinetic/Core/Assert.h"
 
+/* ########## MACROS SECTION ########## */
 #define XK_SHADER_LOADER_PATH_MAX_SIZE 64
 
-struct XkShaderLoader {
+/* ########## TYPES SECTION ########## */
+struct XkShaderLoader_T {
   XkChar path[XK_SHADER_LOADER_PATH_MAX_SIZE];
 };
 
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkString path) {
+  xkAssert(pLoader);
+
   XkResult result = XK_SUCCESS;
 
 	*pLoader = xkAllocateMemory(sizeof(struct XkShaderLoader));
@@ -23,14 +30,26 @@ XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkString path) {
 
 _catch:
   return(result);
+
+_free:
+  if(loader) {
+    xkFreeMemory(loader);
+  }
+
+  goto _catch;
 }
 
 void xkDestroyShaderLoader(XkShaderLoader loader) {
+  xkAssert(loader); 
+
   /// TODO: Implementation.
   xkFreeMemory(loader);
 }
 
 XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkString name) {
+  xkAssert(loader);
+  xkAssert(pConfig); 
+
   XkResult result = XK_SUCCESS;
 
   XkChar fullPath[XK_SHADER_LOADER_PATH_MAX_SIZE];
@@ -45,6 +64,9 @@ _catch:
 }
 
 void xkUnloadShader(XkShaderLoader loader, XkShaderConfig* const pConfig) {
+  xkAssert(loader);
+  xkAssert(pConfig); 
+
   /// TODO: Implementation.
 }
 

@@ -1,37 +1,40 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkVkCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkVulkanCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
+	xkAssert(pVkSurface);
+	xkAssert(window);
+
   XkResult result = XK_SUCCESS;
 
 #if defined(XK_LINUX)
-	// Initialize Vulkan Wayland surface create info.
-  VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo 	= {0};
+  VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo 	= {};
 	vkWaylandSurfaceCreateInfo.sType 													= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
 	vkWaylandSurfaceCreateInfo.pNext 													= VK_NULL_HANDLE;
 	vkWaylandSurfaceCreateInfo.flags 													= 0;
 	vkWaylandSurfaceCreateInfo.display 												= __xkWaylandGetDisplay();
 	vkWaylandSurfaceCreateInfo.surface 												= __xkWaylandGetSurface(window);
 
-	// Create Vulkan Wayland surface.
-	VkResult vkResult = vkCreateWaylandSurfaceKHR(_xkVkContext.vkInstance, &vkWaylandSurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
+	VkResult vkResult = vkCreateWaylandSurfaceKHR(_xkVulkanContext.vkInstance, &vkWaylandSurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
 	if(vkResult != VK_SUCCESS) {
-		xkLogError("Failed to create Vulkan Wayland surface: %s", __xkVkGetErrorString(vkResult));
+		xkLogError("Vulkan: Failed to create Wayland surface: %s", __xkVulkanGetResultString(vkResult));
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}  
-#elif defined(XK_WIN32)
-	// Initialize Vulkan Win32 surface create info.
-  VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo 				= {0};
+#elif defined(XK_WIN64)
+  VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo 				= {};
 	vkWin32SurfaceCreateInfo.sType 															= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	vkWin32SurfaceCreateInfo.pNext 															= VK_NULL_HANDLE;
 	vkWin32SurfaceCreateInfo.flags 															= 0;
 	vkWin32SurfaceCreateInfo.hinstance 													= __xkWin32GetInstance();
 	vkWin32SurfaceCreateInfo.hwnd 															= __xkWin32GetHWND(window);
-	// Create Vulkan Win32 surface.
-	VkResult vkResult = vkCreateWin32SurfaceKHR(_xkVkContext.vkInstance, &vkWin32SurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
+
+	VkResult vkResult = vkCreateWin32SurfaceKHR(_xkVulkanContext.vkInstance, &vkWin32SurfaceCreateInfo, VK_NULL_HANDLE, pVkSurface);
 	if(vkResult != VK_SUCCESS) {
-		xkLogError("Failed to create Vulkan Win32 surface: %s", __xkVkGetErrorString(vkResult));
+		xkLogError("Vulkan: Failed to create Win32 surface: %s", __xkVulkanGetResultString(vkResult));
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -41,7 +44,8 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroySurface(VkSurfaceKHR vkSurface) {
-	// Destroy Vulkan surface.
-	vkDestroySurfaceKHR(_xkVkContext.vkInstance, vkSurface, VK_NULL_HANDLE);
+void __xkVulkanDestroySurface(VkSurfaceKHR vkSurface) {
+	xkAssert(vkSurface);
+	
+	vkDestroySurfaceKHR(_xkVulkanContext.vkInstance, vkSurface, VK_NULL_HANDLE);
 }

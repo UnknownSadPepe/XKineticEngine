@@ -1,32 +1,35 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Memory.h"
-
-#if defined(XK_UNIX)
+#include "XKinetic/Core/Assert.h"
 
 #define _GNU_SOURCE
 #define __USE_GNU
 #define __USE_MISC
 #include <sys/mman.h>
 
-typedef struct {
+/* ########## TYPES SECTION ########## */
+typedef struct __XkMemoryHeader_T {
 	XkHandle memory;
 	XkSize size;
 } __XkMemoryHeader;
 
+/* ########## GLOBAL VARIABLE SECTION ########## */
 static const XkSize XK_ALIGN = 16;
 
+/* ########## FUNCTIONS SECTION ########## */
 XkHandle xkAllocateMemory(const XkSize size) {
-	// Align memory allocate size.
+	xkAssert(size > 0);
+
+	// Align memory allocate size for better performance and minimal fragmentation.
 	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (XK_ALIGN - 1)) & ~ (XK_ALIGN - 1);
 
-	// Map Unix heap memory.
 	XkHandle memory = mmap(0, alignSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if(!memory) {
 		__xkErrorHandle("Unix: Failed to allocate memory");
 		return(XK_NULL_HANDLE);
 	}
 
-	// Initialize header.
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)memory;
 	pHeader->size = alignSize;
 	pHeader->memory = memory + sizeof(__XkMemoryHeader);
@@ -35,20 +38,24 @@ XkHandle xkAllocateMemory(const XkSize size) {
 }
 
 XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
-	// Align memory allocate size.
+	xkAssert(size > 0);
+
+	if(!memory) {
+		XkHandle newMemory = xkAllocateMemory(size);
+		return(newMemory);
+	}
+
+	// Align memory reallocate size for better performance and minimal fragmentation.
 	const XkSize alignSize = (size + sizeof(__XkMemoryHeader) + (XK_ALIGN - 1)) & ~ (XK_ALIGN - 1);
 
-	// Initialize header.
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)(((XkUInt8*)memory) - sizeof(__XkMemoryHeader));
 
-	// Remap Unix heap memory.
 	XkHandle newMemory = mremap(pHeader, pHeader->size, alignSize, 0, MREMAP_FIXED);
 	if(!newMemory) {
 		__xkErrorHandle("Unix: Failed to reallocate memory");
 		return(XK_NULL_HANDLE);
 	}
 
-	// Initialize heder.
 	pHeader->size = alignSize;
 	pHeader->memory = newMemory + sizeof(__XkMemoryHeader);
 
@@ -56,11 +63,9 @@ XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
 }
 
 void xkFreeMemory(const XkHandle memory) {
-	// Initialize header.
+	xkAssert(memory);
+	
 	__XkMemoryHeader* pHeader = (__XkMemoryHeader*)(((XkUInt8*)memory) - sizeof(__XkMemoryHeader));
 
-	// Unmap Unix heap memory.
 	munmap(memory, pHeader->size);
 }
-
-#endif // XK_UNIX

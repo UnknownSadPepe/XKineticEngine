@@ -1,22 +1,23 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Console.h"
 
-#if defined(XK_UNIX)
+/* ########## MACROS SECTION ########## */
+#define XK_ERROR_HANDLER_ARG_BUFFER_SIZE 1024
+#define XK_ERROR_HANDLER_BUFFER_SIZE XK_ERROR_HANDLER_ARG_BUFFER_SIZE
 
-#include <stdio.h>
-#include <stdarg.h>
-
-#define XK_ERROR_HANDLER_BUFFER_SIZE 1024
-
+/* ########## FUNCTIONS SECTION ########## */
 void __xkErrorHandler(const XkString format, ...) {
-	XkChar buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {0};
+	XkChar handleBuffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {};
 
-	// Format string.
-	va_list args;
-	va_start(args, format);
-	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
-	// Print to console.
-	fprintf(stderr, "XKinetic Error Handler: %s\n", buffer);
-	va_end(args);
+	// Format argument buffer.
+	XkChar argBuffer[XK_ERROR_HANDLER_ARG_BUFFER_SIZE] = {};
+	xkArgs args;
+	xkStartArgs(args, format);
+	xkStringNFFormat(argBuffer, XK_ERROR_HANDLER_ARG_BUFFER_SIZE, format, args);
+	xkEndArgs(args);
+
+	const XkSize size = xkStringNFormat(handleBuffer, XK_ERROR_HANDLER_BUFFER_SIZE, "%s\n", argBuffer);
+
+	xkWriteConsoleColored(XK_CONSOLE_STDERR, XK_COLOR_BRED_BIT, handleBuffer, size);
 }
-
-#endif // XK_UNIX

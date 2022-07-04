@@ -1,13 +1,13 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Core/Minimal.h"
-#include "XKinetic/Platform/File.h"
-#include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Platform/Joystick.h"
 
 #include "XKinetic/Resources/Loaders/ImageLoader.h"
 
-struct XkApplication {
+/* ########## TYPES SECTION ########## */
+struct XkApplication_T {
 	XkApplicationConfig config;
 
 	XkWindow window;
@@ -19,26 +19,25 @@ struct XkApplication {
 	XkImageLoader imageLoader;
 };
 
+/* ########## GLOBAL VARIABLES SECTION ########## */
 XkApplication _xkApplication;
 
+/* ########## FUNCTIONS SECTION ########## */
 static void __xkWindowShow(XkWindow window, const XkWindowShow show) {
+	xkAssert(window);
+
 	switch(show) {
-		case XK_WINDOW_SHOW_DEFAULT: 		xkLogNotice("show default"); break;
-		case XK_WINDOW_SHOW_MAXIMIZED: 	xkLogNotice("show maximized"); break;
-		case XK_WINDOW_SHOW_MINIMIZED: 	xkLogNotice("show minimized"); break;
-		case XK_WINDOW_SHOW_FULLSCREEN: xkLogNotice("show fullscreen"); break;
-		case XK_WINDOW_HIDE: 						xkLogNotice("hide"); break;
+		case XK_WINDOW_SHOW_DEFAULT: 		xkLogNotice("show default"); 			break;
+		case XK_WINDOW_SHOW_MAXIMIZED: 	xkLogNotice("show maximized"); 		break;
+		case XK_WINDOW_SHOW_MINIMIZED: 	xkLogNotice("show minimized"); 		break;
+		case XK_WINDOW_SHOW_FULLSCREEN: xkLogNotice("show fullscreen"); 	break;
+		case XK_WINDOW_HIDE: 						xkLogNotice("hide"); 							break;
+		default: 																													break;
 	}
 }
 
-static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindowAction action, const XkWindowMod mod) {
-	XkString actionStr = XK_NULL_HANDLE; 
-
-	switch(action) {
-		case XK_RELEASE: actionStr = "release"; break;
-		case XK_PRESS: actionStr = "press"; break;
-		case XK_REPEAT: actionStr = "repeat"; break;
-	}
+static void __xkWindowKey(XkWindow window, const XkKey key, const XkAction action, const XkMod mod) {
+	xkAssert(window);
 
 	if(mod & XK_MOD_SHIFT_BIT) {
 		xkLogNotice("mod: %s", "shift");
@@ -72,7 +71,7 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 
 		if(key == XK_KEY_C) {
 			xkSetWindowCursorMode(window, XK_CURSOR_NORMAL);
-			xkSetCursorPosition(window, 0, 0);
+			xkSetWindowCursorPosition(window, 0, 0);
 		} else if(key == XK_KEY_V) {
 			xkSetWindowCursorMode(window, XK_CURSOR_HIDDEN);
 		} else if(key == XK_KEY_B) {
@@ -94,17 +93,11 @@ static void __xkWindowKey(XkWindow window, const XkWindowKey key, const XkWindow
 		}
 	}
 
-	xkLogNotice("key: %d action: %s", key, actionStr);
+	xkLogNotice("key: %d action: %s", key, action == XK_RELEASE ? "release" : action == XK_PRESS ? "press" : action == XK_REPEAT ? "repeat");
 }
 
-static void __xkWindowButton(XkWindow window, const XkWindowButton button, const XkWindowAction action, const XkWindowMod mod) {
-	XkString actionStr = XK_NULL_HANDLE; 
-
-	switch(action) {
-		case XK_RELEASE: actionStr = "release"; break;
-		case XK_PRESS: actionStr = "press"; break;
-		case XK_REPEAT: actionStr = "repeat"; break;
-	}
+static void __xkWindowButton(XkWindow window, const XkButton button, const XkAction action, const XkMod mod) {
+	xkAssert(window);
 
 	if(mod & XK_MOD_SHIFT_BIT) {
 		xkLogNotice("mod: %s", "shift");
@@ -125,14 +118,18 @@ static void __xkWindowButton(XkWindow window, const XkWindowButton button, const
 		xkLogNotice("mod: %s", "num lock");
 	}
 
-	xkLogNotice("button: %d action: %s", button, actionStr);
+	xkLogNotice("button: %d action: %s", key, action == XK_RELEASE ? "release" : action == XK_PRESS ? "press" : action == XK_REPEAT ? "repeat");
 }
 
 static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
-	//xkLogNotice("cursor x: %f y: %f", x, y);
+	xkAssert(window);
+
+	xkLogNotice("cursor x: %f y: %f", x, y);
 }
 
 static void __xkWindowCursorEnter(XkWindow window, XkBool entered) {
+	xkAssert(window);
+
 	if(entered) {
 		xkLogNotice("cursor entered");
 	} else {
@@ -141,23 +138,36 @@ static void __xkWindowCursorEnter(XkWindow window, XkBool entered) {
 }
 
 static void __xkWindowScroll(XkWindow window, XkFloat64 x, XkFloat64 y) {
+	xkAssert(window);
+
 	xkLogNotice("scroll x: %f y: %f", x, y);
 }
 
 static void __xkWindowClose(XkWindow window) {
+	xkAssert(window);
+
 	xkLogNotice("close");
+
 	_xkApplication.exit = XK_TRUE;
 }
 
 static void __xkWindowSize(XkWindow window, XkSize width, XkSize height) {
+	xkAssert(window);
+	xkAssert(width > 0);
+	xkAssert(height > 0);
+
 	xkLogNotice("width: %ld height: %ld", width, height);
 }
 
 static void __xkWindowPosition(XkWindow window, XkInt32 x, XkInt32 y) {
+	xkAssert(window);
+
 	xkLogNotice("x: %d y: %d", x, y);
 }
 
 static void __xkWindowFocus(XkWindow window, XkBool focused) {
+	xkAssert(window);
+
 	if(focused) {
 		xkLogNotice("focused");
 	} else {
@@ -166,13 +176,17 @@ static void __xkWindowFocus(XkWindow window, XkBool focused) {
 }
 
 static void __xkWindowDropFile(XkWindow window, const XkSize count, const XkString* paths) {
+	xkAssert(window);
+
 	for(XkSize i = 0; i < count; i++) {
 		xkLogNotice("file[%ld]: %s", i, paths[i]);
 	}
 }
 
 static void __xkJoystickEvent(XkJoystick joystick, const XkJoystickEvent event) {
-	const XkJoystickID id = xkJoystickID(joystick);
+	xkAssert(joystick);
+
+	const XkJoystickId id = xkJoystickID(joystick);
 
 	if(event == XK_JOYSTICK_CONNECTED) {
 		xkLogNotice("joystick%d disconnected", id);
@@ -182,24 +196,30 @@ static void __xkJoystickEvent(XkJoystick joystick, const XkJoystickEvent event) 
 }
 
 static void __xkJoystickAxis(XkJoystick joystick, const XkJoystickAxis axis, const XkFloat32 value) {
-	const XkJoystickID id = xkJoystickID(joystick);
+	xkAssert(joystick);
+
+	const XkJoystickId id = xkJoystickID(joystick);
 
 	xkLogNotice("joystick%d axis: %d: value: %d", axis, value);
 }
 
-static void __xkJoystickButton(XkJoystick joystick, const XkJoystickButton button, const XkJoystickAction action) {
-	const XkJoystickID id = xkJoystickID(joystick);
+static void __xkJoystickButton(XkJoystick joystick, const XkJoystickButton button, const XkAction action) {
+	xkAssert(joystick);
+
+	const XkJoystickId id = xkJoystickID(joystick);
 
 	xkLogNotice("joystick%d button: %d: action: %d", button, action);
 }
 
-static void __xkJoystickHat(XkJoystick joystick, const XkJoystickHat hat, const XkJoystickAction action) {
-	const XkJoystickID id = xkJoystickID(joystick);
+static void __xkJoystickHat(XkJoystick joystick, const XkJoystickHat hat, const XkAction action) {
+	xkAssert(joystick);
+
+	const XkJoystickId id = xkJoystickID(joystick);
 
 	xkLogNotice("joystick%d hat: %d: action: %d", hat, action);
 }
 
-XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
+XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	_xkApplication.config.name = "XKWindowTest";
@@ -209,13 +229,23 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	_xkApplication.exit = XK_FALSE;
 
 	result = xkInitializeLog();
-	if(result != XK_SUCCESS) goto _catch;
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to initialize log: %d", result);
+		goto _catch;
+	}
 
 	result = xkInitializeWindow();
-	if(result != XK_SUCCESS) goto _catch;
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to initialize window: %d", result);
+		goto _catch;
+	}
 
-	result = xkInitializeJoysticks();
-	if (result != XK_SUCCESS) goto _catch;
+	result = xkInitializeJoystick();
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to initialize joystick: %d", result);
+		goto _catch;
+	}
+
 
 	result = xkCreateJoystick(&_xkApplication.joystick1, XK_JOYSTICK_1);
 	if(result != XK_SUCCESS) {
@@ -237,13 +267,11 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 		xkSetJoystickHatCallback(_xkApplication.joystick2, __xkJoystickHat);
 	}	
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT | XK_WINDOW_DRAG_DROP_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_HINT_DECORATED_BIT | XK_WINDOW_HINT_RESIZABLE_BIT | XK_WINDOW_HINT_DRAG_DROP_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;
 	}
-
-	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
 
 	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
 	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
@@ -257,41 +285,38 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
 	xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
 
-	// Create image loader.
+	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
+
 	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to create image loader");
 		goto _catch;
 	}
 
-	// Load window icon.
 	XkImageConfig iconConfig;
 	result = xkLoadImage(_xkApplication.imageLoader, &iconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window icon");
 	}
 
-	// Load window small icon.
 	XkImageConfig smallIconConfig;
 	result = xkLoadImage(_xkApplication.imageLoader, &smallIconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window small icon");	
 	}
 
-	// Load window small icon.
 	XkImageConfig cursorConfig;
 	result = xkLoadImage(_xkApplication.imageLoader, &cursorConfig, "XKineticCursor.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window cursor");
 	}
 
-	// Set window icon.
-	XkWindowIcon icon = {0};
+	XkWindowIcon icon = {};
 	icon.width				= iconConfig.width;
 	icon.height 			= iconConfig.height;
 	icon.pixels 			= iconConfig.pixels;
 
-	XkWindowIcon smallIcon 	= {0};
+	XkWindowIcon smallIcon 	= {};
 	smallIcon.width 				= smallIconConfig.width;
 	smallIcon.height 				= smallIconConfig.height;
 	smallIcon.pixels 				= smallIconConfig.pixels;
@@ -299,28 +324,24 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	XkWindowIcon icons[2] = {icon, smallIcon};
 	xkSetWindowIcon(_xkApplication.window, 2, icons);
 
-	// Set window cursor.
-	XkWindowIcon cursorIcon 	= {0};
+	XkWindowIcon cursorIcon 	= {};
 	cursorIcon.width 					= cursorConfig.width;
 	cursorIcon.height 				= cursorConfig.height;
 	cursorIcon.pixels 				= cursorConfig.pixels;
 
 	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
 
-	// Unload window cursor.
 	xkUnloadImage(_xkApplication.imageLoader, &cursorConfig);
 
-	// Unload window icon.
 	xkUnloadImage(_xkApplication.imageLoader, &iconConfig);
 
-	// Unload window small icon.
 	xkUnloadImage(_xkApplication.imageLoader, &smallIconConfig);
 
 _catch:
 	return(result);
 }
 
-void xkDestroyApplication(void) {
+void xkTerminateApplication(void) {
 	if(_xkApplication.joystick1) {
 		xkDestroyJoystick(_xkApplication.joystick1);
 	}
@@ -331,7 +352,7 @@ void xkDestroyApplication(void) {
 
 	xkDestroyWindow(_xkApplication.window);
 
-	xkTerminateJoysticks();
+	xkTerminateJoystick();
 
 	xkTerminateWindow();
 
@@ -340,16 +361,6 @@ void xkDestroyApplication(void) {
 
 void xkUpdateApplication(void) {
 	while(!_xkApplication.exit) {
-		// Poll window events.
-		xkPollWindowEvents();
-
-		// Poll joysticks events.
-		if(_xkApplication.joystick1) {
-			xkPollJoystickEvents(_xkApplication.joystick1);
-		}
-
-		if(_xkApplication.joystick2) {
-			xkPollJoystickEvents(_xkApplication.joystick2);
-		}
+		xkPollEvents();
 	}
 }

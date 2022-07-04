@@ -1,22 +1,19 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Platform/Memory.h"
-
-#if defined(XK_LINUX)
+#include "XKinetic/Core/Assert.h"
+#include "XKinetic/Core/String.h"
 
 #define _GNU_SOURCE
 #define __USE_GNU
-#define _POSIX_C_SOURCE 200112L
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <limits.h>
 #include <time.h>
 #include <linux/input.h>
 #include <errno.h>
 #include <poll.h>
-
-#include <string.h>
 
 #include "wayland-client-protocol.h"
 #include "xdg-shell-client-protocol.h"
@@ -32,31 +29,35 @@
 #include "wayland-pointer-constraints-unstable-v1-client-protocol-code.h"
 #include "wayland-idle-inhibit-unstable-v1-client-protocol-code.h"
 
-#include "XKinetic/Core/String.h"
+/* ########## FUNCTION DECLARATIONS SECTION ########## */
+static XkBool 			__xkXDGCreateSurface(XkWindow);
+static void 				__xkXDGDestorySurface(XkWindow);
 
-static XkBool __xkXDGCreateSurface(XkWindow);
-static void __xkXDGDestorySurface(XkWindow);
-static XkBool __xkXDGCreateDecorations(XkWindow);
-static void __xkXDGDestroyDecorations(XkWindow);
+static XkBool 			__xkXDGCreateDecorations(XkWindow);
+static void 				__xkXDGDestroyDecorations(XkWindow);
 
-static XkBool __xkZWPCreateIdleInhibitor(XkWindow);
-static void __xkZWPDestroyIdleInhibitor(XkWindow);
+static XkBool 			__xkZWPCreateIdleInhibitor(XkWindow);
+static void 				__xkZWPDestroyIdleInhibitor(XkWindow);
 
-struct wl_buffer* __xkWaylandCreateShmBuffer(const int, const int, const int, const int);
-static void __xkWaylandResizeWindow(XkWindow);
+static int 					__xkWaylandAllocateShmFile(const XkSize);
+struct wl_buffer* 	__xkWaylandCreateShmBuffer(const XkSize, const XkSize, const XkSize, const XkSize);
 
-static XkBool __xkWaylandFlushDisplay(void);
+static void 				__xkWaylandResizeWindow(XkWindow);
 
-static void __xkZWPLockPointer(XkWindow);
-static void __xkZWPUnlockPointer(XkWindow);
+static XkBool 			__xkWaylandFlushDisplay(void);
 
-static char* __xkWaylandReadDataOfferAsString(struct wl_data_offer*, const char*);
-XkString* __xkParseURI(XkString, XkSize*);
+static void 				__xkZWPLockPointer(XkWindow);
+static void 				__xkZWPUnlockPointer(XkWindow);
 
-void __xkWaylandSetWindowCursor(XkWindow, struct wl_buffer*, int, int);
+static char* 				__xkWaylandReadDataOfferAsString(struct wl_data_offer*, const char*);
 
-static void __xkWaylandCreateKeyTable(void);
+XkString* 					__xkParseURI(XkString, XkSize*);
 
+void 								__xkWaylandSetWindowCursor(XkWindow, struct wl_buffer*, const XkSize, const XkSize);
+
+static void 				__xkWaylandCreateKeyTable(void);
+
+/* ########## FUNCTION SECTION ########## */
 static void __xkXDGWmBasePing(void* data, struct xdg_wm_base* xdgBase, uint32_t serial) {
 	xdg_wm_base_pong(xdgBase, serial);
 }
@@ -71,10 +72,8 @@ static void __xkXDGSurfaceHandleConfigure(void* data, struct xdg_surface* xdgSur
 		goto _catch;
 	}
 
-	/// Configure XDG surface.
   xdg_surface_ack_configure(xdgSurface, serial);
 
-  // Resize Wayland window.
 	__xkWaylandResizeWindow(window);
 
 _catch:
@@ -91,11 +90,10 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
 		return;
 	}
 
-  XkBool maximized = XK_FALSE;
+  XkBool maximized 	= XK_FALSE;
   XkBool fullscreen = XK_FALSE;
-  XkBool activated = XK_FALSE;
+  XkBool activated 	= XK_FALSE;
 
-  // Select window state.
 	uint32_t* state;
 	wl_array_for_each(state, wlStates) {
 		switch(*state) {
@@ -106,7 +104,6 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
     }
   }
 
-  // Input window size.
 	if((width != 0 && height != 0) && (width != window->wayland.width || height != window->wayland.height)) {
 		window->wayland.width = (XkSize)width;
 		window->wayland.height = (XkSize)height;
@@ -114,18 +111,15 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
 		__xkInputWindowSize(window, (XkSize)width, (XkSize)height);
 	}
 
-	// Input window maximized.
 	if(maximized && activated) {
   	__xkInputWindowShow(window, XK_WINDOW_SHOW_MAXIMIZED);
 	} 
 
-	// Input window fullscreen.
 	if(fullscreen) {
   	__xkInputWindowShow(window, XK_WINDOW_SHOW_FULLSCREEN);
 		window->fullscreen = fullscreen;
   }
 
-  // Input window minimized. 
   if(!activated) {
   	__xkInputWindowShow(window, XK_WINDOW_SHOW_MINIMIZED);
   }
@@ -137,7 +131,6 @@ static void __xkXDGToplevelHandleClose(void* data, struct xdg_toplevel* xdgTople
 		return;
 	}
 
-	// Input window close.
 	__xkInputWindowClose(window);
 }
 
@@ -160,7 +153,6 @@ static void __xkWaylandPointerHandleEnter(void* data, struct wl_pointer* wlPoint
 	_xkPlatform.wayland.pointerSerial = serial;
 	_xkPlatform.wayland.pointerWindowFocus = window;
 
-	// Input cursor enter.
 	__xkInputWindowCursorEnter(window, XK_TRUE);
 
 	if(window->wayland.wlCursorBuffer) {
@@ -177,7 +169,6 @@ static void __xkWaylandPointerHandleLeave(void* data, struct wl_pointer* wlPoint
 	_xkPlatform.wayland.pointerSerial = serial;
 	_xkPlatform.wayland.pointerWindowFocus = NULL;
 
-	// Input cursor enter.
 	__xkInputWindowCursorEnter(window, XK_FALSE);
 }
 
@@ -197,7 +188,6 @@ static void __xkWaylandPointerHandleMotion(void* data,	struct wl_pointer* wlPoin
 	window->wayland.cursorPosX = (XkFloat64)x;
 	window->wayland.cursorPosY = (XkFloat64)y;
 
-	// Input cursor.
 	__xkInputWindowCursor(window, (XkFloat64)x, (XkFloat64)y);
 }
 
@@ -207,10 +197,9 @@ static void __xkWaylandPointerHandleButton(void* data, struct wl_pointer* wlPoin
 		return;
 	}
 
-	const XkWindowButton button = btn - BTN_LEFT;
-	const XkWindowAction action = state == WL_POINTER_BUTTON_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+	const XkButton button = btn - BTN_LEFT;
+	const XkAction action = state == WL_POINTER_BUTTON_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
 
-	// Input button.
 	__xkInputWindowButton(window, button, action, _xkPlatform.wayland.modifiers);
 }
 
@@ -232,7 +221,6 @@ static void __xkWaylandPointerHandleAxis(void* data, struct wl_pointer* wlPointe
 		y = -wl_fixed_to_double(value) * scrollFactor;
 	}
 
-	// Input scroll. 
 	__xkInputWindowScroll(window, (XkFloat64)x, (XkFloat64)y);
 }
 
@@ -280,7 +268,6 @@ static void __xkZWPRelativePointerHandleRelativeMotion(void* data, struct zwp_re
   xPos += wl_fixed_to_double(dx);
   yPos += wl_fixed_to_double(dy);
 
-  // Input cursor.
   __xkInputWindowCursor(window, (XkFloat64)xPos, (XkFloat64)yPos);
 }
 
@@ -302,26 +289,21 @@ static const struct zwp_locked_pointer_v1_listener _xkZWPLockedPointerListener =
 };
 
 static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKeyboard, uint32_t format, int fd, uint32_t size) {
-	// Check keyboard keymap format.
 	if(format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
 		close(fd);
 		return;
 	}
 
-	// Allocate keymap string.
 	char* string = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
 	if(string == MAP_FAILED) {
 		close(fd);
 		return;
 	}
 
-	// Create XKB keymap
   _xkPlatform.wayland.xkbKeymap = xkb_keymap_new_from_string(_xkPlatform.wayland.xkbContext, string, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
-  // Free keymap string.
 	munmap(string, size);
 
-	// Close keymap file.
 	close(fd);
 
 	if(!_xkPlatform.wayland.xkbKeymap) {
@@ -329,7 +311,6 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		return;
 	}
  
- 	// Create XKB state.
 	_xkPlatform.wayland.xkbState = xkb_state_new(_xkPlatform.wayland.xkbKeymap);
 	if(!_xkPlatform.wayland.xkbState) {
 		__xkErrorHandle("XKB: Failed to create state");
@@ -337,7 +318,6 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		return;
 	}
 
-	// Look up the preferred locale.
 	const char* locale = getenv("LC_ALL");
 	if(!locale) {
 		locale = getenv("LC_CTYPE");
@@ -349,7 +329,6 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		locale = "C";
 	}
 
-	// Create XKB compose table.
 	struct xkb_compose_table* xkbComposeTable = xkb_compose_table_new_from_locale(_xkPlatform.wayland.xkbContext, locale, XKB_COMPOSE_COMPILE_NO_FLAGS);
 	if(!xkbComposeTable) {
 		__xkErrorHandle("XKB: Failed to create compose table");
@@ -357,7 +336,6 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		return;
 	}
 
-	// Create XKB compose state.
 	_xkPlatform.wayland.xkbComposeState = xkb_compose_state_new(xkbComposeTable, XKB_COMPOSE_STATE_NO_FLAGS);
 	if(!_xkPlatform.wayland.xkbComposeState) {
 		__xkErrorHandle("XKB: Failed to create compose state");
@@ -366,10 +344,8 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		return;
 	}
 
-	// Destroy XKB compose table.
 	xkb_compose_table_unref(xkbComposeTable);
 
-  // Initialize XKB mod indices.
 	_xkPlatform.wayland.xkbControlIndex  = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Control");
 	_xkPlatform.wayland.xkbAltIndex      = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod1");
 	_xkPlatform.wayland.xkbShiftIndex    = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Shift");
@@ -391,7 +367,6 @@ static void __xkWaylandKeyboardHandleEnter(void* data, struct wl_keyboard* wlKey
 
 	_xkPlatform.wayland.keyboardWindowFocus = window;
 
-	// Input window focus.
 	__xkInputWindowFocus(window, XK_TRUE);
 }
 
@@ -403,7 +378,6 @@ static void __xkWaylandKeyboardHandleLeave(void* data, struct wl_keyboard* wlKey
 
 	_xkPlatform.wayland.keyboardWindowFocus = NULL;
 
-	// Input window focus.
 	__xkInputWindowFocus(window, XK_FALSE);
 }
 
@@ -413,10 +387,9 @@ static void __xkWaylandKeyboardHandleKey(void* data, struct wl_keyboard* wlKeybo
 		return;
 	}
 
-	const XkWindowKey key = _xkPlatform.keycodes[scancode];
-	const XkWindowAction action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+	const XkKey key = _xkPlatform.keycodes[scancode];
+	const XkAction action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
 
-	// Input key.
 	__xkInputWindowKey(window, key, action, _xkPlatform.wayland.modifiers);
 }
 
@@ -425,7 +398,6 @@ static void __xkWaylandKeyboardHandleModifiers(void* data, struct wl_keyboard* w
 		return;
 	}
 
-	// Update XKB state mask.
 	xkb_state_update_mask(_xkPlatform.wayland.xkbState, modsDepressed, modsLatched, modsLocked, 0, 0, group);
 
 	_xkPlatform.wayland.modifiers = 0;
@@ -442,7 +414,6 @@ static void __xkWaylandKeyboardHandleModifiers(void* data, struct wl_keyboard* w
 		{_xkPlatform.wayland.xkbNumLockIndex,  XK_MOD_NUM_LOCK_BIT}
 	};
 
-	// Select modifiers.
 	for(size_t i = 0; i < sizeof(modifiers) / sizeof(modifiers[0]); i++) {
 		if(xkb_state_mod_index_is_active(_xkPlatform.wayland.xkbState, modifiers[i].xkbIndex, XKB_STATE_MODS_EFFECTIVE) == 1) {
 			_xkPlatform.wayland.modifiers |= modifiers[i].bit;
@@ -498,20 +469,10 @@ static const struct wl_data_offer_listener _xkWaylandDataOfferListener = {
 };
 
 static void __xkWaylandDataDeviceHandleDataOffer(void* data, struct wl_data_device* wlDataDevice, struct wl_data_offer* wlDataOffer) {
-	__XkWaylandOffer* offers = NULL;
-
-	if(_xkPlatform.wayland.offers) {
-		offers = xkReallocateMemory(_xkPlatform.wayland.offers, sizeof(__XkWaylandOffer) * _xkPlatform.wayland.offerCount + 1);
-		if(!offers) {
-			__xkErrorHandle("Wayland: Failed to reallocate offers");
-			return;
-		}
-	} else {
-		offers = xkAllocateMemory(sizeof(__XkWaylandOffer) * _xkPlatform.wayland.offerCount + 1);
-		if(!offers) {
-			__xkErrorHandle("Wayland: Failed to allocate offers");
-			return;
-		}
+	__XkWaylandOffer* offers = xkReallocateMemory(_xkPlatform.wayland.offers, sizeof(__XkWaylandOffer) * _xkPlatform.wayland.offerCount + 1);
+	if(!offers) {
+		__xkErrorHandle("Wayland: Failed to reallocate offers");
+		return;
 	}
 
 	_xkPlatform.wayland.offers = offers;
@@ -519,7 +480,6 @@ static void __xkWaylandDataDeviceHandleDataOffer(void* data, struct wl_data_devi
 
 	_xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1] = (__XkWaylandOffer){wlDataOffer};
 
-	// Add Wayland dota offer listener.
 	wl_data_offer_add_listener(wlDataOffer, &_xkWaylandDataOfferListener, NULL);
 }
 
@@ -534,7 +494,6 @@ static void __xkWaylandDataDeviceHandleEnter(void* data, struct wl_data_device* 
 		return;
 	}
 
-	// Destrpy Wayland data offer.
 	if(_xkPlatform.wayland.wlDragOffer) {
 		wl_data_offer_destroy(_xkPlatform.wayland.wlDragOffer);
 		_xkPlatform.wayland.wlDragOffer = NULL;
@@ -584,10 +543,7 @@ static void __xkWaylandDataDeviceHandleDrop(void* data, struct wl_data_device* w
 		XkSize count;
 		XkString* paths = __xkParseURI(string, &count);
 		if(paths) {
-			XkWindow window = _xkPlatform.wayland.dragWindowFocus;
-
-			// Input drop file.
-			__xkInputWindowDropFile(window, count, (XkString*)paths);
+			__xkInputWindowDropFile((XkWindow)_xkPlatform.wayland.dragWindowFocus, count, (XkString*)paths);
 		}
 
 		for(XkSize i = 0; i < count; i++) {
@@ -601,7 +557,6 @@ static void __xkWaylandDataDeviceHandleDrop(void* data, struct wl_data_device* w
 }
 
 static void __xkWaylandDataDeviceHandleSelection(void* data, struct wl_data_device* wlDataDevice, struct wl_data_offer* wlDataOffer) {
-	// Destroy Wayland data offer.
 	if(_xkPlatform.wayland.wlSelectionOffer) {
 		wl_data_offer_destroy(_xkPlatform.wayland.wlSelectionOffer);
 		_xkPlatform.wayland.wlSelectionOffer = NULL;
@@ -633,26 +588,20 @@ const struct wl_data_device_listener _xkWaylandDataDeviceListener = {
 
 static void __xkWaylandSeatHandleCapabilities(void* data, struct wl_seat* wlSeat, enum wl_seat_capability wlCapability) {
 	if((wlCapability & WL_SEAT_CAPABILITY_POINTER) && !_xkPlatform.wayland.wlPointer) {
-		// Create Wayland pointer.
 		_xkPlatform.wayland.wlPointer = wl_seat_get_pointer(wlSeat);
 
-		// Add Wayland pointer listener.
 		wl_pointer_add_listener(_xkPlatform.wayland.wlPointer, &_xkWaylandPointerListener, NULL);
 	} else if(!(wlCapability & WL_SEAT_CAPABILITY_POINTER) && _xkPlatform.wayland.wlPointer) {
-		// Destroy Wayland pointer.
 		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
 
 		_xkPlatform.wayland.wlPointer = NULL;
 	}
 
 	if((wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && !_xkPlatform.wayland.wlKeyboard) {
-		// Create Wayland keyboard.
 		_xkPlatform.wayland.wlKeyboard = wl_seat_get_keyboard(wlSeat);
 
-		// Add Wayland keyboard listener.
 		wl_keyboard_add_listener(_xkPlatform.wayland.wlKeyboard, &_xkWaylandKeyboardListener, NULL);
 	} else if(!(wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && _xkPlatform.wayland.wlKeyboard) {
-		// Destroy Wayland keyboard.
 		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
 
 		_xkPlatform.wayland.wlKeyboard = NULL;
@@ -670,36 +619,28 @@ static const struct wl_seat_listener _xkWaylandSeatListener = {
 
 static void __xkWaylandRegistryGlobal(void* data, struct wl_registry* wlRegistry, uint32_t name, const char* interface, uint32_t version) {
   if(xkCompareString((XkString)interface, (XkString)wl_compositor_interface.name) == 1) {
-		// Register Wayland compositor.
 		_xkPlatform.wayland.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_shm_interface.name) == 1) {
-		// Register Wayland shared memory.
 		_xkPlatform.wayland.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_output_interface.name) == 1) {
-		// Register Wayland output.
 		_xkPlatform.wayland.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_seat_interface.name) == 1) {
-		// Register Wayland seat.
 		_xkPlatform.wayland.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, version);
+
 		 wl_seat_add_listener(_xkPlatform.wayland.wlSeat, &_xkWaylandSeatListener, NULL);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_data_device_manager_interface.name) == 1) {
-		// Register Wayland data device mamager.
 		_xkPlatform.wayland.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, version);
   } else if(xkCompareString((XkString)interface, (XkString)xdg_wm_base_interface.name) == 1) {
-		// Register XDG Base.
     _xkPlatform.wayland.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, version);
+
 		xdg_wm_base_add_listener(_xkPlatform.wayland.xdgBase, &_xkXDGWmBaseListener, NULL);
   } else if(xkCompareString((XkString)interface, (XkString)zxdg_decoration_manager_v1_interface.name) == 1) {
-		// Register XDG decoration manager.
     _xkPlatform.wayland.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)zwp_relative_pointer_manager_v1_interface.name) == 1) {
-		// Register Wayland relative pointer manager.
 		_xkPlatform.wayland.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)zwp_pointer_constraints_v1_interface.name) == 1) {
-		// Register Wayland pointer constraints.
 		_xkPlatform.wayland.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)zwp_idle_inhibit_manager_v1_interface.name) == 1) {
-		// Register Wayland idle inhibit manager.
 		_xkPlatform.wayland.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, version);
 	}
 }
@@ -725,7 +666,10 @@ static const struct wl_buffer_listener _xkWaylandBufferListener = {
 XkResult xkInitializeWindow(void) {
 	XkResult result = XK_SUCCESS;
 
-	// Connect Wayland server.
+	if(_xkPlatform.initialized) {
+		goto _catch;
+	}
+
 	_xkPlatform.wayland.wlDisplay = wl_display_connect(NULL);
 	if(!_xkPlatform.wayland.wlDisplay) {
 		__xkErrorHandle("Wayland: Failed to connect display");
@@ -733,7 +677,6 @@ XkResult xkInitializeWindow(void) {
 		goto _catch;
 	}
 
-	// Get Wayland display registry.
 	_xkPlatform.wayland.wlRegistry = wl_display_get_registry(_xkPlatform.wayland.wlDisplay);
 	if(!_xkPlatform.wayland.wlRegistry) {
 		__xkErrorHandle("Wayland: Failed to get display registry");
@@ -741,13 +684,10 @@ XkResult xkInitializeWindow(void) {
 		goto _catch;
 	}
 
-	// Add Wayland display registry listener.
   wl_registry_add_listener(_xkPlatform.wayland.wlRegistry, &_xkWaylandRegistryListener, NULL);
 
-  // Create key table.
   __xkWaylandCreateKeyTable();
 
-  // Create XKB context.
 	_xkPlatform.wayland.xkbContext = xkb_context_new(0);
 	if(!_xkPlatform.wayland.xkbContext) {
 		__xkErrorHandle("XKB: Failed to initialize context");
@@ -761,77 +701,66 @@ XkResult xkInitializeWindow(void) {
 	// Sync so we got all initial output events.
   wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
 
-	// Check Wayland compositor register object.
 	if(!_xkPlatform.wayland.wlCompositor) {
 		__xkErrorHandle("Wayland: Failed to register compositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check Wayland shared memory register object.
 	if(!_xkPlatform.wayland.wlShm) {
 		__xkErrorHandle("Wayland: Failed to register shm");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check Wayland output register object.
 	if(!_xkPlatform.wayland.wlOutput) {
 		__xkErrorHandle("Wayland: Failed to register output");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check Wayland seat register object.
 	if(!_xkPlatform.wayland.wlSeat) {
 		__xkErrorHandle("Wayland: Failed to register seat");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check Wauland data device manager register object.
 	if(!_xkPlatform.wayland.wlDataDeviceManager) {
 		__xkErrorHandle("Wayland: Failed to register data device manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check XDG base register object.
 	if(!_xkPlatform.wayland.xdgBase) {
 		__xkErrorHandle("Wayland: Failed to register XDG base");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check XDG decoration manager register object.
   if(!_xkPlatform.wayland.xdgDecorationManager) {
 		__xkErrorHandle("Wayland: Failed to register XDG decoration manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
-	// Check Wayland relative pointer manager register object.
 	if(!_xkPlatform.wayland.zwpRelativePointerManager) {
 		__xkErrorHandle("Wayland: Failed to register relative pointer manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check Wayland pointer constraints register object.
 	if(!_xkPlatform.wayland.zwpPointerConstraints) {
 		__xkErrorHandle("Wayland: Failed to register pointer constraints");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Check Wayland idle inhibit manager register object.
 	if(!_xkPlatform.wayland.zwpIdleInhibitManager) {
 		__xkErrorHandle("Wayland: Failed to register idle inhibit manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-  // Create Wayland data device.
 	_xkPlatform.wayland.wlDataDevice = wl_data_device_manager_get_data_device(_xkPlatform.wayland.wlDataDeviceManager, _xkPlatform.wayland.wlSeat);
   if(!_xkPlatform.wayland.wlDataDevice) {
 		__xkErrorHandle("Wayland: Failed to create data device");
@@ -839,31 +768,15 @@ XkResult xkInitializeWindow(void) {
 		goto _catch;
   }
 
-	// Add Wayland data device listener.
 	wl_data_device_add_listener(_xkPlatform.wayland.wlDataDevice, &_xkWaylandDataDeviceListener, NULL);
 
-	// Get cursor theme.
-	const char* cursorTheme = getenv("XCURSOR_THEME");
-  const char* cursorSizeStr = getenv("XCURSOR_SIZE");
-  int cursorSize = 32;
-  if(cursorSizeStr) {
-		errno = 0;
-		char* cursorSizeEnd = NULL;
-    long cursorSizeLong = strtol(cursorSizeStr, &cursorSizeEnd, 10);
-    if(!*cursorSizeEnd && !errno && cursorSizeLong > 0 && cursorSizeLong <= INT_MAX) {
-			cursorSize = (int)cursorSizeLong;
-		}
-  }
-
-  // Load Wayland cursor theme.
-  _xkPlatform.wayland.wlCursorTheme = wl_cursor_theme_load(cursorTheme, cursorSize, _xkPlatform.wayland.wlShm);
+  _xkPlatform.wayland.wlCursorTheme = wl_cursor_theme_load(NULL, 32, _xkPlatform.wayland.wlShm);
   if(!_xkPlatform.wayland.wlCursorTheme) {
 		__xkErrorHandle("Wayland: Failed to load default cursor theme");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
-  // Create Wayland cursor surface.
   _xkPlatform.wayland.wlCursorSurface = wl_compositor_create_surface(_xkPlatform.wayland.wlCompositor);
   if(!_xkPlatform.wayland.wlCursorSurface) {
 		__xkErrorHandle("Wayland: Failed to create cursor surface");
@@ -871,168 +784,153 @@ XkResult xkInitializeWindow(void) {
 		goto _catch;
   }
 
+  _xkPlatform.initialized = XK_TRUE;
+
 _catch:
 	return(result);
 }
 
 void xkTerminateWindow(void) {
-	// Destroy XKB compose state.
+	if(!_xkPlatform.initialized) {
+		return;
+	}
+
 	if(_xkPlatform.wayland.xkbComposeState) {
 		xkb_compose_state_unref(_xkPlatform.wayland.xkbComposeState);
 
 		_xkPlatform.wayland.xkbComposeState = NULL;
 	}
 
-	// Destroy XKB keymap.
 	if(_xkPlatform.wayland.xkbKeymap) {
 		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
 
 		_xkPlatform.wayland.xkbKeymap = NULL;
 	}
 
-	// Destroy XKB state.
 	if(_xkPlatform.wayland.xkbState) {
 		xkb_state_unref(_xkPlatform.wayland.xkbState);
 
 		_xkPlatform.wayland.xkbState = NULL;
 	}
 
-	// Destroy XKB context.
   if(_xkPlatform.wayland.xkbContext) {
 		xkb_context_unref(_xkPlatform.wayland.xkbContext);
 
 		_xkPlatform.wayland.xkbContext = NULL;
   }
 
-	// Destroy Wayland offers.
 	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
 		wl_data_offer_destroy(_xkPlatform.wayland.offers[i].wlOffer);
 	}
 
-	// Free Wayland offers.
 	if(_xkPlatform.wayland.offers) {
 		xkFreeMemory(_xkPlatform.wayland.offers);
 	}
 
-	// Destroy Wayland cursor.
 	if(_xkPlatform.wayland.wlCursorSurface) {
 		wl_surface_destroy(_xkPlatform.wayland.wlCursorSurface);
 
 		_xkPlatform.wayland.wlCursorSurface = NULL;
 	}
 
-	// Destroy Wayland cursor theme.
 	if(_xkPlatform.wayland.wlCursorTheme) {
 		wl_cursor_theme_destroy(_xkPlatform.wayland.wlCursorTheme);
 
 		_xkPlatform.wayland.wlCursorTheme = NULL;
 	}
 
-  // Destroy Wayland data device.
 	if (_xkPlatform.wayland.wlDataDevice) {
 		wl_data_device_destroy(_xkPlatform.wayland.wlDataDevice);
 
 		_xkPlatform.wayland.wlDataDevice = NULL;
 	}
 
-  // Destroy Wayland data device manager.
   if(_xkPlatform.wayland.wlDataDeviceManager) {
   	wl_data_device_manager_destroy(_xkPlatform.wayland.wlDataDeviceManager);
 
   	_xkPlatform.wayland.wlDataDeviceManager = NULL;
   }
 
-	// Destroy Wayland pointer.
   if(_xkPlatform.wayland.wlPointer) {
 		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
 
 		_xkPlatform.wayland.wlPointer = NULL;
   }
 
-  // Destroy Wayland keyboard.
   if(_xkPlatform.wayland.wlKeyboard) {
 		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
 
 		_xkPlatform.wayland.wlKeyboard = NULL;
   }
 
-	// Destroy Wayland seat.
 	if(_xkPlatform.wayland.wlSeat) {
 		wl_seat_destroy(_xkPlatform.wayland.wlSeat);
 
 		_xkPlatform.wayland.wlSeat = NULL;
 	}
 
-	// Destroy Wayland output.
 	if(_xkPlatform.wayland.wlOutput) {
 		wl_output_destroy(_xkPlatform.wayland.wlOutput);
 
 		_xkPlatform.wayland.wlOutput = NULL;
 	}
 
-	// Destroy Wayland shared memory.
 	if(_xkPlatform.wayland.wlShm) {
 		wl_shm_destroy(_xkPlatform.wayland.wlShm);
 
 		_xkPlatform.wayland.wlShm = NULL;
 	}
 
-	// Destroy Wayland compositor.
   if(_xkPlatform.wayland.wlCompositor) {
 		wl_compositor_destroy(_xkPlatform.wayland.wlCompositor);
 
 		_xkPlatform.wayland.wlCompositor = NULL;
   }
 	
-	// Destroy XDG base.
  	if(_xkPlatform.wayland.xdgBase) {
 		xdg_wm_base_destroy(_xkPlatform.wayland.xdgBase);
 
 		_xkPlatform.wayland.xdgBase = NULL;
 	}
 
-	// Destroy XDG decoration manager.
  	if(_xkPlatform.wayland.xdgDecorationManager) {
 		zxdg_decoration_manager_v1_destroy(_xkPlatform.wayland.xdgDecorationManager);
 
 		_xkPlatform.wayland.xdgDecorationManager = NULL;
  	}
 
-	// Destroy Wayland relative pointer manager.
 	if(_xkPlatform.wayland.zwpRelativePointerManager) {
 		zwp_relative_pointer_manager_v1_destroy(_xkPlatform.wayland.zwpRelativePointerManager);
 
 		_xkPlatform.wayland.zwpRelativePointerManager	= NULL;
 	}
 
-	// Destroy Wayland pointer constraints.
 	if(_xkPlatform.wayland.zwpPointerConstraints) {
 		zwp_pointer_constraints_v1_destroy(_xkPlatform.wayland.zwpPointerConstraints);
 
 		_xkPlatform.wayland.zwpPointerConstraints	= NULL;
 	}
 	
-	// Destroy Wayland idle inhibit manager.
   if(_xkPlatform.wayland.zwpIdleInhibitManager) {
 		zwp_idle_inhibit_manager_v1_destroy(_xkPlatform.wayland.zwpIdleInhibitManager);
 
 		_xkPlatform.wayland.zwpIdleInhibitManager = NULL;
 	}
 
-	// Destroy Wayland register.
 	if(_xkPlatform.wayland.wlRegistry) {
   	wl_registry_destroy(_xkPlatform.wayland.wlRegistry);
 
  		_xkPlatform.wayland.wlRegistry = NULL;
 	}
 
-	// Destroy Wayland display.
 	if(_xkPlatform.wayland.wlDisplay) {
   	wl_display_flush(_xkPlatform.wayland.wlDisplay);
 		wl_display_disconnect(_xkPlatform.wayland.wlDisplay);
 
  		_xkPlatform.wayland.wlDisplay = NULL;
 	}
+
+  _xkPlatform.initialized = XK_FALSE;
 }
 
 struct wl_display* __xkWaylandGetDisplay(void) {
@@ -1040,46 +938,42 @@ struct wl_display* __xkWaylandGetDisplay(void) {
 }
 
 struct wl_surface* __xkWaylandGetSurface(const XkWindow window) {
+	xkAssert(window);
+
 	return(window->wayland.wlSurface);
 }
 
 XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
 	XkResult result = XK_SUCCESS;
 	
-	// Allocate window.
-	*pWindow = xkAllocateMemory(sizeof(struct XkWindow));
+	*pWindow = xkAllocateMemory(sizeof(struct XkWindow_T));
 	if(!(*pWindow)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 	
-	// Template window.
 	XkWindow window = *pWindow;
 
-  // Check window hints support.
   if(
-    (hint & XK_WINDOW_DECORATED_BIT && hint & XK_WINDOW_FLOATING_BIT) || 
-    (hint & XK_WINDOW_RESIZABLE_BIT && hint & XK_WINDOW_FLOATING_BIT)) {
+    (hint & XK_WINDOW_HINT_DECORATED_BIT && hint & XK_WINDOW_HINT_FLOATING_BIT) || 
+    (hint & XK_WINDOW_HINT_RESIZABLE_BIT && hint & XK_WINDOW_HINT_FLOATING_BIT)) {
     __xkErrorHandle("Win32: Unsupported window hints");
   }
 
-  // Initialize window hints.
-	if(hint & XK_WINDOW_DECORATED_BIT) 	window->decorated = XK_TRUE;
-	if(hint & XK_WINDOW_RESIZABLE_BIT) 	window->resizable = XK_TRUE;
-	if(hint & XK_WINDOW_FLOATING_BIT) 	window->floating = XK_TRUE;
+	if(hint & XK_WINDOW_HINT_DECORATED_BIT) 	window->decorated = XK_TRUE;
+	if(hint & XK_WINDOW_HINT_RESIZABLE_BIT) 	window->resizable = XK_TRUE;
+	if(hint & XK_WINDOW_HINT_FLOATING_BIT) 		window->floating = XK_TRUE;
 
-  // Initialize window.
   window->cursorMode 	= XK_CURSOR_NORMAL;
 	if(title) {
-		/// NOTE: needs to be free.
+		/// NOTE: Needs to be free.
   	window->title 		= xkDuplicateString(title);
 	}
 
-	// Initialize Wayland window.
+	/// NOTE: Needs for create shm buffer.
 	window->wayland.width 	= width;
 	window->wayland.height 	= height;
 
-	// Create Wayland window surface.
 	window->wayland.wlSurface = wl_compositor_create_surface(_xkPlatform.wayland.wlCompositor);
   if(!window->wayland.wlSurface) {
 		__xkErrorHandle("Wayland: Failed to create surface");
@@ -1102,12 +996,10 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 		}
 	}
 
-	// Set XDG window title.
 	if(title) {
   	xdg_toplevel_set_title(window->wayland.xdgToplevel, window->title);
 	}
 
-	// Set window not resizable.
 	if(!window->resizable) {
 		xkSetWindowSizeLimits(window, width, height, width, height);
 	}
@@ -1119,98 +1011,75 @@ _catch:
 }
 
 void xkDestroyWindow(XkWindow window) {
-	// Destroy ZWP idle inhibit.
 	__xkZWPDestroyIdleInhibitor(window);
 
-	// Destroy XDG components.
 	__xkXDGDestorySurface(window);
 
-	// Destroy Wayland surface.
 	if(window->wayland.wlSurface) {
 		wl_surface_destroy(window->wayland.wlSurface);
 	}
 
-  // Free window title.
   if(window->title) {
 		xkFreeMemory(window->title);
 	}
 	
-  // Free window.
 	xkFreeMemory(window);
 }
 
 void xkShowWindow(XkWindow window, const XkWindowShow show) {
 	switch(show) {
 		case XK_WINDOW_SHOW_DEFAULT:
-			// Create XDG surface.
 			__xkXDGCreateSurface(window);
 
-			// Create XDG decorations.
 			__xkXDGCreateDecorations(window);
 
-			// Restore Wayland window
+			// Restore XDG toplevel.
 			xdg_toplevel_unset_maximized(window->wayland.xdgToplevel);
 			xdg_toplevel_unset_fullscreen(window->wayland.xdgToplevel);
 
-			// Destroy ZWP idle inhibitor.
 			__xkZWPDestroyIdleInhibitor(window);
 			break;
 
 		case XK_WINDOW_SHOW_MAXIMIZED:
-			// Create XDG surface.
 			__xkXDGCreateSurface(window);
 
-			// Create XDG decorations.
 			__xkXDGCreateDecorations(window);
 
-			// Maximize Wayland window.
 			xdg_toplevel_set_maximized(window->wayland.xdgToplevel);
 
-			// Destroy ZWP idle inhibitor.
 			__xkZWPDestroyIdleInhibitor(window);
 			break;
 
 		case XK_WINDOW_SHOW_MINIMIZED:
-			// Create XDG surface.
 			__xkXDGCreateSurface(window);
 
-			// Create XDG decorations.
 			__xkXDGCreateDecorations(window);
 
-			// Maximize Wayland window.
 			xdg_toplevel_set_minimized(window->wayland.xdgToplevel);
 			break;
 
 		case XK_WINDOW_SHOW_FULLSCREEN:
-			// Create XDG decorations.
 			__xkXDGCreateDecorations(window);
 
-			// Destroy XDG decorations.
 			__xkXDGDestroyDecorations(window);
 
-			// Fullscreen Wayland window.
 			xdg_toplevel_set_fullscreen(window->wayland.xdgToplevel, _xkPlatform.wayland.wlOutput);
 
-			// Create ZWP idle inhibitor
 			__xkZWPCreateIdleInhibitor(window);
 			break;
 
 		case XK_WINDOW_HIDE:
-			// Destroy XDG components.
 			__xkXDGDestorySurface(window);
 
-			// Destroy XDG decorations.
 			__xkXDGDestroyDecorations(window);
 
 			// Set null Wayland surface contents.
       wl_surface_attach(window->wayland.wlSurface, NULL, 0, 0);
 
-      // Destroy Wayland idle inhibitor.
 			__xkZWPDestroyIdleInhibitor(window);
 			break;
 	}
 
-	// Commit Wayland surface.
   wl_surface_commit(window->wayland.wlSurface);
 }
 
@@ -1223,7 +1092,6 @@ void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
 	window->wayland.width = width;
 	window->wayland.height = height;
 
-	// Resize Wayland window.
 	__xkWaylandResizeWindow(window);
 
 	// Automaticaly window size event don't input.
@@ -1242,16 +1110,13 @@ void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeigh
 
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
 	if(minWidth != 0 && minHeight != 0) {
-		// Set XDG toplevel min size.
   	xdg_toplevel_set_min_size(window->wayland.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
 	}
 
 	if(maxWidth != 0 && maxHeight) {
-		// Set XDG toplevel max size.
 		xdg_toplevel_set_max_size(window->wayland.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
 	}
 
-	// Commit Wayland surface.
 	wl_surface_commit(window->wayland.wlSurface);
 }
 
@@ -1266,30 +1131,27 @@ void xkGetWindowPosition(XkWindow window, XkInt32* const pXPos, XkInt32* const p
 }
 
 void xkSetWindowTitle(XkWindow window, const XkString title) {
-	// Free old window title.
   if(window->title) {
 		xkFreeMemory(window->title);
 	}
-	// Duplication new window title.
+
   window->title = xkDuplicateString(title);
 
-	// Set XDG toplevel title.
 	xdg_toplevel_set_title(window->wayland.xdgToplevel, title);
 }
 
 void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
-	// A Wayland client can not set its icon
+	// A Wayland client can't set its icon
 	__xkErrorHandle("Wayland: platform doesn't support setting the window icon");
 }
 
-void xkSetCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
+void xkSetWindowCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
 	if(window->wayland.zwpLockedPointer != NULL) {
-		// Set Wayland cursor positions.
 		zwp_locked_pointer_v1_set_cursor_position_hint(window->wayland.zwpLockedPointer, wl_fixed_from_double(xPos), wl_fixed_from_double(yPos));
 	}
 }
 
-void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
+void xkGetWindowCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* const pYPos) {
 	if(pXPos) {
 		*pXPos = window->wayland.cursorPosX;
 	}
@@ -1299,26 +1161,23 @@ void xkGetCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat64* con
 	}
 }
 
-void xkSetWindowCursorMode(XkWindow window, const XkWindowCursorMode mode) {
+void xkSetWindowCursorMode(XkWindow window, const XkCursorMode mode) {
 	window->cursorMode = mode;
 
 	if(mode == XK_CURSOR_DISABLED) {
-		// Lock and hide cursor.
 		__xkZWPLockPointer(window);
 	} else if(mode == XK_CURSOR_HIDDEN) {
-		// Set hide cursor.
 		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, NULL, 0, 0);
 	} else if(mode == XK_CURSOR_NORMAL) {
-		// Unlock and show cursor.
 		__xkZWPUnlockPointer(window);
 		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, 0, 0);
 	}
 }
 
-void __xkWaylandSetWindowCursor(XkWindow window, struct wl_buffer* wlCursorBuffer, int width, int height) {
+void __xkWaylandSetWindowCursor(XkWindow window, struct wl_buffer* wlCursorBuffer, const XkSize width, const XkSize height) {
 	wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, 0, 0);
 	wl_surface_attach(_xkPlatform.wayland.wlCursorSurface, wlCursorBuffer, 0, 0);
-	wl_surface_damage(_xkPlatform.wayland.wlCursorSurface, 0, 0, 16, 16);
+	wl_surface_damage(_xkPlatform.wayland.wlCursorSurface, 0, 0, (int)width, (int)height);
 	wl_surface_commit(_xkPlatform.wayland.wlCursorSurface);
 }
 
@@ -1327,7 +1186,6 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 		const int width = pIcon->width;
 		const int height = pIcon->height;
 
-		// Create Wayland cursor buffer.
 		window->wayland.wlCursorBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4);
  		if(!window->wayland.wlCursorBuffer) {
 			__xkErrorHandle("Wayland: Failed to create cursor buffer");
@@ -1341,7 +1199,7 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 	} else {
 		struct wl_cursor* wlCursor = wl_cursor_theme_get_cursor(_xkPlatform.wayland.wlCursorTheme, "default");
 		if(!wlCursor) {
-			__xkErrorHandle("Wayland: Standard cursor not found");
+			__xkErrorHandle("Wayland: Failed to find standard cursor");
 			return;
 		}
 
@@ -1357,23 +1215,23 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 	}
 }
 
-uint64_t __xkPosixGetTimerFrequency(void) {
+uint64_t __xkPosixGetTimerFrequency() {
 	return(1000000000);
 }
 
-uint64_t __xkPosixGetTimerValue(void) {
+uint64_t __xkPosixGetTimerValue() {
 	struct timespec ts;
 	clock_gettime(CLOCK_REALTIME, &ts);
-	return (uint64_t) ts.tv_sec * __xkPosixGetTimerFrequency() + (uint64_t)ts.tv_nsec;
+	return((uint64_t)ts.tv_sec * __xkPosixGetTimerFrequency() + (uint64_t)ts.tv_nsec);
 }
 
-XkBool __xkPosixPoll(struct pollfd* fds, nfds_t count, double* timeout) {
+static XkBool __xkPosixPoll(struct pollfd* fds, nfds_t count, double* timeout) {
 	while(XK_TRUE) {
 		if(timeout) {
 			const uint64_t base = __xkPosixGetTimerValue();
 
-			const time_t seconds = (time_t) *timeout;
-			const long nanoseconds = (long) ((*timeout - seconds) * 1e9);
+			const time_t seconds = (time_t)*timeout;
+			const long nanoseconds = (long)((*timeout - seconds) * 1e9);
 			const struct timespec ts = { seconds, nanoseconds };
 			const int result = ppoll(fds, count, &ts, NULL);
 
@@ -1382,24 +1240,24 @@ XkBool __xkPosixPoll(struct pollfd* fds, nfds_t count, double* timeout) {
 			*timeout -= (__xkPosixGetTimerValue() - base) / (double)__xkPosixGetTimerFrequency();
 
 			if(result > 0) {
-				return XK_TRUE;
+				return(XK_TRUE);
 			} else if(result == -1 && error != EINTR && error != EAGAIN) {
-				return XK_FALSE;
+				return(XK_FALSE);
 			} else if(*timeout <= 0.0) {
-				return XK_FALSE;
+				return(XK_FALSE);
 			}
 		} else {
 			const int result = poll(fds, count, -1);
 			if(result > 0) {
-				return XK_TRUE;
+				return(XK_TRUE);
 			} else if(result == -1 && errno != EINTR && errno != EAGAIN) {
-				return XK_FALSE;
+				return(XK_FALSE);
 			}
 		}
 	}
 }
 
-void __xkWaylandHandleEvents(XkFloat64* pTimeout) {
+static void __xkWaylandHandleEvents(XkFloat64* pTimeout) {
 	XkBool event = XK_FALSE;
 	struct pollfd fds[] = {
 		{wl_display_get_fd(_xkPlatform.wayland.wlDisplay), POLLIN}
@@ -1433,16 +1291,16 @@ void __xkWaylandHandleEvents(XkFloat64* pTimeout) {
 	}
 }
 
-void xkPollWindowEvents(void) {
+void xkPollEvents() {
 	XkFloat64 timeout = 0.0;
 	__xkWaylandHandleEvents(&timeout);
 }
 
-void xkWaitWindowEvents(void) {
+void xkWaitEvents() {
 	wl_display_dispatch(_xkPlatform.wayland.wlDisplay);
 }
 
-void xkWaitWindowEventsTimeout(XkFloat64 timeout) {
+void xkWaitEventsTimeout(XkFloat64 timeout) {
 	__xkWaylandHandleEvents(&timeout);
 }
 
@@ -1451,7 +1309,6 @@ static XkBool __xkXDGCreateSurface(XkWindow window) {
 
 	if(window->wayland.xdgToplevel) goto _catch;
 
-	// Get XDG surface from Wayland surface.
 	window->wayland.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.wayland.xdgBase, window->wayland.wlSurface);
 	if(!window->wayland.xdgSurface) {
 		result = XK_TRUE;
@@ -1459,10 +1316,8 @@ static XkBool __xkXDGCreateSurface(XkWindow window) {
 		goto _catch;
   }
 
-	// Add XDG surface listener.
   xdg_surface_add_listener(window->wayland.xdgSurface, &_xkXDGSurfaceListener, window);
 
-	// Get XDG toplevel.
 	window->wayland.xdgToplevel = xdg_surface_get_toplevel(window->wayland.xdgSurface);
   if(!window->wayland.xdgToplevel) {
 		result = XK_TRUE;
@@ -1470,7 +1325,6 @@ static XkBool __xkXDGCreateSurface(XkWindow window) {
 		goto _catch;
   }
 
-	// Add XDG toplevel listener.
   xdg_toplevel_add_listener(window->wayland.xdgToplevel, &_xkXDGToplevelListener, window);
 
 _catch:
@@ -1478,14 +1332,12 @@ _catch:
 }
 
 static void __xkXDGDestorySurface(XkWindow window) {
-	// Destroy XDG toplevel.
 	if(window->wayland.xdgToplevel) {
 		xdg_toplevel_destroy(window->wayland.xdgToplevel);
 
 		window->wayland.xdgToplevel = NULL;
 	}
 
-	// Destroy XDG surface.
 	if(window->wayland.xdgSurface) {
 		xdg_surface_destroy(window->wayland.xdgSurface);
 
@@ -1498,7 +1350,6 @@ static XkBool __xkXDGCreateDecorations(XkWindow window) {
 
 	if(window->wayland.xdgDecoration) goto _catch;
 
-	// Create XDG decorations.
 	window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
 	if(!window->wayland.xdgDecoration) {
 		result = XK_TRUE;
@@ -1506,7 +1357,6 @@ static XkBool __xkXDGCreateDecorations(XkWindow window) {
 		goto _catch;
 	}
 
-	// Set XDG decorations server size mode.
   zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
 
 _catch:
@@ -1514,7 +1364,6 @@ _catch:
 }
 
 static void __xkXDGDestroyDecorations(XkWindow window) {
-	// Destroy XDG decoration.
 	if(window->wayland.xdgDecoration) {
 		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
 
@@ -1527,7 +1376,6 @@ static XkBool __xkZWPCreateIdleInhibitor(XkWindow window) {
 
 	if(window->wayland.zwpIdleInhibitor) goto _catch;
 
-	// Create Wayland idle inhibit.
   window->wayland.zwpIdleInhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(_xkPlatform.wayland.zwpIdleInhibitManager, window->wayland.wlSurface);
   if(!window->wayland.zwpIdleInhibitor) {
 		result = XK_TRUE;
@@ -1540,7 +1388,6 @@ _catch:
 }
 
 static void __xkZWPDestroyIdleInhibitor(XkWindow window) {
-	// Destroy Wayland idle inhibit.
 	if(window->wayland.zwpIdleInhibitor) {
 		zwp_idle_inhibitor_v1_destroy(window->wayland.zwpIdleInhibitor);
 
@@ -1548,7 +1395,7 @@ static void __xkZWPDestroyIdleInhibitor(XkWindow window) {
 	}
 }
 
-static int __xkWaylandAllocateShmFile(const int size) {
+static int __xkWaylandAllocateShmFile(const XkSize size) {
 	int fd = memfd_create("XKinetic-Wayland", MFD_CLOEXEC | MFD_ALLOW_SEALING);
 	if(fd >= 0) {
 		fcntl(fd, F_ADD_SEALS, F_SEAL_SHRINK | F_SEAL_SEAL);
@@ -1556,7 +1403,7 @@ static int __xkWaylandAllocateShmFile(const int size) {
 		goto _catch;
 	}
 
-	int ret = posix_fallocate(fd, 0, size);
+	int ret = posix_fallocate(fd, 0, (int)size);
 	if(ret != 0) {
 		close(fd);
 		fd = -1;
@@ -1567,38 +1414,30 @@ _catch:
 	return(fd);
 }
 
-struct wl_buffer* __xkWaylandCreateShmBuffer(const int width, const int height, const int stride, const int size) {
+struct wl_buffer* __xkWaylandCreateShmBuffer(const XkSize width, const XkSize height, const XkSize stride, const XkSize size) {
 	struct wl_buffer* wlBuffer = NULL;
 
-	// Allocate Waylnad shared file.
 	int fd = __xkWaylandAllocateShmFile(size);
 	if(fd == -1) {
 		goto _catch;
 	}
 
-	// Allocate Wayland shared memory.
 	uint32_t* data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if(data == MAP_FAILED) {
 		close(fd);
 		goto _catch;
 	}
 
-	// Create Wayland poll from shared file.
 	struct wl_shm_pool* wlPool = wl_shm_create_pool(_xkPlatform.wayland.wlShm, fd, size);
 
-	// Create Wayland buffer.
-	wlBuffer = wl_shm_pool_create_buffer(wlPool, 0, width, height, stride, WL_SHM_FORMAT_XRGB8888);
+	wlBuffer = wl_shm_pool_create_buffer(wlPool, 0, (int)width, (int)height, (int)stride, WL_SHM_FORMAT_XRGB8888);
 
-	// Destroy Wayland pool.
 	wl_shm_pool_destroy(wlPool);
 
-	// Close Wayland shared file.
 	close(fd);
 
-	// Free Wayland shared memory.
 	munmap(data, size);
 
-	// Add Wayland buffer listener.
 	wl_buffer_add_listener(wlBuffer, &_xkWaylandBufferListener, NULL);
 
 _catch:
@@ -1609,33 +1448,26 @@ static void __xkWaylandResizeWindow(XkWindow window) {
 	int width = window->wayland.width;
 	int height = window->wayland.height;
 
-	// Create Wayland surface buffer.
 	struct wl_buffer* wlBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4);
  	if(!wlBuffer) {
 		__xkErrorHandle("Wayland: Failed to create shared buffer");
  		return;
  	}
 
- 	// Attach Wayland shared buffer to surface.
 	wl_surface_attach(window->wayland.wlSurface, wlBuffer, 0, 0);
 
-	// Create Wayland region.
 	struct wl_region* wlRegion = wl_compositor_create_region(_xkPlatform.wayland.wlCompositor);
 	if(!wlRegion) {
 		__xkErrorHandle("Wayland: Failed to create region");
 		return;
 	}
 
-	// Add the specified rectangle to the Wayland region.
 	wl_region_add(wlRegion, 0, 0, (int)window->wayland.width, (int)window->wayland.height);
 
-	// Set Wayland surface opaque region.
 	wl_surface_set_opaque_region(window->wayland.wlSurface, wlRegion);
-	
-	// Destroy Wayland region.
+
 	wl_region_destroy(wlRegion);
 
-	// Commit surface
 	wl_surface_commit(window->wayland.wlSurface);
 }
 
@@ -1658,37 +1490,30 @@ static void __xkZWPLockPointer(XkWindow window) {
 		return;
 	}
 
-	// Create Wayland relative pointer.
 	window->wayland.zwpRelativePointer = zwp_relative_pointer_manager_v1_get_relative_pointer(_xkPlatform.wayland.zwpRelativePointerManager, _xkPlatform.wayland.wlPointer);
 	if(!window->wayland.zwpRelativePointer) {
 		__xkErrorHandle("Wayland: Failed to create relative pointer");
 	}
 
-	// Add Wayland relative pointer listener.
   zwp_relative_pointer_v1_add_listener(window->wayland.zwpRelativePointer, &_xkZWPRelativePointerListener, window);
 
-	// Create Wayland pointer constraints.
 	window->wayland.zwpLockedPointer = zwp_pointer_constraints_v1_lock_pointer(_xkPlatform.wayland.zwpPointerConstraints, window->wayland.wlSurface, _xkPlatform.wayland.wlPointer, NULL, ZWP_POINTER_CONSTRAINTS_V1_LIFETIME_PERSISTENT);
 	if(!window->wayland.zwpLockedPointer) {
 		__xkErrorHandle("Wayland: Failed to create locked pointer");
 	}
 
-	// Add Wayland pointer constraints listener.
   zwp_locked_pointer_v1_add_listener(window->wayland.zwpLockedPointer, &_xkZWPLockedPointerListener, window);
 
-	// Set Wayland cursor.
   wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, NULL, 0, 0);
 }
 
 static void __xkZWPUnlockPointer(XkWindow window) {
-	// Destroy Wayland relative pointer.
 	if(window->wayland.zwpRelativePointer) {
 		zwp_relative_pointer_v1_destroy(window->wayland.zwpRelativePointer);
 
 		window->wayland.zwpRelativePointer = NULL;
 	}
 
-	// Destroy Wayland locked pointer.
 	if(window->wayland.zwpLockedPointer) {
 		zwp_locked_pointer_v1_destroy(window->wayland.zwpLockedPointer);
 
@@ -1718,11 +1543,7 @@ static char* __xkWaylandReadDataOfferAsString(struct wl_data_offer* wlDataOffer,
 		const size_t requiredSize = length + readSize + 1;
 		if(requiredSize > size) {
 			char* longer = NULL;
-			if(!string) {
-				longer = xkAllocateMemory(requiredSize);
-			} else {
-				longer = xkReallocateMemory(string, requiredSize);
-			}
+			longer = xkReallocateMemory(string, requiredSize);
 			if(!longer) {
 				__xkErrorHandle("Wayland: Failed to reallocate data offer string");
 				close(fds[0]);
@@ -1754,13 +1575,13 @@ static char* __xkWaylandReadDataOfferAsString(struct wl_data_offer* wlDataOffer,
 }
 
 XkString* __xkParseURI(XkString text, XkSize* pCount) {
-	XkString prefix = "file://";
+	const XkString prefix = "file://";
 	XkString* paths = NULL;
 	XkString line;
 
 	XkSize count = 0;
 
-	while((line = strtok(text, "\r\n"))) {
+	while((line = xkTokenString(text, "\r\n"))) {
 		text = NULL;
 
 		if(line[0] == '#') {
@@ -1778,25 +1599,8 @@ XkString* __xkParseURI(XkString text, XkSize* pCount) {
     ++count;
 
 		XkString path = xkAllocateMemory(xkStringLength(line) + 1);
-		if(!paths) {
-				paths = xkAllocateMemory(count * sizeof(char*));
-		} else {
-			paths = xkReallocateMemory(paths, count * sizeof(char*));
-		}
+		paths = xkReallocateMemory(paths, count * sizeof(char*));
 		paths[count - 1] = path;
-
-		while(*line) {
-			if(line[0] == '%' && line[1] && line[2]) {
-				const char digits[3] = { line[1], line[2], '\0' };
-				*path = (char) strtol(digits, NULL, 16);
-				line += 2;
-			} else {
-				*path = *line;
-			}
-
-			++path;
-			++line;
-    }
 	}
 
 	*pCount = count; 
@@ -1926,5 +1730,3 @@ static void __xkWaylandCreateKeyTable(void) {
 	_xkPlatform.keycodes[KEY_KPENTER]    = XK_KEY_KP_ENTER;
 	_xkPlatform.keycodes[KEY_102ND]      = XK_KEY_WORLD_2;
 }
-
-#endif // XK_LINUX

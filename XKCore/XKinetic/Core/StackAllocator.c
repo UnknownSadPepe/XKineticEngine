@@ -1,116 +1,122 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 #include "XKinetic/Core/StackAllocator.h"
 
-struct XkStackAllocator {
+/* ########## MACROS SECTION ########## */
+#define XK_STACK_ALLOCATOR_REALLOCATE_COEFFICIENT 2
+
+/* ########## TYPES SECTION ########## */
+struct XkStackAllocator_T {
 	XkSize size;
 	XkSize totalSize;
 
 	XkHandle memory;
 };
 
-typedef struct {
+typedef struct XkStackMemoryHeader_T {
 	XkSize size;
 	XkHandle memory;
 } XkStackMemoryHeader;
 
+/* ########## GLOBAL VARIABLES SECTION ########## */
 static const XkSize XK_STACK_ALLOCATOR_ALIGN = 16;
 
-#define XK_STACK_ALLOCATOR_REALLOCATE_COEFFICIENT 2
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateStackAllocator(XkStackAllocator* pAllocator, const XkSize totalSize) {
+	xkAssert(pAllocator);
+	xkAssert(totalSize > 0);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate stack allocator.
-	*pAllocator = xkAllocateMemory(sizeof(struct XkStackAllocator));
+	*pAllocator = xkAllocateMemory(sizeof(struct XkStackAllocator_T));
 	if(!(*pAllocator)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Template stack allocator.
 	XkStackAllocator allocator = *pAllocator;
 
-	// Align total size with stack allocator alignment.
+	// Align total size with stack allocator alignment for better performance and minimal fragmentation.
 	const XkSize alignTotalSize = (totalSize + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
 
-	// Initialize stack allocator.
-	allocator->size = 0;
-	allocator->totalSize = alignTotalSize;
-
-	// Allocate stack allocator memory.
-	allocator->memory = xkAllocateMemory(alignTotalSize);
+	allocator->size 			= 0;
+	allocator->totalSize 	= alignTotalSize;
+	allocator->memory 		= xkAllocateMemory(alignTotalSize);
 	if(!allocator->memory) {
 		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
+		goto _free;
 	}
 
 _catch:
 	return(result);
+
+_free:
+	if(allocator) {
+		xkFreeMemory(allocator);
+	}
+
+	goto _catch;
 }
 
 void xkDestroyStackAllocator(XkStackAllocator allocator) {
-	// Free stack allocator memory.
+	xkAssert(allocator);
+
 	xkFreeMemory(allocator->memory);
 
-	// Free stack allocator.
 	xkFreeMemory(allocator);
 }
 
 void xkClearStackAllocator(XkStackAllocator allocator) {
-	// Null stack allocator allocated size.
+	xkAssert(allocator);
+
 	allocator->size = 0;
 
-	// Zero stack allocator array memory.
 	xkZeroMemory(allocator->memory, allocator->totalSize);
 }
 
 void xkResizeStackAllocator(XkStackAllocator allocator, const XkSize newTotalSize) {
-	// Align new total size with stack allocator alignment.
+	xkAssert(allocator);
+	xkAssert(newTotalSize > 0 && newTotalSize > allocator->totalSize);
+
+	// Align new total size with stack allocator alignment for better performance and minimal fragmentation.
 	const XkSize alignNewTotalSize = (newTotalSize + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
 
-	// Initialize stack allocator.
-	allocator->totalSize = alignNewTotalSize;
-
-	// Reallocate stack allocator memory.
-	allocator->memory = xkReallocateMemory(allocator->memory, alignNewTotalSize);
+	allocator->totalSize 	= alignNewTotalSize;
+	allocator->memory 		= xkReallocateMemory(allocator->memory, alignNewTotalSize);
 }
 
 XkHandle xkAllocateStackMemory(XkStackAllocator allocator, const XkSize size) {
-	// Align allocated size with stack allocator alignment.
+	xkAssert(allocator);
+
+	// Align allocated size with stack allocator alignment for better performance and minimal fragmentation.
 	const XkSize alignSize = (size + (XK_STACK_ALLOCATOR_ALIGN - 1)) & ~(XK_STACK_ALLOCATOR_ALIGN - 1);
 
-	// Initialize allocate size with header. 
 	const XkSize headerSize = alignSize + sizeof(XkStackMemoryHeader);
 
-	// Check if there is not enough space in stack allocator.
 	if((allocator->size + headerSize) > allocator->totalSize) {
-		// Resize stack allocator.
 		xkResizeStackAllocator(allocator, allocator->totalSize * XK_STACK_ALLOCATOR_REALLOCATE_COEFFICIENT);
 	}
 
-	// Initialize stack allocator header.
 	XkStackMemoryHeader* pHeader = (XkStackMemoryHeader*)(((XkUInt8*)allocator->memory + allocator->size));
 
-	// Select new stack allocator allocated memory.
 	pHeader->memory = (XkUInt8*)pHeader + headerSize;
-	pHeader->size = alignSize;
+	pHeader->size 	= alignSize;
 
-	// Increment stack allocator allocated size.
 	allocator->size += headerSize;
 
 	return(pHeader->memory);
 }
 
-void xkFreeStackMemory(XkStackAllocator allocator, const XkHandle memory) {
-	// Initialize stack allocator header.
-	XkStackMemoryHeader* pHeader = (XkStackMemoryHeader*)((XkUInt8*)memory - sizeof(XkStackMemoryHeader));
+void xkFreeStackMemory(XkStackAllocator allocator, const XkHandle data) {
+	xkAssert(allocator);
+	xkAssert(data);
 
-	// Initialize allocate size with header. 
+	XkStackMemoryHeader* pHeader = (XkStackMemoryHeader*)((XkUInt8*)data - sizeof(XkStackMemoryHeader));
+ 
 	const XkSize headerSize = pHeader->size + sizeof(XkStackMemoryHeader);
 
-	// Decrement stack allocator allocated size with header.
 	allocator->size -= headerSize;
 
-	// Zero memory with header.
 	xkZeroMemory((XkHandle)pHeader, headerSize);
 }

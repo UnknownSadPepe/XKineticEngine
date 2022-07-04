@@ -40,6 +40,7 @@
 #define XK_FLOAT32_EPSILON 1E-5
 #define XK_FLOAT64_EPSILON 1E-9
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -231,6 +232,7 @@ XKMATH_API XkFloat64 xkDAbs(const XkFloat64);
 	XkFloat32: xkFAbs, \
   XkFloat64: xkDAbs)(x)
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

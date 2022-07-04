@@ -1,51 +1,53 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-#ifdef XKVULKAN_DEBUG
-static VKAPI_ATTR VkBool32 VKAPI_CALL __xkVkMessageCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity, VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* callbackData, void* data) {
-	if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
-    xkLogNotice("Vulkan: %s", callbackData->pMessage);
-  }	else if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)	{
-    xkLogError("Vulkan: %s", callbackData->pMessage);
-  } else if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)	{ 
-    xkLogWarning("Vulkan %s", callbackData->pMessage);
-  } else if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
-    xkLogInfo("Vulkan %s", callbackData->pMessage);
+/* ########## FUNCTIONS SECTION ########## */
+#if defined(XKVULKAN_DEBUG)
+static VKAPI_ATTR VkBool32 VKAPI_CALL __xkVulkanMessageCallback(VkDebugUtilsMessageSeverityFlagBitsEXT vkSeverity, VkDebugUtilsMessageTypeFlagsEXT vkType, const VkDebugUtilsMessengerCallbackDataEXT* vkCallbackData, void* user) {
+	if(vkSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+    xkLogNotice("Vulkan: %s", vkCallbackData->pMessage);
+  }	else if(vkSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)	{
+    xkLogError("Vulkan: %s", vkCallbackData->pMessage);
+  } else if(vkSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)	{ 
+    xkLogWarning("Vulkan %s", vkCallbackData->pMessage);
+  } else if(vkSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+    xkLogInfo("Vulkan %s", vkCallbackData->pMessage);
   }
 
   return(VK_FALSE);
 }
 
-void __xkVkPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT* pVkDebugMessengerCreateInfo) {
-  *pVkDebugMessengerCreateInfo                      = (VkDebugUtilsMessengerCreateInfoEXT){0};
+void __xkVulkanPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT* pVkDebugMessengerCreateInfo) {
+  xkAssert(pVkDebugMessengerCreateInfo);
+
+  *pVkDebugMessengerCreateInfo                      = (VkDebugUtilsMessengerCreateInfoEXT){};
   pVkDebugMessengerCreateInfo->sType                = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   pVkDebugMessengerCreateInfo->pNext                = VK_NULL_HANDLE;
   pVkDebugMessengerCreateInfo->flags                = 0;
   pVkDebugMessengerCreateInfo->messageSeverity      = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
   pVkDebugMessengerCreateInfo->messageType          = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
-  pVkDebugMessengerCreateInfo->pfnUserCallback      = __xkVkMessageCallback;
+  pVkDebugMessengerCreateInfo->pfnUserCallback      = __xkVulkanMessageCallback;
   pVkDebugMessengerCreateInfo->pUserData            = VK_NULL_HANDLE;
 }
 
-XkResult __xkVkCreateDebugMessenger(void) {
+XkResult __xkVulkanCreateDebugMessenger() {
   XkResult result = XK_SUCCESS;
 
-  // Get Vulkan 'vkCreateDebugUtilsMessengerEXT' process adderss.
-  PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkCreateDebugUtilsMessengerEXT");
+  PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessenger = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVulkanContext.vkInstance, "vkCreateDebugUtilsMessengerEXT");
   if(!vkCreateDebugUtilsMessenger) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Vulkan: Failed to get instance proc address vkCreateDebugUtilsMessengerEXT: %s", __xkVkGetErrorString(VK_ERROR_EXTENSION_NOT_PRESENT));
+    xkLogError("Vulkan: Failed to get process address vkCreateDebugUtilsMessengerEXT: %s", __xkVulkanGetResultString(VK_ERROR_EXTENSION_NOT_PRESENT));
     goto _catch;
   }
 
-  // Initialize Vulkan debug utils messenger create info.
   VkDebugUtilsMessengerCreateInfoEXT vkDebugUtilsMessengerCreateInfo;
-  __xkVkPopulateDebugMessengerCreateInfo(&vkDebugUtilsMessengerCreateInfo);
+  __xkVulkanPopulateDebugMessengerCreateInfo(&vkDebugUtilsMessengerCreateInfo);
 
-  // Create Vulkan debug utils messenger.
-  VkResult vkResult = vkCreateDebugUtilsMessenger(_xkVkContext.vkInstance, &vkDebugUtilsMessengerCreateInfo, VK_NULL_HANDLE, &_xkVkContext.vkDebugMessenger);
+  VkResult vkResult = vkCreateDebugUtilsMessenger(_xkVulkanContext.vkInstance, &vkDebugUtilsMessengerCreateInfo, VK_NULL_HANDLE, &_xkVulkanContext.vkDebugMessenger);
   if(vkResult != VK_SUCCESS) {
      result = XK_ERROR_UNKNOWN;
-    xkLogError("Vulkan: Failed to create debug messenger: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to create debug messenger: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;   
   }
 
@@ -53,15 +55,17 @@ _catch:
   return(result);  
 }
 
-void __xkVkDestroyDebugMessenger(void) {
-    // Get Vulkan 'vkDestroyDebugUtilsMessengerEXT' process adderss.
-  PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessenger = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVkContext.vkInstance, "vkDestroyDebugUtilsMessengerEXT");
+void __xkVulkanDestroyDebugMessenger() {
+  PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessenger = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_xkVulkanContext.vkInstance, "vkDestroyDebugUtilsMessengerEXT");
   if(!vkDestroyDebugUtilsMessenger) {
-    xkLogError("Vulkan: Failed to get instance proc address vkDestroyDebugUtilsMessengerEXT: %s", __xkVkGetErrorString(VK_ERROR_EXTENSION_NOT_PRESENT));
+    xkLogError("Vulkan: Failed to get process address vkDestroyDebugUtilsMessengerEXT: %s", __xkVulkanGetResultString(VK_ERROR_EXTENSION_NOT_PRESENT));
     return;
   }
 
-  // Destroy Vulkan debug utils messenger.
-  vkDestroyDebugUtilsMessenger(_xkVkContext.vkInstance, _xkVkContext.vkDebugMessenger, VK_NULL_HANDLE);
+  if(_xkVulkanContext.vkDebugMessenger) {
+    vkDestroyDebugUtilsMessenger(_xkVulkanContext.vkInstance, _xkVulkanContext.vkDebugMessenger, VK_NULL_HANDLE);
+
+    _xkVulkanContext.vkDebugMessenger = VK_NULL_HANDLE;
+  }
 }
 #endif // XKVULKAN_DEBUG

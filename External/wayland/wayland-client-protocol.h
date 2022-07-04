@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "wayland-client.h"
+#include "wayland-client-core.h"
 
 #ifdef  __cplusplus
 extern "C" {

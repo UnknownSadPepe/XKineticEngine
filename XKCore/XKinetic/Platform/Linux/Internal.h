@@ -1,17 +1,20 @@
 #pragma once
 
-#include <wayland-client.h>
+/* ########## INCLUDE SECTION ########## */
+#include <wayland-client-core.h>
 #include <wayland-cursor.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-compose.h>
-#include "XKinetic/XKCore.h"
 #include "XKinetic/Platform/Unix/Internal.h"
+#include "XKinetic/XKCore.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-typedef struct {
+/* ########## TYPES SECTION ########## */
+typedef struct __XkWaylandWindow_T {
 	struct wl_surface* 										wlSurface;
 
   struct xdg_surface* 									xdgSurface;
@@ -34,21 +37,17 @@ typedef struct {
 	XkFloat64 cursorPosY;
 } __XkWaylandWindow;
 
-#define XK_PLATFORM_WINDOW __XkWaylandWindow wayland
-
-typedef struct {
+typedef struct __XkLinuxJoystick_T {
 	int                     handle;
 } __XkLinuxJoystick;
 
-#define XK_PLATFORM_JOYSTICK __XkLinuxJoystick handle
-
-typedef struct {
+typedef struct __XkWaylandOffer_T {
 	struct wl_data_offer*       wlOffer;
 	XkBool                    	UTF8;
 	XkBool                    	URI;
 } __XkWaylandOffer;
 
-typedef struct {
+typedef struct __XkWaylandPlatform_T {
 	struct wl_display*												wlDisplay;
   struct wl_registry*												wlRegistry;
 
@@ -103,8 +102,12 @@ typedef struct {
 
 } __XkWaylandPlatform;
 
-#define XK_PLATFORM __XkWaylandPlatform wayland
+/* ########## TYPES MACROS SECTION ########## */
+#define XK_PLATFORM_WINDOW 		__XkWaylandWindow wayland
+#define XK_PLATFORM_JOYSTICK 	__XkLinuxJoystick handle
+#define XK_PLATFORM 					__XkWaylandPlatform wayland
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

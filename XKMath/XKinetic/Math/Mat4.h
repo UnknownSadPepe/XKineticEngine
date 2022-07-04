@@ -3,6 +3,7 @@
 #include "XKinetic/XKMath.h"
 #include "XKinetic/Math/Math.h"
 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
@@ -55,6 +56,7 @@ typedef union {
 	XkFloat64 handle[4][4];
 } XkDMat4;
 
+/// note: for using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

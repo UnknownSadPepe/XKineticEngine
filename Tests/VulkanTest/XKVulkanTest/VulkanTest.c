@@ -1,11 +1,11 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Core/Minimal.h"
-#include "XKinetic/Platform/File.h"
-#include "XKinetic/Platform/Console.h"
 #include "XKinetic/Application.h"
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Renderer/Renderer.h"
 
-struct XkApplication {
+/* ########## TYPES SECTION ########## */
+struct XkApplication_T {
 	XkApplicationConfig config;
 
 	XkWindow window;
@@ -14,17 +14,25 @@ struct XkApplication {
 	XkBool exit;
 };
 
+/* ########## GLOBAL VARIABLES SECTION ########## */
 XkApplication _xkApplication;
 
+/* ########## FUNCTIONS SECTION ########## */
 static void __xkWindowClose(XkWindow window) {
+	xkAssert(window);
+
 	_xkApplication.exit = XK_TRUE;
 }
 
 static void __xkWindowSize(XkWindow window, XkSize width, XkSize height) {
+	xkAssert(window);
+	xkAssert(width > 0);
+	xkAssert(height > 0);
+
 	xkResizeRenderer(_xkApplication.renderer, width, height);
 }
 
-XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
+XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
 	_xkApplication.config.name = "XKVulkanTest";
@@ -34,30 +42,41 @@ XkResult xkCreateApplication(const XkSize argc, const XkString* argv) {
 	_xkApplication.exit = XK_FALSE;
 
 	result = xkInitializeLog();
-	if(result != XK_SUCCESS) goto _catch;
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to initialize log: %d", result);
+		goto _catch;
+	}
 
 	result = xkInitializeWindow();
-	if(result != XK_SUCCESS) goto _catch;
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to initialize window: %d", result);
+		goto _catch;
+	}
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_DECORATED_BIT | XK_WINDOW_RESIZABLE_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_HINT_DECORATED_BIT | XK_WINDOW_HINT_RESIZABLE_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;
 	}
 
-	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
-
 	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
 	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
 
-	XkRendererConfig rendererConfig = {0};
+	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
+
+	XkRendererConfig rendererConfig = {};
 	rendererConfig.blending 				= XK_FALSE;
 	rendererConfig.depthTest 				= XK_TRUE;
 	rendererConfig.stencilTest 			= XK_TRUE;
 	rendererConfig.scissorTest 			= XK_TRUE;
 
+	result = xkInitializeRenderer();
+	if(result != XK_SUCCESS) {
+		xkLogFatal("Failed to initialize renderer: %d", result);
+		goto _catch;
+	}	
 
-	result = xkCreateRenderer(&_xkApplication.renderer, &rendererConfig, _xkApplication.window, XK_RENDERER_API_VK);
+	result = xkCreateRenderer(&_xkApplication.renderer, &rendererConfig, _xkApplication.window, XK_RENDERER_API_VULKAN);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create renderer: %d", result);
 		goto _catch;
@@ -71,26 +90,28 @@ _catch:
 	return(result);
 }
 
-void xkDestroyApplication(void) {
-	xkDestroyWindow(_xkApplication.window);
+void xkTerminateApplication() {
 	xkDestroyRenderer(_xkApplication.renderer);
+
+	xkDestroyWindow(_xkApplication.window);
+
+	xkTeminateRenderer();
 
 	xkTerminateWindow();
 
 	xkTerminateLog();
 }
 
-void xkUpdateApplication(void) {
+void xkUpdateApplication() {
 	while(!_xkApplication.exit) {
+		xkPollEvents();
+
 		xkClearRenderer(_xkApplication.renderer);
 
 		xkBeginRenderer(_xkApplication.renderer);
 
-		// Draw scene.
+		/// TODO: Draw scene.
 
 		xkEndRenderer(_xkApplication.renderer);
-
-		// Poll window events.
-		xkPollWindowEvents();
 	}
 }

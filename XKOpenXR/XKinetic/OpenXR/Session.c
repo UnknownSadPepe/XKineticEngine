@@ -1,11 +1,13 @@
-#include "XKinetic/OpenXR/Internal.h"
+/* ########## INCLUDE SECTION ########## */
+#include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkXRCreateSession(void) {
+/* ########## FUNCTIONS DECLARATIONS SECTION ########## */
+XkResult __xkOpenXRCreateSession() {
   XkResult result = XK_SUCCESS;
 
 #if defined(XK_XRVULKAN)
-  // Initialize OpenXR Vulkan graphics binding.
-  XrGraphicsBindingVulkanKHR xrGraphicsBindingVulkan  = {0};
+  XrGraphicsBindingVulkanKHR xrGraphicsBindingVulkan  = {};
   xrGraphicsBindingVulkan.type                        = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR;
   xrGraphicsBindingVulkan.next                        = XR_NULL_HANDLE; 
   xrGraphicsBindingVulkan.instance                    = /*TOOD: implementation*/;
@@ -14,16 +16,14 @@ XkResult __xkXRCreateSession(void) {
   xrGraphicsBindingVulkan.queueFamilyIndex            = /*TOOD: implementation*/;
   xrGraphicsBindingVulkan.queueIndex                  = /*TOOD: implementation*/; 
 #elif defined(XK_XRDIRECTX12)
-  // Initialize OpenXR DirectX12 graphics binding.
-  XrGraphicsBindingD3D12KHR xrGraphicsBindingD3D12    = {0};
+  XrGraphicsBindingD3D12KHR xrGraphicsBindingD3D12    = {};
   xrGraphicsBindingD3D12.type                         = XR_TYPE_GRAPHICS_BINDING_D3D12_KHR;
   xrGraphicsBindingD3D12.next                         = XR_NULL_HANDLE;
   //xrGraphicsBindingD3D12.device                       = /*TOOD: implementation*/;
   //xrGraphicsBindingD3D12.queue                        = /*TOOD: implementation*/;
 #endif // XK_XRVULKAN || XK_XRDIRECTX12
 
-  // Initialize OpenXR session info.
-  XrSessionCreateInfo xrSessionInfo   = {0};
+  XrSessionCreateInfo xrSessionInfo   = {};
   xrSessionInfo.type                  = XR_TYPE_SESSION_CREATE_INFO;
 #if defined(XK_XRVULKAN)
   xrSessionInfo.next                  = &xrGraphicsBindingVulkan;
@@ -31,13 +31,12 @@ XkResult __xkXRCreateSession(void) {
   xrSessionInfo.next                  = &xrGraphicsBindingD3D12;
 #endif // XK_XRVULKAN || XK_XRDIRECTX12
   xrSessionInfo.createFlags           = 0;
-  xrSessionInfo.systemId              = _xkXRContext.xrSystemId;
+  xrSessionInfo.systemId              = _xkOpenXRContext.xrSystemId;
 
-  // Create OpenXR session.
-  XrResult xrResult = xrCreateSession(_xkXRContext.xrInstance, &xrSessionInfo, &_xkXRContext.xrSession);
+  XrResult xrResult = xrCreateSession(_xkOpenXRContext.xrInstance, &xrSessionInfo, &_xkOpenXRContext.xrSession);
   if(xrResult != XR_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to create OpenXR session: %s", __xkXRGetErrorString(xrResult));
+    xkLogError("OpenXR: Failed to create session: %s", __xkOpenXRGetResultString(xrResult));
     goto _catch;
   }
 
@@ -45,11 +44,10 @@ _catch:
   return(result);
 }
 
-void __xkXRDestroySession(void) {
-  // Destroy OpenXR session.
-  if(_xkXRContext.xrSession) {
-    xrDestroySession(_xkXRContext.xrSession);
+void __xkOpenXRDestroySession() {
+  if(_xkOpenXRContext.xrSession) {
+    xrDestroySession(_xkOpenXRContext.xrSession);
 
-    _xkXRContext.xrSession = XR_NULL_HANDLE;
+    _xkOpenXRContext.xrSession = XR_NULL_HANDLE;
   }
 }

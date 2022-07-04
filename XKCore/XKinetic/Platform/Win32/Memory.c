@@ -1,17 +1,18 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 
-#if defined(XK_WIN32)
-
-#include <windows.h>
-#include "XKinetic/Platform/Win32/Internal.h"
-
+/* ########## GLOBAL VARIABLES SECTION ########## */
 static const XkSize XK_ALIGN = 16;
 
+/* ########## FUNCTIONS SECTION ########## */
 XkHandle xkAllocateMemory(const XkSize size) {
-	// Align memory allocate size.
+	xkAssert(size > 0);
+
+	// Align memory allocate size for better performance and minimal fragmentation.
 	const XkSize alignSize = (size + (XK_ALIGN - 1)) & ~(XK_ALIGN - 1);
 
-	// Allocate Win32 heap memory.
 	XkHandle memory = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, alignSize);
 	if(!memory) {
 		__xkErrorHandle("Win32: Failed to allocate memory");
@@ -22,22 +23,27 @@ XkHandle xkAllocateMemory(const XkSize size) {
 }
 
 XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
-	// Align memory reallocate size.
+	xkAssert(size > 0);
+
+	if(!memory) {
+		XkHandle newMemory = xkAllocateMemory(size);
+		return(newMemory);
+	}
+
+	// Align memory reallocate size for better performance and minimal fragmentation.
 	const XkSize alignSize = (size + (XK_ALIGN - 1)) & ~(XK_ALIGN - 1);
 
-	// Reallocate Win32 memory.
-	XkHandle pNewMemory = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, memory, alignSize);
-	if(!pNewMemory) {
+	XkHandle newMemory = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, memory, alignSize);
+	if(!newMemory) {
 		__xkErrorHandle("Win32: Failed to reallocate memory");
 		return(XK_NULL_HANDLE);
 	}
 
-	return(pNewMemory);	
+	return(newMemory);	
 }
 
 void xkFreeMemory(const XkHandle memory) {
-	// Free Win32 heap memory.
+	xkAsserts(memory);
+
 	HeapFree(GetProcessHeap(), 0, memory);
 }
-
-#endif // XK_WIN32

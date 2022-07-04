@@ -1,35 +1,40 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-static VkSurfaceFormatKHR __xkVKChooseSurfaceFormat(VkSurfaceKHR, const VkSurfaceFormatKHR);
-static VkPresentModeKHR __xkVKChoosePresentMode(VkSurfaceKHR, const VkPresentModeKHR);
+/* ########## FUNCTIONS DECLARATIONS SECTION ########## */
+static VkSurfaceFormatKHR   __xkVKChooseSurfaceFormat(VkSurfaceKHR, const VkSurfaceFormatKHR);
+static VkPresentModeKHR     __xkVKChoosePresentMode(VkSurfaceKHR, const VkPresentModeKHR);
 
-XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurface, VkExtent2D* const pVkExtent, VkFormat* const pVkFormat, VkImage* pVkImages, uint32_t* const pMinImageCount) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkVulkanCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurface, VkExtent2D* const pVkExtent, VkFormat* const pVkFormat, VkImage* pVkImages, uint32_t* const pMinImageCount) {
+  xkAssert(pVkSwapChain);
+  xkAssert(vkSurface);
+  xkAssert(pVkExtent);
+  xkAssert(pVkFormat);
+  xkAssert(pVkImages);
+  xkAssert(pMinImageCount);
+
   XkResult result = XK_SUCCESS;
 
-  // Get Vulkan surface capabilities.
   VkSurfaceCapabilitiesKHR vkCapabilities;
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_xkVkContext.vkPhysicalDevice, vkSurface, &vkCapabilities);
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &vkCapabilities);
 
-  // Choose Vulkan surface format.
-  VkSurfaceFormatKHR vkSurfaceFormat = __xkVKChooseSurfaceFormat(vkSurface, (VkSurfaceFormatKHR){VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}); /// NOTE: I don't know, should I check it out?
+  VkSurfaceFormatKHR vkSurfaceFormat = __xkVKChooseSurfaceFormat(vkSurface, (VkSurfaceFormatKHR){VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR});
 
-  // Choose Vulkan present mode.
-  VkPresentModeKHR vkPresentMode = __xkVKChoosePresentMode(vkSurface, VK_PRESENT_MODE_MAILBOX_KHR); /// NOTE: I don't know, should I check it out?
+  VkPresentModeKHR vkPresentMode = __xkVKChoosePresentMode(vkSurface, VK_PRESENT_MODE_MAILBOX_KHR);
 
-  // Set minimal image count.
   uint32_t minImageCount = vkCapabilities.minImageCount + 1;
   if(vkCapabilities.maxImageCount > 0 && minImageCount > vkCapabilities.maxImageCount) {
     minImageCount = vkCapabilities.maxImageCount;
   }
 
-  // Set queue family indices.
   uint32_t queueFamilyIndices[] = {
-    _xkVkContext.queueFamilyIndices.graphics,
-    _xkVkContext.queueFamilyIndices.present
+    _xkVulkanContext.queueFamilyIndices.graphics,
+    _xkVulkanContext.queueFamilyIndices.present
   };
   
-  // Initialize Vulkan swap chain create info.
-  VkSwapchainCreateInfoKHR vkSwapChainCreateInfo  = {0};
+  VkSwapchainCreateInfoKHR vkSwapChainCreateInfo  = {};
   vkSwapChainCreateInfo.sType                     = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   vkSwapChainCreateInfo.pNext                     = VK_NULL_HANDLE;
   vkSwapChainCreateInfo.flags                     = 0;
@@ -40,7 +45,7 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
   vkSwapChainCreateInfo.imageExtent               = vkCapabilities.currentExtent;
   vkSwapChainCreateInfo.imageArrayLayers          = 1;
   vkSwapChainCreateInfo.imageUsage                = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-  if(_xkVkContext.queueFamilyIndices.graphics != _xkVkContext.queueFamilyIndices.present) {
+  if(_xkVulkanContext.queueFamilyIndices.graphics != _xkVulkanContext.queueFamilyIndices.present) {
     vkSwapChainCreateInfo.imageSharingMode        = VK_SHARING_MODE_CONCURRENT;
     vkSwapChainCreateInfo.queueFamilyIndexCount   = 2;
   } else {
@@ -54,31 +59,28 @@ XkResult __xkVkCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vkSurf
   vkSwapChainCreateInfo.clipped                   = VK_TRUE;
   vkSwapChainCreateInfo.oldSwapchain              = VK_NULL_HANDLE; /// TODO: Implementation 'oldSwapChain'.
 
-  // Create Vulkan swap chain.
-  VkResult vkResult = vkCreateSwapchainKHR(_xkVkContext.vkLogicalDevice, &vkSwapChainCreateInfo, VK_NULL_HANDLE, pVkSwapChain);
+  VkResult vkResult = vkCreateSwapchainKHR(_xkVulkanContext.vkLogicalDevice, &vkSwapChainCreateInfo, VK_NULL_HANDLE, pVkSwapChain);
   if(vkResult != VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to create Vulkan swap chain: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to create swap chain: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
   // Get Vulkan swap chain image count.
-  vkResult = vkGetSwapchainImagesKHR(_xkVkContext.vkLogicalDevice, *pVkSwapChain, &minImageCount, VK_NULL_HANDLE);
+  vkResult = vkGetSwapchainImagesKHR(_xkVulkanContext.vkLogicalDevice, *pVkSwapChain, &minImageCount, VK_NULL_HANDLE);
   if(vkResult == VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to get Vulkan swap chain image count: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to get swap chain image count: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
   // Get Vulkan swap chain images.
-  vkResult = vkGetSwapchainImagesKHR(_xkVkContext.vkLogicalDevice, *pVkSwapChain, &minImageCount, pVkImages);
+  vkResult = vkGetSwapchainImagesKHR(_xkVulkanContext.vkLogicalDevice, *pVkSwapChain, &minImageCount, pVkImages);
   if(vkResult == VK_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to get Vulkan swap chain images: %s", __xkVkGetErrorString(vkResult));
+    xkLogError("Vulkan: Failed to get swap chain images: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   } 
-
-  xkLogTrace("minImageCount: %d", minImageCount);
 
   *pVkExtent = vkCapabilities.currentExtent;
   *pVkFormat = vkSurfaceFormat.format;
@@ -88,33 +90,38 @@ _catch:
   return(result);
 }
 
-void __xkVkDestroySwapChain(VkSwapchainKHR vkSwapChain) {
-  // Destroy Vulkan swap chain.
-  vkDestroySwapchainKHR(_xkVkContext.vkLogicalDevice, vkSwapChain, VK_NULL_HANDLE);
+void __xkVulkanDestroySwapChain(VkSwapchainKHR vkSwapChain) {
+  xkAssert(vkSwapChain);
+
+  vkDestroySwapchainKHR(_xkVulkanContext.vkLogicalDevice, vkSwapChain, VK_NULL_HANDLE);
 }
 
 static VkSurfaceFormatKHR __xkVKChooseSurfaceFormat(VkSurfaceKHR vkSurface, const VkSurfaceFormatKHR vkRequiredSurfaceFormat) {
+  xkAssert(vkSurface);
+
   VkSurfaceFormatKHR vkSurfaceFormat = {
     .format       = VK_FORMAT_UNDEFINED,
     .colorSpace   = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
   };
 
-  // Get Vulkan surface format count.
   uint32_t surfaceFormatCount = 0;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(_xkVkContext.vkPhysicalDevice, vkSurface, &surfaceFormatCount, VK_NULL_HANDLE);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &surfaceFormatCount, VK_NULL_HANDLE);
   if(surfaceFormatCount == 0) {
-    xkLogWarning("Failed to get Vulkan surface formats");
+    xkLogWarning("Vulkan: Failed to get surface formats");
     goto _catch;
   }
 
-  // Get Vulkan surface formats.
-  VkSurfaceFormatKHR* vkSurfaceFormats = xkAllocateMemory(sizeof(VkSurfaceFormatKHR) * surfaceFormatCount);
-  vkGetPhysicalDeviceSurfaceFormatsKHR(_xkVkContext.vkPhysicalDevice, vkSurface, &surfaceFormatCount, vkSurfaceFormats);
+  VkSurfaceFormatKHR* vkSurfaceFormats = XK_NULL_HANDLE;
+  vkSurfaceFormats = xkAllocateMemory(sizeof(VkSurfaceFormatKHR) * surfaceFormatCount);
+  if(!vkSurfaceFormats) {
+    xkLogWarning("Vulkan: Failed to allocate surface formats");
+    goto _catch;
+  }
 
-  // Template available Vulkan surface format.
-  VkSurfaceFormatKHR vkAvailableSurfaceFormat = {0};
+  vkGetPhysicalDeviceSurfaceFormatsKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &surfaceFormatCount, vkSurfaceFormats);
 
-  // Choose Vulkan surface format.
+  VkSurfaceFormatKHR vkAvailableSurfaceFormat = {};
+
   for(uint32_t i = 0; i < surfaceFormatCount; i++) {
     vkAvailableSurfaceFormat = vkSurfaceFormats[i];
 
@@ -133,24 +140,28 @@ _catch:
 }
 
 static VkPresentModeKHR __xkVKChoosePresentMode(VkSurfaceKHR vkSurface, const VkPresentModeKHR vkRequiredPresentMode) {
+  xkAssert(vkSurface);
+
   VkPresentModeKHR vkPresentMode = VK_PRESENT_MODE_FIFO_KHR;
 
-  // Get Vulkan present mode count.
   uint32_t presentModeCount = 0;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(_xkVkContext.vkPhysicalDevice, vkSurface, &presentModeCount, VK_NULL_HANDLE);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &presentModeCount, VK_NULL_HANDLE);
   if(presentModeCount == 0) {
-    xkLogWarning("Failed to get Vulkan present modes");
+    xkLogWarning("Vulkan: Failed to get present modes");
     goto _catch;
   }
 
-  // Get Vulkan present modes.
-  VkPresentModeKHR* vkPresentModes = xkAllocateMemory(sizeof(VkPresentModeKHR) * presentModeCount);
-  vkGetPhysicalDeviceSurfacePresentModesKHR(_xkVkContext.vkPhysicalDevice, vkSurface, &presentModeCount, vkPresentModes);
+  VkPresentModeKHR* vkPresentModes = XK_NULL_HANDLE;
+  vkPresentModes = xkAllocateMemory(sizeof(VkPresentModeKHR) * presentModeCount);
+  if(!vkPresentModes) {
+    xkLogWarning("Vulkan: Failed to allocate present modes");
+    goto _catch;
+  }
 
-  // Template available Vulkan present mode.
-  VkPresentModeKHR vkAvailablePresentMode = {0};
+  vkGetPhysicalDeviceSurfacePresentModesKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &presentModeCount, vkPresentModes);
 
-  // Choose Vulkan present mode.
+  VkPresentModeKHR vkAvailablePresentMode = {};
+
   for(uint32_t i = 0; i < presentModeCount; i++) {
     vkAvailablePresentMode = vkPresentModes[i];
 

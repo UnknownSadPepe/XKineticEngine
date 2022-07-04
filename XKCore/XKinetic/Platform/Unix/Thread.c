@@ -1,51 +1,49 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Thread.h"
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 
-#if defined(XK_POSIX)
+/* ########## MACROS SECTION ########## */
+#define XK_UNIX_THREAD_STACK_SIZE (1024 * 1024)
 
 #define _GNU_SOURCE
 #include <signal.h>
 #include <unistd.h>
 
-#define XK_UNIX_THREAD_STACK_SIZE (1024 * 1024)
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) {
+	xkAssert(pThread);
+	xkAssert(pfnRoutine);
+
 	XkResult result = XK_SUCCESS;
-	
-	// Allocate thread.
-	*pThread = xkAllocateMemory(sizeof(struct XkThread));
+
+	*pThread = xkAllocateMemory(sizeof(struct XkThread_T));
 	if(!(*pThread)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}
 	
-	// Template thread.
 	XkThread thread = *pThread;
 
-	// Allocate thread stack.
-	thread->handle.pStack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
-	if(!thread->handle.pStack) {
+	thread->pthread.stack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
+	if(!thread->pthread.stack) {
 		__xkErrorHandle("Unix: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	// Create Posix thread attribute.
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 
-	// Set Posix thread stack info.
-	pthread_attr_setstack(&attr, thread->handle.pStack, XK_UNIX_THREAD_STACK_SIZE);
+	pthread_attr_setstack(&attr, thread->pthread.stack, XK_UNIX_THREAD_STACK_SIZE);
 
-	// Create Posix thread.
-	if(pthread_create(&thread->handle.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
+	if(pthread_create(&thread->pthread.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
 		__xkErrorHandle("Unix: Failed to create thread!");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	// Destroy Posix thread attribute.
 	pthread_attr_destroy(&attr);
 
 _catch:
@@ -53,63 +51,59 @@ _catch:
 }
 
 void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
-	// Join Posix thread.
-	pthread_join(thread->handle.handle, (void**)ppResult);
+	xkAssert(thread);
 
-	// Free thread stack.
-	xkFreeMemory(thread->handle.pStack);
+	pthread_join(thread->pthread.handle, (void**)ppResult);
 
-	// Free thread.
+	xkFreeMemory(thread->pthread.stack);
+
 	xkFreeMemory(thread);
 }
 
 void xkDetachThread(XkThread thread) {
-	// Detach Posix thread.
-	pthread_detach(thread->handle.handle);
+	xkAssert(thread);
 
-	// Free thread stack.
-	xkFreeMemory(thread->handle.pStack);
+	pthread_detach(thread->pthread.handle);
 
-	// Free thread.
+	xkFreeMemory(thread->pthread.stack);
+
 	xkFreeMemory(thread);
 }
 
 void xkExitThread(void) {
-	// Exit Posix thread.
 	pthread_exit(NULL);
 }
 
 void xkKillThread(XkThread thread) {
-	// Kill Posix thread.
-	pthread_kill(thread->handle.handle, 0);
+	xkAssert(thread);
 
-	// Free thread stack.
-	xkFreeMemory(thread->handle.pStack);
+	pthread_kill(thread->pthread.handle, 0);
 
-	// Free thread stack.
+	xkFreeMemory(thread->pthread.stack);
+
 	xkFreeMemory(thread);
 }
 
 void xkThreadSleep(const XkSize milliSeconds) {
+	xkAssert(milliSeconds > 0);
+
 	usleep((unsigned int)milliSeconds);
 }
 
 XkResult xkCreateMutex(XkMutex* pMutex) {
+	xkAssert(pMutex);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate mutex.
-	*pMutex = xkAllocateMemory(sizeof(struct XkMutex));
+	*pMutex = xkAllocateMemory(sizeof(struct XkMutex_T));
 	if(!(*pMutex)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}
 	
-	// Template mutex.
 	XkMutex mutex = *pMutex;
 
-
-	// Initialize Posix mutex.
-	if(pthread_mutex_init(&mutex->handle.handle, NULL) != 0) {
+	if(pthread_mutex_init(&mutex->pthread.handle, NULL) != 0) {
 		__xkErrorHandle("Unix: Failed to create mutex");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
@@ -120,21 +114,21 @@ _catch:
 }
 
 void xkDestroyMutex(XkMutex mutex) {
-	// Destroy Posix mutex.
-	pthread_mutex_destroy(&mutex->handle.handle);
+	xkAssert(mutex);
 
-	// Free mutex.
+	pthread_mutex_destroy(&mutex->pthread.handle);
+
 	xkFreeMemory(mutex);
 }
 
 void xkLockMutex(XkMutex mutex) {
-	// Lock Posix mutex.
-	pthread_mutex_lock(&mutex->handle.handle);
+	xkAssert(mutex);
+
+	pthread_mutex_lock(&mutex->pthread.handle);
 }
 
 void xkUnlockMutex(XkMutex mutex) {
-	// Unlock Posix mutex.
-	pthread_mutex_unlock(&mutex->handle.handle);
-}
+	xkAssert(mutex);
 
-#endif // XK_POSIX
+	pthread_mutex_unlock(&mutex->pthread.handle);
+}

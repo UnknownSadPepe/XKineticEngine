@@ -1,70 +1,74 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Thread.h"
+#include "XKinetic/Core/Assert.h"
 
-#if defined(XK_WIN32)
+/* ########## MACROS SECTION ########## */
+#define XK_WIN64_THREAD_STACK_SIZE (1024 * 1024)
 
-#include <windows.h>
-#include "XKinetic/Platform/Win32/Internal.h"
-
-#define XK_WIN32_THREAD_STACK_SIZE (1024 * 1024)
-
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) {
+	xkAssert(pThread);
+	xkAssert(pfnRoutine);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate thread.
-	*pThread = xkAllocateMemory(sizeof(struct XkThread));
+	*pThread = xkAllocateMemory(sizeof(struct XkThread_T));
 	if(!(*pThread)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}
 	
-	// Template thread.
 	XkThread thread = *pThread;
 
 	// Allocate thread stack memory.
-	thread->win32.pStack = xkAllocateMemory(XK_WIN32_THREAD_STACK_SIZE);
-	if(!thread->win32.pStack) {
+	thread->win32.stack = xkAllocateMemory(XK_WIN64_THREAD_STACK_SIZE);
+	if(!thread->win32.stack) {
 		__xkErrorHandle("Win32: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
+		goto _free;
 	}
 
 	// Create Win32 thread.
-	thread->win32.handle = CreateThread(NULL, XK_WIN32_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->win32.pStack, 0, &thread->win32.id);
+	thread->win32.handle = CreateThread(NULL, XK_WIN64_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->win32.stack, 0, &thread->win32.id);
 	if(!thread->win32.handle) {
 		__xkErrorHandle("Win32: Failed to create thread");
 		result = XK_ERROR_UNKNOWN;
-		goto _catch;
+		goto _free;
 	}
 
 _catch:
 	return(result);
+
+_free:
+	if(thread) {
+		xkFreeMemory(thread);
+	}
+
+	goto _catch;
 }
 
 void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
-	// Wait for Win32 thread.
+	xkAssert(thread);
+
 	WaitForSingleObject(thread->win32.handle, INFINITE);
 
-	// Close Win32 thread.
 	CloseHandle(thread->win32.handle);
 
-	// Free thread stack memory.
-	xkFreeMemory(thread->win32.pStack);
+	xkFreeMemory(thread->win32.stack);
 
-	// Free thread.
 	xkFreeMemory(thread);
 }
 
 void xkDetachThread(XkThread thread) {
-	// Terminate Win32 thread.
+	xkAssert(thread);
+
 	TerminateThread(thread->win32.handle, (DWORD)0);
 
-	// Close Win32 thread.
 	CloseHandle(thread->win32.handle);
 
-	// Free thread stack memory.
-	xkFreeMemory(thread->win32.pStack);
+	xkFreeMemory(thread->win32.stack);
 
-	// Free thread.
 	xkFreeMemory(thread);
 }
 
@@ -73,47 +77,54 @@ void xkExitThread() {
 }
 
 void xkKillThread(XkThread thread) {
-	// Terminate Win32 thread.
+	xkAssert(thread);
+
 	TerminateThread(thread->win32.handle, (DWORD)0);
 
-	// Close Win32 thread.
 	CloseHandle(thread->win32.handle);
 
-	// Free thread stack memory.
-	xkFreeMemory(thread->win32.pStack);
+	xkFreeMemory(thread->win32.stack);
 
-	// Free thread.
 	xkFreeMemory(thread);
 }
 
 void xkThreadSleep(const XkSize milliSeconds) {
+	xkAssert(milliSeconds > 0);
+
 	Sleep(milliSeconds);
 }
 
 XkResult xkCreateMutex(XkMutex* pMutex) {
+	xkAssert(pMutex);
+
 	XkResult result = XK_SUCCESS;
 
-	// Allocate mutex.
-	*pMutex = xkAllocateMemory(sizeof(struct XkMutex));
+	*pMutex = xkAllocateMemory(sizeof(struct XkMutex_T));
 	if(!(*pMutex)) {
 		__xkErrorHandle("Win32: Failed to create mutex");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;	
 	}
 	
-	// Template mutex.
 	XkMutex mutex = *pMutex;
 
-	// Initialize Win32 critical section.
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
 	InitializeCriticalSection(&mutex->win32.handle);
 
 _catch:
 	return(result);
+
+_free:
+	if(mutex) {
+		xkFreeMemory(mutex);
+	}
+
+	goto _catch;
 }
 
 void xkDestroyMutex(XkMutex mutex) {
-	// Delete Win32 critical section.
+	xkAssert(mutex);
+
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
 	DeleteCriticalSection(&mutex->win32.handle);
 
@@ -122,15 +133,15 @@ void xkDestroyMutex(XkMutex mutex) {
 }
 
 void xkLockMutex(XkMutex mutex) {
-	// Enter Win32 critical section.
+	xkAssert(mutex);
+
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
 	EnterCriticalSection(&mutex->win32.handle);
 }
 
 void xkUnlockMutex(XkMutex mutex) {
-	// Leave Win32 critical section.
+	xkAssert(mutex);
+
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
 	LeaveCriticalSection(&mutex->win32.handle);
 }
-
-#endif // XK_WIN32

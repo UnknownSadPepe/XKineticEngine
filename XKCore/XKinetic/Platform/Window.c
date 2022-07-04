@@ -1,9 +1,12 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Window.h"
 
+/* ########## GLOBAL VARIABLE SECTION ########## */
 __XkPlatform _xkPlatform;
 
-XkWindowCursorMode xkGetWindowCursorMode(XkWindow window) {
+/* ########## FUNCTIONS SECTION ########## */
+XkCursorMode xkGetWindowCursorMode(XkWindow window) {
 	return(window->cursorMode);
 }
 
@@ -17,13 +20,13 @@ void __xkInputWindowShow(XkWindow window, const XkWindowShow show) {
 	}
 }
 
-void __xkInputWindowKey(XkWindow window, const XkWindowKey key, const XkWindowAction action, const XkWindowMod mod) {
+void __xkInputWindowKey(XkWindow window, const XkKey key, const XkAction action, const XkMod mod) {
 	if(window->callbacks.key) {
 		window->callbacks.key(window, key, action, mod);
 	}
 }
 
-void __xkInputWindowButton(XkWindow window, const XkWindowButton button, const XkWindowAction action, const XkWindowMod mod) {
+void __xkInputWindowButton(XkWindow window, const XkButton button, const XkAction action, const XkMod mod) {
 	if(window->callbacks.button) {
 		window->callbacks.button(window, button, action, mod);
 	}

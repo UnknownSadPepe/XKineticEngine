@@ -1,8 +1,9 @@
 #pragma once
 
-#include <stddef.h>
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKCore.h"
 
+/* ########## FUNCTIONS SECTION ########## */
 extern XkResult __xkEntry(const XkSize, const XkString*);
 
 int main(int argc, char** argv) {

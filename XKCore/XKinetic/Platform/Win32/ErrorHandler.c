@@ -1,24 +1,20 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Core/String.h"
 
-#if defined(XK_WIN32)
-
-#include <stdio.h>
-#include <stdarg.h>
 #include <windows.h>
 
+/* ########## MACROS SECTION ########## */
 #define XK_ERROR_HANDLER_BUFFER_SIZE 1024
 
+/* ########## FUNCTIONS SECTION ########## */
 void __xkErrorHandler(const XkString format, ...) {
-	XkChar buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {0};
+	XkChar buffer[XK_ERROR_HANDLER_BUFFER_SIZE] = {};
 
-	// Format string.
-	va_list args;
-	va_start(args, format);
-	// Print to console.
-	vsnprintf(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
-	// Win32 message box.
+	xkArgs args;
+	xkStartArgs(args, format);
+	xkStringNFFormat(buffer, XK_ERROR_HANDLER_BUFFER_SIZE, format, args);
+	xkEndArgs(args);
+
 	MessageBox(NULL, buffer, "XKinetic Error Handler", MB_ABORTRETRYIGNORE | MB_ICONERROR | MB_TOPMOST);
-	va_end(args);
 }
-
-#endif // XK_WIN32

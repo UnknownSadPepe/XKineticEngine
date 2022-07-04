@@ -1,12 +1,14 @@
+/* ########## INCLUDE SECTION ########## */
 /*TODO: remove #include <time.h>*/
 #include <time.h>
+#include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Time.h"
 
+/* ########## FUNCTIONS SECTION ########## */
 void xkTimeFormat(XkTime* const pTime, const XkSize rawTime) {
 	time_t rt = (time_t)rawTime;
 	struct tm t = *localtime(&rt);
 
-	// Initialize time.
   pTime->second 	= (XkSize)t.tm_sec;
   pTime->minute 	= (XkSize)t.tm_min;
   pTime->hour 		= (XkSize)t.tm_hour;
@@ -18,7 +20,6 @@ void xkTimeFormat(XkTime* const pTime, const XkSize rawTime) {
 }
 
 XkSize xkTimeStringFormat(XkTime* const pTime, XkString buffer, const XkSize size, const XkString format) {
-	// Initialize Unix tm.
 	struct tm t = {
 		.tm_sec 	= (int)pTime->second,
 		.tm_min 	= (int)pTime->minute,
@@ -30,7 +31,9 @@ XkSize xkTimeStringFormat(XkTime* const pTime, XkString buffer, const XkSize siz
 		.tm_yday 	= (int)pTime->yDay
 	};
 
+	/// TODO: Remove 'strftime'.
 	size_t formatSize = strftime(buffer, size, format, &t);
+	
 	return((XkSize)formatSize);
 }
 
