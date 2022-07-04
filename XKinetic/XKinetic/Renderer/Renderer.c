@@ -58,6 +58,7 @@
 	#define XKVULKAN_DESTROY_TEXTURE2D			"xkVulkanDestroyTexture2D"
 #endif // XK_LINUX || XK_WIN64
 
+/* ########## TYPES SECTION ########## */
 struct XkRenderer_T {
 	XkHandle handle;
 
@@ -110,6 +111,7 @@ struct XkTexture2d_T {
 };
 
 
+/* ########## FUNCTIONS DECLARATIONS SECTION ########## */
 #if defined(XK_WIN64) || defined(XK_LINUX)
 	static XkResult __xkLoadVulkanModule(XkRenderer);
 #endif // XK_WIN64 || XK_LINUX
@@ -118,6 +120,20 @@ struct XkTexture2d_T {
 	static XkResult __xkLoadD3D12Module(XkRenderer);
 #endif // XK_WIN64
 
+/* ########## FUNCTIONS SECTION ########## */
+XkResult xkInitializeRenderer() {
+	XkResult result = XK_SUCCESS;
+
+	/// TODO: Implementation.
+
+_catch:
+	return(result);
+}
+
+void xkTerminateRenderer() {
+	/// TODO: Implementation.
+}
+
 XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window, XkRendererApi api) {
 	xkAssert(pRenderer);
 	xkAssert(pConfig);
@@ -125,7 +141,7 @@ XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig
 
 	XkResult result = XK_SUCCESS;
 
-	*pRenderer = xkAllocateMemory(sizeof(struct XkRenderer));
+	*pRenderer = xkAllocateMemory(sizeof(struct XkRenderer_T));
 	if(!(*pRenderer)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -149,7 +165,7 @@ XkResult xkCreateRenderer(XkRenderer* pRenderer, XkRendererConfig* const pConfig
 			break;
 
 #if defined(XK_WIN64) || defined(XK_LINUX)
-		case XK_RENDERER_API_VK:
+		case XK_RENDERER_API_VULKAN:
 			result = __xkLoadVulkanModule(renderer);
 			if(result != XK_SUCCESS) {
 				goto _free;
@@ -272,7 +288,7 @@ XkResult xkCreateBuffer(XkBuffer* pBuffer, const XkSize size, XkHandle data, XkR
 
 	XkResult result = XK_SUCCESS;
 
-	*pBuffer = xkAllocateMemory(sizeof(struct XkBuffer));
+	*pBuffer = xkAllocateMemory(sizeof(struct XkBuffer_T));
 	if(!pBuffer) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -323,7 +339,7 @@ void xkBindIndexBuffer(XkBuffer buffer) {
 	buffer->renderer->callbacks.bindIndexBuffer(buffer->handle);
 }
 
-XkResult xkCreateTexture2D(XkTexture2D* pTexture, XkHandle data, const XkSize width, const XkSize height, XkRenderer renderer) {
+XkResult xkCreateTexture2D(XkTexture2d* pTexture, XkHandle data, const XkSize width, const XkSize height, XkRenderer renderer) {
 	xkAssert(pTexture);
 	xkAssert(data);
 	xkAssert(width > 0);
@@ -332,13 +348,13 @@ XkResult xkCreateTexture2D(XkTexture2D* pTexture, XkHandle data, const XkSize wi
 
 	XkResult result = XK_SUCCESS;
 
-	*pTexture = xkAllocateMemory(sizeof(struct XkTexture2D));
+	*pTexture = xkAllocateMemory(sizeof(struct XkTexture2d_T));
 	if(!pTexture) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	XkTexture2D texture = *pTexture;
+	XkTexture2d texture = *pTexture;
 
 	texture->renderer = renderer;
 
@@ -356,7 +372,7 @@ _free:
 	goto _catch;
 }
 
-void xkDestroyTexture2D(XkTexture2D texture) {
+void xkDestroyTexture2D(XkTexture2d texture) {
 	xkAssert(texture);
 
 	texture->renderer->callbacks.destroyTexture2D(texture->handle);

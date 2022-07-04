@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Model.h"
@@ -9,18 +10,19 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef XkUInt64 XkMeshID;
+/* ########## TYPES SECTION ########## */
+typedef XkUInt64 XkMeshId;
 
-typedef struct XkMesh* XkMesh;
+typedef struct XkMesh_T* XkMesh;
 
-typedef struct XkMeshSystem* XkMeshSystem;
+typedef struct XkMeshSystem_T* XkMeshSystem;
 
-XK_API XkResult xkCreateMeshSystem(XkMeshSystem*);
-XK_API void xkDestroyMeshSystem(XkMeshSystem);
-XK_API XkMeshID xkCreateMesh(XkMeshSystem, XkModelConfig* const);
-XK_API void xkDestroyMesh(XkMeshSystem, XkMeshID);
+extern XK_API XkResult	xkCreateMeshSystem(XkMeshSystem*);
+extern XK_API void			xkDestroyMeshSystem(XkMeshSystem);
+extern XK_API XkMeshId	xkCreateMesh(XkMeshSystem, const XkModelConfig* const);
+extern XK_API void			xkDestroyMesh(XkMeshSystem, const XkMeshId);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -1,2 +1,2 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/Platform/Entry.h"
+#include "XKinetic/Entry.h"

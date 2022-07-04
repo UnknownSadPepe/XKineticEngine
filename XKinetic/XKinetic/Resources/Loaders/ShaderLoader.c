@@ -16,7 +16,7 @@ XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkString path) {
 
   XkResult result = XK_SUCCESS;
 
-	*pLoader = xkAllocateMemory(sizeof(struct XkShaderLoader));
+	*pLoader = xkAllocateMemory(sizeof(struct XkShaderLoader_T));
 	if(!(*pLoader)) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -63,10 +63,9 @@ _catch:
   return(result);
 }
 
-void xkUnloadShader(XkShaderLoader loader, XkShaderConfig* const pConfig) {
+void xkUnloadShader(XkShaderLoader loader, const XkShaderConfig* const pConfig) {
   xkAssert(loader);
   xkAssert(pConfig); 
-
   /// TODO: Implementation.
 }
 

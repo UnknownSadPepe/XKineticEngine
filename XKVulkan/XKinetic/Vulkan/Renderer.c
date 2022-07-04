@@ -47,7 +47,7 @@ struct XkVulkanBuffer_T {
 	VkDeviceSize 			vkSize;
 };
 
-struct XkVulkanTexture2D_T {
+struct XkVulkanTexture2d_T {
 	XkVulkanRenderer renderer;
 
 	VkImage 				vkImage;
@@ -57,14 +57,14 @@ struct XkVulkanTexture2D_T {
 };
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkVulkanCreateRenderer(XkVulkanRenderer* pRenderer, XkRendererConfig* const pConfig, XkWindow window) {
+XkResult xkVulkanCreateRenderer(XkVulkanRenderer* pRenderer, const XkRendererConfig* const pConfig, const XkWindow window) {
 	xkAssert(pRenderer);
 	xkAssert(pConfig);
 	xkAssert(window);
 
 	XkResult result = XK_SUCCESS;
 
-	*pRenderer = xkAllocateMemory(sizeof(struct XkVulkanRenderer));
+	*pRenderer = xkAllocateMemory(sizeof(struct XkVulkanRenderer_T));
 	if(!pRenderer) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -80,22 +80,13 @@ XkResult xkVulkanCreateRenderer(XkVulkanRenderer* pRenderer, XkRendererConfig* c
 		renderer->clearValueCount 			= 1;
 	}
 
-	renderer->vkScissor 							= {};
-	renderer->vkExtent 								= {};
+	renderer->vkScissor								= (VkRect2D){};
+	renderer->vkExtent 								= (VkExtent2D){};
 	renderer->vkCullMode 							= VK_CULL_MODE_FRONT_AND_BACK;
 	renderer->vkPrimitiveTopology 		= VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
 	renderer->vkSurface 							= VK_NULL_HANDLE;
 	renderer->vkSwapChain 						= VK_NULL_HANDLE;
-	renderer->vkSwapChainImageFormat 	= VK_NULL_HANDLE;
-	renderer->vkSwapChainImages 			= {VK_NULL_HANDLE}
-	renderer->vkSwapChainImageViews 	= {VK_NULL_HANDLE};
-	renderer->swapChainImageCount 		= VK_NULL_HANDLE;
-	renderer->vkFrameBuffers 					= {VK_NULL_HANDLE}
-	renderer->vkRenderPass 						= VK_NULL_HANDLE;
-  renderer->vkAvailableSemaphores 	= {VK_NULL_HANDLE};
-  renderer->vkFinishedSemaphores 		= {VK_NULL_HANDLE};
-  renderer->vkFlightFences 					= {VK_NULL_HANDLE};
-	renderer->vkCommandBuffers 				= {VK_NULL_HANDLE};
+	renderer->vkSwapChainImageFormat 	= 0;
 	renderer->frameIndex 							= 0;
 	renderer->imageIndex 							= 0;
 
@@ -282,7 +273,7 @@ void xkVulkanBeginRenderer(XkVulkanRenderer renderer) {
 
   VkResult vkResult = vkBeginCommandBuffer(vkCommandBuffer, &vkCommandBufferBeginInfo);
   if(vkResult != VK_SUCCESS) {
-    xkLogError("Failed to begin Vulkan command buffer: %s", __xkVulkanGetErrorString(vkResult));
+    xkLogError("Failed to begin Vulkan command buffer: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
@@ -312,7 +303,7 @@ void xkVulkanEndRenderer(XkVulkanRenderer renderer) {
 
   VkResult vkResult = vkEndCommandBuffer(vkCommandBuffer);
   if(vkResult != VK_SUCCESS) {
-    xkLogError("Failed to end Vulkan single command buffer: %s", __xkVulkanGetErrorString(vkResult));
+    xkLogError("Failed to end Vulkan single command buffer: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }  
 
@@ -364,7 +355,7 @@ XkResult xkVulkanCreateBuffer(XkVulkanBuffer* pBuffer, const XkBufferUsage usage
 
 	XkResult result = XK_SUCCESS;
 
-	*pBuffer = xkAllocateMemory(sizeof(struct XkVulkanBuffer));
+	*pBuffer = xkAllocateMemory(sizeof(struct XkVulkanBuffer_T));
 	if(!pBuffer) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -375,7 +366,7 @@ XkResult xkVulkanCreateBuffer(XkVulkanBuffer* pBuffer, const XkBufferUsage usage
 	buffer->vkSize = (VkDeviceSize)size;
 	buffer->renderer = renderer;
 
-	VkBufferUsageFlags vkBufferUsage = {};
+	VkBufferUsageFlags vkBufferUsage = 0;
 	switch(usage) {
 		case XK_BUFFER_USAGE_VERTEX: 	vkBufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; break;
 		case XK_BUFFER_USAGE_INDEX: 	vkBufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT; break;
@@ -432,19 +423,19 @@ void xkVulkanMapBuffer(XkVulkanBuffer buffer, const XkHandle data) {
 	__xkVulkanMapBuffer(buffer->vkMemory, buffer->vkSize, data);
 }
 
-XkResult xkVulkanCreateTexture2D(XkVulkanTexture2D* pTexture, XkHandle data, const XkSize width, const XkSize height, XkVulkanRenderer renderer) {
+XkResult xkVulkanCreateTexture2D(XkVulkanTexture2d* pTexture, XkHandle data, const XkSize width, const XkSize height, XkVulkanRenderer renderer) {
 	xkAssert(pTexture);
 	xkAssert(renderer);
 
 	XkResult result = XK_SUCCESS;
 
-	*pTexture = xkAllocateMemory(sizeof(struct XkVulkanTexture2D));
+	*pTexture = xkAllocateMemory(sizeof(struct XkVulkanTexture2d_T));
 	if(!pTexture) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	XkVulkanTexture2D texture = *pTexture;
+	XkVulkanTexture2d texture = *pTexture;
 
 	texture->renderer = renderer;
 
@@ -504,7 +495,7 @@ _free:
 	goto _catch;
 }
 
-void xkVulkanDestroyTexture2D(XkVulkanTexture2D texture) {
+void xkVulkanDestroyTexture2D(XkVulkanTexture2d texture) {
 	xkAssert(texture);
 
 	__xkVulkanDestroySampler(texture->vkSampler);

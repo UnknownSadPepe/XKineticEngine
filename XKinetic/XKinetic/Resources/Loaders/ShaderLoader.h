@@ -14,12 +14,12 @@ extern "C" {
 typedef struct XkShaderLoader_T* XkShaderLoader;
 
 /* ########## FUNCTIONS SECTION ########## */
-extern XK_API XkResult 	xkCreateShaderLoader(XkShaderLoader*, XkString);
-extern XK_API void 			xkDestroyShaderLoader(XkShaderLoader);
-extern XK_API XkResult 	xkLoadShader(XkShaderLoader, XkShaderConfig* const, XkString);
-extern XK_API void 			xkUnloadShader(XkShaderLoader, XkShaderConfig* const);
+extern XK_API XkResult		xkCreateShaderLoader(XkShaderLoader*, XkString);
+extern XK_API void				xkDestroyShaderLoader(XkShaderLoader);
+extern XK_API XkResult		xkLoadShader(XkShaderLoader, XkShaderConfig* const, XkString);
+extern XK_API void				xkUnloadShader(XkShaderLoader, const XkShaderConfig* const);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

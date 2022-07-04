@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Scene/Components.h"
@@ -9,19 +10,21 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef XkUInt64 XkEntityID;
+/* ########## TYPES SECTION ########## */
+typedef XkUInt64 XkEntityId;
 
-typedef struct {
-  XkEntityID id;
+typedef struct XkEntity_T {
+  XkEntityId id;
 } XkEntity;
 
-XK_API XkResult xkCreateEntity(XkEntity*);
-XK_API void xkDestroyEntity(XkEntity*);
-XK_API XkComponentID xkAddEntityComponent(XkEntity*, XkComponentType);
-XK_API void xkRemoveEntityComponent(XkEntity*, XkComponentID);
-XK_API void xkEntityHasComponent(XkEntity*, XkComponentType);
+extern XK_API XkResult				xkCreateEntity(XkEntity*);
+extern XK_API void						xkDestroyEntity(XkEntity*);
 
-/// note: for using in cpp programs. 
+extern XK_API XkComponentId		xkAddEntityComponent(XkEntity*, const XkComponentType);
+extern XK_API void						xkRemoveEntityComponent(XkEntity*, const XkComponentId);
+extern XK_API void						xkEntityHasComponent(XkEntity*, const XkComponentType);
+
+/// NOTE: For using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

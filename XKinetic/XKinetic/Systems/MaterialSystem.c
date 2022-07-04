@@ -1,23 +1,30 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Core/PoolAllocator.h"
 #include "XKinetic/Systems/MaterialSystem.h"
+#include "XKinetic/Core/Assert.h"
 
+/* ########## MACROS SECTION ########## */
 #define XK_MATERIAL_SYSTEM_ARRAY_SIZE 1024
 
-struct XkMaterialSystem {
+/* ########## TYPES SECTION ########## */
+struct XkMaterialSystem_T {
   XkPoolAllocator materials;
 
-  XkMaterialID materialID;
+  XkMaterialId materialId;
 };
 
-struct XkMaterial {
-  XkMaterialID ID;
+struct XkMaterial_T {
+  XkMaterialId id;
   /// TODO: Implementation.
 };
 
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateMaterialSystem(XkMaterialSystem* pSystem) {
+	xkAssert(pSystem)
+
   XkResult result = XK_SUCCESS;
 
-  *pSystem = xkAllocateMemory(sizeof(struct XkMaterialSystem));
+  *pSystem = xkAllocateMemory(sizeof(struct XkMaterialSystem_T));
   if(!(*pSystem)) {
     result = XK_ERROR_BAD_ALLOCATE;
     goto _catch;
@@ -25,32 +32,47 @@ XkResult xkCreateMaterialSystem(XkMaterialSystem* pSystem) {
 
   XkMaterialSystem system = *pSystem;
 
-  system->materialID = 1;
+  system->materialId = 1;
 
-  result = xkCreatePoolAllocator(&system->materials, XK_MATERIAL_SYSTEM_ARRAY_SIZE, struct XkMaterial);
-  if(result != XK_SUCCESS) goto _catch;
+  result = xkCreatePoolAllocator(&system->materials, XK_MATERIAL_SYSTEM_ARRAY_SIZE, struct XkMaterial_T);
+  if(result != XK_SUCCESS) {
+		goto _free;
+	}
 
   /// TODO: Implementation.
 
 _catch:
   return(result);
+
+_free:
+	if(system) {
+		xkFreeMemory(system);
+	}
+
+	goto _catch;
 }
 
 void xkDestroyMaterialSystem(XkMaterialSystem system) {
+	xkAssert(system);
   /// TODO: Implementation.
   xkDestroyPoolAllocator(system->materials);
+	xkFreeMemory(system);
 }
 
-XkMaterialID xkCreateMaterial(XkMaterialSystem system, XkMaterialConfig* const pConfig) {
-  /// TODO: Implementation.
-  XkMaterialID id = 0;
+XkMaterialId xkCreateMaterial(XkMaterialSystem system, const XkMaterialConfig* const pConfig) {
+	xkAssert(system);
+	xkAssert(pConfig)
 
-  id = ++system->materialID;
+  /// TODO: Implementation.
+  XkMaterialId id = 0;
+
+  id = ++system->materialId;
 
 _catch:
   return(id);
 }
 
-void xkDestroyMaterial(XkMaterialSystem system, XkMaterialID id) {
+void xkDestroyMaterial(XkMaterialSystem system, XkMaterialId id) {
+	xkAssert(system);
   /// TODO: Implementation.
 }

@@ -5,7 +5,7 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkInitializeJoysticks(void) {
+XkResult xkInitializeJoystick() {
 	XkResult result = XK_SUCCESS;
 
 	if(_xkPlatform.dinput.initialized) {
@@ -25,7 +25,7 @@ _catch:
 	return(result);
 }
 
-void xkTerminateJoysticks(void) {
+void xkTerminateJoystick() {
 	if(!_xkPlatform.dinput.initialized) {
 		return;
 	}

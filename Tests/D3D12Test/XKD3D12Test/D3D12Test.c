@@ -64,17 +64,17 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 
 	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_MAXIMIZED);
 
-	XkRendererConfig rendererConfig = {};
-	rendererConfig.blending 				= XK_FALSE;
-	rendererConfig.depthTest 				= XK_TRUE;
-	rendererConfig.stencilTest 			= XK_TRUE;
-	rendererConfig.scissorTest 			= XK_TRUE;
-
 	result = xkInitializeRenderer();
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to initialize renderer: %d", result);
 		goto _catch;
 	}	
+
+	XkRendererConfig rendererConfig = {};
+	rendererConfig.blending 				= XK_FALSE;
+	rendererConfig.depthTest 				= XK_TRUE;
+	rendererConfig.stencilTest 			= XK_TRUE;
+	rendererConfig.scissorTest 			= XK_TRUE;
 
 	result = xkCreateRenderer(&_xkApplication.renderer, &rendererConfig, _xkApplication.window, XK_RENDERER_API_D3D12);
 	if(result != XK_SUCCESS) {

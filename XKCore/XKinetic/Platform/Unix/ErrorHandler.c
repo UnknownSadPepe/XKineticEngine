@@ -1,6 +1,7 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Console.h"
+#include "XKinetic/Core/String.h"
 
 /* ########## MACROS SECTION ########## */
 #define XK_ERROR_HANDLER_ARG_BUFFER_SIZE 1024
@@ -12,12 +13,12 @@ void __xkErrorHandler(const XkString format, ...) {
 
 	// Format argument buffer.
 	XkChar argBuffer[XK_ERROR_HANDLER_ARG_BUFFER_SIZE] = {};
-	xkArgs args;
+	XkArgs args;
 	xkStartArgs(args, format);
 	xkStringNFFormat(argBuffer, XK_ERROR_HANDLER_ARG_BUFFER_SIZE, format, args);
 	xkEndArgs(args);
 
 	const XkSize size = xkStringNFormat(handleBuffer, XK_ERROR_HANDLER_BUFFER_SIZE, "%s\n", argBuffer);
 
-	xkWriteConsoleColored(XK_CONSOLE_STDERR, XK_COLOR_BRED_BIT, handleBuffer, size);
+	xkWriteConsoleColored(XK_CONSOLE_STDERR, XK_COLOR_BRED, handleBuffer, size);
 }

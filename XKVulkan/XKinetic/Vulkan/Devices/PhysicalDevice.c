@@ -201,7 +201,6 @@ static uint32_t __xkVulkanScorePhysicalDevice(const VkPhysicalDevice vkPhysicalD
   // Gives a higher score to devices with a higher maximum texture size.
   result += vkPhysicalDeviceProperties.limits.maxImageDimension2D;
 
-_catch:
   return(result);
 }
 

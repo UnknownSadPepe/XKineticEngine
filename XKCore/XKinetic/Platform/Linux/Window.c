@@ -29,6 +29,11 @@
 #include "wayland-pointer-constraints-unstable-v1-client-protocol-code.h"
 #include "wayland-idle-inhibit-unstable-v1-client-protocol-code.h"
 
+/* ########## MACROS SECTION ########## */
+#ifndef CLOCK_REALTIME
+	#define CLOCK_REALTIME 0
+#endif // CLOCK_REALTIME
+
 /* ########## FUNCTION DECLARATIONS SECTION ########## */
 static XkBool 			__xkXDGCreateSurface(XkWindow);
 static void 				__xkXDGDestorySurface(XkWindow);

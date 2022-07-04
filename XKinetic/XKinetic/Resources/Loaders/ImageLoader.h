@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Image.h"
@@ -9,14 +10,16 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef struct XkImageLoader* XkImageLoader;
+/* ########## TYPES SECTION ########## */
+typedef struct XkImageLoader_T* XkImageLoader;
 
-XK_API XkResult xkCreateImageLoader(XkImageLoader*, XkString);
-XK_API void xkDestroyImageLoader(XkImageLoader);
-XK_API XkResult xkLoadImage(XkImageLoader, XkImageConfig* const, XkString);
-XK_API void xkUnloadImage(XkImageLoader, XkImageConfig* const);
+/* ########## FUNCTIONS SECTION ########## */
+extern XK_API XkResult		xkCreateImageLoader(XkImageLoader*, XkString);
+extern XK_API void				xkDestroyImageLoader(XkImageLoader);
+extern XK_API XkResult		xkLoadImage(XkImageLoader, XkImageConfig* const, XkString);
+extern XK_API void				xkUnloadImage(XkImageLoader, const XkImageConfig* const);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs. 
 #ifdef __cplusplus
 }
 #endif // __cplusplus

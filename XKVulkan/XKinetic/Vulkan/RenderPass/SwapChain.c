@@ -160,7 +160,7 @@ static VkPresentModeKHR __xkVKChoosePresentMode(VkSurfaceKHR vkSurface, const Vk
 
   vkGetPhysicalDeviceSurfacePresentModesKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &presentModeCount, vkPresentModes);
 
-  VkPresentModeKHR vkAvailablePresentMode = {};
+  VkPresentModeKHR vkAvailablePresentMode = 0;
 
   for(uint32_t i = 0; i < presentModeCount; i++) {
     vkAvailablePresentMode = vkPresentModes[i];

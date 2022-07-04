@@ -30,7 +30,7 @@ typedef struct __XkUnixModule_T {
 /* ########## TYPES MACROS SECTION ########## */
 #define XK_PLATFORM_FILE 		__XkUnixFile unix
 #define XK_PLATFORM_THREAD 	__XkPThreadThread pthread
-#define XK_PLATFORM_MUTEX 	__XkPThreadThread pthread
+#define XK_PLATFORM_MUTEX 	__XkPThreadMutex pthread
 #define XK_PLATFORM_MODULE 	__XkUnixModule unix
 
 /// note: for using in cpp programs. 

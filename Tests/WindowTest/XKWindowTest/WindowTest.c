@@ -93,7 +93,7 @@ static void __xkWindowKey(XkWindow window, const XkKey key, const XkAction actio
 		}
 	}
 
-	xkLogNotice("key: %d action: %s", key, action == XK_RELEASE ? "release" : action == XK_PRESS ? "press" : action == XK_REPEAT ? "repeat");
+	xkLogNotice("key: %d action: %s", key, action == XK_RELEASE ? "release" : action == XK_PRESS ? "press" : "repeat");
 }
 
 static void __xkWindowButton(XkWindow window, const XkButton button, const XkAction action, const XkMod mod) {
@@ -118,7 +118,7 @@ static void __xkWindowButton(XkWindow window, const XkButton button, const XkAct
 		xkLogNotice("mod: %s", "num lock");
 	}
 
-	xkLogNotice("button: %d action: %s", key, action == XK_RELEASE ? "release" : action == XK_PRESS ? "press" : action == XK_REPEAT ? "repeat");
+	xkLogNotice("button: %d action: %s", button, action == XK_RELEASE ? "release" : action == XK_PRESS ? "press" : "repeat");
 }
 
 static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
@@ -267,7 +267,7 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		xkSetJoystickHatCallback(_xkApplication.joystick2, __xkJoystickHat);
 	}	
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_HINT_DECORATED_BIT | XK_WINDOW_HINT_RESIZABLE_BIT | XK_WINDOW_HINT_DRAG_DROP_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_HINT_DECORATED_BIT | XK_WINDOW_HINT_RESIZABLE_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;

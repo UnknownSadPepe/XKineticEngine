@@ -225,7 +225,7 @@ xkStaticAssert((sizeof(XkFloat64) * 8) == XK_FLOAT64_WIDTH);
 xkStaticAssert((sizeof(XkSize) * 8) == XK_SIZE_WIDTH);
 
 #if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__)
-	typedef signed char XkChar;
+	typedef char XkChar;
 #endif // __ILP32__ || __LP32__ || __LLP64__ || __LP64__
 
 xkStaticAssert((sizeof(XkChar) * 8) == XK_CHAR_WIDTH);

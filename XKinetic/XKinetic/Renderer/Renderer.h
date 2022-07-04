@@ -13,8 +13,8 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct XkRenderer_T* XkRenderer;
-typedef struct XkBuffer_T* XkBuffer_T;
-typedef struct XkTexture2d* XkTexture2d_T;
+typedef struct XkBuffer_T* XkBuffer;
+typedef struct XkTexture2d_T* XkTexture2d;
 
 typedef enum XkRendererApi_T {
 	XK_RENDERER_API_DEFAULT,
@@ -23,6 +23,9 @@ typedef enum XkRendererApi_T {
 	XK_RENDERER_API_D3D12
 #endif // XK_WIN64
 } XkRendererApi;
+
+typedef XkResult(*XkInitializeRendererPfn)();
+typedef void(*XkTerminateRendererPfn)();
 
 typedef XkResult(*XkCreateRendererPfn)(XkHandle*, XkRendererConfig* const, XkWindow);
 typedef void(*XkDestroyRendererPfn)(XkHandle);
@@ -56,6 +59,9 @@ typedef XkResult(*XkCreateTexture2dPfn)(XkHandle*, XkHandle, const XkSize, const
 typedef void(*XkDestroyTexture2dPfn)(XkHandle);
 
 /* ########## FUNCTIONS SECTION ########## */
+extern XK_API XkResult	xkInitializeRenderer();
+extern XK_API void			xkTerminateRenderer();
+
 extern XK_API XkResult 	xkCreateRenderer(XkRenderer*, XkRendererConfig* const, XkWindow, XkRendererApi);
 extern XK_API void 			xkDestroyRenderer(XkRenderer);
 

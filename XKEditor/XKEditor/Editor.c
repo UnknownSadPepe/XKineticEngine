@@ -9,6 +9,7 @@ struct XkApplication_T {
 	XkApplicationConfig config;
 
 	XkWindow window;
+	XkRenderer renderer;
 
 	XkBool exit;
 };
@@ -65,6 +66,12 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
+	XkRendererConfig rendererConfig = {};
+	rendererConfig.blending 				= XK_FALSE;
+	rendererConfig.depthTest 				= XK_TRUE;
+	rendererConfig.stencilTest 			= XK_TRUE;
+	rendererConfig.scissorTest 			= XK_TRUE;
+
 	result = xkCreateRenderer(&_xkApplication.renderer, &rendererConfig, _xkApplication.window, XK_RENDERER_API_DEFAULT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create renderer: %d", result);
@@ -84,7 +91,7 @@ void xkTerminateApplication(void) {
 
 	xkDestroyWindow(_xkApplication.window);
 
-	xkTeminateRenderer();
+	xkTerminateRenderer();
 
 	xkTerminateWindow();
 

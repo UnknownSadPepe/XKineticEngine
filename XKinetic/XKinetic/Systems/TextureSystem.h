@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Image.h"
@@ -9,18 +10,20 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef XkUInt64 XkTextureID;
+/* ########## TYPES SECTION ########## */
+typedef XkUInt64 XkTextureId;
 
-typedef struct XkTexture* XkTexture;
+typedef struct XkTexture_T* XkTexture;
 
-typedef struct XkTextureSystem* XkTextureSystem;
+typedef struct XkTextureSystem_T* XkTextureSystem;
 
-XK_API XkResult xkCreateTextureSystem(XkTextureSystem*);
-XK_API void xkDestroyTextureSystem(XkTextureSystem);
-XK_API XkTextureID xkCreateTexture(XkTextureSystem, XkImageConfig* const);
-XK_API void xkDestroyTexture(XkTextureSystem, XkTextureID);
+/* ########## FUNCTIONS SECTION ########## */
+extern XK_API XkResult			xkCreateTextureSystem(XkTextureSystem*);
+extern XK_API void					xkDestroyTextureSystem(XkTextureSystem);
+extern XK_API XkTextureId		xkCreateTexture(XkTextureSystem, const XkImageConfig* const);
+extern XK_API void					xkDestroyTexture(XkTextureSystem, XkTextureId);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

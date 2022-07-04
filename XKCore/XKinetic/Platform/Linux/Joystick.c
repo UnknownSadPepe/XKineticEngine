@@ -4,7 +4,7 @@
 #include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/Assert.h"
 
-XkResult xkInitializeJoysticks() {
+XkResult xkInitializeJoystick() {
 	XkResult result = XK_SUCCESS;
 
 	/// TODO: Implementation.
@@ -13,7 +13,7 @@ _catch:
 	return(result);	
 }
 
-void xkTerminateJoysticks() {
+void xkTerminateJoystick() {
 	/// TODO: Implementation.
 }
 

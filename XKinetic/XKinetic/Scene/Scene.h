@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 
@@ -8,14 +9,16 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef struct XkScene* XkScene;
+/* ########## TYPES SECTION ########## */
+typedef struct XkScene_T* XkScene;
 
-XK_API XkResult xkCreateScene(XkScene*);
-XK_API void xkDestroyScene(XkScene);
-XK_API void xkBeginScene(XkScene);
-XK_API void xkEndScene(XkScene);
+/* ########## FUNCTIONS SECTION ########## */
+extern XK_API XkResult		xkCreateScene(XkScene*);
+extern XK_API void				xkDestroyScene(XkScene);
+extern XK_API void				xkBeginScene(XkScene);
+extern XK_API void				xkEndScene(XkScene);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

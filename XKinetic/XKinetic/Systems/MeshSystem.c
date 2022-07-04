@@ -1,23 +1,30 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Core/PoolAllocator.h"
 #include "XKinetic/Systems/MeshSystem.h"
+#include "XKinetic/Core/Assert.h"
 
+/* ########## MACROS SECTION ########## */
 #define XK_MESH_SYSTEM_ARRAY_SIZE 1024
 
-struct XkMeshSystem {
+/* ########## TYPES SECTION ########## */
+struct XkMeshSystem_T {
   XkPoolAllocator meshs;
 
-  XkMeshID meshID;
+  XkMeshId meshId;
 };
 
-struct XkMesh {
-  XkMeshID ID;
+struct XkMesh_T {
+  XkMeshId id;
   /// TODO: Implementation.
 };
 
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateMeshSystem(XkMeshSystem* pSystem) {
+	xkAssert(pSystem);
+
   XkResult result = XK_SUCCESS;
 
-  *pSystem = xkAllocateMemory(sizeof(struct XkMeshSystem));
+  *pSystem = xkAllocateMemory(sizeof(struct XkMeshSystem_T));
   if(!(*pSystem)) {
     result = XK_ERROR_BAD_ALLOCATE;
     goto _catch;
@@ -25,32 +32,47 @@ XkResult xkCreateMeshSystem(XkMeshSystem* pSystem) {
 
   XkMeshSystem system = *pSystem;
 
-  system->meshID = 1;
+  system->meshId = 1;
 
-  result = xkCreatePoolAllocator(&system->meshs, XK_MESH_SYSTEM_ARRAY_SIZE, struct XkMesh);
-  if(result != XK_SUCCESS) goto _catch;
+  result = xkCreatePoolAllocator(&system->meshs, XK_MESH_SYSTEM_ARRAY_SIZE, struct XkMesh_T);
+  if(result != XK_SUCCESS) {
+		goto _free;
+	}
 
   /// TODO: Implementation.
 
 _catch:
   return(result);
+
+_free:
+	if(system) {
+		xkFreeMemory(system);
+	}
+
+	goto _catch;
 }
 
 void xkDestroyMeshSystem(XkMeshSystem system) {
+	xkAssert(system);
   /// TODO: Implementation.
   xkDestroyPoolAllocator(system->meshs);
+	xkFreeMemory(system);
 }
 
-XkMeshID xkCreateMesh(XkMeshSystem system, XkModelConfig* const pConfig) {
-  /// TODO: Implementation.
-  XkMeshID id = 0;
+XkMeshId xkCreateMesh(XkMeshSystem system, const XkModelConfig* const pConfig) {
+	xkAssert(system);
+	xkAssert(pConfig)
 
-  id = ++system->meshID;
+  /// TODO: Implementation.
+  XkMeshId id = 0;
+
+  id = ++system->meshId;
 
 _catch:
   return(id);
 }
 
-void xkDestroyMesh(XkMeshSystem system, XkMeshID id) {
+void xkDestroyMesh(XkMeshSystem system, XkMeshId id) {
+	xkAssert(system);
   /// TODO: Implementation.
 }

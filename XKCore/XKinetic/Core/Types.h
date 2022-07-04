@@ -31,7 +31,7 @@ XK_INLINE XKCORE_API XkBool xkDelim(const XkChar chr, XkString delim) {
 	return(XK_FALSE);
 }
 
-XK_INLINE XKCORE_API XkBool xkDelim8(const XkChar chr, XkString8 delim8) {
+XK_INLINE XKCORE_API XkBool xkDelim8(const XkChar8 chr, XkString8 delim8) {
 	while(*delim8) {
 		if(chr == *delim8) {
 			return(XK_TRUE);
@@ -41,7 +41,7 @@ XK_INLINE XKCORE_API XkBool xkDelim8(const XkChar chr, XkString8 delim8) {
 	return(XK_FALSE);
 }
 
-XK_INLINE XKCORE_API XkBool xkDelim16(const XkChar chr, XkString16 delim16) {
+XK_INLINE XKCORE_API XkBool xkDelim16(const XkChar16 chr, XkString16 delim16) {
 	while(*delim16) {
 		if(chr == *delim16) {
 			return(XK_TRUE);
@@ -51,7 +51,7 @@ XK_INLINE XKCORE_API XkBool xkDelim16(const XkChar chr, XkString16 delim16) {
 	return(XK_FALSE);
 }
 
-XK_INLINE XKCORE_API XkBool xkDelim32(const XkChar chr, XkString32 delim32) {
+XK_INLINE XKCORE_API XkBool xkDelim32(const XkChar32 chr, XkString32 delim32) {
 	while(*delim32) {
 		if(chr == *delim32) {
 			return(XK_TRUE);

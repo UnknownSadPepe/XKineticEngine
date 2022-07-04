@@ -13,7 +13,7 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef struct XkImageConfig_T {
+typedef struct XkMaterialConfig_T {
 	XkChar name[XK_MATERIAL_NAME_MAX_SIZE];
 } XkMaterialConfig;
 

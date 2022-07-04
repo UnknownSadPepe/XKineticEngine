@@ -1,8 +1,19 @@
 set(CORE_SRC_DIR ${PROJECT_SOURCE_DIR}/XKCore)
 
-file(GLOB_RECURSE CORE_SRC ${CORE_SRC_DIR}/*.c)
+file(GLOB PLATFOMR_SRC ${CORE_SRC_DIR}/XKinetic/Platform/*.c)
+file(GLOB UNIX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Unix/*.c)
+file(GLOB LINUX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Linux/*.c)
+file(GLOB WIN32_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Win32/*.c)
+file(GLOB_RECURSE CORE_SRC ${CORE_SRC_DIR}/XKinetic/Core/*.c)
 
-add_library(XKCore SHARED ${CORE_SRC})
+add_library(XKCore SHARED ${CORE_SRC} ${PLATFOMR_SRC})
+
+if(UNIX AND NOT APPLE)
+	target_sources(XKCore PRIVATE ${UNIX_SRC})
+	target_sources(XKCore PRIVATE ${LINUX_SRC})
+elseif(WIN32)
+	target_sources(XKCore PRIVATE ${WIN32_SRC})
+endif()
 
 target_include_directories(XKCore PRIVATE ${CORE_SRC_DIR})
 
@@ -77,5 +88,5 @@ if(WIN32)
 endif()
 
 if(UNIX AND NOT APPLE)
-  target_link_libraries(XKCore PRIVATE dl rt)
+  target_link_libraries(XKCore PRIVATE dl rt pthread)
 endif()

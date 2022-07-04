@@ -1,16 +1,17 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/OpenXR/Internal.h"
+#include "XKinetic/Core/Assert.h"
 
-XkResult __xkOpenXRCreateReferenceSpace(void) {
+/* ########## FUNCTIONS SECTION ########## */
+XkResult __xkOpenXRCreateReferenceSpace() {
   XkResult result = XK_SUCCESS;
 
-  // Initialize OpenXR reference space info.
   XrReferenceSpaceCreateInfo xrReferenceSpaceInfo   = {};
   xrReferenceSpaceInfo.type                         = XR_TYPE_REFERENCE_SPACE_CREATE_INFO;
   xrReferenceSpaceInfo.next                         = XR_NULL_HANDLE;
   xrReferenceSpaceInfo.referenceSpaceType           = XR_REFERENCE_SPACE_TYPE_LOCAL;
   //xrReferenceSpaceInfo.poseInReferenceSpace         = /*TODO: implementation*/;
 
-  // Create OpenXR reference space.
   XrResult xrResult = xrCreateReferenceSpace(_xkOpenXRContext.xrInstance, &xrReferenceSpaceInfo, _xkOpenXRContext.xrReferenceSpace);
   if(xrResult != XR_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
@@ -22,8 +23,7 @@ _catch:
   return(result);
 }
 
-void __xkOpenXRDestroyReferenceSpace(void) {w
-  // Destroy OpenXR reference space.
+void __xkOpenXRDestroyReferenceSpace() {
   if(_xkOpenXRContext.xrReferenceSpace) {
     xrDestroySpace(_xkOpenXRContext.xrReferenceSpace);
 

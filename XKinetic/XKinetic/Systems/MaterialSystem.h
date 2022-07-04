@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Resources/Material.h"
@@ -9,18 +10,19 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef XkUInt64 XkMaterialID;
+/* ########## TYPES SECTION ########## */
+typedef XkUInt64 XkMaterialId;
 
-typedef struct XkMaterial* XkMaterial;
+typedef struct XkMaterial_T* XkMaterial;
 
-typedef struct XkMaterialSystem* XkMaterialSystem;
+typedef struct XkMaterialSystem_T* XkMaterialSystem;
 
-XK_API XkResult xkCreateMaterialSystem(XkMaterialSystem*);
-XK_API void xkDestroyMaterialSystem(XkMaterialSystem);
-XK_API XkMaterialID xkCreateMaterial(XkMaterialSystem, XkMaterialConfig* const);
-XK_API void xkDestroyMaterial(XkMaterialSystem, XkMaterialID);
+extern XK_API XkResult				xkCreateMaterialSystem(XkMaterialSystem*);
+extern XK_API void						xkDestroyMaterialSystem(XkMaterialSystem);
+extern XK_API XkMaterialId		xkCreateMaterial(XkMaterialSystem, const XkMaterialConfig* const);
+extern XK_API void						xkDestroyMaterial(XkMaterialSystem, const XkMaterialId);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

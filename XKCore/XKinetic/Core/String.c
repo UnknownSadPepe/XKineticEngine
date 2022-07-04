@@ -83,7 +83,7 @@ void xkStringFromWString(XkString string, XkWString wstring) {
 
 void xkNStringFromWString(XkString string, XkWString wstring, const XkSize length) {
 	XkSize len = length;
-	while(*string && *wstring) {
+	while(*string && *wstring && --len) {
 		*string = (XkChar)*wstring;
 
 		++string;
@@ -613,8 +613,6 @@ XkInt32 xkNCompareString8(XkString8 string1, XkString8 string2, const XkSize len
 }
 
 XkString8 xkTokenString8(XkString8 string, XkString8 token) {
-	XkSize count = 0;
-
 	while(*string) {
 		if(xkDelim8(*string, token)) {
 			*string = '\0';
@@ -626,9 +624,7 @@ XkString8 xkTokenString8(XkString8 string, XkString8 token) {
 	return(XK_NULL_HANDLE);
 }
 
-XkString8 xkNTokenString8(XkString8 string, XkString8 token, const XkSize length) {
-	XkSize count = 0;
-	
+XkString8 xkNTokenString8(XkString8 string, XkString8 token, const XkSize length) {	
 	XkSize len = length;
 	while(*string && --len) {
 		if(xkDelim8(*string, token)) {

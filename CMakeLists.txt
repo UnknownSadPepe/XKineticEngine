@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
-set(CMAKE_REQUIRED_FLAGS "-std=c2x -Wall -Wextra")
+set(CMAKE_C_FLAGS "-std=c2x")
+add_definitions("-Wall -Wextra -Wno-unused-parameter")
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -14,9 +15,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE EQUAL "Debug")
-  set(CMAKE_REQUIRED_FLAGS CMAKE_REQUIRED_FLAGS "-g -O0")
+	add_definitions("-g -O0")
 elseif(CMAKE_BUILD_TYPE EQUAL "Release")
-  set(CMAKE_REQUIRED_FLAGS CMAKE_REQUIRED_FLAGS "-O2") 
+	add_definitions("-O2")
 endif()
 
 option(XKINETIC_TESTS "Build tests applications" OFF)
@@ -30,11 +31,11 @@ if(WIN32)
   set(CMAKE_STATIC_LIBRARY_PREFIX "")
 endif()
 
-#add_subdirectory(XKCore)
+add_subdirectory(XKCore)
 
 add_subdirectory(XKMath)
 
-if(UNIX AND NOT APPLE OR WIN64)
+if(UNIX AND NOT APPLE OR WIN32)
   add_subdirectory(XKVulkan)
 endif()
 
@@ -42,7 +43,7 @@ if(WIN32)
   add_subdirectory(XKD3D12)
 endif()
 
-add_subdirectory(XKOpenXR)
+#add_subdirectory(XKOpenXR)
 
 add_subdirectory(XKinetic)
 

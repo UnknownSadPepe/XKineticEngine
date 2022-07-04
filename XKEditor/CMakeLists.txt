@@ -10,4 +10,4 @@ endif()
 
 target_include_directories(XKEditor PRIVATE ${EDITOR_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
 
-target_link_libraries(XKEditor XKCore XKMath XKinetic)
+target_link_libraries(XKEditor PRIVATE XKCore XKMath XKinetic)

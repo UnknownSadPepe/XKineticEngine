@@ -1,23 +1,30 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Core/PoolAllocator.h"
 #include "XKinetic/Systems/TextureSystem.h"
+#include "XKinetic/Core/Assert.h"
 
+/* ########## MACROS SECTION ########## */
 #define XK_TEXTURE_SYSTEM_ARRAY_SIZE 128
 
-struct XkTextureSystem {
+/* ########## TYPES SECTION ########## */
+struct XkTextureSystem_T {
   XkPoolAllocator textures;
 
-  XkTextureID textureID;
+  XkTextureId textureId;
 };
 
-struct XkTexture {
-  XkTextureID ID;
+struct XkTexture_T {
+  XkTextureId id;
   /// TODO: Implementation.
 };
 
+/* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
+	xkAssert(pSystem);
+
   XkResult result = XK_SUCCESS;
 
-  *pSystem = xkAllocateMemory(sizeof(struct XkTextureSystem));
+  *pSystem = xkAllocateMemory(sizeof(struct XkTextureSystem_T));
   if(!(*pSystem)) {
     result = XK_ERROR_BAD_ALLOCATE;
     goto _catch;
@@ -25,9 +32,9 @@ XkResult xkCreateTextureSystem(XkTextureSystem* pSystem) {
 
   XkTextureSystem system = *pSystem;
 
-  system->textureID = 1;
+  system->textureId = 1;
 
-  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkTexture);
+  result = xkCreatePoolAllocator(&system->textures, XK_TEXTURE_SYSTEM_ARRAY_SIZE, struct XkTexture_T);
   if(result != XK_SUCCESS) goto _catch;
 
   /// TODO: Implementation.
@@ -37,20 +44,26 @@ _catch:
 }
 
 void xkDestroyTextureSystem(XkTextureSystem system) {
+	xkAssert(system);
   /// TODO: Implementation.
   xkDestroyPoolAllocator(system->textures);
+	xkFreeMemory(system);
 }
 
-XkTextureID xkCreateTexture(XkTextureSystem system, XkImageConfig* const pConfig) {
-  /// TODO: Implementation.
-  XkTextureID id = 0;
+XkTextureId xkCreateTexture(XkTextureSystem system, const XkImageConfig* const pConfig) {
+	xkAssert(system);
+	xkAssert(pConfig);
 
-  id = ++system->textureID;
+  /// TODO: Implementation.
+  XkTextureId id = 0;
+
+  id = ++system->textureId;
 
 _catch:
   return(id);
 }
 
-void xkDestroyTexture(XkTextureSystem system, XkTextureID id) {
+void xkDestroyTexture(XkTextureSystem system, XkTextureId id) {
+	xkAssert(system);
   /// TODO: Implementation.
 }
