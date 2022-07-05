@@ -10,14 +10,11 @@
 extern "C" {
 #endif // __cplusplus
 
-/* ########## TYPES SECTION ########## */
-typedef struct XkMaterialLoader_T* XkMaterialLoader;
-
 /* ########## FUNCTIONS SECTION ########## */
-extern XK_API XkResult		xkCreateMaterialLoader(XkMaterialLoader*, XkString);
-extern XK_API void				xkDestroyMaterialLoader(XkMaterialLoader);
-extern XK_API XkResult		xkLoadMaterial(XkMaterialLoader, XkMaterialConfig* const, XkString);
-extern XK_API void				xkUnloadMaterial(XkMaterialLoader, const XkMaterialConfig* const);
+extern XK_API XkResult		xkInitializeMaterialLoader(XkString);
+extern XK_API void				xkTerminateMaterialLoader();
+extern XK_API XkResult		xkLoadMaterial(XkMaterialConfig* const, XkString);
+extern XK_API void				xkUnloadMaterial(const XkMaterialConfig* const);
 
 /// NOTE: For using in cpp programs. 
 #ifdef __cplusplus

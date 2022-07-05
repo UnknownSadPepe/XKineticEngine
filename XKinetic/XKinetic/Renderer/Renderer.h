@@ -12,86 +12,44 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef struct XkRenderer_T* XkRenderer;
-typedef struct XkBuffer_T* XkBuffer;
-typedef struct XkTexture2d_T* XkTexture2d;
-
-typedef enum XkRendererApi_T {
-	XK_RENDERER_API_DEFAULT,
-	XK_RENDERER_API_VULKAN,
-#if defined(XK_WIN64)
-	XK_RENDERER_API_D3D12
-#endif // XK_WIN64
-} XkRendererApi;
-
-typedef XkResult(*XkInitializeRendererPfn)();
-typedef void(*XkTerminateRendererPfn)();
-
-typedef XkResult(*XkCreateRendererPfn)(XkHandle*, XkRendererConfig* const, XkWindow);
-typedef void(*XkDestroyRendererPfn)(XkHandle);
-
-typedef void(*XkClearColorRendererPfn)(XkHandle, XkVec4);
-typedef void(*XkClearDepthRendererPfn)(XkHandle, XkFloat32);
-typedef void(*XkClearStencilRendererPfn)(XkHandle, XkUInt32);
-typedef void(*XkClearRendererPfn)(XkHandle);
-
-typedef void(*XkTopologyRendererPfn)(XkHandle, XkTopology);
-typedef void(*XkCullModeRendererPfn)(XkHandle, XkCullMode);
-
-typedef void(*XkBeginRendererPfn)(XkHandle);
-typedef void(*XkEndRendererPfn)(XkHandle);
-
-typedef void(*XkResizeRendererPfn)(XkHandle, XkSize, XkSize);
-typedef void(*XkScissorRendererPfn)(XkHandle, XkInt32, XkInt32, XkSize, XkSize);
-
-typedef void(*XkDrawPfn)(XkHandle, XkSize);
-typedef void(*XkDrawIndexedPfn)(XkHandle, XkSize);
-
-typedef XkResult(*XkCreateBufferPfn)(XkHandle*, const XkSize, const XkHandle, XkHandle);
-typedef void(*XkDestroyBufferPfn)(XkHandle);
-
-typedef void(*XkMapBufferPfn)(XkHandle, const XkHandle);
-
-typedef void(*XkBindVertexBufferPfn)(XkHandle);
-typedef void(*XkBindIndexBufferPfn)(XkHandle);
-
-typedef XkResult(*XkCreateTexture2dPfn)(XkHandle*, XkHandle, const XkSize, const XkSize, XkHandle);
-typedef void(*XkDestroyTexture2dPfn)(XkHandle);
+typedef XkHandle XkRenderer;
+typedef XkHandle XkRendererBuffer;
+typedef XkHandle XkRendererTexture;
 
 /* ########## FUNCTIONS SECTION ########## */
-extern XK_API XkResult	xkInitializeRenderer();
+extern XK_API XkResult	xkInitializeRenderer(const XkRendererApi);
 extern XK_API void			xkTerminateRenderer();
 
-extern XK_API XkResult 	xkCreateRenderer(XkRenderer*, XkRendererConfig* const, XkWindow, XkRendererApi);
+extern XK_API XkResult 	xkCreateRenderer(XkRenderer*, XkWindow, const XkRendererHint);
 extern XK_API void 			xkDestroyRenderer(XkRenderer);
 
-extern XK_API void 			xkClearColorRenderer(XkRenderer, XkVec4);
-extern XK_API void 			xkClearDepthRenderer(XkRenderer, XkFloat32);
-extern XK_API void 			xkClearStencilRenderer(XkRenderer, XkUInt32);
+extern XK_API void 			xkClearColorRenderer(XkRenderer, const XkVec4);
+extern XK_API void 			xkClearDepthRenderer(XkRenderer, const XkFloat32);
+extern XK_API void 			xkClearStencilRenderer(XkRenderer, const XkUInt32);
 extern XK_API void 			xkClearRenderer(XkRenderer);
 
-extern XK_API void 			xkTopologyRenderer(XkRenderer, XkTopology);
-extern XK_API void 			xkCullModeRenderer(XkRenderer, XkCullMode);
+extern XK_API void 			xkTopologyRenderer(XkRenderer, const XkTopology);
+extern XK_API void 			xkCullModeRenderer(XkRenderer, const XkCullMode);
 
 extern XK_API void 			xkBeginRenderer(XkRenderer);
 extern XK_API void 			xkEndRenderer(XkRenderer);
 
-extern XK_API void 			xkResizeRenderer(XkRenderer, XkSize, XkSize);
-extern XK_API void 			xkScissorRenderer(XkRenderer, XkInt32, XkInt32, XkSize, XkSize);
+extern XK_API void 			xkResizeRenderer(XkRenderer, const XkSize, const XkSize);
+extern XK_API void 			xkScissorRenderer(XkRenderer, const XkInt32, const XkInt32, const XkSize, const XkSize);
 
-extern XK_API void 			xkDraw(XkRenderer, XkSize);
-extern XK_API void 			xkDrawIndexed(XkRenderer, XkSize);
+extern XK_API void 			xkDraw(XkRenderer, const XkSize);
+extern XK_API void 			xkDrawIndexed(XkRenderer, const XkSize);
 
-extern XK_API XkResult 	xkCreateBuffer(XkBuffer*, const XkSize, XkHandle, XkRenderer);
-extern XK_API void 			xkDestroyBuffer(XkBuffer);
+extern XK_API XkResult 	xkCreateRendererBuffer(XkRendererBuffer*, const XkSize, const XkHandle, const XkBufferUsage);
+extern XK_API void 			xkDestroyRendererBuffer(XkRendererBuffer);
 
-extern XK_API void 			xkMapBuffer(XkBuffer, const XkHandle);
+extern XK_API void 			xkMapRendererBuffer(XkRendererBuffer, const XkHandle);
 
-extern XK_API void 			xkBindVertexBuffer(XkBuffer);
-extern XK_API void 			xkBindIndexBuffer(XkBuffer);
+extern XK_API void 			xkBindRendererVertexBuffer(XkRendererBuffer, XkRenderer);
+extern XK_API void 			xkBindRendererIndexBuffer(XkRendererBuffer, XkRenderer);
 
-extern XK_API XkResult 	xkCreateTexture2d(XkTexture2d*, XkHandle, const XkSize, const XkSize, XkRenderer);
-extern XK_API void 			xkDestroyTexture2d(XkTexture2d);
+extern XK_API XkResult 	xkCreateRendererTexture(XkRendererTexture*, const XkSize, const XkSize, const XkHandle, const XkTextureType);
+extern XK_API void 			xkDestroyRendererTexture(XkRendererTexture);
 
 /// note: for using in cpp programs. 
 #ifdef __cplusplus

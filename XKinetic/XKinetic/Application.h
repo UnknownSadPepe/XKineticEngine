@@ -2,6 +2,8 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKinetic.h"
+#include "XKinetic/Platform/Window.h"
+#include "XKinetic/Renderer/Renderer.h"
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus
@@ -9,16 +11,19 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef struct XkApplicationConfig_T {
+typedef struct XkApplication_T {
 	XkString name;
 	struct {
 		XkSize major;
 		XkSize minor;	
 		XkSize patch;	
 	}	version;
-} XkApplicationConfig;
 
-typedef struct XkApplication_T XkApplication;
+	XkWindow window;
+	XkRenderer renderer;
+
+	XkBool exit;
+}	XkApplication;
 
 /* ########## EXTERN SECTION ########## */
 extern XkApplication _xkApplication;

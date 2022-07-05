@@ -1,23 +1,9 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Application.h"
-#include "XKinetic/Platform/Window.h"
 #include "XKinetic/Platform/Joystick.h"
 
 #include "XKinetic/Resources/Loaders/ImageLoader.h"
-
-/* ########## TYPES SECTION ########## */
-struct XkApplication_T {
-	XkApplicationConfig config;
-
-	XkWindow window;
-	XkJoystick joystick1;
-	XkJoystick joystick2;
-
-	XkBool exit;
-
-	XkImageLoader imageLoader;
-};
 
 /* ########## GLOBAL VARIABLES SECTION ########## */
 XkApplication _xkApplication;
@@ -184,48 +170,40 @@ static void __xkWindowDropFile(XkWindow window, const XkSize count, const XkStri
 }
 
 static void __xkJoystickEvent(XkJoystick joystick, const XkJoystickEvent event) {
-	xkAssert(joystick);
-
-	const XkJoystickId id = xkJoystickID(joystick);
+	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
 
 	if(event == XK_JOYSTICK_CONNECTED) {
-		xkLogNotice("joystick%d disconnected", id);
+		xkLogNotice("joystick%d disconnected", joystick);
 	} else if(event == XK_JOYSTICK_DISCONNECTED) {
-		xkLogNotice("joystick%d disconnected", id);
+		xkLogNotice("joystick%d disconnected", joystick);
 	}
 }
 
 static void __xkJoystickAxis(XkJoystick joystick, const XkJoystickAxis axis, const XkFloat32 value) {
-	xkAssert(joystick);
+	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
 
-	const XkJoystickId id = xkJoystickID(joystick);
-
-	xkLogNotice("joystick%d axis: %d: value: %d", axis, value);
+	xkLogNotice("joystick%d axis: %d: value: %d", joystick, axis, value);
 }
 
 static void __xkJoystickButton(XkJoystick joystick, const XkJoystickButton button, const XkAction action) {
-	xkAssert(joystick);
+	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
 
-	const XkJoystickId id = xkJoystickID(joystick);
-
-	xkLogNotice("joystick%d button: %d: action: %d", button, action);
+	xkLogNotice("joystick%d button: %d: action: %d", joystick, button, action);
 }
 
 static void __xkJoystickHat(XkJoystick joystick, const XkJoystickHat hat, const XkAction action) {
-	xkAssert(joystick);
+	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
 
-	const XkJoystickId id = xkJoystickID(joystick);
-
-	xkLogNotice("joystick%d hat: %d: action: %d", hat, action);
+	xkLogNotice("joystick%d hat: %d: action: %d", joystick, hat, action);
 }
 
 XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 	XkResult result = XK_SUCCESS;
 
-	_xkApplication.config.name = "XKWindowTest";
-	_xkApplication.config.version.major = 0;
-	_xkApplication.config.version.minor = 0;
-	_xkApplication.config.version.patch = 1;
+	_xkApplication.name = "XKWindowTest";
+	_xkApplication.version.major = 0;
+	_xkApplication.version.minor = 0;
+	_xkApplication.version.patch = 1;
 	_xkApplication.exit = XK_FALSE;
 
 	result = xkInitializeLog();
@@ -246,28 +224,22 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
-
-	result = xkCreateJoystick(&_xkApplication.joystick1, XK_JOYSTICK_1);
-	if(result != XK_SUCCESS) {
-		xkLogFatal("Failed to create joystick1: %d", result);
-	} else {
-		xkSetJoystickEventCallback(_xkApplication.joystick1, __xkJoystickEvent);
-		xkSetJoystickAxisCallback(_xkApplication.joystick1, __xkJoystickAxis);	
-		xkSetJoystickButtonCallback(_xkApplication.joystick1, __xkJoystickButton);
-		xkSetJoystickHatCallback(_xkApplication.joystick1, __xkJoystickHat);
+	for(XkJoystick j = XK_JOYSTICK_1; j < XK_JOYSTICK_16; j++) {
+		if(xkJoystickPresent(j)) {
+			xkSetJoystickEventCallback(j, __xkJoystickEvent);
+			xkSetJoystickAxisCallback(j, __xkJoystickAxis);
+			xkSetJoystickButtonCallback(j, __xkJoystickButton);
+			xkSetJoystickHatCallback(j, __xkJoystickHat);
+		}
 	}
 
-	result = xkCreateJoystick(&_xkApplication.joystick2, XK_JOYSTICK_2);
+	result = xkInitializeImageLoader("../../");
 	if(result != XK_SUCCESS) {
-		xkLogFatal("Failed to create joystick2: %d", result);
-	} else {
-		xkSetJoystickEventCallback(_xkApplication.joystick2, __xkJoystickEvent);
-		xkSetJoystickAxisCallback(_xkApplication.joystick2, __xkJoystickAxis);	
-		xkSetJoystickButtonCallback(_xkApplication.joystick2, __xkJoystickButton);
-		xkSetJoystickHatCallback(_xkApplication.joystick2, __xkJoystickHat);
-	}	
+		xkLogError("Failed to initialize image loader: %d", result);
+		goto _catch;
+	}
 
-	result = xkCreateWindow(&_xkApplication.window, _xkApplication.config.name, 1280, 720, XK_WINDOW_HINT_DECORATED_BIT | XK_WINDOW_HINT_RESIZABLE_BIT);
+	result = xkCreateWindow(&_xkApplication.window, _xkApplication.name, 1280, 720, XK_WINDOW_HINT_DECORATED_BIT | XK_WINDOW_HINT_RESIZABLE_BIT);
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to create window: %d", result);
 		goto _catch;
@@ -287,26 +259,20 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 
 	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
 
-	result = xkCreateImageLoader(&_xkApplication.imageLoader, "./");
-	if(result != XK_SUCCESS) {
-		xkLogError("Failed to create image loader");
-		goto _catch;
-	}
-
 	XkImageConfig iconConfig;
-	result = xkLoadImage(_xkApplication.imageLoader, &iconConfig, "XKineticIcon.png");
+	result = xkLoadImage(&iconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window icon");
 	}
 
 	XkImageConfig smallIconConfig;
-	result = xkLoadImage(_xkApplication.imageLoader, &smallIconConfig, "XKineticIcon.png");
+	result = xkLoadImage(&smallIconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window small icon");	
 	}
 
 	XkImageConfig cursorConfig;
-	result = xkLoadImage(_xkApplication.imageLoader, &cursorConfig, "XKineticCursor.png");
+	result = xkLoadImage(&cursorConfig, "XKineticCursor.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window cursor");
 	}
@@ -331,26 +297,20 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 
 	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
 
-	xkUnloadImage(_xkApplication.imageLoader, &cursorConfig);
+	xkUnloadImage(&cursorConfig);
 
-	xkUnloadImage(_xkApplication.imageLoader, &iconConfig);
+	xkUnloadImage(&iconConfig);
 
-	xkUnloadImage(_xkApplication.imageLoader, &smallIconConfig);
+	xkUnloadImage(&smallIconConfig);
 
 _catch:
 	return(result);
 }
 
 void xkTerminateApplication(void) {
-	if(_xkApplication.joystick1) {
-		xkDestroyJoystick(_xkApplication.joystick1);
-	}
-
-	if(_xkApplication.joystick2) {
-		xkDestroyJoystick(_xkApplication.joystick2);
-	}
-
 	xkDestroyWindow(_xkApplication.window);
+
+	xkTerminateImageLoader();
 
 	xkTerminateJoystick();
 

@@ -6,7 +6,7 @@
 
 /* ########## TYPES SECTION ########## */
 struct XkVulkanRenderer_T {
-	XkRendererConfig 			config;
+	XkRendererHint				hint;
 
 	VkClearValue 					vkClearValues[2];
 	uint32_t 							clearValueCount;
@@ -40,16 +40,12 @@ struct XkVulkanRenderer_T {
 };
 
 struct XkVulkanBuffer_T {
-	XkVulkanRenderer 	renderer;
-
 	VkBuffer 					vkBuffer;
 	VkDeviceMemory 		vkMemory;
 	VkDeviceSize 			vkSize;
 };
 
-struct XkVulkanTexture2d_T {
-	XkVulkanRenderer renderer;
-
+struct XkVulkanTexture_T {
 	VkImage 				vkImage;
 	VkDeviceMemory 	vkMemory;
 	VkImageView 		vkImageView;
@@ -57,9 +53,8 @@ struct XkVulkanTexture2d_T {
 };
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkVulkanCreateRenderer(XkVulkanRenderer* pRenderer, const XkRendererConfig* const pConfig, const XkWindow window) {
+XkResult xkVulkanCreateRenderer(XkVulkanRenderer* pRenderer, const XkWindow window, const XkRendererHint hint) {
 	xkAssert(pRenderer);
-	xkAssert(pConfig);
 	xkAssert(window);
 
 	XkResult result = XK_SUCCESS;
@@ -72,9 +67,9 @@ XkResult xkVulkanCreateRenderer(XkVulkanRenderer* pRenderer, const XkRendererCon
 
 	XkVulkanRenderer renderer = *pRenderer;
 
-	renderer->config 									= *pConfig;
+	renderer->hint										= hint;
 
-	if(renderer->config.depthTest || renderer->config.stencilTest) {
+	if(hint & XK_RENDERER_HINT_DEPTH_TEST_BIT || hint & XK_RENDERER_HINT_STENCIL_TEST_BIT) {
 		renderer->clearValueCount 			= 2;
 	} else {
 		renderer->clearValueCount 			= 1;
@@ -187,7 +182,7 @@ void xkVulkanDestroyRenderer(XkVulkanRenderer renderer) {
 	xkFreeMemory(renderer);
 }
 
-void xkVulkanClearColorRenderer(XkVulkanRenderer renderer, XkVec4 color) {
+void xkVulkanClearColorRenderer(XkVulkanRenderer renderer, const XkVec4 color) {
 	xkAssert(renderer);
 
 	renderer->vkClearValues[0].color.float32[0] = (float)color.r;
@@ -196,18 +191,20 @@ void xkVulkanClearColorRenderer(XkVulkanRenderer renderer, XkVec4 color) {
 	renderer->vkClearValues[0].color.float32[3] = (float)color.a;
 }
 
-void xkVulkanClearDepthRenderer(XkVulkanRenderer renderer, XkFloat32 depth) {
+void xkVulkanClearDepthRenderer(XkVulkanRenderer renderer, const XkFloat32 depth) {
 	xkAssert(renderer);
+	xkAssert(depth > 0.0f);
 
-	if(renderer->config.depthTest) {
+	if(renderer->hint & XK_RENDERER_HINT_DEPTH_TEST_BIT) {
 		renderer->vkClearValues[1].depthStencil.depth = (float)depth;
 	}
 }
 
-void xkVulkanClearStencilRenderer(XkVulkanRenderer renderer, XkUInt32 stencil) {
+void xkVulkanClearStencilRenderer(XkVulkanRenderer renderer, const XkUInt32 stencil) {
 	xkAssert(renderer);
+	xkAssert(stencil > 0);
 
-	if(renderer->config.stencilTest) {
+	if(renderer->hint & XK_RENDERER_HINT_STENCIL_TEST_BIT) {
 		renderer->vkClearValues[1].depthStencil.stencil = (uint32_t)stencil;
 	}
 }
@@ -234,7 +231,7 @@ void xkVulkanClearRenderer(XkVulkanRenderer renderer) {
 	vkCmdSetCullMode(vkCommandBuffer, renderer->vkCullMode);
 }
 
-void xkVulkanTopologyRenderer(XkVulkanRenderer renderer, XkTopology topology) {
+void xkVulkanTopologyRenderer(XkVulkanRenderer renderer, const XkTopology topology) {
 	xkAssert(renderer);
 
 	switch(topology) {
@@ -246,7 +243,7 @@ void xkVulkanTopologyRenderer(XkVulkanRenderer renderer, XkTopology topology) {
 	}
 }
 
-void xkVulkanCullModeRenderer(XkVulkanRenderer renderer, XkCullMode cullMode) {
+void xkVulkanCullModeRenderer(XkVulkanRenderer renderer, const XkCullMode cullMode) {
 	xkAssert(renderer);
 
 	switch(cullMode) {
@@ -273,7 +270,7 @@ void xkVulkanBeginRenderer(XkVulkanRenderer renderer) {
 
   VkResult vkResult = vkBeginCommandBuffer(vkCommandBuffer, &vkCommandBufferBeginInfo);
   if(vkResult != VK_SUCCESS) {
-    xkLogError("Failed to begin Vulkan command buffer: %s", __xkVulkanGetResultString(vkResult));
+    xkLogError("Vulkan: Failed to begin command buffer: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }
 
@@ -303,7 +300,7 @@ void xkVulkanEndRenderer(XkVulkanRenderer renderer) {
 
   VkResult vkResult = vkEndCommandBuffer(vkCommandBuffer);
   if(vkResult != VK_SUCCESS) {
-    xkLogError("Failed to end Vulkan single command buffer: %s", __xkVulkanGetResultString(vkResult));
+    xkLogError("Vulkan: Failed to end command buffer: %s", __xkVulkanGetResultString(vkResult));
     goto _catch;
   }  
 
@@ -315,17 +312,21 @@ _catch:
 	return;
 }
 
-void xkVulkanResizeRenderer(XkVulkanRenderer renderer, XkSize width, XkSize height) {
+void xkVulkanResizeRenderer(XkVulkanRenderer renderer, const XkSize width, const XkSize height) {
 	xkAssert(renderer);
+	xkAssert(width > 0);
+	xkAssert(height > 0);
 
 	renderer->vkExtent.width 		= (uint32_t)width;
 	renderer->vkExtent.height 	= (uint32_t)height;	
 }
 
-void xkVulkanScissorRenderer(XkVulkanRenderer renderer, XkInt32 x, XkInt32 y, XkSize width, XkSize height) {
+void xkVulkanScissorRenderer(XkVulkanRenderer renderer, const XkInt32 x, const XkInt32 y, const XkSize width, const XkSize height) {
 	xkAssert(renderer);
+	xkAssert(width > 0);
+	xkAssert(height > 0);
 
-	if(renderer->config.scissorTest) {
+	if(renderer->hint & XK_RENDERER_HINT_SCISSOR_TEST_BIT) {
 		renderer->vkScissor.offset.x 				= (int32_t)x;
 		renderer->vkScissor.offset.y 				= (int32_t)y;
 		renderer->vkScissor.extent.width 		= (uint32_t)width;
@@ -333,7 +334,7 @@ void xkVulkanScissorRenderer(XkVulkanRenderer renderer, XkInt32 x, XkInt32 y, Xk
 	}
 }
 
-void xkVulkanDraw(XkVulkanRenderer renderer, XkSize vertexCount) {
+void xkVulkanDraw(XkVulkanRenderer renderer, const XkSize vertexCount) {
 	xkAssert(renderer);
 	xkAssert(vertexCount > 0);
 
@@ -341,7 +342,7 @@ void xkVulkanDraw(XkVulkanRenderer renderer, XkSize vertexCount) {
 	vkCmdDraw(renderer->vkCommandBuffers[renderer->frameIndex], (uint32_t)vertexCount, 1, 0, 0);
 }
 
-void xkVulkanDrawIndexed(XkVulkanRenderer renderer, XkSize indexCount) {
+void xkVulkanDrawIndexed(XkVulkanRenderer renderer, const XkSize indexCount) {
 	xkAssert(renderer);
 	xkAssert(indexCount > 0);
 
@@ -349,8 +350,9 @@ void xkVulkanDrawIndexed(XkVulkanRenderer renderer, XkSize indexCount) {
 	vkCmdDrawIndexed(renderer->vkCommandBuffers[renderer->frameIndex], (uint32_t)indexCount, 1, 0, 0, 0);
 }
 
-XkResult xkVulkanCreateBuffer(XkVulkanBuffer* pBuffer, const XkBufferUsage usage, const XkSize size, const XkHandle data, XkVulkanRenderer renderer) {
+XkResult xkVulkanCreateBuffer(XkVulkanBuffer* pBuffer, const XkSize size, const XkHandle data, const XkBufferUsage usage) {
 	xkAssert(pBuffer);
+	xkAssert(size > 0);
 	xkAssert(renderer);
 
 	XkResult result = XK_SUCCESS;
@@ -364,12 +366,11 @@ XkResult xkVulkanCreateBuffer(XkVulkanBuffer* pBuffer, const XkBufferUsage usage
 	XkVulkanBuffer buffer = *pBuffer;
 
 	buffer->vkSize = (VkDeviceSize)size;
-	buffer->renderer = renderer;
 
 	VkBufferUsageFlags vkBufferUsage = 0;
 	switch(usage) {
-		case XK_BUFFER_USAGE_VERTEX: 	vkBufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; break;
-		case XK_BUFFER_USAGE_INDEX: 	vkBufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT; break;
+		case XK_BUFFER_USAGE_VERTEX: 	vkBufferUsage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;	break;
+		case XK_BUFFER_USAGE_INDEX: 	vkBufferUsage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;		break;
 		case XK_BUFFER_USAGE_UNIFORM: vkBufferUsage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; break;
 	}
 
@@ -399,45 +400,48 @@ void xkVulkanDestroyBuffer(XkVulkanBuffer buffer) {
 	xkFreeMemory(buffer);
 }
 
-void xkVulkanBindVertexBuffer(XkVulkanBuffer buffer) {
+void xkVulkanMapBuffer(XkVulkanBuffer buffer, const XkHandle data) {
 	xkAssert(pBuffer);
+	xkAssert(data);
 
-	VkCommandBuffer vkCommandBuffer = buffer->renderer->vkCommandBuffers[buffer->renderer->frameIndex];
+	__xkVulkanMapBuffer(buffer->vkMemory, buffer->vkSize, data);
+}
+
+void xkVulkanBindVertexBuffer(XkVulkanBuffer buffer, XkVulkanRenderer renderer) {
+	xkAssert(pBuffer);
+	xkAssert(renderer);
+
+	VkCommandBuffer vkCommandBuffer = renderer->vkCommandBuffers[renderer->frameIndex];
 
   VkBuffer vkVertexBuffers[] = {buffer->vkBuffer};
   VkDeviceSize vkOffsets[] = {};
   vkCmdBindVertexBuffers(vkCommandBuffer, 0, 1, vkVertexBuffers, vkOffsets);
 }
 
-void xkVulkanBindIndexBuffer(XkVulkanBuffer buffer) {
+void xkVulkanBindIndexBuffer(XkVulkanBuffer buffer, XkVulkanRenderer renderer) {
 	xkAssert(pBuffer);
+	xkAssert(renderer);
 
-	VkCommandBuffer vkCommandBuffer = buffer->renderer->vkCommandBuffers[buffer->renderer->frameIndex];
+	VkCommandBuffer vkCommandBuffer = renderer->vkCommandBuffers[renderer->frameIndex];
 
 	vkCmdBindIndexBuffer(vkCommandBuffer, buffer->vkBuffer, 0, VK_INDEX_TYPE_UINT32);
 }
 
-void xkVulkanMapBuffer(XkVulkanBuffer buffer, const XkHandle data) {
-	xkAssert(pBuffer);
-
-	__xkVulkanMapBuffer(buffer->vkMemory, buffer->vkSize, data);
-}
-
-XkResult xkVulkanCreateTexture2D(XkVulkanTexture2d* pTexture, XkHandle data, const XkSize width, const XkSize height, XkVulkanRenderer renderer) {
+XkResult xkVulkanCreateTexture(XkVulkanTexture* pTexture, const XkSize width, const XkSize height, const XkHandle data, const XkTextureType type) {
 	xkAssert(pTexture);
-	xkAssert(renderer);
+	xkAssert(width > 0);
+	xkAssert(height > 0);
+	xkAssert(data);
 
 	XkResult result = XK_SUCCESS;
 
-	*pTexture = xkAllocateMemory(sizeof(struct XkVulkanTexture2d_T));
+	*pTexture = xkAllocateMemory(sizeof(struct XkVulkanTexture_T));
 	if(!pTexture) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	XkVulkanTexture2d texture = *pTexture;
-
-	texture->renderer = renderer;
+	XkVulkanTexture texture = *pTexture;
 
 	const VkDeviceSize vkSize = (width * height) * 4;
 
@@ -449,6 +453,13 @@ XkResult xkVulkanCreateTexture2D(XkVulkanTexture2d* pTexture, XkHandle data, con
 	vkExtent.height 			= (uint32_t)height;
 	vkExtent.depth 				= 1;
 
+	VkImageType vkImageType = 0;
+	switch(type) {
+		case XK_TEXTURE_TYPE_1D: vkImageType = VK_IMAGE_TYPE_1D; break;
+		case XK_TEXTURE_TYPE_2D: vkImageType = VK_IMAGE_TYPE_2D; break;
+		case XK_TEXTURE_TYPE_3D: vkImageType = VK_IMAGE_TYPE_3D; break;
+	}
+
 	VkBuffer vkTransferBuffer;
 	VkDeviceMemory vkTransferBufferMemory;
 	result = __xkVulkanCreateBuffer(&vkTransferBuffer, &vkTransferBufferMemory, vkSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data);
@@ -458,7 +469,7 @@ XkResult xkVulkanCreateTexture2D(XkVulkanTexture2d* pTexture, XkHandle data, con
     goto _free;
 	}
 
-	result = __xkVulkanCreateImage(&texture->vkImage, &texture->vkMemory, VK_IMAGE_TYPE_2D, VK_FORMAT_R8G8B8A8_SRGB, vkExtent, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mipLevels);
+	result = __xkVulkanCreateImage(&texture->vkImage, &texture->vkMemory, vkImageType, VK_FORMAT_R8G8B8A8_SRGB, vkExtent, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mipLevels);
 	if(result != XK_SUCCESS) {
     xkLogError("Failed to create Vulkan image: %d", result);
     result = XK_ERROR_CREATE_FAILED;  
@@ -495,7 +506,7 @@ _free:
 	goto _catch;
 }
 
-void xkVulkanDestroyTexture2D(XkVulkanTexture2d texture) {
+void xkVulkanDestroyTexture(XkVulkanTexture texture) {
 	xkAssert(texture);
 
 	__xkVulkanDestroySampler(texture->vkSampler);

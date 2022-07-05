@@ -22,7 +22,7 @@ typedef struct XkD3D12Texture2d_T* 	XkD3D12Texture2d;
 extern XKD3D12_API XkResult 	xkD3D12InitializeContext();
 extern XKD3D12_API void 			xkD3D12TerminateContext();
 
-extern XKD3D12_API XkResult 	xkD3D12CreateRenderer(XkD3D12Renderer*, const XkRendererConfig* const, const XkWindow);
+extern XKD3D12_API XkResult 	xkD3D12CreateRenderer(XkD3D12Renderer*, const XkWindow, const XkRendererHint);
 extern XKD3D12_API void 			xkD3D12DestroyRenderer(XkD3D12Renderer);
 
 extern XKD3D12_API void 			xkD3D12ClearColorRenderer(XkD3D12Renderer, const XkVec4);
@@ -42,15 +42,15 @@ extern XKD3D12_API void 			xkD3D12ScissorRenderer(XkD3D12Renderer, const XkInt32
 extern XKD3D12_API void 			xkD3D12Draw(XkD3D12Renderer, const XkSize);
 extern XKD3D12_API void 			xkD3D12DrawIndexed(XkD3D12Renderer, const XkSize);
 
-extern XKD3D12_API XkResult 	xkD3D12CreateBuffer(XkD3D12Buffer*, const XkBufferUsage, const XkSize, XkHandle, XkD3D12Renderer);
+extern XKD3D12_API XkResult 	xkD3D12CreateBuffer(XkD3D12Buffer*, const XkSize, const XkHandle, const XkBufferUsage);
 extern XKD3D12_API void 			xkD3D12DestroyBuffer(XkD3D12Buffer);
 
 extern XKD3D12_API void 			xkD3D12MapBuffer(XkD3D12Buffer, const XkHandle);
 
-extern XKD3D12_API void 			xkD3D12BindVertexBuffer(XkD3D12Buffer);
-extern XKD3D12_API void 			xkD3D12BindIndexBuffer(XkD3D12Buffer);
+extern XKD3D12_API void 			xkD3D12BindVertexBuffer(XkD3D12Buffer, XkD3D12Renderer);
+extern XKD3D12_API void 			xkD3D12BindIndexBuffer(XkD3D12Buffer, XkD3D12Renderer);
 
-extern XKD3D12_API XkResult 	xkD3D12CreateTexture2d(XkD3D12Texture2d*, XkHandle, const XkSize, const XkSize, XkD3D12Renderer);
+extern XKD3D12_API XkResult 	xkD3D12CreateTexture2d(XkD3D12Texture2d*, const XkSize, const XkSize, const XkHandle);
 extern XKD3D12_API void 			xkD3D12DestroyTexture2d(XkD3D12Texture2d);
 
 /// NOTE: For using in cpp programs. 

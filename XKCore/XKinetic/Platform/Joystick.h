@@ -10,7 +10,7 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef enum XkJoystickId_T {
+typedef enum XkJoystick_T {
 	XK_JOYSTICK_1  = 0,
 	XK_JOYSTICK_2  = 1,
 	XK_JOYSTICK_3  = 2,
@@ -27,7 +27,7 @@ typedef enum XkJoystickId_T {
 	XK_JOYSTICK_14 = 13,
 	XK_JOYSTICK_15 = 14,
 	XK_JOYSTICK_16 = 15
-} XkJoystickId;
+} XkJoystick;
 
 typedef enum XkJoystickEvent_T {
 	XK_JOYSTICK_DISCONNECTED 	= 0,
@@ -78,8 +78,6 @@ typedef enum XkJoystickHat_T {
 	XK_GAMEPAD_HAT_LEFT_DOWN          = (XK_GAMEPAD_HAT_LEFT  | XK_GAMEPAD_HAT_DOWN)
 } XkJoystickHat;
 
-typedef struct XkJoystick_T* XkJoystick;
-
 typedef void(*XkJoystickEventPfn)(XkJoystick, const XkJoystickEvent);
 typedef void(*XkJoystickAxisPfn)(XkJoystick, const XkJoystickAxis, const XkFloat32);
 typedef void(*XkJoystickButtonPfn)(XkJoystick, const XkJoystickButton, const XkAction);
@@ -89,14 +87,12 @@ typedef void(*XkJoystickHatPfn)(XkJoystick, const XkJoystickHat, const XkAction)
 extern XKCORE_API XkResult 		xkInitializeJoystick();
 extern XKCORE_API void 				xkTerminateJoystick();
 
-extern XKCORE_API XkResult 		xkCreateJoystick(XkJoystick*, const XkJoystickId);
-extern XKCORE_API void 				xkDestroyJoystick(XkJoystick);
+extern XKCORE_API XkResult 		xkJoystickPresent(XkJoystick);
 
 extern XKCORE_API XkBool 			xkJoystickGamepad(XkJoystick);
 extern XKCORE_API XkString 		xkJoystickName(XkJoystick);
 extern XKCORE_API XkString 		xkJoystickMappingName(XkJoystick);
 extern XKCORE_API XkString 		xkJoystickName(XkJoystick);
-extern XKCORE_API XkJoystickId xkJoystickID(XkJoystick);
 
 extern XKCORE_API void 				xkSetJoystickEventCallback(XkJoystick, const XkJoystickEventPfn);
 extern XKCORE_API void 				xkSetJoystickAxisCallback(XkJoystick, const XkJoystickAxisPfn);

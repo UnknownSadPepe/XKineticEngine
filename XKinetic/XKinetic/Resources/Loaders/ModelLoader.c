@@ -3,56 +3,53 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## MACROS SECTION ########## */
-#define XK_MODEL_LOADER_PATH_MAX_SIZE 64
+#define XK_MODEL_LOADER_PATH_MAX_SIZE 128
 
 /* ########## TYPES SECTION ########## */
-struct XkModelLoader_T {
+typedef struct __XkModelLoader_T {
+	XkBool initialized;
+
   XkChar path[XK_MODEL_LOADER_PATH_MAX_SIZE];
-};
+} __XkModelLoader;
+
+/* ########## GLOBAL VARIABLES SECTION ########## */
+static __XkModelLoader _xkModelLoader;
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkCreateModelLoader(XkModelLoader* pLoader, XkString path) {
-	xkAssert(pLoader);
-
+XkResult xkInitializeModelLoader(XkString path) {
   XkResult result = XK_SUCCESS;
 
-	*pLoader = xkAllocateMemory(sizeof(struct XkModelLoader_T));
-	if(!(*pLoader)) {
-		result = XK_ERROR_BAD_ALLOCATE;
+	if(_xkModelLoader.initialized) {
 		goto _catch;
 	}
 
-	XkModelLoader loader = *pLoader;
-
-  xkNCopyString(loader->path, path, XK_MODEL_LOADER_PATH_MAX_SIZE);
+  xkNCopyString(_xkModelLoader.path, path, XK_MODEL_LOADER_PATH_MAX_SIZE);
 
   /// TODO: Implementation.
+
+	_xkModelLoader.initialized = XK_TRUE;
 
 _catch:
   return(result);
+}
 
-_free:
-	if(loader) {
-		xkFreeMemory(loader);
+void xkTerminateModelLoader() {
+	if(!_xkModelLoader.initialized) {
+		return;
 	}
 
-	goto _catch;
-}
-
-void xkDestroyModelLoader(XkModelLoader loader) {
-	xkAssert(loader);
   /// TODO: Implementation.
-  xkFreeMemory(loader);
+
+	_xkModelLoader.initialized = XK_FALSE;
 }
 
-XkResult xkLoadModel(XkModelLoader loader, XkModelConfig* const pConfig, XkString name) {
-	xkAssert(loader);
+XkResult xkLoadModel(XkModelConfig* const pConfig, XkString name) {
 	xkAssert(pConfig);
 
   XkResult result = XK_SUCCESS;
 
   XkChar fullPath[XK_MODEL_LOADER_PATH_MAX_SIZE];
-  xkStringNFormat(fullPath, XK_MODEL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
+  xkStringNFormat(fullPath, XK_MODEL_LOADER_PATH_MAX_SIZE, "%s%s", _xkModelLoader.path, name);
 
   /// TODO: Implementation.
   pConfig->vertexCount = 0;
@@ -64,8 +61,7 @@ _catch:
   return(result); 
 }
 
-void xkUnloadModel(XkModelLoader loader, const XkModelConfig* const pConfig) {
-	xkAssert(loader);
+void xkUnloadModel(const XkModelConfig* const pConfig) {
 	xkAssert(pConfig);
   /// TODO: Implementation.
 }

@@ -58,9 +58,7 @@ struct XkWindow_T {
 	XK_PLATFORM_WINDOW;
 };
 
-struct XkJoystick_T {
-	XkJoystickId 					id;
-
+typedef struct XkJoystickObject_T {
 	struct {
 		XkJoystickEventPfn 	event;
 		XkJoystickAxisPfn 	axis;
@@ -69,16 +67,18 @@ struct XkJoystick_T {
 	} callbacks;
 
 	XK_PLATFORM_JOYSTICK;
-};
+} XkJoystickObject;
 
 struct XkModule_T {
 	XK_PLATFORM_MODULE;
 };
 
 typedef struct __XkPlatform_T {
-	XkBool 		initialized;
+	XkBool			initialized;
 
-	XkInt16 	keycodes[512];
+	XkInt16			keycodes[512];
+
+	XkJoystickObject	joysticks[XK_JOYSTICK_16 + 1];
 
 	XK_PLATFORM;
 } __XkPlatform;

@@ -146,7 +146,7 @@ void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 	xkStringNFFormat(argBuffer, XK_LOG_ARG_BUFFER_SIZE, format, args);
 
 	// Format log buffer.
-	const XkSize size = xkStringNFormat(logBuffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s\n", timeBuffer, typeBuffer[type], argBuffer);
+	const XkSize size = xkStringNFormat(logBuffer, XK_LOG_BUFFER_SIZE, "[%s]{%s} %s", timeBuffer, typeBuffer[type], argBuffer);
 
 	xkWriteConsoleColored(stream, color, logBuffer, size);
 

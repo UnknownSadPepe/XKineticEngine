@@ -32,10 +32,14 @@ struct XkD3D12Renderer_T {
 };
 
 struct XkD3D12Buffer_T {
+	XkD3D12Renderer 	renderer;
+
 	ID3D12Resource* 	d3d12Resource;
 };
 
-struct XkD3D12Texture_T {
+struct XkD3D12Texture2d_T {
+	XkD3D12Renderer 	renderer;
+
 	ID3D12Resource* 	d3d12Resource;
 };
 
@@ -131,13 +135,11 @@ void xkD3D12ClearColorRenderer(XkD3D12Renderer renderer, const XkVec4 color) {
 
 void xkD3D12ClearDepthRenderer(XkD3D12Renderer renderer, const XkFloat32 depth) {
 	xkAssert(renderer);
-	xkAssert(depth > 0.0f);
 	/// TODO: Implementation.
 }
 
 void xkD3D12ClearStencilRenderer(XkD3D12Renderer renderer, const XkUInt32 stencil) {
 	xkAssert(renderer);
-	xkAssert(stencil > 0);
 	/// TODO: Implementation.
 }
 
@@ -189,8 +191,6 @@ void xkD3D12EndRenderer(XkD3D12Renderer renderer) {
 
 void xkD3D12ResizeRenderer(XkD3D12Renderer renderer, const XkSize width, const XkSize height) {
 	xkAssert(renderer);
-	xkAssert(width > 0);
-	xkAssert(height > 0);
 
 	renderer->d3d12Viewport.TopLeftX	= 0.0f;
 	renderer->d3d12Viewport.TopLeftY	= 0.0f;
@@ -202,8 +202,6 @@ void xkD3D12ResizeRenderer(XkD3D12Renderer renderer, const XkSize width, const X
 
 void xkD3D12ScissorRenderer(XkD3D12Renderer renderer, const XkInt32 x, const XkInt32 y, const XkSize width, const XkSize height) {
 	xkAssert(renderer);
-	xkAssert(width > 0);
-	xkAssert(height > 0);
 
 	renderer->d3d12Scissor.left				= x;
 	renderer->d3d12Scissor.top				= y;
@@ -227,9 +225,8 @@ void xkD3D12DrawIndexed(XkD3D12Renderer renderer, const XkSize indexCount) {
 	//ID3D12GraphicsCommandList6_DrawIndexedInstanced(renderer->d3d12CommandList6, indexCount, 1, 0, 0, 0);
 }
 
-XkResult xkD3D12CreateBuffer(XkD3D12Buffer* pBuffer, const XkSize size, const XkHandle data, const XkBufferUsage usage) {
+XkResult xkD3D12CreateBuffer(XkD3D12Buffer* pBuffer, const XkBufferUsage usage, const XkSize size, XkHandle data) {
 	xkAssert(pBuffer);
-	xkAssert(size > 0);
 	xkAssert(renderer);
 
 	XkResult result = XK_SUCCESS;
@@ -241,6 +238,8 @@ XkResult xkD3D12CreateBuffer(XkD3D12Buffer* pBuffer, const XkSize size, const Xk
 	}
 
 	XkD3D12Buffer buffer = *pBuffer;
+
+	buffer->renderer = renderer;
 
 	/// TODO: Implementation.
 
@@ -264,37 +263,33 @@ void xkD3D12DestroyBuffer(XkD3D12Buffer buffer) {
 
 void xkD3D12MapBuffer(XkD3D12Buffer buffer, const XkHandle data) {
 	xkAssert(buffer);
-	xkAssert(data);
 	/// TODO: Implementation.
 }
 
-void xkD3D12BindVertexBuffer(XkD3D12Buffer buffer, XkD3D12Renderer renderer) {
+void xkD3D12BindVertexBuffer(XkD3D12Buffer buffer) {
 	xkAssert(buffer);
-	xkAssert(renderer);
 	/// TODO: Implementation.
 }
 
-void xkD3D12BindIndexBuffer(XkD3D12Buffer buffer, XkD3D12Renderer renderer) {
+void xkD3D12BindIndexBuffer(XkD3D12Buffer buffer) {
 	xkAssert(buffer);
-	xkAssert(renderer);
 	/// TODO: Implementation.
 }
 
-XkResult xkD3D12CreateTexture(XkD3D12Texture* pTexture, const XkSize width, const XkSize height, const XkHandle data, const XkTextureType type) {
+XkResult xkD3D12CreateTexture2d(XkD3D12Texture2d* pTexture, XkHandle data, const XkSize width, const XkSize height) {
 	xkAssert(pTexture);
 	xkAssert(width > 0);
 	xkAssert(height > 0);
-	xkAssert(data);
 
 	XkResult result = XK_SUCCESS;
 
-	*pTexture = xkAllocateMemory(sizeof(struct XkD3D12Texture_T));
+	*pTexture = xkAllocateMemory(sizeof(struct XkD3D12Texture2D_T));
 	if(!pTexture) {
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
 
-	XkD3D12Texture texture = *pTexture;
+	XkD3D12Texture2D texture = *pTexture;
 
 	/// TODO: Implementation.
 
@@ -309,7 +304,7 @@ _free:
 	goto _catch;
 }
 
-void xkD3D12DestroyTexture(XkD3D12Texture texture) {
+void xkD3D12DestroyTexture2d(XkD3D12Texture2d texture) {
 	xkAssert(texture);
 
 	/// TODO: Implementation.

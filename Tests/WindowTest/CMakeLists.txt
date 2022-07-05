@@ -8,6 +8,6 @@ else()
   add_executable(XKWindowTest ${WINDOW_TEST_SRC})
 endif()
 
-target_include_directories(XKWindowTest PRIVATE ${WINDOW_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKinetic)
+target_include_directories(XKWindowTest PRIVATE ${WINDOW_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
 
 target_link_libraries(XKWindowTest PRIVATE XKCore XKinetic)

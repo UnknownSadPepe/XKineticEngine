@@ -4,6 +4,9 @@
 #include "XKinetic/XKinetic.h"
 #include "XKinetic/Core/Minimal.h"
 
+/* ########## MACROS SECTION ########## */
+#define XK_SHARED_NAME_MAX_SIZE 32
+
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 extern "C" {
@@ -11,11 +14,12 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct XkShaderConfig_T {
-  XkSize size;
-  XkHandle code;
+	XkChar		name[XK_SHARED_NAME_MAX_SIZE];
+  XkSize		size;
+  XkHandle	code;
 } XkShaderConfig;
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

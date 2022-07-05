@@ -6,54 +6,50 @@
 #define XK_SHADER_LOADER_PATH_MAX_SIZE 64
 
 /* ########## TYPES SECTION ########## */
-struct XkShaderLoader_T {
+typedef struct __XkShaderLoader_T {
+	XkBool initialized;
+
   XkChar path[XK_SHADER_LOADER_PATH_MAX_SIZE];
-};
+} __XkShaderLoader;
+
+/* ########## GLOBAL VARIABLES SECTION ########## */
+static __XkShaderLoader _xkShaderLoader;
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkCreateShaderLoader(XkShaderLoader* pLoader, XkString path) {
-  xkAssert(pLoader);
-
+XkResult xkInitializeShaderLoader(XkString path) {
   XkResult result = XK_SUCCESS;
 
-	*pLoader = xkAllocateMemory(sizeof(struct XkShaderLoader_T));
-	if(!(*pLoader)) {
-		result = XK_ERROR_BAD_ALLOCATE;
+	if(_xkShaderLoader.initialized) {
 		goto _catch;
 	}
 
-	XkShaderLoader loader = *pLoader;
-
-  xkNCopyString(loader->path, path, XK_SHADER_LOADER_PATH_MAX_SIZE);
+  xkNCopyString(_xkShaderLoader.path, path, XK_SHADER_LOADER_PATH_MAX_SIZE);
 
   /// TODO: Implementation.
+
+	_xkShaderLoader.initialized = XK_TRUE;
 
 _catch:
   return(result);
-
-_free:
-  if(loader) {
-    xkFreeMemory(loader);
-  }
-
-  goto _catch;
 }
 
-void xkDestroyShaderLoader(XkShaderLoader loader) {
-  xkAssert(loader); 
+void xkTerminateShaderLoader() {
+	if(!_xkShaderLoader.initialized) {
+		return;
+	}
 
   /// TODO: Implementation.
-  xkFreeMemory(loader);
+
+	_xkShaderLoader.initialized = XK_FALSE;
 }
 
-XkResult xkLoadShader(XkShaderLoader loader, XkShaderConfig* const pConfig, XkString name) {
-  xkAssert(loader);
+XkResult xkLoadShader(XkShaderConfig* const pConfig, XkString name) {
   xkAssert(pConfig); 
 
   XkResult result = XK_SUCCESS;
 
   XkChar fullPath[XK_SHADER_LOADER_PATH_MAX_SIZE];
-  xkStringNFormat(fullPath, XK_SHADER_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
+  xkStringNFormat(fullPath, XK_SHADER_LOADER_PATH_MAX_SIZE, "%s%s", _xkShaderLoader.path, name);
 
   /// TODO: Implementation.
   pConfig->size = 0;
@@ -63,8 +59,7 @@ _catch:
   return(result);
 }
 
-void xkUnloadShader(XkShaderLoader loader, const XkShaderConfig* const pConfig) {
-  xkAssert(loader);
+void xkUnloadShader(const XkShaderConfig* const pConfig) {
   xkAssert(pConfig); 
   /// TODO: Implementation.
 }

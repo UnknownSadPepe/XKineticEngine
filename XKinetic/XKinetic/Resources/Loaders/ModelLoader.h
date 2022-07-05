@@ -10,14 +10,11 @@
 extern "C" {
 #endif // __cplusplus
 
-/* ########## TYPES SECTION ########## */
-typedef struct XkModelLoader_T* XkModelLoader;
-
 /* ########## FUNCTIONS SECTION ########## */
-extern XK_API XkResult		xkCreateModelLoader(XkModelLoader*, XkString);
-extern XK_API void				xkDestroyModelLoader(XkModelLoader);
-extern XK_API XkResult		xkLoadModel(XkModelLoader, XkModelConfig* const, XkString);
-extern XK_API void				xkUnloadModel(XkModelLoader, const XkModelConfig* const);
+extern XK_API XkResult		xkInitializeModelLoader(XkString);
+extern XK_API void				xkTerminateModelLoader();
+extern XK_API XkResult		xkLoadModel(XkModelConfig* const, XkString);
+extern XK_API void				xkUnloadModel(const XkModelConfig* const);
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus

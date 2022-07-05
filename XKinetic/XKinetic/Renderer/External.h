@@ -27,18 +27,30 @@ typedef enum XkCullMode_T {
 	XK_CULL_MODE_FRONT_BACK			= 2
 } XkCullMode;
 
-typedef enum {
+typedef enum XkBufferUsage_T {
 	XK_BUFFER_USAGE_VERTEX			= 0,
 	XK_BUFFER_USAGE_INDEX				= 1,
 	XK_BUFFER_USAGE_UNIFORM			= 2
 } XkBufferUsage;
 
-typedef struct XkRendererConfig_T {
-	XkBool blending;
-	XkBool depthTest;
-	XkBool stencilTest;
-	XkBool scissorTest;
-} XkRendererConfig;
+typedef enum XkTextureType_T {
+	XK_TEXTURE_TYPE_1D					= 0,
+	XK_TEXTURE_TYPE_2D					= 1,
+	XK_TEXTURE_TYPE_3D					= 2
+} XkTextureType;
+
+typedef enum XkRendererApi_T {
+	XK_RENDERER_API_DEFAULT			= 0,
+	XK_RENDERER_API_VULKAN			= 1,
+	XK_RENDERER_API_D3D12				= 2
+} XkRendererApi;
+
+typedef enum XkRendererHint_T {
+	XK_RENDERER_HINT_DEPTH_TEST_BIT			= 0x0001,
+	XK_RENDERER_HINT_STENCIL_TEST_BIT		= 0x0002,
+	XK_RENDERER_HINT_SCISSOR_TEST_BIT		= 0x0004,
+	XK_RENDERER_HINT_BLENDING_BIT				= 0x0008
+} XkRendererHint;
 
 typedef struct XkVertex_T {
 	XkVec3 position;
@@ -54,7 +66,7 @@ typedef struct XkUniformBufferObject_T {
   XkMat4 projection;
 } XkUniformBufferObject;
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

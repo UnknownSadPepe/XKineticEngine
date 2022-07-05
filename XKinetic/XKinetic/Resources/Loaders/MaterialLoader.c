@@ -3,56 +3,53 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## MACROS SECTION ########## */
-#define XK_MATERIAL_LOADER_PATH_MAX_SIZE 64
+#define XK_MATERIAL_LOADER_PATH_MAX_SIZE 128
 
 /* ########## TYPES SECTION ########## */
-struct XkMaterialLoader_T {
+typedef struct __XkMaterialLoader_T {
+	XkBool initialized;
+
   XkChar path[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
-};
+} __XkMaterialLoader;
+
+/* ########## GLOBAL VARIABLES SECTION ########## */
+static __XkMaterialLoader _xkMaterialLoader;
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkCreateMaterialLoader(XkMaterialLoader* pLoader, XkString path) {
-	xkAssert(pLoader);
-
+XkResult xkInitializeMaterialLoader(XkString path) {
   XkResult result = XK_SUCCESS;
 
-	*pLoader = xkAllocateMemory(sizeof(struct XkMaterialLoader_T));
-	if(!(*pLoader)) {
-		result = XK_ERROR_BAD_ALLOCATE;
+	if(_xkMaterialLoader.initialized) {
 		goto _catch;
 	}
 
-	XkMaterialLoader loader = *pLoader;
-
-  xkNCopyString(loader->path, path, XK_MATERIAL_LOADER_PATH_MAX_SIZE);
+  xkNCopyString(_xkMaterialLoader.path, path, XK_MATERIAL_LOADER_PATH_MAX_SIZE);
 
   /// TODO: Implementation.
+
+	_xkMaterialLoader.initialized = XK_TRUE;
 
 _catch:
   return(result);
+}
 
-_free:
-	if(loader) {
-		xkFreeMemory(loader);
+void xkTerminateMaterialLoader() {
+	if(!_xkMaterialLoader.initialized) {
+		return;
 	}
 
-	goto _catch;
-}
-
-void xkDestroyMaterialLoader(XkMaterialLoader loader) {
-	xkAssert(loader);
   /// TODO: Implementation.
-  xkFreeMemory(loader);
+
+	_xkMaterialLoader.initialized = XK_FALSE;
 }
 
-XkResult xkLoadMaterial(XkMaterialLoader loader, XkMaterialConfig* const pConfig, XkString name) {
-	xkAssert(loader);
+XkResult xkLoadMaterial(XkMaterialConfig* const pConfig, XkString name) {
 	xkAssert(pConfig);
 
   XkResult result = XK_SUCCESS;
 
   XkChar fullPath[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
-  xkStringNFormat(fullPath, XK_MATERIAL_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
+  xkStringNFormat(fullPath, XK_MATERIAL_LOADER_PATH_MAX_SIZE, "%s%s", _xkMaterialLoader.path, name);
 
   /// TODO: Implementation.
 
@@ -60,8 +57,7 @@ _catch:
   return(result); 
 }
 
-void xkUnloadMaterial(XkMaterialLoader loader, const XkMaterialConfig* const pConfig) {
-	xkAssert(loader);
+void xkUnloadMaterial(const XkMaterialConfig* const pConfig) {
 	xkAssert(pConfig);
   /// TODO: Implementation.
 }

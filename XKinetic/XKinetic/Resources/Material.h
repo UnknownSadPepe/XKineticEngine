@@ -5,7 +5,7 @@
 #include "XKinetic/Core/Minimal.h"
 
 /* ########## MACROS SECTION ########## */
-#define XK_MATERIAL_NAME_MAX_SIZE 128
+#define XK_MATERIAL_NAME_MAX_SIZE 32
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus
@@ -14,10 +14,10 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct XkMaterialConfig_T {
-	XkChar name[XK_MATERIAL_NAME_MAX_SIZE];
+	XkChar		name[XK_MATERIAL_NAME_MAX_SIZE];
 } XkMaterialConfig;
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

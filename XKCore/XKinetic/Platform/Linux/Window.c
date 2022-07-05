@@ -109,7 +109,7 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
     }
   }
 
-	if((width != 0 && height != 0) && (width != window->wayland.width || height != window->wayland.height)) {
+	if((width != 0 && height != 0) && ((XkSize)width != window->wayland.width || (XkSize)height != window->wayland.height)) {
 		window->wayland.width = (XkSize)width;
 		window->wayland.height = (XkSize)height;
 
@@ -139,9 +139,14 @@ static void __xkXDGToplevelHandleClose(void* data, struct xdg_toplevel* xdgTople
 	__xkInputWindowClose(window);
 }
 
+static void __xkXDGToplevelHandleConfigureBounds(void* data, struct xdg_toplevel* xdgToplevel, int32_t width, int32_t height) {
+	/// NOTE: Nothing to do here.
+}
+
 static const struct xdg_toplevel_listener _xkXDGToplevelListener = {
   __xkXDGToplevelHandleConfigure,
-  __xkXDGToplevelHandleClose
+  __xkXDGToplevelHandleClose,
+	__xkXDGToplevelHandleConfigureBounds
 };
 
 static void __xkWaylandPointerHandleEnter(void* data, struct wl_pointer* wlPointer, uint32_t serial, struct wl_surface* wlSurface, wl_fixed_t sx, wl_fixed_t sy) {
@@ -237,11 +242,15 @@ static void __xkWaylandPointerHandleAxisSource(void* data, struct wl_pointer* wl
 	/// NOTE: Nothing to do here.
 }
 
-void __xkWaylandPointerHandleAxisStop(void* data, struct wl_pointer* wl_pointer, uint32_t time, uint32_t axis) {
+static void __xkWaylandPointerHandleAxisStop(void* data, struct wl_pointer* wl_pointer, uint32_t time, uint32_t axis) {
 	/// NOTE: Nothing to do here.
 }
 
-void __xkWaylandPointerHandleAxisDiscrete(void* data, struct wl_pointer* wl_pointer, uint32_t axis, int32_t discrete) {
+static void __xkWaylandPointerHandleAxisDiscrete(void* data, struct wl_pointer* wl_pointer, uint32_t axis, int32_t discrete) {
+	/// NOTE: Nothing to do here.
+}
+
+static void __xkWaylandPointerHandleAxisValue(void *data, struct wl_pointer* wlPointer, uint32_t axis, int32_t value120) {
 	/// NOTE: Nothing to do here.
 }
 
@@ -254,7 +263,8 @@ static const struct wl_pointer_listener _xkWaylandPointerListener = {
 	__xkWaylandPointerHandleFrame,
 	__xkWaylandPointerHandleAxisSource,
 	__xkWaylandPointerHandleAxisStop,
-	__xkWaylandPointerHandleAxisDiscrete
+	__xkWaylandPointerHandleAxisDiscrete,
+	__xkWaylandPointerHandleAxisValue
 };
 
 static void __xkZWPRelativePointerHandleRelativeMotion(void* data, struct zwp_relative_pointer_v1* zwpRelativePointer, uint32_t timeHi, uint32_t timeLo, wl_fixed_t dx, wl_fixed_t dy, wl_fixed_t dxUnaccel, wl_fixed_t dyUnaccel) {
@@ -483,7 +493,7 @@ static void __xkWaylandDataDeviceHandleDataOffer(void* data, struct wl_data_devi
 	_xkPlatform.wayland.offers = offers;
 	++_xkPlatform.wayland.offerCount;
 
-	_xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1] = (__XkWaylandOffer){wlDataOffer};
+	_xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1] = (__XkWaylandOffer){wlDataOffer, XK_FALSE, XK_FALSE};
 
 	wl_data_offer_add_listener(wlDataOffer, &_xkWaylandDataOfferListener, NULL);
 }

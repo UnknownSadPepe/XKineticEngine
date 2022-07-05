@@ -17,43 +17,18 @@ void xkTerminateJoystick() {
 	/// TODO: Implementation.
 }
 
-XkResult xkCreateJoystick(XkJoystick* pJoystick, const XkJoystickId id) {
-	xkAssert(pJoystick);
-	xkAssert(id >= XK_JOYSTICK_1);
+XkResult xkJoystickPresent(XkJoystick j) {
+	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
 
 	XkResult result = XK_SUCCESS;
-
-	*pJoystick = xkAllocateMemory(sizeof(struct XkJoystick_T));
-	if(!(*pJoystick)) {
-		result = XK_ERROR_BAD_ALLOCATE;
-		goto _catch;
-	}
-
-	XkJoystick joystick = *pJoystick;
-
-	joystick->id = id;
 
 	/// TODO: Implementation.
 
 _catch:
 	return(result);
-
-_free:
-	if(joystick) {
-		xkFreeMemory(joystick);
-	}
-
-	goto _catch;
 }
 
-void xkDestroyJoystick(XkJoystick joystick) {
-	xkAssert(pJoystick);
-	/// TODO: Implementation.
-	
-	xkFreeMemory(joystick);
-}
-
-XkString xkJoystickMappingName(XkJoystick joystick) {
-	xkAssert(pJoystick);
+XkString xkJoystickMappingName(XkJoystick j) {
+	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
 	return("Linux");
 }

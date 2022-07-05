@@ -1,10 +1,13 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Console.h"
+#include "XKinetic/Core/String.h"
 
 #include <unistd.h>
 
 /* ########## MACROS SECTION ########## */
+#define XK_CONSOLE_BUFFER_SIZE 1024
+
 #define XK_UNIX_COLOR_RESET			"\e[0m"
 
 #define XK_UNIX_COLOR_FBLACK		"\e[0;30m"
@@ -52,7 +55,10 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const X
 		default: 								return;
 	}
 
-	write(stream, buffer, size);
+	XkChar fmtBuffer[XK_CONSOLE_BUFFER_SIZE];
+	const XkSize fmtSize = xkStringNFormat(fmtBuffer, XK_CONSOLE_BUFFER_SIZE, "%s\n", buffer);
+
+	write(stream, fmtBuffer, fmtSize);
 }
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
@@ -64,7 +70,6 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 	}
 
 	const char* pColor = XK_NULL_HANDLE;
-	size_t colorSize = 8;
 	switch(color) {
 		case XK_COLOR_FBLACK: 	pColor = XK_UNIX_COLOR_FBLACK; break;
 		case XK_COLOR_FRED: 		pColor = XK_UNIX_COLOR_FRED; break;
@@ -102,14 +107,13 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 		case XK_COLOR_BCYAN: 		pColor = XK_UNIX_COLOR_BCYAN; break;
 		case XK_COLOR_BWHITE: 	pColor = XK_UNIX_COLOR_BWHITE; break;
 
-		default: 										pColor = XK_NULL_HANDLE; colorSize = 0; break;
+		default: 										pColor = XK_NULL_HANDLE; break;
 	}
 
-	write(stream, pColor, colorSize);
+	XkChar fmtBuffer[XK_CONSOLE_BUFFER_SIZE];
+	const XkSize fmtSize = xkStringNFormat(fmtBuffer, XK_CONSOLE_BUFFER_SIZE, "%s%s%s\n", pColor, buffer, XK_UNIX_COLOR_RESET);
 
-	write(stream, buffer, size);
-
-	write(stream, XK_UNIX_COLOR_RESET, 5);
+	write(stream, fmtBuffer, fmtSize);
 }
 
 void xkReadConsole(XkString buffer, const XkSize size) {

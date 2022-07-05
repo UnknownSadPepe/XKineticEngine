@@ -6,56 +6,53 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## MACROS SECTION ########## */
-#define XK_IMAGE_LOADER_PATH_MAX_SIZE 64
+#define XK_IMAGE_LOADER_PATH_MAX_SIZE 128
 
 /* ########## TYPES SECTION ########## */
-struct XkImageLoader_T {
+typedef struct __XkImageLoader_T {
+	XkBool initialized;
+
   XkChar path[XK_IMAGE_LOADER_PATH_MAX_SIZE];
-};
+} __XkImageLoader;
+
+/* ########## GLOABL VARIABLES SECTION ########## */
+static __XkImageLoader _xkImageLoader;
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult xkCreateImageLoader(XkImageLoader* pLoader, XkString path) {
-	xkAssert(pLoader);
-
+XkResult xkInitializeImageLoader(XkString path) {
   XkResult result = XK_SUCCESS;
 
-	*pLoader = xkAllocateMemory(sizeof(struct XkImageLoader_T));
-	if(!(*pLoader)) {
-		result = XK_ERROR_BAD_ALLOCATE;
+	if(_xkImageLoader.initialized) {
 		goto _catch;
 	}
 
-	XkImageLoader loader = *pLoader;
-
-  xkNCopyString(loader->path, path, XK_IMAGE_LOADER_PATH_MAX_SIZE);
+  xkNCopyString(_xkImageLoader.path, path, XK_IMAGE_LOADER_PATH_MAX_SIZE);
 
   /// TODO: Implementation.
+
+	_xkImageLoader.initialized = XK_TRUE;
 
 _catch:
   return(result);
+}
 
-_free:
-	if(loader) {
-		xkFreeMemory(loader);
+void xkTerminateImageLoader() {
+	if(!_xkImageLoader.initialized) {
+		return;
 	}
 
-	goto _catch;
-}
-
-void xkDestroyImageLoader(XkImageLoader loader) {
-	xkAssert(loader);
   /// TODO: Implementation.
-  xkFreeMemory(loader);
+
+	_xkImageLoader.initialized = XK_FALSE;
 }
 
-XkResult xkLoadImage(XkImageLoader loader, XkImageConfig* const pConfig, XkString name) {
-	xkAssert(loader);
+XkResult xkLoadImage(XkImageConfig* const pConfig, XkString name) {
 	xkAssert(pConfig);
 
   XkResult result = XK_SUCCESS;
 
 	XkChar fullPath[XK_IMAGE_LOADER_PATH_MAX_SIZE];
-  xkStringNFormat(fullPath, XK_IMAGE_LOADER_PATH_MAX_SIZE, "%s%s", loader->path, name);
+  xkStringNFormat(fullPath, XK_IMAGE_LOADER_PATH_MAX_SIZE, "%s%s", _xkImageLoader.path, name);
 
   /// TODO: Implementation.
   pConfig->pixels = stbi_load(fullPath, (int*)&pConfig->width, (int*)&pConfig->height, XK_NULL_HANDLE, 4);
@@ -68,8 +65,7 @@ _catch:
   return(result);
 }
 
-void xkUnloadImage(XkImageLoader loader, const XkImageConfig* const pConfig) {
-	xkAssert(loader);
+void xkUnloadImage(const XkImageConfig* const pConfig) {
 	xkAssert(pConfig);
   /// TODO: Implementation.
   stbi_image_free(pConfig->pixels);
