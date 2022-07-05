@@ -30,7 +30,7 @@ extern XKCORE_API void __xkAssertion(const XkString, const XkString, const XkInt
 	#define xkAssert(expr)
 #endif // XK_DEBUG
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

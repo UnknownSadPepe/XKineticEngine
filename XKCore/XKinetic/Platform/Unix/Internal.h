@@ -33,7 +33,7 @@ typedef struct __XkUnixModule_T {
 #define XK_PLATFORM_MUTEX 	__XkPThreadMutex pthread
 #define XK_PLATFORM_MODULE 	__XkUnixModule unix
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

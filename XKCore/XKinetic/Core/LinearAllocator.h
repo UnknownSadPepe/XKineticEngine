@@ -20,7 +20,7 @@ extern XKCORE_API void 			xkResizeLinearAllocator(XkLinearAllocator, const XkSiz
 
 extern XKCORE_API XkHandle 	xkAllocateLinearMemory(XkLinearAllocator, const XkSize);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

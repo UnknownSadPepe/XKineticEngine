@@ -28,7 +28,7 @@ extern XKCORE_API void 			xkLogDebug(const XkString, ...);
 	#define 									xkLogDebug(format, ...)
 #endif // !XK_DEBUG
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

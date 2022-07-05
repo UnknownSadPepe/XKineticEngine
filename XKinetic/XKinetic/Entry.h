@@ -29,7 +29,7 @@ _catch:
 	return(result);
 }
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

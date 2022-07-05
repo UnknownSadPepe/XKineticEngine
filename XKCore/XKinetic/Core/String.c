@@ -487,25 +487,71 @@ XkInt32 xkNCompareString(XkString string1, XkString string2, const XkSize length
 	return(status);
 }
 
-XkString xkTokenString(XkString string, XkString token) {
-	while(*string) {
+XkString xkTokenString(XkString string, XkString* pNext, XkString token) {
+	while(XK_TRUE) {
+		if(xkDelim(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == '\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	XkString ret = string;
+	while(XK_TRUE) {
+		if(*string == '\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim(*string, token)) {
 			*string = '\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
 }
 
-XkString xkNTokenString(XkString string, XkString token, const XkSize length) {
+XkString xkNTokenString(XkString string, XkString* pNext, XkString token, const XkSize length) {
 	XkSize len = length;
-	while(*string && --len) {
+
+	while(XK_TRUE && --len) {
+		if(xkDelim(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == '\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	len = length;
+	XkString ret = string;
+	while(XK_TRUE && --len) {
+		if(*string == '\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim(*string, token)) {
 			*string = '\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
@@ -612,29 +658,76 @@ XkInt32 xkNCompareString8(XkString8 string1, XkString8 string2, const XkSize len
 	return(status);
 }
 
-XkString8 xkTokenString8(XkString8 string, XkString8 token) {
-	while(*string) {
+XkString8 xkTokenString8(XkString8 string, XkString8* pNext, XkString8 token) {
+	while(XK_TRUE) {
+		if(xkDelim8(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == '\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	XkString8 ret = string;
+	while(XK_TRUE) {
+		if(*string == '\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim8(*string, token)) {
 			*string = '\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
 }
 
-XkString8 xkNTokenString8(XkString8 string, XkString8 token, const XkSize length) {	
+XkString8 xkNTokenString8(XkString8 string, XkString8* pNext, XkString8 token, const XkSize length) {	
 	XkSize len = length;
-	while(*string && --len) {
+
+	while(XK_TRUE && --len) {
+		if(xkDelim8(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == '\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	len = length;
+	XkString8 ret = string;
+	while(XK_TRUE && --len) {
+		if(*string == '\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim8(*string, token)) {
 			*string = '\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
+
 }
 
 XkString8 xkDuplicateString8(XkString8 string) {
@@ -709,29 +802,76 @@ XkInt32 xkNCompareString16(XkString16 string1, XkString16 string2, const XkSize 
 	return(status);
 }
 
-XkString16 xkTokenString16(XkString16 string, XkString16 token) {
-	while(*string) {
+XkString16 xkTokenString16(XkString16 string, XkString16* pNext, XkString16 token) {
+	while(XK_TRUE) {
+		if(xkDelim16(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == u'\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	XkString16 ret = string;
+	while(XK_TRUE) {
+		if(*string == u'\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim16(*string, token)) {
 			*string = u'\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
 }
 
-XkString16 xkNTokenString16(XkString16 string, XkString16 token, const XkSize length) {
+XkString16 xkNTokenString16(XkString16 string, XkString16* pNext, XkString16 token, const XkSize length) {
 	XkSize len = length;
-	while(*string && --len) {
+
+	while(XK_TRUE && --len) {
+		if(xkDelim16(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == u'\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	len = length;
+	XkString16 ret = string;
+	while(XK_TRUE && --len) {
+		if(*string == u'\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim16(*string, token)) {
 			*string = u'\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
+
 }
 
 XkString16 xkDuplicateString16(XkString16 string) {
@@ -806,29 +946,76 @@ XkInt32 xkNCompareString32(XkString32 string1, XkString32 string2, const XkSize 
 	return(status);
 }
 
-XkString32 xkTokenString32(XkString32 string, XkString32 token) {
-	while(*string) {
+XkString32 xkTokenString32(XkString32 string, XkString32* pNext, XkString32 token) {
+	while(XK_TRUE) {
+		if(xkDelim32(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == U'\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	XkString32 ret = string;
+	while(XK_TRUE) {
+		if(*string == U'\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim32(*string, token)) {
 			*string = U'\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
 }
 
-XkString32 xkNTokenString32(XkString32 string, XkString32 token, const XkSize length) {
+XkString32 xkNTokenString32(XkString32 string, XkString32* pNext, XkString32 token, const XkSize length) {
 	XkSize len = length;
-	while(*string && --len) {
+
+	while(XK_TRUE && --len) {
+		if(xkDelim32(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == U'\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	len = length;
+	XkString32 ret = string;
+	while(XK_TRUE && --len) {
+		if(*string == U'\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkDelim32(*string, token)) {
 			*string = U'\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
+
 }
 
 XkString32 xkDuplicateString32(XkString32 string) {
@@ -903,29 +1090,76 @@ XkInt32 xkNCompareWString(XkWString string1, XkWString string2, const XkSize len
 	return(status);
 }
 
-XkWString xkTokenWString(XkWString string, XkWString token) {
-	while(*string) {
+XkWString xkTokenWString(XkWString string, XkWString* pNext, XkWString token) {
+	while(XK_TRUE) {
+		if(xkWDelim(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == L'\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	XkWString ret = string;
+	while(XK_TRUE) {
+		if(*string == L'\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkWDelim(*string, token)) {
 			*string = L'\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
 }
 
-XkWString xkNTokenWString(XkWString string, XkWString token, const XkSize length) {
+XkWString xkNTokenWString(XkWString string, XkWString* pNext, XkWString token, const XkSize length) {
 	XkSize len = length;
-	while(*string && --len) {
+
+	while(XK_TRUE && --len) {
+		if(xkWDelim(*string, token)) {
+			++string;
+			continue;
+		}
+
+		if(*string == L'\0') {
+			// NOTE: We've reached the end of the string
+			return(XK_NULL_HANDLE);
+		}
+		break;
+	}
+
+	len = length;
+	XkWString ret = string;
+	while(XK_TRUE && --len) {
+		if(*string == L'\0') {
+			/// NOTE: End of the input string and next exec will return null.
+			*pNext = string;
+			return ret;
+		}
+
 		if(xkWDelim(*string, token)) {
 			*string = L'\0';
-			return(string + 1);
+			*pNext = string + 1;
+			return ret;
 		}
+
 		++string;
 	}
 
 	return(XK_NULL_HANDLE);
+
 }
 
 XkWString xkDuplicateWString(XkWString string) {

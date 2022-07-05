@@ -48,7 +48,7 @@ extern XKCORE_API void 			__xkHashTableSet(XkHashTable, const XkHashKey, XkHandl
 	__xkHashTableSet(table, key, &tmp);							\
 }
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

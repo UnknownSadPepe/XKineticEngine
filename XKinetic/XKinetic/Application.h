@@ -33,7 +33,7 @@ extern XkResult 	xkInitializeApplication(const XkSize, const XkString*);
 extern void 			xkTerminateApplication();
 extern void 			xkUpdateApplication();
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -171,7 +171,7 @@ extern XKCORE_API void 				xkPollEvents();
 extern XKCORE_API void 				xkWaitEvents();
 extern XKCORE_API void 				xkWaitEventsTimeout(XkFloat64);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

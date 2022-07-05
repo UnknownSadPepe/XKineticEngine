@@ -287,6 +287,7 @@ void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeigh
 void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize minHeight, const XkSize maxWidth, const XkSize maxHeight) {
   xkAssert(window);
 
+
 	RECT rect;
 	GetWindowRect(window->win32.handle, &rect);
 

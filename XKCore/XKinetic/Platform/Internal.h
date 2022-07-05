@@ -100,7 +100,7 @@ extern XK_EXPORT void 								__xkErrorHandler(const XkString pFormat, ...);
 /* ########## FUNCTIONS HELPERS MACROS SECTION ########## */
 #define 															__xkErrorHandle(message) __xkErrorHandler("%s %s %d", message, __FILE__, __LINE__)
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

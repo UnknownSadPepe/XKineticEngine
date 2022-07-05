@@ -45,7 +45,7 @@ extern XKCORE_API void 			xkReadFile(XkFile, XkString, const XkSize);
 extern XKCORE_API void 			xkAsyncWriteFile(XkFile, const XkString, const XkSize);
 extern XKCORE_API void 			xkAsyncReadFile(XkFile, XkString, const XkSize);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -25,7 +25,7 @@ extern XKCORE_API XkSize 	xkGetTime();
 extern XKCORE_API void 		xkTimeFormat(XkTime* const, const XkSize);
 extern XKCORE_API XkSize 	xkTimeStringFormat(XkTime* const, XkString, const XkSize, const XkString);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

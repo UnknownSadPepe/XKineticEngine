@@ -26,7 +26,7 @@ XKCORE_API void 			xkDestroyMutex(XkMutex);
 XKCORE_API void 			xkLockMutex(XkMutex);
 XKCORE_API void 			xkUnlockMutex(XkMutex);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

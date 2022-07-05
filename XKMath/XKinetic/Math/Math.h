@@ -232,7 +232,7 @@ XKMATH_API XkFloat64 xkDAbs(const XkFloat64);
 	XkFloat32: xkFAbs, \
   XkFloat64: xkDAbs)(x)
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

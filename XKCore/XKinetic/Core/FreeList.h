@@ -21,7 +21,7 @@ extern XKCORE_API void 			xkClearFreeList(XkFreeList);
 extern XKCORE_API XkHandle 	xkFreeListAllocate(XkFreeList, const XkSize);
 extern XKCORE_API void 			xkFreeListFree(XkFreeList, XkHandle);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

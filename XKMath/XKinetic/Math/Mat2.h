@@ -56,7 +56,7 @@ typedef union {
 	XkFloat64 handle[2][4];
 } XkDMat2x4;
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

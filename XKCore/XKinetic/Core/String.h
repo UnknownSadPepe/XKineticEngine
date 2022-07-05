@@ -77,8 +77,8 @@ extern XKCORE_API XkString 		xkConcatString(XkString, XkString);
 extern XKCORE_API XkString 		xkNConcatString(XkString, XkString, const XkSize);
 extern XKCORE_API XkInt32 		xkCompareString(XkString, XkString);
 extern XKCORE_API XkInt32 		xkNCompareString(XkString, XkString, const XkSize);
-extern XKCORE_API XkString 		xkTokenString(XkString, XkString);
-extern XKCORE_API XkString 		xkNTokenString(XkString, XkString, const XkSize);
+extern XKCORE_API XkString 		xkTokenString(XkString, XkString*, XkString);
+extern XKCORE_API XkString 		xkNTokenString(XkString, XkString*, XkString, const XkSize);
 extern XKCORE_API XkString 		xkDuplicateString(XkString);
 extern XKCORE_API XkString 		xkNDuplicateString(XkString, const XkSize);
 
@@ -94,8 +94,8 @@ extern XKCORE_API XkString8 	xkConcatString8(XkString8, XkString8);
 extern XKCORE_API XkString8 	xkNConcatString8(XkString8, XkString8, const XkSize);
 extern XKCORE_API XkInt32 		xkCompareString8(XkString8, XkString8);
 extern XKCORE_API XkInt32 		xkNCompareString8(XkString8, XkString8, const XkSize);
-extern XKCORE_API XkString8 	xkTokenString8(XkString8, XkString8);
-extern XKCORE_API XkString8 	xkNTokenString8(XkString8, XkString8, const XkSize);
+extern XKCORE_API XkString8 	xkTokenString8(XkString8, XkString8*, XkString8);
+extern XKCORE_API XkString8 	xkNTokenString8(XkString8, XkString8*, XkString8, const XkSize);
 extern XKCORE_API XkString8 	xkDuplicateString8(XkString8);
 extern XKCORE_API XkString8 	xkNDuplicateString8(XkString8, const XkSize);
 
@@ -106,8 +106,8 @@ extern XKCORE_API XkString16 	xkConcatString16(XkString16, XkString16);
 extern XKCORE_API XkString16 	xkNConcatString16(XkString16, XkString16, const XkSize);
 extern XKCORE_API XkInt32 		xkCompareString16(XkString16, XkString16);
 extern XKCORE_API XkInt32 		xkNCompareString16(XkString16, XkString16, const XkSize);
-extern XKCORE_API XkString16 	xkTokenString16(XkString16, XkString16);
-extern XKCORE_API XkString16 	xkNTokenString16(XkString16, XkString16, const XkSize);
+extern XKCORE_API XkString16 	xkTokenString16(XkString16, XkString16*, XkString16);
+extern XKCORE_API XkString16 	xkNTokenString16(XkString16, XkString16*, XkString16, const XkSize);
 extern XKCORE_API XkString16 	xkDuplicateString16(XkString16);
 extern XKCORE_API XkString16 	xkNDuplicateString16(XkString16, const XkSize);
 
@@ -118,8 +118,8 @@ extern XKCORE_API XkString32 	xkConcatString32(XkString32, XkString32);
 extern XKCORE_API XkString32 	xkNConcatString32(XkString32, XkString32, const XkSize);
 extern XKCORE_API XkInt32 		xkCompareString32(XkString32, XkString32);
 extern XKCORE_API XkInt32 		xkNCompareString32(XkString32, XkString32, const XkSize);
-extern XKCORE_API XkString32 	xkTokenString32(XkString32, XkString32);
-extern XKCORE_API XkString32 	xkNTokenString32(XkString32, XkString32, const XkSize);
+extern XKCORE_API XkString32 	xkTokenString32(XkString32, XkString32*, XkString32);
+extern XKCORE_API XkString32 	xkNTokenString32(XkString32, XkString32*, XkString32, const XkSize);
 extern XKCORE_API XkString32 	xkDuplicateString32(XkString32);
 extern XKCORE_API XkString32 	xkNDuplicateString32(XkString32, const XkSize);
 
@@ -130,8 +130,8 @@ extern XKCORE_API XkWString 	xkConcatWString(XkWString, XkWString);
 extern XKCORE_API XkWString 	xkNConcatWString(XkWString, XkWString, const XkSize);
 extern XKCORE_API XkInt32 		xkCompareWString(XkWString, XkWString);
 extern XKCORE_API XkInt32 		xkNCompareWString(XkWString, XkWString, const XkSize);
-extern XKCORE_API XkWString 	xkTokenWString(XkWString, XkWString);
-extern XKCORE_API XkWString 	xkNTokenWString(XkWString, XkWString, const XkSize);
+extern XKCORE_API XkWString 	xkTokenWString(XkWString, XkWString*, XkWString);
+extern XKCORE_API XkWString 	xkNTokenWString(XkWString, XkWString*, XkWString, const XkSize);
 extern XKCORE_API XkWString 	xkDuplicateWString(XkWString);
 extern XKCORE_API XkWString 	xkNDuplicateWString(XkWString, const XkSize);
 
@@ -140,7 +140,7 @@ extern XKCORE_API XkSize 			xkWStringNFormat(XkWString, const XkSize, XkWString,
 extern XKCORE_API XkSize 			xkWStringFFormat(XkWString, XkWString, XkArgs);
 extern XKCORE_API XkSize 			xkWStringNFFormat(XkWString, const XkSize, XkWString, XkArgs);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

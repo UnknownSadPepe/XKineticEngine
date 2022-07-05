@@ -29,6 +29,8 @@ typedef struct __XkWaylandWindow_T {
 	struct wl_buffer*											wlCursorBuffer;
 	int cursorWidth;
 	int cursorHeight;
+	int cursorXHot;
+	int cursorYHot;
 
 	XkSize width;
 	XkSize height;
@@ -107,7 +109,7 @@ typedef struct __XkWaylandPlatform_T {
 #define XK_PLATFORM_JOYSTICK 	__XkLinuxJoystick handle
 #define XK_PLATFORM 					__XkWaylandPlatform wayland
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

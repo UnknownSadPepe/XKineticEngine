@@ -24,7 +24,7 @@ extern XK_API XkComponentId		xkAddEntityComponent(XkEntity*, const XkComponentTy
 extern XK_API void						xkRemoveEntityComponent(XkEntity*, const XkComponentId);
 extern XK_API void						xkEntityHasComponent(XkEntity*, const XkComponentType);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

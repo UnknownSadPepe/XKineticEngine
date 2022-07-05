@@ -57,7 +57,7 @@ extern XKCORE_API void   xkWriteConsole(const XkConsoleHandle, const XkString, c
 extern XKCORE_API void   xkWriteConsoleColored(const XkConsoleHandle, const XkConsoleColor, const XkString, const XkSize);
 extern XKCORE_API void   xkReadConsole(XkString, const XkSize);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

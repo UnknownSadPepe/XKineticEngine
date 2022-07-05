@@ -8,6 +8,8 @@
 /* ########## GLOBAL VARIABLES SECTION ########## */
 XkApplication _xkApplication;
 
+static XkWindowIcon cursorIcon;
+
 /* ########## FUNCTIONS SECTION ########## */
 static void __xkWindowShow(XkWindow window, const XkWindowShow show) {
 	xkAssert(window);
@@ -64,8 +66,10 @@ static void __xkWindowKey(XkWindow window, const XkKey key, const XkAction actio
 			xkSetWindowCursorMode(window, XK_CURSOR_DISABLED);
 		}
 
-		if (key == XK_KEY_X) {
+		if(key == XK_KEY_X) {
 			xkSetWindowCursor(window, XK_NULL_HANDLE);
+		} else if(key == XK_KEY_Z) {
+			xkSetWindowCursor(window, &cursorIcon);	
 		}
 
 		if(key == XK_KEY_F) {
@@ -110,7 +114,7 @@ static void __xkWindowButton(XkWindow window, const XkButton button, const XkAct
 static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
 	xkAssert(window);
 
-	xkLogNotice("cursor x: %f y: %f", x, y);
+	//xkLogNotice("cursor x: %f y: %f", x, y);
 }
 
 static void __xkWindowCursorEnter(XkWindow window, XkBool entered) {
@@ -289,19 +293,18 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 
 	XkWindowIcon icons[2] = {icon, smallIcon};
 	xkSetWindowIcon(_xkApplication.window, 2, icons);
-
-	XkWindowIcon cursorIcon 	= {};
-	cursorIcon.width 					= cursorConfig.width;
-	cursorIcon.height 				= cursorConfig.height;
-	cursorIcon.pixels 				= cursorConfig.pixels;
+	
+	cursorIcon.width				= cursorConfig.width;
+	cursorIcon.height 			= cursorConfig.height;
+	cursorIcon.pixels 			= cursorConfig.pixels;
 
 	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
 
-	xkUnloadImage(&cursorConfig);
+	//xkUnloadImage(&cursorConfig);
 
-	xkUnloadImage(&iconConfig);
+	//xkUnloadImage(&iconConfig);
 
-	xkUnloadImage(&smallIconConfig);
+	//xkUnloadImage(&smallIconConfig);
 
 _catch:
 	return(result);

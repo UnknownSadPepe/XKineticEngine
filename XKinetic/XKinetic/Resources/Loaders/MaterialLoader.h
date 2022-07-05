@@ -16,7 +16,7 @@ extern XK_API void				xkTerminateMaterialLoader();
 extern XK_API XkResult		xkLoadMaterial(XkMaterialConfig* const, XkString);
 extern XK_API void				xkUnloadMaterial(const XkMaterialConfig* const);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

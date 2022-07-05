@@ -22,7 +22,7 @@ XKCORE_API XkHandle 	xkZeroMemory(XkHandle, const XkSize);
 
 XKCORE_API XkInt32 		xkCompareMemory(const XkHandle, const XkHandle, const XkSize);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -230,7 +230,7 @@ XK_INLINE XKMATH_API XkFloat64 xkDVec3Dot(const XkDVec3 a, const XkDVec3 b) {
 	return(result);
 }
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

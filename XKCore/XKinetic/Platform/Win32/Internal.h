@@ -73,7 +73,7 @@ typedef struct __XkWin32Platform_T {
 #define XK_PLATFORM_MODULE 		__XkWin32Module win32
 #define XK_PLATFORM 					__XkWin32Platform win32
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

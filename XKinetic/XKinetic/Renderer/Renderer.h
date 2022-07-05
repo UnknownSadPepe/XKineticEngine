@@ -51,7 +51,7 @@ extern XK_API void 			xkBindRendererIndexBuffer(XkRendererBuffer, XkRenderer);
 extern XK_API XkResult 	xkCreateRendererTexture(XkRendererTexture*, const XkSize, const XkSize, const XkHandle, const XkTextureType);
 extern XK_API void 			xkDestroyRendererTexture(XkRendererTexture);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

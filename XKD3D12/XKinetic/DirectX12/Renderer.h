@@ -53,7 +53,7 @@ extern XKD3D12_API void 			xkD3D12BindIndexBuffer(XkD3D12Buffer, XkD3D12Renderer
 extern XKD3D12_API XkResult 	xkD3D12CreateTexture2d(XkD3D12Texture2d*, const XkSize, const XkSize, const XkHandle);
 extern XKD3D12_API void 			xkD3D12DestroyTexture2d(XkD3D12Texture2d);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

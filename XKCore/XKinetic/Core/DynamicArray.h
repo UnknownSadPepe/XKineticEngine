@@ -55,7 +55,7 @@ extern XKCORE_API void 			__xkDynamicArraySet(XkDynamicArray, const XkSize, XkHa
 	__xkDynamicArraySet(array, &tmp);					\
 }
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

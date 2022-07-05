@@ -16,7 +16,7 @@ extern XK_API void				xkTerminateImageLoader();
 extern XK_API XkResult		xkLoadImage(XkImageConfig* const, XkString);
 extern XK_API void				xkUnloadImage(const XkImageConfig* const);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

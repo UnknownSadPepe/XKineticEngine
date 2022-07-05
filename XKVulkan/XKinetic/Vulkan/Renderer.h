@@ -53,7 +53,7 @@ extern XKVULKAN_API void 			xkVulkanBindIndexBuffer(XkVulkanBuffer, XkVulkanRend
 extern XKVULKAN_API XkResult 	xkVulkanCreateTexture(XkVulkanTexture*, const XkSize, const XkSize, const XkHandle, const XkTextureType);
 extern XKVULKAN_API void 			xkVulkanDestroyTexture(XkVulkanTexture);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

@@ -260,7 +260,7 @@ typedef XkChar32* XkString32;
 
 typedef XkWChar* XkWString;
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

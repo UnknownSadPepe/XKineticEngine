@@ -24,7 +24,7 @@ extern XKCORE_API void 			xkFreePoolMemory(XkPoolAllocator, const XkHandle);
 /* ########## FUNCTIONS MACROS SECTION ########## */
 #define 										xkCreatePoolAllocator(allocator, totalChunkCount, chunkType) __xkCreatePoolAllocator(allocator, totalChunkCount, sizeof(chunkType))
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

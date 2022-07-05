@@ -93,7 +93,7 @@ XK_INLINE XKCORE_API XkUInt32 xkToUpper(const XkUInt32 chr) {
 	return(chr);
 }
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

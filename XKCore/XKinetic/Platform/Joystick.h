@@ -105,7 +105,7 @@ extern XK_EXPORT void 				__xkInputJoystickAxis(XkJoystick, const XkJoystickAxis
 extern XK_EXPORT void 				__xkInputJoystickButton(XkJoystick, const XkJoystickButton, const XkAction);
 extern XK_EXPORT void 				__xkInputJoystickHat(XkJoystick, const XkJoystickHat, const XkAction);
 
-/// note: for using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus

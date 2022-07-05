@@ -16,7 +16,7 @@ extern XK_API void				xkTerminateShaderLoader();
 extern XK_API XkResult		xkLoadShader(XkShaderConfig* const, XkString);
 extern XK_API void				xkUnloadShader(const XkShaderConfig* const);
 
-/// NOTE: For using in cpp programs. 
+/// NOTE: For using in cpp programs.
 #ifdef __cplusplus
 }
 #endif // __cplusplus
