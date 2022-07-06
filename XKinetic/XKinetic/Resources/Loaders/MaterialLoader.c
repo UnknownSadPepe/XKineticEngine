@@ -7,7 +7,7 @@
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkMaterialLoader_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
   XkChar path[XK_MATERIAL_LOADER_PATH_MAX_SIZE];
 } __XkMaterialLoader;

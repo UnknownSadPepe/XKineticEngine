@@ -8,9 +8,9 @@ const char* _xkVulkanInstanceExtensions[] = {
 
 #if defined(XK_LINUX)
 	VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME,
-#elif defined(XK_WIN64)
+#elif defined(XK_WINDOWS)
 	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
-#endif // XK_LINUX || XK_WIN64
+#endif // XK_LINUX || XK_WINDOWS
 
 #ifdef XKVULKAN_DEBUG
 	VK_EXT_DEBUG_UTILS_EXTENSION_NAME
@@ -36,8 +36,8 @@ const uint32_t _xkVulkanInstanceLayerCount = 0;
 #endif // XKVULKAN_DEBUG
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-static XkBool __xkVulkanCheckInstanceExtensionsSupport();
-static XkBool __xkVulkanCheckInstanceLayersSupport();
+static XkBool8 __xkVulkanCheckInstanceExtensionsSupport();
+static XkBool8 __xkVulkanCheckInstanceLayersSupport();
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult __xkVulkanCreateInstance() {
@@ -100,8 +100,8 @@ void __xkVulkanDestroyInstance() {
   }
 }
 
-static XkBool __xkVulkanCheckInstanceExtensionsSupport() {
-  XkBool result = XK_TRUE; 
+static XkBool8 __xkVulkanCheckInstanceExtensionsSupport() {
+  XkBool8 result = XK_TRUE; 
 
   uint32_t availableExtensionPropertiesCount = 0;
   vkEnumerateInstanceExtensionProperties(VK_NULL_HANDLE, &availableExtensionPropertiesCount, VK_NULL_HANDLE);
@@ -125,7 +125,7 @@ static XkBool __xkVulkanCheckInstanceExtensionsSupport() {
 
   const char* requiredExtension = XK_NULL_HANDLE;
 
-  XkBool availableExtensionFind = XK_FALSE;
+  XkBool8 availableExtensionFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVulkanInstanceExtensionCount; i++) {
     requiredExtension = _xkVulkanInstanceExtensions[i];
@@ -154,8 +154,8 @@ _catch:
   return(result);
 }
 
-static XkBool __xkVulkanCheckInstanceLayersSupport() {
-  XkBool result = XK_TRUE; 
+static XkBool8 __xkVulkanCheckInstanceLayersSupport() {
+  XkBool8 result = XK_TRUE; 
 
   uint32_t availableLayerPropertiesCount = 0;
   vkEnumerateInstanceLayerProperties(&availableLayerPropertiesCount, VK_NULL_HANDLE);
@@ -179,7 +179,7 @@ static XkBool __xkVulkanCheckInstanceLayersSupport() {
 
   const char* requiredLayer = XK_NULL_HANDLE;
 
-  XkBool availableLayerFind = XK_FALSE;
+  XkBool8 availableLayerFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVulkanInstanceLayerCount; i++) {
     requiredLayer = _xkVulkanInstanceLayers[i];

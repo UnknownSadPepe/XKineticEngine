@@ -136,7 +136,7 @@ XK_INLINE XKMATH_API XkDVec3 xkDVec3Div(const XkDVec3 a, const XkDVec3 b) {
 	return(vec);
 }
 
-XK_INLINE XKMATH_API XkBool xkVec3Compare(const XkVec3 a, const XkVec3 b) {
+XK_INLINE XKMATH_API XkBool8 xkVec3Compare(const XkVec3 a, const XkVec3 b) {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	/// TODO: Implementation.
 #else
@@ -148,7 +148,7 @@ XK_INLINE XKMATH_API XkBool xkVec3Compare(const XkVec3 a, const XkVec3 b) {
 	return(XK_TRUE);
 }
 
-XK_INLINE XKMATH_API XkBool xkDVec3Compare(const XkDVec3 a, const XkDVec3 b) {
+XK_INLINE XKMATH_API XkBool8 xkDVec3Compare(const XkDVec3 a, const XkDVec3 b) {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	/// TODO: Implementation.
 #else

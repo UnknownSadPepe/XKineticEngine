@@ -1,26 +1,35 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
 XkHandle xkCopyMemory(XkHandle dstMemory, const XkHandle srcMemory, const XkSize size) {
+	xkAssert(dstMemory);
+	xkAssert(srcMemory);
+	xkAssert(size > 0);
+
 	const XkUInt8* alignSrcMemory = srcMemory;
 	XkUInt8* alignDstMemory = dstMemory;
 
 	XkSize length = size;
 
-  while(--length) {
+	while(--length) {
 		*alignDstMemory++ = *alignSrcMemory++;
-  }
+	}
 
-  return(dstMemory);
+	return(dstMemory);
 }
 
 XkHandle xkMoveMemory(XkHandle dstMemory, const XkHandle srcMemory, const XkSize size) {
+	xkAssert(dstMemory);
+	xkAssert(srcMemory);
+	xkAssert(size > 0);
+
 	const XkUInt8* alignSrcMemory = srcMemory;
 	XkUInt8* alignDstMemory = dstMemory;
 
-  XkUInt8* tmpMemory  = xkAllocateMemory(size);
+	XkUInt8* tmpMemory  = xkAllocateMemory(size);
 	if(tmpMemory == XK_NULL_HANDLE) {
 		return XK_NULL_HANDLE;
 	}
@@ -31,26 +40,33 @@ XkHandle xkMoveMemory(XkHandle dstMemory, const XkHandle srcMemory, const XkSize
 
 	for(XkSize i = 0 ; i < size; ++i) {
 		*(alignDstMemory + i) = *(alignSrcMemory + i);
-  }
+	}
 
-  xkFreeMemory(tmpMemory);
+	xkFreeMemory(tmpMemory);
 
-  return(dstMemory);
+	return(dstMemory);
 }
 
 XkHandle xkZeroMemory(XkHandle memory, const XkSize size) {
+	xkAssert(memory);
+	xkAssert(size > 0);
+
 	XkUInt8* alignMemory = memory;
 
 	XkSize length = size;
 
-  while(--length) {
+	while(--length) {
 		*alignMemory++ = 0;
-  }
+	}
 
-  return(memory);
+	return(memory);
 }
 
 XkInt32 xkCompareMemory(const XkHandle memory1, const XkHandle memory2, const XkSize size) {
+	xkAssert(memory1);
+	xkAssert(memory2);
+	xkAssert(size > 0);
+	
 	XkUInt8* alignMemory1 = memory1;
 
 	XkUInt8* alignMemory2 = memory2;

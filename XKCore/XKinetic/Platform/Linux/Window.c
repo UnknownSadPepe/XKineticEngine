@@ -39,13 +39,13 @@
 #endif
 
 /* ########## FUNCTION DECLARATIONS SECTION ########## */
-static XkBool 			__xkXDGCreateSurface(XkWindow);
+static XkBool8 			__xkXDGCreateSurface(XkWindow);
 static void 				__xkXDGDestorySurface(XkWindow);
 
-static XkBool 			__xkXDGCreateDecorations(XkWindow);
+static XkBool8 			__xkXDGCreateDecorations(XkWindow);
 static void 				__xkXDGDestroyDecorations(XkWindow);
 
-static XkBool 			__xkZWPCreateIdleInhibitor(XkWindow);
+static XkBool8 			__xkZWPCreateIdleInhibitor(XkWindow);
 static void 				__xkZWPDestroyIdleInhibitor(XkWindow);
 
 static int 					__xkWaylandAllocateShmFile(const XkSize);
@@ -53,7 +53,7 @@ struct wl_buffer* 	__xkWaylandCreateShmBuffer(const XkSize, const XkSize, const 
 
 static void 				__xkWaylandResizeWindow(XkWindow);
 
-static XkBool 			__xkWaylandFlushDisplay(void);
+static XkBool8 			__xkWaylandFlushDisplay(void);
 
 static void 				__xkZWPLockPointer(XkWindow);
 static void 				__xkZWPUnlockPointer(XkWindow);
@@ -99,9 +99,9 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
 		return;
 	}
 
-  XkBool maximized 	= XK_FALSE;
-  XkBool fullscreen = XK_FALSE;
-  XkBool activated 	= XK_FALSE;
+  XkBool8 maximized 	= XK_FALSE;
+  XkBool8 fullscreen 	= XK_FALSE;
+  XkBool8 activated 	= XK_FALSE;
 
 	uint32_t* state;
 	wl_array_for_each(state, wlStates) {
@@ -113,9 +113,9 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
     }
   }
 
-	if((width != 0 && height != 0) && ((XkSize)width != window->wayland.width || (XkSize)height != window->wayland.height)) {
-		window->wayland.width = (XkSize)width;
-		window->wayland.height = (XkSize)height;
+	if((width != 0 && height != 0) && ((XkSize)width != window->linux.wayland.width || (XkSize)height != window->linux.wayland.height)) {
+		window->linux.wayland.width = (XkSize)width;
+		window->linux.wayland.height = (XkSize)height;
 
 		__xkInputWindowSize(window, (XkSize)width, (XkSize)height);
 	}
@@ -126,7 +126,6 @@ static void __xkXDGToplevelHandleConfigure(void* data, struct xdg_toplevel* xdgT
 
 	if(fullscreen) {
   	__xkInputWindowShow(window, XK_WINDOW_SHOW_FULLSCREEN);
-		window->fullscreen = fullscreen;
   }
 
   if(!activated) {
@@ -164,8 +163,8 @@ static void __xkWaylandPointerHandleEnter(void* data, struct wl_pointer* wlPoint
 		return;
 	}
 
-	_xkPlatform.wayland.pointerSerial = serial;
-	_xkPlatform.wayland.pointerWindowFocus = window;
+	_xkPlatform.linux.wayland.pointerSerial = serial;
+	_xkPlatform.linux.wayland.pointerWindowFocus = window;
 
 	__xkWaylandSetWindowCursor(window);
 
@@ -173,21 +172,19 @@ static void __xkWaylandPointerHandleEnter(void* data, struct wl_pointer* wlPoint
 }
 
 static void __xkWaylandPointerHandleLeave(void* data, struct wl_pointer* wlPointer, uint32_t serial, struct wl_surface* wlSurface) {
-	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	XkWindow window = _xkPlatform.linux.wayland.pointerWindowFocus;
 	if(!window) {
 		return;
 	}
 
-	_xkPlatform.wayland.pointerSerial = serial;
-	_xkPlatform.wayland.pointerWindowFocus = NULL;
-
-	__xkWaylandSetWindowCursor(window);
+	_xkPlatform.linux.wayland.pointerSerial 			= serial;
+	_xkPlatform.linux.wayland.pointerWindowFocus 	= NULL;
 
 	__xkInputWindowCursorEnter(window, XK_FALSE);
 }
 
 static void __xkWaylandPointerHandleMotion(void* data,	struct wl_pointer* wlPointer, uint32_t time, wl_fixed_t sx, wl_fixed_t sy) {
-	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	XkWindow window = _xkPlatform.linux.wayland.pointerWindowFocus;
 	if(!window) {
 		return;
 	}
@@ -199,26 +196,26 @@ static void __xkWaylandPointerHandleMotion(void* data,	struct wl_pointer* wlPoin
 	double x = wl_fixed_to_double(sx);
 	double y = wl_fixed_to_double(sy);
 
-	window->wayland.cursorPosX = (XkFloat64)x;
-	window->wayland.cursorPosY = (XkFloat64)y;
+	window->linux.wayland.cursorPosX = (XkFloat64)x;
+	window->linux.wayland.cursorPosY = (XkFloat64)y;
 
 	__xkInputWindowCursor(window, (XkFloat64)x, (XkFloat64)y);
 }
 
 static void __xkWaylandPointerHandleButton(void* data, struct wl_pointer* wlPointer, uint32_t serial, uint32_t time, uint32_t btn, uint32_t state) {
-	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	XkWindow window = _xkPlatform.linux.wayland.pointerWindowFocus;
 	if(!window) {
 		return;
 	}
 
 	const XkButton button = btn - BTN_LEFT;
-	const XkAction action = state == WL_POINTER_BUTTON_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+	const XkAction action = state == WL_POINTER_BUTTON_STATE_PRESSED ? XK_ACTION_PRESS : XK_ACTION_RELEASE;
 
-	__xkInputWindowButton(window, button, action, _xkPlatform.wayland.modifiers);
+	__xkInputWindowButton(window, button, action, _xkPlatform.linux.xkb.modifiers);
 }
 
 static void __xkWaylandPointerHandleAxis(void* data, struct wl_pointer* wlPointer, uint32_t time, uint32_t axis, wl_fixed_t value) {
-	XkWindow window = _xkPlatform.wayland.pointerWindowFocus;
+	XkWindow window = _xkPlatform.linux.wayland.pointerWindowFocus;
 	if(!window) {
 		return;
 	}
@@ -281,8 +278,8 @@ static void __xkZWPRelativePointerHandleRelativeMotion(void* data, struct zwp_re
 		return;
 	}
 
-  double xPos = window->wayland.cursorPosX;
-  double yPos = window->wayland.cursorPosY;
+  double xPos = window->linux.wayland.cursorPosX;
+  double yPos = window->linux.wayland.cursorPosY;
 
   xPos += wl_fixed_to_double(dx);
   yPos += wl_fixed_to_double(dy);
@@ -319,21 +316,21 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		return;
 	}
 
-  _xkPlatform.wayland.xkbKeymap = xkb_keymap_new_from_string(_xkPlatform.wayland.xkbContext, string, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+  _xkPlatform.linux.xkb.xkbKeymap = xkb_keymap_new_from_string(_xkPlatform.linux.xkb.xkbContext, string, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
 	munmap(string, size);
 
 	close(fd);
 
-	if(!_xkPlatform.wayland.xkbKeymap) {
+	if(!_xkPlatform.linux.xkb.xkbKeymap) {
 		__xkErrorHandle("XKB: Failed to compile keymap");
 		return;
 	}
  
-	_xkPlatform.wayland.xkbState = xkb_state_new(_xkPlatform.wayland.xkbKeymap);
-	if(!_xkPlatform.wayland.xkbState) {
+	_xkPlatform.linux.xkb.xkbState = xkb_state_new(_xkPlatform.linux.xkb.xkbKeymap);
+	if(!_xkPlatform.linux.xkb.xkbState) {
 		__xkErrorHandle("XKB: Failed to create state");
-		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+		xkb_keymap_unref(_xkPlatform.linux.xkb.xkbKeymap);
 		return;
 	}
 
@@ -348,29 +345,29 @@ static void __xkWaylandKeyboardHandleKeymap(void* data, struct wl_keyboard* wlKe
 		locale = "C";
 	}
 
-	struct xkb_compose_table* xkbComposeTable = xkb_compose_table_new_from_locale(_xkPlatform.wayland.xkbContext, locale, XKB_COMPOSE_COMPILE_NO_FLAGS);
+	struct xkb_compose_table* xkbComposeTable = xkb_compose_table_new_from_locale(_xkPlatform.linux.xkb.xkbContext, locale, XKB_COMPOSE_COMPILE_NO_FLAGS);
 	if(!xkbComposeTable) {
 		__xkErrorHandle("XKB: Failed to create compose table");
-		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+		xkb_keymap_unref(_xkPlatform.linux.xkb.xkbKeymap);
 		return;
 	}
 
-	_xkPlatform.wayland.xkbComposeState = xkb_compose_state_new(xkbComposeTable, XKB_COMPOSE_STATE_NO_FLAGS);
-	if(!_xkPlatform.wayland.xkbComposeState) {
+	_xkPlatform.linux.xkb.xkbComposeState = xkb_compose_state_new(xkbComposeTable, XKB_COMPOSE_STATE_NO_FLAGS);
+	if(!_xkPlatform.linux.xkb.xkbComposeState) {
 		__xkErrorHandle("XKB: Failed to create compose state");
 		xkb_compose_table_unref(xkbComposeTable);
-		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+		xkb_keymap_unref(_xkPlatform.linux.xkb.xkbKeymap);
 		return;
 	}
 
 	xkb_compose_table_unref(xkbComposeTable);
 
-	_xkPlatform.wayland.xkbControlIndex  = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Control");
-	_xkPlatform.wayland.xkbAltIndex      = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod1");
-	_xkPlatform.wayland.xkbShiftIndex    = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Shift");
-	_xkPlatform.wayland.xkbSuperIndex    = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod4");
-	_xkPlatform.wayland.xkbCapsLockIndex = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Lock");
-	_xkPlatform.wayland.xkbNumLockIndex  = xkb_keymap_mod_get_index(_xkPlatform.wayland.xkbKeymap, "Mod2");
+	_xkPlatform.linux.xkb.xkbControlIndex  = xkb_keymap_mod_get_index(_xkPlatform.linux.xkb.xkbKeymap, "Control");
+	_xkPlatform.linux.xkb.xkbAltIndex      = xkb_keymap_mod_get_index(_xkPlatform.linux.xkb.xkbKeymap, "Mod1");
+	_xkPlatform.linux.xkb.xkbShiftIndex    = xkb_keymap_mod_get_index(_xkPlatform.linux.xkb.xkbKeymap, "Shift");
+	_xkPlatform.linux.xkb.xkbSuperIndex    = xkb_keymap_mod_get_index(_xkPlatform.linux.xkb.xkbKeymap, "Mod4");
+	_xkPlatform.linux.xkb.xkbCapsLockIndex = xkb_keymap_mod_get_index(_xkPlatform.linux.xkb.xkbKeymap, "Lock");
+	_xkPlatform.linux.xkb.xkbNumLockIndex  = xkb_keymap_mod_get_index(_xkPlatform.linux.xkb.xkbKeymap, "Mod2");
 }
 
 static void __xkWaylandKeyboardHandleEnter(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, struct wl_surface* wlSurface, struct wl_array* wlKeys) {
@@ -384,58 +381,58 @@ static void __xkWaylandKeyboardHandleEnter(void* data, struct wl_keyboard* wlKey
 		return;
   }
 
-	_xkPlatform.wayland.keyboardWindowFocus = window;
+	_xkPlatform.linux.wayland.keyboardWindowFocus = window;
 
 	__xkInputWindowFocus(window, XK_TRUE);
 }
 
 static void __xkWaylandKeyboardHandleLeave(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, struct wl_surface* wlSurface) {
-	XkWindow window = _xkPlatform.wayland.keyboardWindowFocus;
+	XkWindow window = _xkPlatform.linux.wayland.keyboardWindowFocus;
 	if(!window) {
 		return;
 	}
 
-	_xkPlatform.wayland.keyboardWindowFocus = NULL;
+	_xkPlatform.linux.wayland.keyboardWindowFocus = NULL;
 
 	__xkInputWindowFocus(window, XK_FALSE);
 }
 
 static void __xkWaylandKeyboardHandleKey(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, uint32_t time, uint32_t scancode, uint32_t state) {
-	XkWindow window = _xkPlatform.wayland.keyboardWindowFocus;
+	XkWindow window = _xkPlatform.linux.wayland.keyboardWindowFocus;
 	if(!window) {
 		return;
 	}
 
 	const XkKey key = _xkPlatform.keycodes[scancode];
-	const XkAction action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_PRESS : XK_RELEASE;
+	const XkAction action = state == WL_KEYBOARD_KEY_STATE_PRESSED ? XK_ACTION_PRESS : XK_ACTION_RELEASE;
 
-	__xkInputWindowKey(window, key, action, _xkPlatform.wayland.modifiers);
+	__xkInputWindowKey(window, key, action, _xkPlatform.linux.xkb.modifiers);
 }
 
 static void __xkWaylandKeyboardHandleModifiers(void* data, struct wl_keyboard* wlKeyboard, uint32_t serial, uint32_t modsDepressed, uint32_t modsLatched, uint32_t modsLocked, uint32_t group) {
-	if(!_xkPlatform.wayland.xkbKeymap) {
+	if(!_xkPlatform.linux.xkb.xkbKeymap) {
 		return;
 	}
 
-	xkb_state_update_mask(_xkPlatform.wayland.xkbState, modsDepressed, modsLatched, modsLocked, 0, 0, group);
+	xkb_state_update_mask(_xkPlatform.linux.xkb.xkbState, modsDepressed, modsLatched, modsLocked, 0, 0, group);
 
-	_xkPlatform.wayland.modifiers = 0;
+	_xkPlatform.linux.xkb.modifiers = 0;
 
 	struct {
 		xkb_mod_index_t xkbIndex;
 		unsigned int bit;
 	} modifiers[] = {
-		{_xkPlatform.wayland.xkbControlIndex,  XK_MOD_CONTROL_BIT},
-		{_xkPlatform.wayland.xkbAltIndex,      XK_MOD_ALT_BIT},
-		{_xkPlatform.wayland.xkbShiftIndex,    XK_MOD_SHIFT_BIT},
-		{_xkPlatform.wayland.xkbSuperIndex,    XK_MOD_SUPER_BIT},
-		{_xkPlatform.wayland.xkbCapsLockIndex, XK_MOD_CAPS_LOCK_BIT},
-		{_xkPlatform.wayland.xkbNumLockIndex,  XK_MOD_NUM_LOCK_BIT}
+		{_xkPlatform.linux.xkb.xkbControlIndex,  XK_MOD_CONTROL_BIT},
+		{_xkPlatform.linux.xkb.xkbAltIndex,      XK_MOD_ALT_BIT},
+		{_xkPlatform.linux.xkb.xkbShiftIndex,    XK_MOD_SHIFT_BIT},
+		{_xkPlatform.linux.xkb.xkbSuperIndex,    XK_MOD_SUPER_BIT},
+		{_xkPlatform.linux.xkb.xkbCapsLockIndex, XK_MOD_CAPS_LOCK_BIT},
+		{_xkPlatform.linux.xkb.xkbNumLockIndex,  XK_MOD_NUM_LOCK_BIT}
 	};
 
 	for(size_t i = 0; i < sizeof(modifiers) / sizeof(modifiers[0]); i++) {
-		if(xkb_state_mod_index_is_active(_xkPlatform.wayland.xkbState, modifiers[i].xkbIndex, XKB_STATE_MODS_EFFECTIVE) == 1) {
-			_xkPlatform.wayland.modifiers |= modifiers[i].bit;
+		if(xkb_state_mod_index_is_active(_xkPlatform.linux.xkb.xkbState, modifiers[i].xkbIndex, XKB_STATE_MODS_EFFECTIVE) == 1) {
+			_xkPlatform.linux.xkb.modifiers |= modifiers[i].bit;
 		}
 	}
 }
@@ -460,12 +457,12 @@ static const struct wl_keyboard_listener _xkWaylandKeyboardListener = {
 };
 
 static void __xkWaylandDataOfferHandleOffer(void* data, struct wl_data_offer* wlDataOffer, const char* mimeType) {
-	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
-		if(_xkPlatform.wayland.offers[i].wlOffer == wlDataOffer) {
+	for(XkSize i = 0; i < _xkPlatform.linux.wayland.offerCount; i++) {
+		if(_xkPlatform.linux.wayland.offers[i].wlOffer == wlDataOffer) {
 			if(xkCompareString((XkString)mimeType, (XkString)"text/plain;charset=utf-8") == 1) {
-				_xkPlatform.wayland.offers[i].UTF8 = XK_TRUE;
+				_xkPlatform.linux.wayland.offers[i].UTF8 = XK_TRUE;
 			} else if (xkCompareString((XkString)mimeType, (XkString)"text/uri-list") == 1) {
-				_xkPlatform.wayland.offers[i].URI = XK_TRUE;
+				_xkPlatform.linux.wayland.offers[i].URI = XK_TRUE;
 			}
 
 			break;
@@ -488,16 +485,16 @@ static const struct wl_data_offer_listener _xkWaylandDataOfferListener = {
 };
 
 static void __xkWaylandDataDeviceHandleDataOffer(void* data, struct wl_data_device* wlDataDevice, struct wl_data_offer* wlDataOffer) {
-	__XkWaylandOffer* offers = xkReallocateMemory(_xkPlatform.wayland.offers, sizeof(__XkWaylandOffer) * _xkPlatform.wayland.offerCount + 1);
+	__XkWaylandOffer* offers = xkReallocateMemory(_xkPlatform.linux.wayland.offers, sizeof(__XkWaylandOffer) * _xkPlatform.linux.wayland.offerCount + 1);
 	if(!offers) {
 		__xkErrorHandle("Wayland: Failed to reallocate offers");
 		return;
 	}
 
-	_xkPlatform.wayland.offers = offers;
-	++_xkPlatform.wayland.offerCount;
+	_xkPlatform.linux.wayland.offers = offers;
+	++_xkPlatform.linux.wayland.offerCount;
 
-	_xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1] = (__XkWaylandOffer){wlDataOffer, XK_FALSE, XK_FALSE};
+	_xkPlatform.linux.wayland.offers[_xkPlatform.linux.wayland.offerCount - 1] = (__XkWaylandOffer){wlDataOffer, XK_FALSE, XK_FALSE};
 
 	wl_data_offer_add_listener(wlDataOffer, &_xkWaylandDataOfferListener, NULL);
 }
@@ -513,26 +510,26 @@ static void __xkWaylandDataDeviceHandleEnter(void* data, struct wl_data_device* 
 		return;
 	}
 
-	if(_xkPlatform.wayland.wlDragOffer) {
-		wl_data_offer_destroy(_xkPlatform.wayland.wlDragOffer);
-		_xkPlatform.wayland.wlDragOffer = NULL;
-		_xkPlatform.wayland.dragWindowFocus = NULL;
+	if(_xkPlatform.linux.wayland.wlDragOffer) {
+		wl_data_offer_destroy(_xkPlatform.linux.wayland.wlDragOffer);
+		_xkPlatform.linux.wayland.wlDragOffer = NULL;
+		_xkPlatform.linux.wayland.dragWindowFocus = NULL;
 	}
 
-	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
-		if(_xkPlatform.wayland.offers[i].wlOffer == wlDataOffer) {
-			if(_xkPlatform.wayland.offers[i].URI) {
-				_xkPlatform.wayland.wlDragOffer = wlDataOffer;
-				_xkPlatform.wayland.dragWindowFocus = window;
+	for(XkSize i = 0; i < _xkPlatform.linux.wayland.offerCount; i++) {
+		if(_xkPlatform.linux.wayland.offers[i].wlOffer == wlDataOffer) {
+			if(_xkPlatform.linux.wayland.offers[i].URI) {
+				_xkPlatform.linux.wayland.wlDragOffer = wlDataOffer;
+				_xkPlatform.linux.wayland.dragWindowFocus = window;
 			}
 
-			_xkPlatform.wayland.offers[i] = _xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1];
-			--_xkPlatform.wayland.offerCount;
+			_xkPlatform.linux.wayland.offers[i] = _xkPlatform.linux.wayland.offers[_xkPlatform.linux.wayland.offerCount - 1];
+			--_xkPlatform.linux.wayland.offerCount;
 			break;
 		}
 	}
 
-	if (_xkPlatform.wayland.wlDragOffer) {
+	if (_xkPlatform.linux.wayland.wlDragOffer) {
 		wl_data_offer_accept(wlDataOffer, serial, "text/uri-list");
 	} else {
 		wl_data_offer_accept(wlDataOffer, serial, NULL);
@@ -541,10 +538,10 @@ static void __xkWaylandDataDeviceHandleEnter(void* data, struct wl_data_device* 
 }
 
 static void __xkWaylandDataDeviceHandleLeave(void* data, struct wl_data_device* wlDataDevice) {
-	if(_xkPlatform.wayland.wlDragOffer) {
-		wl_data_offer_destroy(_xkPlatform.wayland.wlDragOffer);
-		_xkPlatform.wayland.wlDragOffer = NULL;
-		_xkPlatform.wayland.dragWindowFocus = NULL;
+	if(_xkPlatform.linux.wayland.wlDragOffer) {
+		wl_data_offer_destroy(_xkPlatform.linux.wayland.wlDragOffer);
+		_xkPlatform.linux.wayland.wlDragOffer = NULL;
+		_xkPlatform.linux.wayland.dragWindowFocus = NULL;
 	}
 }
 
@@ -553,16 +550,16 @@ static void __xkWaylandDataDeviceHandleMotion(void* data, struct wl_data_device*
 }
 
 static void __xkWaylandDataDeviceHandleDrop(void* data, struct wl_data_device* wlDataDevice) {
-	if(!_xkPlatform.wayland.wlDragOffer) {
+	if(!_xkPlatform.linux.wayland.wlDragOffer) {
 		return;
 	}
 
-	XkString string = __xkWaylandReadDataOfferAsString(_xkPlatform.wayland.wlDragOffer, "text/uri-list");
+	XkString string = __xkWaylandReadDataOfferAsString(_xkPlatform.linux.wayland.wlDragOffer, "text/uri-list");
 	if(string) {
 		XkSize count;
 		XkString* paths = __xkParseURI(string, &count);
 		if(paths) {
-			__xkInputWindowDropFile((XkWindow)_xkPlatform.wayland.dragWindowFocus, count, (XkString*)paths);
+			__xkInputWindowDropFile((XkWindow)_xkPlatform.linux.wayland.dragWindowFocus, count, (XkString*)paths);
 		}
 
 		for(XkSize i = 0; i < count; i++) {
@@ -576,21 +573,21 @@ static void __xkWaylandDataDeviceHandleDrop(void* data, struct wl_data_device* w
 }
 
 static void __xkWaylandDataDeviceHandleSelection(void* data, struct wl_data_device* wlDataDevice, struct wl_data_offer* wlDataOffer) {
-	if(_xkPlatform.wayland.wlSelectionOffer) {
-		wl_data_offer_destroy(_xkPlatform.wayland.wlSelectionOffer);
-		_xkPlatform.wayland.wlSelectionOffer = NULL;
+	if(_xkPlatform.linux.wayland.wlSelectionOffer) {
+		wl_data_offer_destroy(_xkPlatform.linux.wayland.wlSelectionOffer);
+		_xkPlatform.linux.wayland.wlSelectionOffer = NULL;
 	}
 
-	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
-		if(_xkPlatform.wayland.offers[i].wlOffer == wlDataOffer) {
-			if(_xkPlatform.wayland.offers[i].UTF8) {
-				_xkPlatform.wayland.wlSelectionOffer = wlDataOffer;
+	for(XkSize i = 0; i < _xkPlatform.linux.wayland.offerCount; i++) {
+		if(_xkPlatform.linux.wayland.offers[i].wlOffer == wlDataOffer) {
+			if(_xkPlatform.linux.wayland.offers[i].UTF8) {
+				_xkPlatform.linux.wayland.wlSelectionOffer = wlDataOffer;
 			} else {
 				wl_data_offer_destroy(wlDataOffer);
 			}
 
-			_xkPlatform.wayland.offers[i] = _xkPlatform.wayland.offers[_xkPlatform.wayland.offerCount - 1];
-			--_xkPlatform.wayland.offerCount;
+			_xkPlatform.linux.wayland.offers[i] = _xkPlatform.linux.wayland.offers[_xkPlatform.linux.wayland.offerCount - 1];
+			--_xkPlatform.linux.wayland.offerCount;
 			break;
 		}
 	}
@@ -606,24 +603,24 @@ const struct wl_data_device_listener _xkWaylandDataDeviceListener = {
 };
 
 static void __xkWaylandSeatHandleCapabilities(void* data, struct wl_seat* wlSeat, enum wl_seat_capability wlCapability) {
-	if((wlCapability & WL_SEAT_CAPABILITY_POINTER) && !_xkPlatform.wayland.wlPointer) {
-		_xkPlatform.wayland.wlPointer = wl_seat_get_pointer(wlSeat);
+	if((wlCapability & WL_SEAT_CAPABILITY_POINTER) && !_xkPlatform.linux.wayland.wlPointer) {
+		_xkPlatform.linux.wayland.wlPointer = wl_seat_get_pointer(wlSeat);
 
-		wl_pointer_add_listener(_xkPlatform.wayland.wlPointer, &_xkWaylandPointerListener, NULL);
-	} else if(!(wlCapability & WL_SEAT_CAPABILITY_POINTER) && _xkPlatform.wayland.wlPointer) {
-		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
+		wl_pointer_add_listener(_xkPlatform.linux.wayland.wlPointer, &_xkWaylandPointerListener, NULL);
+	} else if(!(wlCapability & WL_SEAT_CAPABILITY_POINTER) && _xkPlatform.linux.wayland.wlPointer) {
+		wl_pointer_destroy(_xkPlatform.linux.wayland.wlPointer);
 
-		_xkPlatform.wayland.wlPointer = NULL;
+		_xkPlatform.linux.wayland.wlPointer = NULL;
 	}
 
-	if((wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && !_xkPlatform.wayland.wlKeyboard) {
-		_xkPlatform.wayland.wlKeyboard = wl_seat_get_keyboard(wlSeat);
+	if((wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && !_xkPlatform.linux.wayland.wlKeyboard) {
+		_xkPlatform.linux.wayland.wlKeyboard = wl_seat_get_keyboard(wlSeat);
 
-		wl_keyboard_add_listener(_xkPlatform.wayland.wlKeyboard, &_xkWaylandKeyboardListener, NULL);
-	} else if(!(wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && _xkPlatform.wayland.wlKeyboard) {
-		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
+		wl_keyboard_add_listener(_xkPlatform.linux.wayland.wlKeyboard, &_xkWaylandKeyboardListener, NULL);
+	} else if(!(wlCapability & WL_SEAT_CAPABILITY_KEYBOARD) && _xkPlatform.linux.wayland.wlKeyboard) {
+		wl_keyboard_destroy(_xkPlatform.linux.wayland.wlKeyboard);
 
-		_xkPlatform.wayland.wlKeyboard = NULL;
+		_xkPlatform.linux.wayland.wlKeyboard = NULL;
 	}
 }
 
@@ -638,29 +635,29 @@ static const struct wl_seat_listener _xkWaylandSeatListener = {
 
 static void __xkWaylandRegistryGlobal(void* data, struct wl_registry* wlRegistry, uint32_t name, const char* interface, uint32_t version) {
   if(xkCompareString((XkString)interface, (XkString)wl_compositor_interface.name) == 1) {
-		_xkPlatform.wayland.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
+		_xkPlatform.linux.wayland.wlCompositor = wl_registry_bind(wlRegistry, name, &wl_compositor_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_shm_interface.name) == 1) {
-		_xkPlatform.wayland.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, version);
+		_xkPlatform.linux.wayland.wlShm = wl_registry_bind(wlRegistry, name, &wl_shm_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_output_interface.name) == 1) {
-		_xkPlatform.wayland.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
+		_xkPlatform.linux.wayland.wlOutput = wl_registry_bind(wlRegistry, name, &wl_output_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_seat_interface.name) == 1) {
-		_xkPlatform.wayland.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, version);
+		_xkPlatform.linux.wayland.wlSeat = wl_registry_bind(wlRegistry, name, &wl_seat_interface, version);
 
-		 wl_seat_add_listener(_xkPlatform.wayland.wlSeat, &_xkWaylandSeatListener, NULL);
+		 wl_seat_add_listener(_xkPlatform.linux.wayland.wlSeat, &_xkWaylandSeatListener, NULL);
 	} else if(xkCompareString((XkString)interface, (XkString)wl_data_device_manager_interface.name) == 1) {
-		_xkPlatform.wayland.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, version);
+		_xkPlatform.linux.wayland.wlDataDeviceManager = wl_registry_bind(wlRegistry, name, &wl_data_device_manager_interface, version);
   } else if(xkCompareString((XkString)interface, (XkString)xdg_wm_base_interface.name) == 1) {
-    _xkPlatform.wayland.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, version);
+    _xkPlatform.linux.wayland.xdgBase = wl_registry_bind(wlRegistry, name, &xdg_wm_base_interface, version);
 
-		xdg_wm_base_add_listener(_xkPlatform.wayland.xdgBase, &_xkXDGWmBaseListener, NULL);
+		xdg_wm_base_add_listener(_xkPlatform.linux.wayland.xdgBase, &_xkXDGWmBaseListener, NULL);
   } else if(xkCompareString((XkString)interface, (XkString)zxdg_decoration_manager_v1_interface.name) == 1) {
-    _xkPlatform.wayland.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, version);
+    _xkPlatform.linux.wayland.xdgDecorationManager = wl_registry_bind(wlRegistry, name, &zxdg_decoration_manager_v1_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)zwp_relative_pointer_manager_v1_interface.name) == 1) {
-		_xkPlatform.wayland.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, version);
+		_xkPlatform.linux.wayland.zwpRelativePointerManager = wl_registry_bind(wlRegistry, name, &zwp_relative_pointer_manager_v1_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)zwp_pointer_constraints_v1_interface.name) == 1) {
-		_xkPlatform.wayland.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, version);
+		_xkPlatform.linux.wayland.zwpPointerConstraints = wl_registry_bind(wlRegistry, name, &zwp_pointer_constraints_v1_interface, version);
 	} else if(xkCompareString((XkString)interface, (XkString)zwp_idle_inhibit_manager_v1_interface.name) == 1) {
-		_xkPlatform.wayland.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, version);
+		_xkPlatform.linux.wayland.zwpIdleInhibitManager = wl_registry_bind(wlRegistry, name, &zwp_idle_inhibit_manager_v1_interface, version);
 	}
 }
 
@@ -685,281 +682,283 @@ static const struct wl_buffer_listener _xkWaylandBufferListener = {
 XkResult xkInitializeWindow(void) {
 	XkResult result = XK_SUCCESS;
 
-	if(_xkPlatform.initialized) {
+	if(_xkPlatform.linux.wayland.initialized && _xkPlatform.linux.xkb.initialized) {
 		goto _catch;
 	}
 
-	_xkPlatform.wayland.wlDisplay = wl_display_connect(NULL);
-	if(!_xkPlatform.wayland.wlDisplay) {
+	_xkPlatform.linux.wayland.wlDisplay = wl_display_connect(NULL);
+	if(!_xkPlatform.linux.wayland.wlDisplay) {
 		__xkErrorHandle("Wayland: Failed to connect display");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	_xkPlatform.wayland.wlRegistry = wl_display_get_registry(_xkPlatform.wayland.wlDisplay);
-	if(!_xkPlatform.wayland.wlRegistry) {
+	_xkPlatform.linux.wayland.wlRegistry = wl_display_get_registry(_xkPlatform.linux.wayland.wlDisplay);
+	if(!_xkPlatform.linux.wayland.wlRegistry) {
 		__xkErrorHandle("Wayland: Failed to get display registry");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-  wl_registry_add_listener(_xkPlatform.wayland.wlRegistry, &_xkWaylandRegistryListener, NULL);
+  wl_registry_add_listener(_xkPlatform.linux.wayland.wlRegistry, &_xkWaylandRegistryListener, NULL);
 
   __xkWaylandCreateKeyTable();
 
-	_xkPlatform.wayland.xkbContext = xkb_context_new(0);
-	if(!_xkPlatform.wayland.xkbContext) {
+	_xkPlatform.linux.xkb.xkbContext = xkb_context_new(0);
+	if(!_xkPlatform.linux.xkb.xkbContext) {
 		__xkErrorHandle("XKB: Failed to initialize context");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Sync so we got all registry objects.
-  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
+  wl_display_roundtrip(_xkPlatform.linux.wayland.wlDisplay);
 
 	// Sync so we got all initial output events.
-  wl_display_roundtrip(_xkPlatform.wayland.wlDisplay);
+  wl_display_roundtrip(_xkPlatform.linux.wayland.wlDisplay);
 
-	if(!_xkPlatform.wayland.wlCompositor) {
+	if(!_xkPlatform.linux.wayland.wlCompositor) {
 		__xkErrorHandle("Wayland: Failed to register compositor");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.wlShm) {
+	if(!_xkPlatform.linux.wayland.wlShm) {
 		__xkErrorHandle("Wayland: Failed to register shm");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.wlOutput) {
+	if(!_xkPlatform.linux.wayland.wlOutput) {
 		__xkErrorHandle("Wayland: Failed to register output");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.wlSeat) {
+	if(!_xkPlatform.linux.wayland.wlSeat) {
 		__xkErrorHandle("Wayland: Failed to register seat");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.wlDataDeviceManager) {
+	if(!_xkPlatform.linux.wayland.wlDataDeviceManager) {
 		__xkErrorHandle("Wayland: Failed to register data device manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.xdgBase) {
+	if(!_xkPlatform.linux.wayland.xdgBase) {
 		__xkErrorHandle("Wayland: Failed to register XDG base");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-  if(!_xkPlatform.wayland.xdgDecorationManager) {
+  if(!_xkPlatform.linux.wayland.xdgDecorationManager) {
 		__xkErrorHandle("Wayland: Failed to register XDG decoration manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
-	if(!_xkPlatform.wayland.zwpRelativePointerManager) {
+	if(!_xkPlatform.linux.wayland.zwpRelativePointerManager) {
 		__xkErrorHandle("Wayland: Failed to register relative pointer manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.zwpPointerConstraints) {
+	if(!_xkPlatform.linux.wayland.zwpPointerConstraints) {
 		__xkErrorHandle("Wayland: Failed to register pointer constraints");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	if(!_xkPlatform.wayland.zwpIdleInhibitManager) {
+	if(!_xkPlatform.linux.wayland.zwpIdleInhibitManager) {
 		__xkErrorHandle("Wayland: Failed to register idle inhibit manager");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
-	_xkPlatform.wayland.wlDataDevice = wl_data_device_manager_get_data_device(_xkPlatform.wayland.wlDataDeviceManager, _xkPlatform.wayland.wlSeat);
-  if(!_xkPlatform.wayland.wlDataDevice) {
+	_xkPlatform.linux.wayland.wlDataDevice = wl_data_device_manager_get_data_device(_xkPlatform.linux.wayland.wlDataDeviceManager, _xkPlatform.linux.wayland.wlSeat);
+  if(!_xkPlatform.linux.wayland.wlDataDevice) {
 		__xkErrorHandle("Wayland: Failed to create data device");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
-	wl_data_device_add_listener(_xkPlatform.wayland.wlDataDevice, &_xkWaylandDataDeviceListener, NULL);
+	wl_data_device_add_listener(_xkPlatform.linux.wayland.wlDataDevice, &_xkWaylandDataDeviceListener, NULL);
 
-  _xkPlatform.wayland.wlCursorTheme = wl_cursor_theme_load(NULL, 32, _xkPlatform.wayland.wlShm);
-  if(!_xkPlatform.wayland.wlCursorTheme) {
+  _xkPlatform.linux.wayland.wlCursorTheme = wl_cursor_theme_load(NULL, 32, _xkPlatform.linux.wayland.wlShm);
+  if(!_xkPlatform.linux.wayland.wlCursorTheme) {
 		__xkErrorHandle("Wayland: Failed to load default cursor theme");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
-  _xkPlatform.wayland.wlCursorSurface = wl_compositor_create_surface(_xkPlatform.wayland.wlCompositor);
-  if(!_xkPlatform.wayland.wlCursorSurface) {
+  _xkPlatform.linux.wayland.wlCursorSurface = wl_compositor_create_surface(_xkPlatform.linux.wayland.wlCompositor);
+  if(!_xkPlatform.linux.wayland.wlCursorSurface) {
 		__xkErrorHandle("Wayland: Failed to create cursor surface");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
   }
 
-  _xkPlatform.initialized = XK_TRUE;
+  _xkPlatform.linux.wayland.initialized = XK_TRUE;
+  _xkPlatform.linux.xkb.initialized = XK_TRUE;
 
 _catch:
 	return(result);
 }
 
 void xkTerminateWindow(void) {
-	if(!_xkPlatform.initialized) {
+	if(!_xkPlatform.linux.wayland.initialized && !_xkPlatform.linux.xkb.initialized) {
 		return;
 	}
 
-	if(_xkPlatform.wayland.xkbComposeState) {
-		xkb_compose_state_unref(_xkPlatform.wayland.xkbComposeState);
+	if(_xkPlatform.linux.xkb.xkbComposeState) {
+		xkb_compose_state_unref(_xkPlatform.linux.xkb.xkbComposeState);
 
-		_xkPlatform.wayland.xkbComposeState = NULL;
+		_xkPlatform.linux.xkb.xkbComposeState = NULL;
 	}
 
-	if(_xkPlatform.wayland.xkbKeymap) {
-		xkb_keymap_unref(_xkPlatform.wayland.xkbKeymap);
+	if(_xkPlatform.linux.xkb.xkbKeymap) {
+		xkb_keymap_unref(_xkPlatform.linux.xkb.xkbKeymap);
 
-		_xkPlatform.wayland.xkbKeymap = NULL;
+		_xkPlatform.linux.xkb.xkbKeymap = NULL;
 	}
 
-	if(_xkPlatform.wayland.xkbState) {
-		xkb_state_unref(_xkPlatform.wayland.xkbState);
+	if(_xkPlatform.linux.xkb.xkbState) {
+		xkb_state_unref(_xkPlatform.linux.xkb.xkbState);
 
-		_xkPlatform.wayland.xkbState = NULL;
+		_xkPlatform.linux.xkb.xkbState = NULL;
 	}
 
-  if(_xkPlatform.wayland.xkbContext) {
-		xkb_context_unref(_xkPlatform.wayland.xkbContext);
+  if(_xkPlatform.linux.xkb.xkbContext) {
+		xkb_context_unref(_xkPlatform.linux.xkb.xkbContext);
 
-		_xkPlatform.wayland.xkbContext = NULL;
+		_xkPlatform.linux.xkb.xkbContext = NULL;
   }
 
-	for(XkSize i = 0; i < _xkPlatform.wayland.offerCount; i++) {
-		wl_data_offer_destroy(_xkPlatform.wayland.offers[i].wlOffer);
+	for(XkSize i = 0; i < _xkPlatform.linux.wayland.offerCount; i++) {
+		wl_data_offer_destroy(_xkPlatform.linux.wayland.offers[i].wlOffer);
 	}
 
-	if(_xkPlatform.wayland.offers) {
-		xkFreeMemory(_xkPlatform.wayland.offers);
+	if(_xkPlatform.linux.wayland.offers) {
+		xkFreeMemory(_xkPlatform.linux.wayland.offers);
 	}
 
-	if(_xkPlatform.wayland.wlCursorSurface) {
-		wl_surface_destroy(_xkPlatform.wayland.wlCursorSurface);
+	if(_xkPlatform.linux.wayland.wlCursorSurface) {
+		wl_surface_destroy(_xkPlatform.linux.wayland.wlCursorSurface);
 
-		_xkPlatform.wayland.wlCursorSurface = NULL;
+		_xkPlatform.linux.wayland.wlCursorSurface = NULL;
 	}
 
-	if(_xkPlatform.wayland.wlCursorTheme) {
-		wl_cursor_theme_destroy(_xkPlatform.wayland.wlCursorTheme);
+	if(_xkPlatform.linux.wayland.wlCursorTheme) {
+		wl_cursor_theme_destroy(_xkPlatform.linux.wayland.wlCursorTheme);
 
-		_xkPlatform.wayland.wlCursorTheme = NULL;
+		_xkPlatform.linux.wayland.wlCursorTheme = NULL;
 	}
 
-	if (_xkPlatform.wayland.wlDataDevice) {
-		wl_data_device_destroy(_xkPlatform.wayland.wlDataDevice);
+	if (_xkPlatform.linux.wayland.wlDataDevice) {
+		wl_data_device_destroy(_xkPlatform.linux.wayland.wlDataDevice);
 
-		_xkPlatform.wayland.wlDataDevice = NULL;
+		_xkPlatform.linux.wayland.wlDataDevice = NULL;
 	}
 
-  if(_xkPlatform.wayland.wlDataDeviceManager) {
-  	wl_data_device_manager_destroy(_xkPlatform.wayland.wlDataDeviceManager);
+  if(_xkPlatform.linux.wayland.wlDataDeviceManager) {
+  	wl_data_device_manager_destroy(_xkPlatform.linux.wayland.wlDataDeviceManager);
 
-  	_xkPlatform.wayland.wlDataDeviceManager = NULL;
+  	_xkPlatform.linux.wayland.wlDataDeviceManager = NULL;
   }
 
-  if(_xkPlatform.wayland.wlPointer) {
-		wl_pointer_destroy(_xkPlatform.wayland.wlPointer);
+  if(_xkPlatform.linux.wayland.wlPointer) {
+		wl_pointer_destroy(_xkPlatform.linux.wayland.wlPointer);
 
-		_xkPlatform.wayland.wlPointer = NULL;
+		_xkPlatform.linux.wayland.wlPointer = NULL;
   }
 
-  if(_xkPlatform.wayland.wlKeyboard) {
-		wl_keyboard_destroy(_xkPlatform.wayland.wlKeyboard);
+  if(_xkPlatform.linux.wayland.wlKeyboard) {
+		wl_keyboard_destroy(_xkPlatform.linux.wayland.wlKeyboard);
 
-		_xkPlatform.wayland.wlKeyboard = NULL;
+		_xkPlatform.linux.wayland.wlKeyboard = NULL;
   }
 
-	if(_xkPlatform.wayland.wlSeat) {
-		wl_seat_destroy(_xkPlatform.wayland.wlSeat);
+	if(_xkPlatform.linux.wayland.wlSeat) {
+		wl_seat_destroy(_xkPlatform.linux.wayland.wlSeat);
 
-		_xkPlatform.wayland.wlSeat = NULL;
+		_xkPlatform.linux.wayland.wlSeat = NULL;
 	}
 
-	if(_xkPlatform.wayland.wlOutput) {
-		wl_output_destroy(_xkPlatform.wayland.wlOutput);
+	if(_xkPlatform.linux.wayland.wlOutput) {
+		wl_output_destroy(_xkPlatform.linux.wayland.wlOutput);
 
-		_xkPlatform.wayland.wlOutput = NULL;
+		_xkPlatform.linux.wayland.wlOutput = NULL;
 	}
 
-	if(_xkPlatform.wayland.wlShm) {
-		wl_shm_destroy(_xkPlatform.wayland.wlShm);
+	if(_xkPlatform.linux.wayland.wlShm) {
+		wl_shm_destroy(_xkPlatform.linux.wayland.wlShm);
 
-		_xkPlatform.wayland.wlShm = NULL;
+		_xkPlatform.linux.wayland.wlShm = NULL;
 	}
 
-  if(_xkPlatform.wayland.wlCompositor) {
-		wl_compositor_destroy(_xkPlatform.wayland.wlCompositor);
+  if(_xkPlatform.linux.wayland.wlCompositor) {
+		wl_compositor_destroy(_xkPlatform.linux.wayland.wlCompositor);
 
-		_xkPlatform.wayland.wlCompositor = NULL;
+		_xkPlatform.linux.wayland.wlCompositor = NULL;
   }
 	
- 	if(_xkPlatform.wayland.xdgBase) {
-		xdg_wm_base_destroy(_xkPlatform.wayland.xdgBase);
+ 	if(_xkPlatform.linux.wayland.xdgBase) {
+		xdg_wm_base_destroy(_xkPlatform.linux.wayland.xdgBase);
 
-		_xkPlatform.wayland.xdgBase = NULL;
+		_xkPlatform.linux.wayland.xdgBase = NULL;
 	}
 
- 	if(_xkPlatform.wayland.xdgDecorationManager) {
-		zxdg_decoration_manager_v1_destroy(_xkPlatform.wayland.xdgDecorationManager);
+ 	if(_xkPlatform.linux.wayland.xdgDecorationManager) {
+		zxdg_decoration_manager_v1_destroy(_xkPlatform.linux.wayland.xdgDecorationManager);
 
-		_xkPlatform.wayland.xdgDecorationManager = NULL;
+		_xkPlatform.linux.wayland.xdgDecorationManager = NULL;
  	}
 
-	if(_xkPlatform.wayland.zwpRelativePointerManager) {
-		zwp_relative_pointer_manager_v1_destroy(_xkPlatform.wayland.zwpRelativePointerManager);
+	if(_xkPlatform.linux.wayland.zwpRelativePointerManager) {
+		zwp_relative_pointer_manager_v1_destroy(_xkPlatform.linux.wayland.zwpRelativePointerManager);
 
-		_xkPlatform.wayland.zwpRelativePointerManager	= NULL;
+		_xkPlatform.linux.wayland.zwpRelativePointerManager	= NULL;
 	}
 
-	if(_xkPlatform.wayland.zwpPointerConstraints) {
-		zwp_pointer_constraints_v1_destroy(_xkPlatform.wayland.zwpPointerConstraints);
+	if(_xkPlatform.linux.wayland.zwpPointerConstraints) {
+		zwp_pointer_constraints_v1_destroy(_xkPlatform.linux.wayland.zwpPointerConstraints);
 
-		_xkPlatform.wayland.zwpPointerConstraints	= NULL;
+		_xkPlatform.linux.wayland.zwpPointerConstraints	= NULL;
 	}
 	
-  if(_xkPlatform.wayland.zwpIdleInhibitManager) {
-		zwp_idle_inhibit_manager_v1_destroy(_xkPlatform.wayland.zwpIdleInhibitManager);
+  if(_xkPlatform.linux.wayland.zwpIdleInhibitManager) {
+		zwp_idle_inhibit_manager_v1_destroy(_xkPlatform.linux.wayland.zwpIdleInhibitManager);
 
-		_xkPlatform.wayland.zwpIdleInhibitManager = NULL;
+		_xkPlatform.linux.wayland.zwpIdleInhibitManager = NULL;
 	}
 
-	if(_xkPlatform.wayland.wlRegistry) {
-  	wl_registry_destroy(_xkPlatform.wayland.wlRegistry);
+	if(_xkPlatform.linux.wayland.wlRegistry) {
+  	wl_registry_destroy(_xkPlatform.linux.wayland.wlRegistry);
 
- 		_xkPlatform.wayland.wlRegistry = NULL;
+ 		_xkPlatform.linux.wayland.wlRegistry = NULL;
 	}
 
-	if(_xkPlatform.wayland.wlDisplay) {
-  	wl_display_flush(_xkPlatform.wayland.wlDisplay);
-		wl_display_disconnect(_xkPlatform.wayland.wlDisplay);
+	if(_xkPlatform.linux.wayland.wlDisplay) {
+  	wl_display_flush(_xkPlatform.linux.wayland.wlDisplay);
+		wl_display_disconnect(_xkPlatform.linux.wayland.wlDisplay);
 
- 		_xkPlatform.wayland.wlDisplay = NULL;
+ 		_xkPlatform.linux.wayland.wlDisplay = NULL;
 	}
 
-  _xkPlatform.initialized = XK_FALSE;
+  _xkPlatform.linux.wayland.initialized = XK_FALSE;
+  _xkPlatform.linux.xkb.initialized = XK_FALSE;
 }
 
 struct wl_display* __xkWaylandGetDisplay(void) {
-	return(_xkPlatform.wayland.wlDisplay);
+	return(_xkPlatform.linux.wayland.wlDisplay);
 }
 
 struct wl_surface* __xkWaylandGetSurface(const XkWindow window) {
 	xkAssert(window);
 
-	return(window->wayland.wlSurface);
+	return(window->linux.wayland.wlSurface);
 }
 
 XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize width, const XkSize height, const XkWindowHint hint) {
@@ -988,25 +987,25 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	if(hint & XK_WINDOW_HINT_FLOATING_BIT) 		window->floating = XK_TRUE;
 
   window->cursorMode 	= XK_CURSOR_NORMAL;
-  window->wayland.wlCursorBuffer 	= NULL;
+  window->linux.wayland.wlCursorBuffer 	= NULL;
 	if(title) {
 		/// NOTE: Needs to be free.
   	window->title 		= xkDuplicateString(title);
 	}
 
 	/// NOTE: Needs for create shm buffer.
-	window->wayland.width 	= width;
-	window->wayland.height 	= height;
+	window->linux.wayland.width 	= width;
+	window->linux.wayland.height 	= height;
 
-	window->wayland.wlSurface = wl_compositor_create_surface(_xkPlatform.wayland.wlCompositor);
-  if(!window->wayland.wlSurface) {
+	window->linux.wayland.wlSurface = wl_compositor_create_surface(_xkPlatform.linux.wayland.wlCompositor);
+  if(!window->linux.wayland.wlSurface) {
 		__xkErrorHandle("Wayland: Failed to create surface");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
 
 	// Needs in keyboard listener.
- 	wl_surface_set_user_data(window->wayland.wlSurface, window);
+ 	wl_surface_set_user_data(window->linux.wayland.wlSurface, window);
 
 	if(__xkXDGCreateSurface(window)) {
 		result = XK_ERROR_UNKNOWN;
@@ -1021,7 +1020,7 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
 	}
 
 	if(title) {
-  	xdg_toplevel_set_title(window->wayland.xdgToplevel, window->title);
+  	xdg_toplevel_set_title(window->linux.wayland.xdgToplevel, window->title);
 	}
 
 	if(!window->resizable) {
@@ -1041,12 +1040,12 @@ void xkDestroyWindow(XkWindow window) {
 
 	__xkXDGDestorySurface(window);
 
-	if(window->wayland.wlCursorBuffer) {
-		wl_buffer_destroy(window->wayland.wlCursorBuffer);
+	if(window->linux.wayland.wlCursorBuffer) {
+		wl_buffer_destroy(window->linux.wayland.wlCursorBuffer);
 	}
 
-	if(window->wayland.wlSurface) {
-		wl_surface_destroy(window->wayland.wlSurface);
+	if(window->linux.wayland.wlSurface) {
+		wl_surface_destroy(window->linux.wayland.wlSurface);
 	}
 
   if(window->title) {
@@ -1066,8 +1065,8 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 			__xkXDGCreateDecorations(window);
 
 			// Restore XDG toplevel.
-			xdg_toplevel_unset_maximized(window->wayland.xdgToplevel);
-			xdg_toplevel_unset_fullscreen(window->wayland.xdgToplevel);
+			xdg_toplevel_unset_maximized(window->linux.wayland.xdgToplevel);
+			xdg_toplevel_unset_fullscreen(window->linux.wayland.xdgToplevel);
 
 			__xkZWPDestroyIdleInhibitor(window);
 			break;
@@ -1077,7 +1076,7 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 
 			__xkXDGCreateDecorations(window);
 
-			xdg_toplevel_set_maximized(window->wayland.xdgToplevel);
+			xdg_toplevel_set_maximized(window->linux.wayland.xdgToplevel);
 
 			__xkZWPDestroyIdleInhibitor(window);
 			break;
@@ -1087,7 +1086,7 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 
 			__xkXDGCreateDecorations(window);
 
-			xdg_toplevel_set_minimized(window->wayland.xdgToplevel);
+			xdg_toplevel_set_minimized(window->linux.wayland.xdgToplevel);
 			break;
 
 		case XK_WINDOW_SHOW_FULLSCREEN:
@@ -1095,7 +1094,7 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 
 			__xkXDGDestroyDecorations(window);
 
-			xdg_toplevel_set_fullscreen(window->wayland.xdgToplevel, _xkPlatform.wayland.wlOutput);
+			xdg_toplevel_set_fullscreen(window->linux.wayland.xdgToplevel, _xkPlatform.linux.wayland.wlOutput);
 
 			__xkZWPCreateIdleInhibitor(window);
 			break;
@@ -1106,13 +1105,13 @@ void xkShowWindow(XkWindow window, const XkWindowShow show) {
 			__xkXDGDestroyDecorations(window);
 
 			// Set null Wayland surface contents.
-      wl_surface_attach(window->wayland.wlSurface, NULL, 0, 0);
+      wl_surface_attach(window->linux.wayland.wlSurface, NULL, 0, 0);
 
 			__xkZWPDestroyIdleInhibitor(window);
 			break;
 	}
 
-  wl_surface_commit(window->wayland.wlSurface);
+  wl_surface_commit(window->linux.wayland.wlSurface);
 }
 
 void xkFocusWindow(XkWindow window) {
@@ -1127,8 +1126,8 @@ void xkSetWindowSize(XkWindow window, const XkSize width, const XkSize height) {
   xkAssert(width > 0);
   xkAssert(height > 0);
 
-	window->wayland.width = width;
-	window->wayland.height = height;
+	window->linux.wayland.width = width;
+	window->linux.wayland.height = height;
 
 	__xkWaylandResizeWindow(window);
 
@@ -1140,11 +1139,11 @@ void xkGetWindowSize(XkWindow window, XkSize* const pWidth, XkSize* const pHeigh
 	xkAssert(window);
 
 	if(pWidth) {
-		*pWidth = window->wayland.width;
+		*pWidth = window->linux.wayland.width;
 	}
 
   if(pHeight) {
-    *pHeight = window->wayland.height;
+    *pHeight = window->linux.wayland.height;
 	}
 }
 
@@ -1152,14 +1151,14 @@ void xkSetWindowSizeLimits(XkWindow window, const XkSize minWidth, const XkSize 
 	xkAssert(window);
 
 	if(minWidth != 0 && minHeight != 0) {
-  	xdg_toplevel_set_min_size(window->wayland.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
+  	xdg_toplevel_set_min_size(window->linux.wayland.xdgToplevel, (int32_t)minWidth, (int32_t)minHeight);
 	}
 
 	if(maxWidth != 0 && maxHeight) {
-		xdg_toplevel_set_max_size(window->wayland.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
+		xdg_toplevel_set_max_size(window->linux.wayland.xdgToplevel, (int32_t)maxWidth, (int32_t)maxHeight);
 	}
 
-	wl_surface_commit(window->wayland.wlSurface);
+	wl_surface_commit(window->linux.wayland.wlSurface);
 }
 
 void xkSetWindowPosition(XkWindow window, const XkInt32 xPos, const XkInt32 yPos) {
@@ -1185,7 +1184,7 @@ void xkSetWindowTitle(XkWindow window, const XkString title) {
 
   window->title = xkDuplicateString(title);
 
-	xdg_toplevel_set_title(window->wayland.xdgToplevel, title);
+	xdg_toplevel_set_title(window->linux.wayland.xdgToplevel, title);
 }
 
 void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pIcon) {
@@ -1198,8 +1197,8 @@ void xkSetWindowIcon(XkWindow window, const XkSize count, const XkWindowIcon* pI
 void xkSetWindowCursorPosition(XkWindow window, const XkFloat64 xPos, const XkFloat64 yPos) {
 	xkAssert(window);
 
-	if(window->wayland.zwpLockedPointer != NULL) {
-		zwp_locked_pointer_v1_set_cursor_position_hint(window->wayland.zwpLockedPointer, wl_fixed_from_double(xPos), wl_fixed_from_double(yPos));
+	if(window->linux.wayland.zwpLockedPointer != NULL) {
+		zwp_locked_pointer_v1_set_cursor_position_hint(window->linux.wayland.zwpLockedPointer, wl_fixed_from_double(xPos), wl_fixed_from_double(yPos));
 	}
 }
 
@@ -1207,11 +1206,11 @@ void xkGetWindowCursorPosition(XkWindow window, XkFloat64* const pXPos, XkFloat6
 	xkAssert(window);
 
 	if(pXPos) {
-		*pXPos = window->wayland.cursorPosX;
+		*pXPos = window->linux.wayland.cursorPosX;
 	}
 
 	if(pYPos) {
-		*pYPos = window->wayland.cursorPosY;
+		*pYPos = window->linux.wayland.cursorPosY;
 	}
 }
 
@@ -1223,23 +1222,39 @@ void xkSetWindowCursorMode(XkWindow window, const XkCursorMode mode) {
 	if(mode == XK_CURSOR_DISABLED) {
 		__xkZWPLockPointer(window);
 	} else if(mode == XK_CURSOR_HIDDEN) {
-		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, NULL, 0, 0);
+		wl_pointer_set_cursor(_xkPlatform.linux.wayland.wlPointer, _xkPlatform.linux.wayland.pointerSerial, NULL, 0, 0);
 	} else if(mode == XK_CURSOR_NORMAL) {
 		__xkZWPUnlockPointer(window);
-		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, window->wayland.cursorXHot, window->wayland.cursorYHot);
+		wl_pointer_set_cursor(_xkPlatform.linux.wayland.wlPointer, _xkPlatform.linux.wayland.pointerSerial, _xkPlatform.linux.wayland.wlCursorSurface, window->linux.wayland.cursorXHot, window->linux.wayland.cursorYHot);
 	}
 }
 
 void __xkWaylandSetWindowCursor(XkWindow window) {
 	xkAssert(window);
 
-	__xkErrorHandle("set cursor");
+	if(window->cursorMode != XK_CURSOR_NORMAL) {
+		return;
+	}
 
-	if(window->wayland.wlCursorBuffer && window->cursorMode == XK_CURSOR_NORMAL) {
-		wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, _xkPlatform.wayland.wlCursorSurface, window->wayland.cursorXHot, window->wayland.cursorYHot);
-		wl_surface_attach(_xkPlatform.wayland.wlCursorSurface, window->wayland.wlCursorBuffer, 0, 0);
-		wl_surface_damage(_xkPlatform.wayland.wlCursorSurface, 0, 0, (int)window->wayland.cursorWidth, (int)window->wayland.cursorHeight);
-		wl_surface_commit(_xkPlatform.wayland.wlCursorSurface);
+	if(window->linux.wayland.wlCursorBuffer) {
+		wl_pointer_set_cursor(_xkPlatform.linux.wayland.wlPointer, _xkPlatform.linux.wayland.pointerSerial, _xkPlatform.linux.wayland.wlCursorSurface, window->linux.wayland.cursorXHot, window->linux.wayland.cursorYHot);
+		wl_surface_attach(_xkPlatform.linux.wayland.wlCursorSurface, window->linux.wayland.wlCursorBuffer, 0, 0);
+		wl_surface_damage(_xkPlatform.linux.wayland.wlCursorSurface, 0, 0, (int)window->linux.wayland.cursorWidth, (int)window->linux.wayland.cursorHeight);
+		wl_surface_commit(_xkPlatform.linux.wayland.wlCursorSurface);
+	} else {
+		struct wl_cursor* wlCursor = wl_cursor_theme_get_cursor(_xkPlatform.linux.wayland.wlCursorTheme, "default");
+		if(!wlCursor) {
+			__xkErrorHandle("Wayland: Failed to find standard cursor");
+			return;
+		}
+
+		struct wl_cursor_image* wlImage = wlCursor->images[0];
+		struct wl_buffer* wlCursorBuffer = wl_cursor_image_get_buffer(wlImage);
+
+		wl_pointer_set_cursor(_xkPlatform.linux.wayland.wlPointer, _xkPlatform.linux.wayland.pointerSerial, _xkPlatform.linux.wayland.wlCursorSurface, wlImage->hotspot_x, wlImage->hotspot_y);
+		wl_surface_attach(_xkPlatform.linux.wayland.wlCursorSurface, wlCursorBuffer, 0, 0);
+		wl_surface_damage(_xkPlatform.linux.wayland.wlCursorSurface, 0, 0, (int)wlImage->width, (int)wlImage->height);
+		wl_surface_commit(_xkPlatform.linux.wayland.wlCursorSurface);	
 	}
 }
 
@@ -1250,30 +1265,22 @@ void xkSetWindowCursor(XkWindow window, const XkWindowIcon* pIcon) {
 		const int width = pIcon->width;
 		const int height = pIcon->height;
 
-		window->wayland.wlCursorBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4, pIcon->pixels);
- 		if(!window->wayland.wlCursorBuffer) {
+		window->linux.wayland.wlCursorBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4, pIcon->pixels);
+ 		if(!window->linux.wayland.wlCursorBuffer) {
 			__xkErrorHandle("Wayland: Failed to create cursor buffer");
  			return;
  		}
 
-		window->wayland.cursorWidth 	= width;
-		window->wayland.cursorHeight 	= height;
-		window->wayland.cursorXHot 		= 0;
-		window->wayland.cursorYHot 		= 0;
+		window->linux.wayland.cursorWidth 	= width;
+		window->linux.wayland.cursorHeight 	= height;
+		window->linux.wayland.cursorXHot 		= 0;
+		window->linux.wayland.cursorYHot 		= 0;
 	} else {
-		struct wl_cursor* wlCursor = wl_cursor_theme_get_cursor(_xkPlatform.wayland.wlCursorTheme, "default");
-		if(!wlCursor) {
-			__xkErrorHandle("Wayland: Failed to find standard cursor");
-			return;
+		if(window->linux.wayland.wlCursorBuffer) {
+			wl_buffer_destroy(window->linux.wayland.wlCursorBuffer);
 		}
 
-		struct wl_cursor_image* wlImage = wlCursor->images[0];
-
-		window->wayland.wlCursorBuffer 	= wl_cursor_image_get_buffer(wlImage);
-		window->wayland.cursorWidth 		= wlImage->width;
-		window->wayland.cursorHeight 		= wlImage->height;
-		window->wayland.cursorXHot 			= wlImage->hotspot_x;
-		window->wayland.cursorYHot 			= wlImage->hotspot_y;
+		window->linux.wayland.wlCursorBuffer 	= NULL;
 	}
 
 	__xkWaylandSetWindowCursor(window);
@@ -1289,7 +1296,7 @@ uint64_t __xkPosixGetTimerValue() {
 	return((uint64_t)ts.tv_sec * __xkPosixGetTimerFrequency() + (uint64_t)ts.tv_nsec);
 }
 
-static XkBool __xkPosixPoll(struct pollfd* fds, nfds_t count, double* timeout) {
+static XkBool8 __xkPosixPoll(struct pollfd* fds, nfds_t count, double* timeout) {
 	while(XK_TRUE) {
 		if(timeout) {
 			const uint64_t base = __xkPosixGetTimerValue();
@@ -1322,76 +1329,76 @@ static XkBool __xkPosixPoll(struct pollfd* fds, nfds_t count, double* timeout) {
 }
 
 static void __xkWaylandHandleEvents(XkFloat64* pTimeout) {
-	XkBool event = XK_FALSE;
+	XkBool8 event = XK_FALSE;
 	struct pollfd fds[] = {
-		{wl_display_get_fd(_xkPlatform.wayland.wlDisplay), POLLIN}
+		{wl_display_get_fd(_xkPlatform.linux.wayland.wlDisplay), POLLIN}
   };
 
 	while(!event) {
-		while(wl_display_prepare_read(_xkPlatform.wayland.wlDisplay) != 0) {
-			wl_display_dispatch_pending(_xkPlatform.wayland.wlDisplay);			
+		while(wl_display_prepare_read(_xkPlatform.linux.wayland.wlDisplay) != 0) {
+			wl_display_dispatch_pending(_xkPlatform.linux.wayland.wlDisplay);			
 		}
 
 		if(!__xkWaylandFlushDisplay()) {
-			wl_display_cancel_read(_xkPlatform.wayland.wlDisplay);
+			wl_display_cancel_read(_xkPlatform.linux.wayland.wlDisplay);
 
 			return;
 		}
 
 		if(!__xkPosixPoll(fds, 1, pTimeout)) {
-			wl_display_cancel_read(_xkPlatform.wayland.wlDisplay);
+			wl_display_cancel_read(_xkPlatform.linux.wayland.wlDisplay);
 
 			return;
 		}
 
 		if(fds[0].revents & POLLIN) {
-			wl_display_read_events(_xkPlatform.wayland.wlDisplay);
-			if(wl_display_dispatch_pending(_xkPlatform.wayland.wlDisplay) > 0) {
+			wl_display_read_events(_xkPlatform.linux.wayland.wlDisplay);
+			if(wl_display_dispatch_pending(_xkPlatform.linux.wayland.wlDisplay) > 0) {
 				event = XK_TRUE;
 			}
 		} else {
-			wl_display_cancel_read(_xkPlatform.wayland.wlDisplay);		
+			wl_display_cancel_read(_xkPlatform.linux.wayland.wlDisplay);		
 		}
 	}
 }
 
-void xkPollEvents() {
+void xkPollWindowEvents() {
 	XkFloat64 timeout = 0.0;
 	__xkWaylandHandleEvents(&timeout);
 }
 
-void xkWaitEvents() {
-	wl_display_dispatch(_xkPlatform.wayland.wlDisplay);
+void xkWaitWindowEvents() {
+	wl_display_dispatch(_xkPlatform.linux.wayland.wlDisplay);
 }
 
-void xkWaitEventsTimeout(XkFloat64 timeout) {
+void xkWaitWindowEventsTimeout(XkFloat64 timeout) {
 	__xkWaylandHandleEvents(&timeout);
 }
 
-static XkBool __xkXDGCreateSurface(XkWindow window) {
+static XkBool8 __xkXDGCreateSurface(XkWindow window) {
 	xkAssert(window);
 
-	XkBool result = XK_FALSE;
+	XkBool8 result = XK_FALSE;
 
-	if(window->wayland.xdgToplevel) goto _catch;
+	if(window->linux.wayland.xdgToplevel) goto _catch;
 
-	window->wayland.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.wayland.xdgBase, window->wayland.wlSurface);
-	if(!window->wayland.xdgSurface) {
+	window->linux.wayland.xdgSurface = xdg_wm_base_get_xdg_surface(_xkPlatform.linux.wayland.xdgBase, window->linux.wayland.wlSurface);
+	if(!window->linux.wayland.xdgSurface) {
 		result = XK_TRUE;
 		__xkErrorHandle("XDG: Failed to create surface");
 		goto _catch;
   }
 
-  xdg_surface_add_listener(window->wayland.xdgSurface, &_xkXDGSurfaceListener, window);
+  xdg_surface_add_listener(window->linux.wayland.xdgSurface, &_xkXDGSurfaceListener, window);
 
-	window->wayland.xdgToplevel = xdg_surface_get_toplevel(window->wayland.xdgSurface);
-  if(!window->wayland.xdgToplevel) {
+	window->linux.wayland.xdgToplevel = xdg_surface_get_toplevel(window->linux.wayland.xdgSurface);
+  if(!window->linux.wayland.xdgToplevel) {
 		result = XK_TRUE;
 		__xkErrorHandle("XDG: Failed to create toplevel");
 		goto _catch;
   }
 
-  xdg_toplevel_add_listener(window->wayland.xdgToplevel, &_xkXDGToplevelListener, window);
+  xdg_toplevel_add_listener(window->linux.wayland.xdgToplevel, &_xkXDGToplevelListener, window);
 
 _catch:
 	return(result);
@@ -1400,34 +1407,34 @@ _catch:
 static void __xkXDGDestorySurface(XkWindow window) {
 	xkAssert(window);
 
-	if(window->wayland.xdgToplevel) {
-		xdg_toplevel_destroy(window->wayland.xdgToplevel);
+	if(window->linux.wayland.xdgToplevel) {
+		xdg_toplevel_destroy(window->linux.wayland.xdgToplevel);
 
-		window->wayland.xdgToplevel = NULL;
+		window->linux.wayland.xdgToplevel = NULL;
 	}
 
-	if(window->wayland.xdgSurface) {
-		xdg_surface_destroy(window->wayland.xdgSurface);
+	if(window->linux.wayland.xdgSurface) {
+		xdg_surface_destroy(window->linux.wayland.xdgSurface);
 
-		window->wayland.xdgSurface = NULL;
+		window->linux.wayland.xdgSurface = NULL;
 	}
 }
 
-static XkBool __xkXDGCreateDecorations(XkWindow window) {
+static XkBool8 __xkXDGCreateDecorations(XkWindow window) {
 	xkAssert(window);
 
-	XkBool result = XK_FALSE;
+	XkBool8 result = XK_FALSE;
 
-	if(window->wayland.xdgDecoration) goto _catch;
+	if(window->linux.wayland.xdgDecoration) goto _catch;
 
-	window->wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.wayland.xdgDecorationManager, window->wayland.xdgToplevel);
-	if(!window->wayland.xdgDecoration) {
+	window->linux.wayland.xdgDecoration = zxdg_decoration_manager_v1_get_toplevel_decoration(_xkPlatform.linux.wayland.xdgDecorationManager, window->linux.wayland.xdgToplevel);
+	if(!window->linux.wayland.xdgDecoration) {
 		result = XK_TRUE;
 		__xkErrorHandle("XDG: Failed to create decorations");
 		goto _catch;
 	}
 
-  zxdg_toplevel_decoration_v1_set_mode(window->wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+  zxdg_toplevel_decoration_v1_set_mode(window->linux.wayland.xdgDecoration, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
 
 _catch:
 	return(result);
@@ -1436,22 +1443,22 @@ _catch:
 static void __xkXDGDestroyDecorations(XkWindow window) {
 	xkAssert(window);
 
-	if(window->wayland.xdgDecoration) {
-		zxdg_toplevel_decoration_v1_destroy(window->wayland.xdgDecoration);
+	if(window->linux.wayland.xdgDecoration) {
+		zxdg_toplevel_decoration_v1_destroy(window->linux.wayland.xdgDecoration);
 
-		window->wayland.xdgDecoration = NULL;
+		window->linux.wayland.xdgDecoration = NULL;
 	}
 }
 
-static XkBool __xkZWPCreateIdleInhibitor(XkWindow window) {
+static XkBool8 __xkZWPCreateIdleInhibitor(XkWindow window) {
 	xkAssert(window);
 
-	XkBool result = XK_FALSE;
+	XkBool8 result = XK_FALSE;
 
-	if(window->wayland.zwpIdleInhibitor) goto _catch;
+	if(window->linux.wayland.zwpIdleInhibitor) goto _catch;
 
-  window->wayland.zwpIdleInhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(_xkPlatform.wayland.zwpIdleInhibitManager, window->wayland.wlSurface);
-  if(!window->wayland.zwpIdleInhibitor) {
+  window->linux.wayland.zwpIdleInhibitor = zwp_idle_inhibit_manager_v1_create_inhibitor(_xkPlatform.linux.wayland.zwpIdleInhibitManager, window->linux.wayland.wlSurface);
+  if(!window->linux.wayland.zwpIdleInhibitor) {
 		result = XK_TRUE;
     __xkErrorHandle("Wayland: Failed to create idle inhibitor");
 		goto _catch;
@@ -1464,10 +1471,10 @@ _catch:
 static void __xkZWPDestroyIdleInhibitor(XkWindow window) {
 	xkAssert(window);
 
-	if(window->wayland.zwpIdleInhibitor) {
-		zwp_idle_inhibitor_v1_destroy(window->wayland.zwpIdleInhibitor);
+	if(window->linux.wayland.zwpIdleInhibitor) {
+		zwp_idle_inhibitor_v1_destroy(window->linux.wayland.zwpIdleInhibitor);
 
-		window->wayland.zwpIdleInhibitor = NULL;
+		window->linux.wayland.zwpIdleInhibitor = NULL;
 	}
 }
 
@@ -1511,7 +1518,7 @@ struct wl_buffer* __xkWaylandCreateShmBuffer(const XkSize width, const XkSize he
 		goto _catch;
 	}
 
-	struct wl_shm_pool* wlPool = wl_shm_create_pool(_xkPlatform.wayland.wlShm, fd, size);
+	struct wl_shm_pool* wlPool = wl_shm_create_pool(_xkPlatform.linux.wayland.wlShm, fd, size);
 
 	wlBuffer = wl_shm_pool_create_buffer(wlPool, 0, (int)width, (int)height, (int)stride, WL_SHM_FORMAT_XRGB8888);
 
@@ -1543,8 +1550,8 @@ _catch:
 static void __xkWaylandResizeWindow(XkWindow window) {
 	xkAssert(window);
 
-	int width = window->wayland.width;
-	int height = window->wayland.height;
+	int width = window->linux.wayland.width;
+	int height = window->linux.wayland.height;
 
 	struct wl_buffer* wlBuffer = __xkWaylandCreateShmBuffer(width, height, width * 4, (width * height) * 4, XK_NULL_HANDLE);
  	if(!wlBuffer) {
@@ -1552,26 +1559,26 @@ static void __xkWaylandResizeWindow(XkWindow window) {
  		return;
  	}
 
-	wl_surface_attach(window->wayland.wlSurface, wlBuffer, 0, 0);
+	wl_surface_attach(window->linux.wayland.wlSurface, wlBuffer, 0, 0);
 
-	struct wl_region* wlRegion = wl_compositor_create_region(_xkPlatform.wayland.wlCompositor);
+	struct wl_region* wlRegion = wl_compositor_create_region(_xkPlatform.linux.wayland.wlCompositor);
 	if(!wlRegion) {
 		__xkErrorHandle("Wayland: Failed to create region");
 		return;
 	}
 
-	wl_region_add(wlRegion, 0, 0, (int)window->wayland.width, (int)window->wayland.height);
+	wl_region_add(wlRegion, 0, 0, (int)window->linux.wayland.width, (int)window->linux.wayland.height);
 
-	wl_surface_set_opaque_region(window->wayland.wlSurface, wlRegion);
+	wl_surface_set_opaque_region(window->linux.wayland.wlSurface, wlRegion);
 
 	wl_region_destroy(wlRegion);
 
-	wl_surface_commit(window->wayland.wlSurface);
+	wl_surface_commit(window->linux.wayland.wlSurface);
 }
 
-static XkBool __xkWaylandFlushDisplay() {
-	while(wl_display_flush(_xkPlatform.wayland.wlDisplay) == -1) {
-		struct pollfd fd = {wl_display_get_fd(_xkPlatform.wayland.wlDisplay), POLLOUT};
+static XkBool8 __xkWaylandFlushDisplay() {
+	while(wl_display_flush(_xkPlatform.linux.wayland.wlDisplay) == -1) {
+		struct pollfd fd = {wl_display_get_fd(_xkPlatform.linux.wayland.wlDisplay), POLLOUT};
 
 		while(poll(&fd, 1, -1) == -1) {
 			if(errno != EINTR && errno != EAGAIN) {
@@ -1586,40 +1593,40 @@ static XkBool __xkWaylandFlushDisplay() {
 static void __xkZWPLockPointer(XkWindow window) {
 	xkAssert(window);
 
-	if(window->wayland.zwpRelativePointer) {
+	if(window->linux.wayland.zwpRelativePointer) {
 		return;
 	}
 
-	window->wayland.zwpRelativePointer = zwp_relative_pointer_manager_v1_get_relative_pointer(_xkPlatform.wayland.zwpRelativePointerManager, _xkPlatform.wayland.wlPointer);
-	if(!window->wayland.zwpRelativePointer) {
+	window->linux.wayland.zwpRelativePointer = zwp_relative_pointer_manager_v1_get_relative_pointer(_xkPlatform.linux.wayland.zwpRelativePointerManager, _xkPlatform.linux.wayland.wlPointer);
+	if(!window->linux.wayland.zwpRelativePointer) {
 		__xkErrorHandle("Wayland: Failed to create relative pointer");
 	}
 
-  zwp_relative_pointer_v1_add_listener(window->wayland.zwpRelativePointer, &_xkZWPRelativePointerListener, window);
+  zwp_relative_pointer_v1_add_listener(window->linux.wayland.zwpRelativePointer, &_xkZWPRelativePointerListener, window);
 
-	window->wayland.zwpLockedPointer = zwp_pointer_constraints_v1_lock_pointer(_xkPlatform.wayland.zwpPointerConstraints, window->wayland.wlSurface, _xkPlatform.wayland.wlPointer, NULL, ZWP_POINTER_CONSTRAINTS_V1_LIFETIME_PERSISTENT);
-	if(!window->wayland.zwpLockedPointer) {
+	window->linux.wayland.zwpLockedPointer = zwp_pointer_constraints_v1_lock_pointer(_xkPlatform.linux.wayland.zwpPointerConstraints, window->linux.wayland.wlSurface, _xkPlatform.linux.wayland.wlPointer, NULL, ZWP_POINTER_CONSTRAINTS_V1_LIFETIME_PERSISTENT);
+	if(!window->linux.wayland.zwpLockedPointer) {
 		__xkErrorHandle("Wayland: Failed to create locked pointer");
 	}
 
-  zwp_locked_pointer_v1_add_listener(window->wayland.zwpLockedPointer, &_xkZWPLockedPointerListener, window);
+  zwp_locked_pointer_v1_add_listener(window->linux.wayland.zwpLockedPointer, &_xkZWPLockedPointerListener, window);
 
-  wl_pointer_set_cursor(_xkPlatform.wayland.wlPointer, _xkPlatform.wayland.pointerSerial, NULL, 0, 0);
+  wl_pointer_set_cursor(_xkPlatform.linux.wayland.wlPointer, _xkPlatform.linux.wayland.pointerSerial, NULL, 0, 0);
 }
 
 static void __xkZWPUnlockPointer(XkWindow window) {
 	xkAssert(window);
 
-	if(window->wayland.zwpRelativePointer) {
-		zwp_relative_pointer_v1_destroy(window->wayland.zwpRelativePointer);
+	if(window->linux.wayland.zwpRelativePointer) {
+		zwp_relative_pointer_v1_destroy(window->linux.wayland.zwpRelativePointer);
 
-		window->wayland.zwpRelativePointer = NULL;
+		window->linux.wayland.zwpRelativePointer = NULL;
 	}
 
-	if(window->wayland.zwpLockedPointer) {
-		zwp_locked_pointer_v1_destroy(window->wayland.zwpLockedPointer);
+	if(window->linux.wayland.zwpLockedPointer) {
+		zwp_locked_pointer_v1_destroy(window->linux.wayland.zwpLockedPointer);
 
-		window->wayland.zwpLockedPointer = NULL;
+		window->linux.wayland.zwpLockedPointer = NULL;
 	}
 }
 

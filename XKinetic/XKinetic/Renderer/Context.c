@@ -9,12 +9,12 @@ __XkRendererContext _xkRendererContext;
 /* ########## MACROS SECTION ########## */
 #if defined(XK_LINUX)
 	#define XKVULKAN_LIBRARY			"libXKVulkan.so"
-#elif defined(XK_WIN64)
+#elif defined(XK_WINDOWS)
 	#define XKVULKAN_LIBRARY			"XKVulkan.dll"
 	#define XKD3D12_LIBRARY				"XKD3D12.dll"
-#endif // XK_LINUX || XK_WIN64
+#endif // XK_LINUX || XK_WINDOWS
 
-#if defined(XK_LINUX) || defined(XK_WIN64)
+#if defined(XK_LINUX) || defined(XK_WINDOWS)
 	#define XKVULKAN_INITIALIZE_RENDERER		"xkVulkanInitializeRenderer"
 	#define XKVULKAN_TERMINATE_RENDERER			"xkVulkanTerminateRenderer"
 	#define XKVULKAN_CREATE_RENDERER				"xkVulkanCreateRenderer"
@@ -38,9 +38,9 @@ __XkRendererContext _xkRendererContext;
 	#define XKVULKAN_BIND_INDEX_BUFFER			"xkVulkanBindIndexBuffer"
 	#define XKVULKAN_CREATE_TEXTURE2D				"xkVulkanCreateTexture2d"
 	#define XKVULKAN_DESTROY_TEXTURE2D			"xkVulkanDestroyTexture2d"
-#endif // XK_LINUX || XK_WIN64
+#endif // XK_LINUX || XK_WINDOWS
 
-#if defined(XK_WIN64)
+#if defined(XK_WINDOWS)
 	#define XKVULKAN_INITIALIZE_RENDERER		"xkD3D12InitializeRenderer"
 	#define XKVULKAN_TERMINATE_RENDERER			"xkD3D12TerminateRenderer"
 	#define XKD3D12_CREATE_RENDERER					"xkD3D12CreateRenderer"
@@ -64,16 +64,16 @@ __XkRendererContext _xkRendererContext;
 	#define XKD3D12_BIND_INDEX_BUFFER				"xkD3D12BindIndexBuffer"
 	#define XKD3D12_CREATE_TEXTURE2D				"xkD3D12CreateTexture2d"
 	#define XKD3D12_DESTROY_TEXTURE2D				"xkD3D12DestroyTexture2d"
-#endif // XK_WIN64
+#endif // XK_WINDOWS
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-#if defined(XK_WIN64) || defined(XK_LINUX)
+#if defined(XK_WINDOWS) || defined(XK_LINUX)
 	static XkResult __xkLoadVulkanModule();
-#endif // XK_WIN64 || XK_LINUX
+#endif // XK_WINDOWS || XK_LINUX
 
-#if defined(XK_WIN64)
+#if defined(XK_WINDOWS)
 	static XkResult __xkLoadD3D12Module();
-#endif // XK_WIN64
+#endif // XK_WINDOWS
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult xkInitializeRenderer(const XkRendererApi api) {
@@ -85,7 +85,7 @@ XkResult xkInitializeRenderer(const XkRendererApi api) {
 
 	switch(api) {
 		case XK_RENDERER_API_DEFAULT:
-#if defined(XK_WIN64)
+#if defined(XK_WINDOWS)
 			result = __xkLoadD3D12Module();
 			if(result != XK_SUCCESS) {
 				goto _catch;
@@ -98,11 +98,11 @@ XkResult xkInitializeRenderer(const XkRendererApi api) {
 #else
 			result = XK_ERROR_UNKNOWN;
 			goto _catch;
-#endif // XK_WIN64 || XK_LINUX
+#endif // XK_WINDOWS || XK_LINUX
 			break;
 
 		case XK_RENDERER_API_VULKAN:
-#if defined(XK_WIN64) || defined(XK_LINUX)
+#if defined(XK_WINDOWS) || defined(XK_LINUX)
 			result = __xkLoadVulkanModule();
 			if(result != XK_SUCCESS) {
 				goto _catch;
@@ -110,11 +110,11 @@ XkResult xkInitializeRenderer(const XkRendererApi api) {
 #else
 			result = XK_ERROR_UNKNOWN;
 			goto _catch;
-#endif // XK_WIN64 || XK_LINUX
+#endif // XK_WINDOWS || XK_LINUX
 			break;
 
 		case XK_RENDERER_API_D3D12:
-#if defined(XK_WIN64)
+#if defined(XK_WINDOWS)
 			result = __xkLoadD3D12Module();
 			if(result != XK_SUCCESS) {
 				goto _catch;
@@ -122,7 +122,7 @@ XkResult xkInitializeRenderer(const XkRendererApi api) {
 #else
 			result = XK_ERROR_UNKNOWN;
 			goto _catch;
-#endif // XK_WIN64
+#endif // XK_WINDOWS
 			break;
 	}
 
@@ -147,7 +147,7 @@ void xkTerminateRenderer() {
 	_xkRendererContext.initialized = XK_FALSE;
 }
 
-#if defined(XK_WIN64) || defined(XK_LINUX)
+#if defined(XK_WINDOWS) || defined(XK_LINUX)
 
 XkResult __xkLoadVulkanModule() {
 	xkAssert(renderer);
@@ -285,9 +285,9 @@ _catch:
 	return(result);
 }
 
-#endif // XK_WIN64 || XK_LINUX
+#endif // XK_WINDOWS || XK_LINUX
 
-#if defined(XK_WIN64)
+#if defined(XK_WINDOWS)
 
 XkResult __xkLoadD3D12Module() {
 	xkAssert(renderer);
@@ -420,4 +420,4 @@ _catch:
 	return(result);
 }
 
-#endif // XK_WIN64
+#endif // XK_WINDOWS

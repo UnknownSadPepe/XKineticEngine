@@ -4,9 +4,9 @@
 #include "XKinetic/XKVulkan.h"
 #if defined(XK_LINUX)
 	#define VK_USE_PLATFORM_WAYLAND_KHR
-#elif defined(XK_WIN64)
+#elif defined(XK_WINDOWS)
 	#define VK_USE_PLATFORM_WIN32_KHR
-#endif // XK_LINUX || XK_WIN64
+#endif // XK_LINUX || XK_WINDOWS
 #include <vulkan/vulkan.h>
 #include "XKinetic/Platform/Window.h"
 #include "XKinetic/Core/Minimal.h"
@@ -27,7 +27,7 @@ typedef struct __XkVkQueueFamilyIndices_T {
   uint32_t compute;
 
 	VkQueueFlags supportedQueues;
-	XkBool supportPresentQueue;
+	XkBool8 supportPresentQueue;
 } __XkVkQueueFamilyIndices;
 
 typedef struct __XkVkSwapChainDetails_T {
@@ -37,7 +37,7 @@ typedef struct __XkVkSwapChainDetails_T {
 } __XkVkSwapChainDetails;
 
 typedef struct __XkVkContext_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
 	VkInstance vkInstance;
 #if defined(XKVULKAN_DEBUG)

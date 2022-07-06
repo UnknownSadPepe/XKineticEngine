@@ -4,7 +4,7 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## MACROS SECTION ########## */
-#define XK_WIN64_THREAD_STACK_SIZE (1024 * 1024)
+#define XK_WINDOWS_THREAD_STACK_SIZE (1024 * 1024)
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) {
@@ -22,15 +22,15 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	XkThread thread = *pThread;
 
 	// Allocate thread stack memory.
-	thread->win32.stack = xkAllocateMemory(XK_WIN64_THREAD_STACK_SIZE);
-	if(!thread->win32.stack) {
+	thread->stack = xkAllocateMemory(XK_WINDOWS_THREAD_STACK_SIZE);
+	if(!thread->stack) {
 		__xkErrorHandle("Win32: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _free;
 	}
 
 	// Create Win32 thread.
-	thread->win32.handle = CreateThread(NULL, XK_WIN64_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->win32.stack, 0, &thread->win32.id);
+	thread->win32.handle = CreateThread(NULL, XK_WINDOWS_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->stack, 0, &thread->win32.id);
 	if(!thread->win32.handle) {
 		__xkErrorHandle("Win32: Failed to create thread");
 		result = XK_ERROR_UNKNOWN;
@@ -55,7 +55,7 @@ void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 
 	CloseHandle(thread->win32.handle);
 
-	xkFreeMemory(thread->win32.stack);
+	xkFreeMemory(thread->stack);
 
 	xkFreeMemory(thread);
 }
@@ -67,7 +67,7 @@ void xkDetachThread(XkThread thread) {
 
 	CloseHandle(thread->win32.handle);
 
-	xkFreeMemory(thread->win32.stack);
+	xkFreeMemory(thread->stack);
 
 	xkFreeMemory(thread);
 }
@@ -83,7 +83,7 @@ void xkKillThread(XkThread thread) {
 
 	CloseHandle(thread->win32.handle);
 
-	xkFreeMemory(thread->win32.stack);
+	xkFreeMemory(thread->stack);
 
 	xkFreeMemory(thread);
 }

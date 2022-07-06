@@ -64,7 +64,7 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
-	xkClearColorRenderer(_xkApplication.renderer, (XkVec4){1.0f, 0.0f, 0.0f, 1.0f});
+	xkClearColorRenderer(_xkApplication.renderer, (XkVec4){{1.0f, 0.0f, 0.0f, 1.0f}});
 	xkClearDepthRenderer(_xkApplication.renderer, (XkFloat64)1.0);
 	xkClearStencilRenderer(_xkApplication.renderer, (XkInt32)0.0);
 
@@ -86,7 +86,7 @@ void xkTerminateApplication() {
 
 void xkUpdateApplication() {
 	while(!_xkApplication.exit) {
-		xkPollEvents();
+		xkPollWindowEvents();
 		
 		xkClearRenderer(_xkApplication.renderer);
 

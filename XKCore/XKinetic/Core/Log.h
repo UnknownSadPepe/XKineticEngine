@@ -19,14 +19,14 @@ extern XKCORE_API void 			xkLogWarning(const XkString, ...);
 extern XKCORE_API void 			xkLogTrace(const XkString, ...);
 extern XKCORE_API void 			xkLogInfo(const XkString, ...);
 extern XKCORE_API void 			xkLogNotice(const XkString, ...);
-#if defined(XK_DEBUG)
+#if defined(XKCORE_DEBUG)
 extern XKCORE_API void 			xkLogDebug(const XkString, ...);
-#endif // XK_DEBUG
+#endif // XKCORE_DEBUG
 	
 /* ########## FUNCTIONS MACROS SECTION ########## */
-#if !defined(XK_DEBUG)
+#if !defined(XKCORE_DEBUG)
 	#define 									xkLogDebug(format, ...)
-#endif // !XK_DEBUG
+#endif // !XKCORE_DEBUG
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus

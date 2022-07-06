@@ -1,17 +1,33 @@
 set(CORE_SRC_DIR ${PROJECT_SOURCE_DIR}/XKCore)
 
 file(GLOB PLATFOMR_SRC ${CORE_SRC_DIR}/XKinetic/Platform/*.c)
-file(GLOB UNIX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Unix/*.c)
-file(GLOB LINUX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Linux/*.c)
-file(GLOB WIN32_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Win32/*.c)
+
+
+
 file(GLOB_RECURSE CORE_SRC ${CORE_SRC_DIR}/XKinetic/Core/*.c)
 
 add_library(XKCore SHARED ${CORE_SRC} ${PLATFOMR_SRC})
 
+if(UNIX OR APPLE)
+  # Posix/Unix system.
+  file(GLOB POSIX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Posix/*.c)
+  target_sources(XKCore PRIVATE ${POSIX_SRC})
+
+  file(GLOB UNIX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Unix/*.c)
+  target_sources(XKCore PRIVATE ${UNIX_SRC})
+endif()
+
 if(UNIX AND NOT APPLE)
-	target_sources(XKCore PRIVATE ${UNIX_SRC})
-	target_sources(XKCore PRIVATE ${LINUX_SRC})
+  # Linux system.
+  file(GLOB LINUX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Linux/*.c)
+  target_sources(XKCore PRIVATE ${LINUX_SRC})
+elseif(APPLE)
+  # Apple system.
+  file(GLOB UNIX_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Cocoa/*.m)
+  target_sources(XKCore PRIVATE ${UNIX_SRC})
 elseif(WIN32)
+  # Windows system.
+  file(GLOB WIN32_SRC ${CORE_SRC_DIR}/XKinetic/Platform/Win32/*.c)
 	target_sources(XKCore PRIVATE ${WIN32_SRC})
 endif()
 

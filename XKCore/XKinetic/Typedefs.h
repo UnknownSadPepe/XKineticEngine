@@ -16,10 +16,15 @@
 	#define XK_HANDLE_WIDTH (32
 #endif // (__LP64__ || __LLP64__) || (__ILP32__ || __LP32__)
 
-#define XK_BOOL_MIN 			(0)
-#define XK_BOOL_MAX 			(0xff)
+#define XK_BOOL8_MIN 			(0)
+#define XK_BOOL8_MAX 			(0xff)
 
-#define XK_BOOL_WIDTH 		(8)
+#define XK_BOOL8_WIDTH 		(8)
+
+#define XK_BOOL32_MIN 		(0)
+#define XK_BOOL32_MAX 		(0xffffffffu)
+
+#define XK_BOOL32_WIDTH 	(32)
 
 #define XK_FALSE 					(0)
 #define XK_TRUE 					(1)
@@ -130,7 +135,8 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef enum {
+typedef enum XkResult_T
+{
 	XK_SUCCESS													= 0,
 	XK_ERROR_BAD_ALLOCATE								= -1,
 	XK_ERROR_MODULE_NOT_PRESENT 				= -2,
@@ -146,9 +152,17 @@ typedef void* XkHandle;
 
 xkStaticAssert((sizeof(XkHandle) * 8) == XK_HANDLE_WIDTH);
 
-typedef _Bool XkBool;
+typedef _Bool XkBool8;
 
-xkStaticAssert((sizeof(XkBool) * 8) == XK_BOOL_WIDTH);
+xkStaticAssert((sizeof(XkBool8) * 8) == XK_BOOL8_WIDTH);
+
+#if defined(__LP32__)
+	typedef unsigned long int XkBool832;
+#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__)
+	typedef unsigned int XkBool832;
+#endif // __LP32__ || (__ILP32__ || __LP64__ || __LLP64__)
+
+xkStaticAssert((sizeof(XkBool832) * 8) == XK_BOOL32_WIDTH);
 
 #if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__)
 	typedef signed char XkInt8;

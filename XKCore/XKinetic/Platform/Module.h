@@ -9,13 +9,13 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef struct XkModule_T* XkModule;
 typedef void(*XkProcPfn)(void);
+typedef struct XkModule_T* XkModule;
 
 /* ########## FUNCTIONS SECTION ########## */
-XKCORE_API XkResult 	xkLoadModule(XkModule*, const XkString);
-XKCORE_API void 			xkUnloadModule(XkModule);
-XKCORE_API XkResult 	xkGetModuleSymbol(XkProcPfn*, const XkString, XkModule);
+extern XKCORE_API XkResult 	xkLoadModule(XkModule*, const XkString);
+extern XKCORE_API void 			xkUnloadModule(XkModule);
+extern XKCORE_API XkResult 	xkGetModuleSymbol(XkProcPfn*, const XkString, XkModule);
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus

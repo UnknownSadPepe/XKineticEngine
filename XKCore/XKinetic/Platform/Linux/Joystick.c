@@ -17,8 +17,8 @@ void xkTerminateJoystick() {
 	/// TODO: Implementation.
 }
 
-XkResult xkJoystickPresent(XkJoystick j) {
-	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
+XkResult xkJoystickPresent(XkJoystickId jid) {
+	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
 
 	XkResult result = XK_SUCCESS;
 
@@ -28,7 +28,20 @@ _catch:
 	return(result);
 }
 
-XkString xkJoystickMappingName(XkJoystick j) {
-	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
+XkString xkJoystickMappingName(XkJoystickId jid) {
+	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
+	
 	return("Linux");
+}
+
+void xkPollJoystickEvents() {
+	/// TODO: Implementation.
+}
+
+void xkWaitJoystickEvents() {
+	/// TODO: Implementation.
+}
+
+void xkWaitTimeoutJoystickEvents(const XkFloat64 timeout) {
+	/// TODO: Implementation.
 }

@@ -34,8 +34,8 @@ const uint32_t _xkOpenXRInstanceLayerCount = 0;
 #endif // XKOPENXR_DEBUG
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-static XkBool __xkOpenXRCheckInstanceExtensionsSupport();
-static XkBool __xkOpenXRCheckInstanceLayersSupport();
+static XkBool8 __xkOpenXRCheckInstanceExtensionsSupport();
+static XkBool8 __xkOpenXRCheckInstanceLayersSupport();
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult __xkOpenXRCreateInstance() {
@@ -96,8 +96,8 @@ void __xkOpenXRDestroyInstance() {
 	}
 }
 
-static XkBool __xkOpenXRCheckInstanceExtensionsSupport() {
-	XkBool result = XK_TRUE;
+static XkBool8 __xkOpenXRCheckInstanceExtensionsSupport() {
+	XkBool8 result = XK_TRUE;
 
 	uint32_t availableExtensionPropertiesCount = 0;
 	xrEnumerateInstanceExtensionProperties(XR_NULL_HANDLE, 0, &availableExtensionPropertiesCount, XR_NULL_HANDLE);
@@ -121,7 +121,7 @@ static XkBool __xkOpenXRCheckInstanceExtensionsSupport() {
 
 	const char* requiredExtension = XK_NULL_HANDLE;
 
-	XkBool availableExtensionFind = XK_FALSE;
+	XkBool8 availableExtensionFind = XK_FALSE;
 
 	for(uint32_t i = 0; i < _xkOpenXRInstanceExtensionCount; i++) {
 		requiredExtension = _xkOpenXRInstanceExtensions[i];
@@ -150,8 +150,8 @@ _catch:
 	return(result);
 }
 
-static XkBool __xkOpenXRCheckInstanceLayersSupport() {
-	XkBool result = XK_TRUE;
+static XkBool8 __xkOpenXRCheckInstanceLayersSupport() {
+	XkBool8 result = XK_TRUE;
 
 	uint32_t availableLayerPropertiesCount = 0;
 	xrEnumerateApiLayerProperties(0, &availableLayerPropertiesCount, XR_NULL_HANDLE);
@@ -175,7 +175,7 @@ static XkBool __xkOpenXRCheckInstanceLayersSupport() {
 
 	const char* requiredLayer = XK_NULL_HANDLE;
 
-	XkBool availableLayerFind = XK_FALSE;
+	XkBool8 availableLayerFind = XK_FALSE;
 
 	for(uint32_t i = 0; i < _xkOpenXRInstanceLayerCount; i++) {
 		requiredLayer = _xkOpenXRInstanceLayers[i];

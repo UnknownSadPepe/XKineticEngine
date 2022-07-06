@@ -2,9 +2,9 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKCore.h"
-#if defined(XK_UNIX)
-	#include "XKinetic/Platform/Unix/Entry.h"
-#elif defined(XK_WIN64)
+#if defined(XK_POSIX)
+	#include "XKinetic/Platform/Posix/Entry.h"
+#elif defined(XK_WINDOWS)
 	#include "XKinetic/Platform/Win32/Entry.h"
 #endif // XK_LINUX
 #include "XKinetic/Application.h"

@@ -24,7 +24,7 @@ XkResult __xkVulkanCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}  
-#elif defined(XK_WIN64)
+#elif defined(XK_WINDOWS)
   VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo 				= {};
 	vkWin32SurfaceCreateInfo.sType 															= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	vkWin32SurfaceCreateInfo.pNext 															= VK_NULL_HANDLE;

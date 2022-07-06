@@ -10,7 +10,7 @@
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkImageLoader_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
   XkChar path[XK_IMAGE_LOADER_PATH_MAX_SIZE];
 } __XkImageLoader;

@@ -2,9 +2,19 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKCore.h"
+#if defined(XK_POSIX)
+	#include "XKinetic/Platform/Posix/Internal.h"
+#endif // XK_POSIX
+
+#if defined(XK_UNIX)
+	#include "XKinetic/Platform/Unix/Internal.h"
+#endif // XK_POSIX
+
 #if defined(XK_LINUX)
 	#include "XKinetic/Platform/Linux/Internal.h"
-#elif defined(XK_WIN64)
+#elif defined(XK_APPLE)
+	#include "XKinetic/Platform/Cocoa/Internal.h"
+#elif defined(XK_WINDOWS)
 	#include "XKinetic/Platform/Win32/Internal.h"
 #endif // XK_LINUX
 #include "XKinetic/Platform/File.h"
@@ -25,6 +35,8 @@ struct XkFile_T {
 
 struct XkThread_T {
 	XK_PLATFORM_THREAD;
+
+	XkHandle stack;
 };
 
 struct XkMutex_T {
@@ -32,14 +44,13 @@ struct XkMutex_T {
 };
 
 struct XkWindow_T {
-	XkBool 										decorated;
-	XkBool 										resizable;
-	XkBool 										floating;
-	XkBool 										fullscreen;
+	XkBool8 						decorated;
+	XkBool8 						resizable;
+	XkBool8 						floating;
 
 	XkCursorMode 				cursorMode;
 
-	XkString 									title;
+	XkString 						title;
 
 	struct {
 		XkWindowShowPfn 				show;
@@ -58,27 +69,28 @@ struct XkWindow_T {
 	XK_PLATFORM_WINDOW;
 };
 
-typedef struct XkJoystickObject_T {
+typedef struct XkJoystick_T {
+	XkJoystickId 		id;
+	XkBool8 				connected;
+
 	struct {
 		XkJoystickEventPfn 	event;
-		XkJoystickAxisPfn 	axis;
-		XkJoystickButtonPfn button;
-		XkJoystickHatPfn 		hat;
+		XkGamepadAxisPfn 	axis;
+		XkGamepadButtonPfn button;
+		XkGamepadHatPfn 		hat;
 	} callbacks;
 
 	XK_PLATFORM_JOYSTICK;
-} XkJoystickObject;
+} XkJoystick;
 
 struct XkModule_T {
 	XK_PLATFORM_MODULE;
 };
 
 typedef struct __XkPlatform_T {
-	XkBool			initialized;
-
 	XkInt16			keycodes[512];
 
-	XkJoystickObject	joysticks[XK_JOYSTICK_16 + 1];
+	XkJoystick	joysticks[XK_JOYSTICK_16 + 1];
 
 	XK_PLATFORM;
 } __XkPlatform;
@@ -87,13 +99,13 @@ typedef struct __XkPlatform_T {
 extern __XkPlatform _xkPlatform;
 
 /* ########## FUNCTIONS HELPERS SECTION ########## */
-#if defined(XK_WIN64)
+#if defined(XK_WINDOWS)
 extern XKCORE_API HINSTANCE 					__xkWin32GetInstance();
 extern XKCORE_API HWND 								__xkWin32GetHWND(const XkWindow);
 #elif defined(XK_LINUX)
 extern XKCORE_API struct wl_display* 	__xkWaylandGetDisplay();
 extern XKCORE_API struct wl_surface* 	__xkWaylandGetSurface(const XkWindow);
-#endif // XK_WIN64
+#endif // XK_WINDOWS
 
 extern XK_EXPORT void 								__xkErrorHandler(const XkString pFormat, ...);
 

@@ -39,7 +39,7 @@ static void                 __xkWin32GetFullWindowSize(DWORD, DWORD, XkSize, XkS
 
 static XkMod                __xkWin32GetKeyMod(void);
 
-static HICON                __xkWin32CreateIcon(const XkWindowIcon*, XkInt32, XkInt32, XkBool);
+static HICON                __xkWin32CreateIcon(const XkWindowIcon*, XkInt32, XkInt32, XkBool8);
 static const XkWindowIcon*  __xkWin32ChooseImage(const XkWindowIcon*, XkSize, XkInt32, XkInt32);
 
 static void                 __xkWin32DisableCursor(const XkWindow);
@@ -55,17 +55,17 @@ static void                 __xkWin32InitializeKeycodes();
 static LRESULT CALLBACK     __xkWin32WindowProc(HWND, UINT, WPARAM, LPARAM);
 
 /* ########## GLOBAL VARIABLES SECTION ########## */
-static const CHAR XK_WIN64_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
+static const CHAR XK_WINDOWS_WINDOW_CLASS_NAME[]  = "XKinetic Win32 Window Class";
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult xkInitializeWindow() {
 	XkResult result = XK_SUCCESS;
 
-  if(_xkPlatform.initialized) {
+  if(_xkPlatform.win32.winapi.initialized) {
     goto _catch;
   }
 
-	_xkPlatform.win32.instance = GetModuleHandle(NULL);
+	_xkPlatform.win32.winapi.instance = GetModuleHandle(NULL);
 	
 	WNDCLASSEXA wc		= {};
 	wc.cbSize					= sizeof(WNDCLASSEXA);
@@ -77,7 +77,7 @@ XkResult xkInitializeWindow() {
 	wc.hIcon					= LoadIcon(NULL, IDI_APPLICATION);
   wc.hCursor				= LoadCursor(NULL, IDC_ARROW);
 	wc.hbrBackground	= (HBRUSH)(COLOR_WINDOW + 1);
-  wc.lpszClassName	= XK_WIN64_WINDOW_CLASS_NAME;
+  wc.lpszClassName	= XK_WINDOWS_WINDOW_CLASS_NAME;
 	wc.hCursor				= NULL;
 	wc.lpszMenuName		= NULL;
 
@@ -89,18 +89,18 @@ XkResult xkInitializeWindow() {
 
 	__xkWin32InitializeKeycodes();
 
-  _xkPlatform.initialized = XK_TRUE;
+  _xkPlatform.win32.initialized = XK_TRUE;
 
 _catch:
 	return(result);
 }
 
 void xkTerminateWindow() {
-  if(!_xkPlatform.initialized) {
+  if(!_xkPlatform.win32.winapi.initialized) {
     return;
   }
 
-	UnregisterClassA(XK_WIN64_WINDOW_CLASS_NAME, _xkPlatform.win32.instance); 
+	UnregisterClassA(XK_WINDOWS_WINDOW_CLASS_NAME, _xkPlatform.win32.instance); 
 
   _xkPlatform.initialized = XK_FALSE;
 }
@@ -160,7 +160,7 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
   XkSize fullHeight   = 0;
   __xkWin32GetFullWindowSize(style, exStyle, width, height, &fullWidth, &fullHeight);
 
-	window->win32.handle = CreateWindowExA(exStyle, XK_WIN64_WINDOW_CLASS_NAME, title, style, (int)xpos, (int)ypos, (int)fullWidth, (int)fullHeight, NULL, NULL, _xkPlatform.win32.instance, NULL);
+	window->win32.handle = CreateWindowExA(exStyle, XK_WINDOWS_WINDOW_CLASS_NAME, title, style, (int)xpos, (int)ypos, (int)fullWidth, (int)fullHeight, NULL, NULL, _xkPlatform.win32.instance, NULL);
   if(!window->win32.handle) {
 		__xkErrorHandle("Win32: Failed to create window");
 		result = XK_ERROR_UNKNOWN;
@@ -193,7 +193,6 @@ void xkDestroyWindow(XkWindow window) {
     DestroyIcon(window->win32.hSmallIcon);
   }
 
-  // Remove Win32 window cursor.
   if(window->win32.hCursor) {
     DestroyCursor(window->win32.hCursor);
   }
@@ -441,7 +440,7 @@ _catch:
   return;
 }
 
-void xkPollEvents() {
+void xkPollWindowEvents() {
 	MSG msg;
 
 	while(PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -450,16 +449,16 @@ void xkPollEvents() {
 	}
 }
 
-void xkWaitEvents() {
+void xkWaitWindowEvents() {
 	WaitMessage();
 
-	xkPollEvents();
+	xkPollWindowEvents();
 }
 
 void xkWaitWindowEventsTimeout(XkFloat64 timeout) {
   MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)(timeout * 1e3), QS_ALLEVENTS);
 
-  xkPollEvents();
+  xkPollWindowEvents();
 }
 
 static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
@@ -467,20 +466,16 @@ static DWORD __xkWin32GetWindowStyle(const XkWindow window) {
 
 	DWORD style = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
-  if(window->fullscreen) {
-    style |= WS_POPUP;
-  } else {
-	  style |= WS_SYSMENU;
+  style |= WS_SYSMENU;
 
-    if(window->decorated) {
-		  style |= WS_CAPTION;
+  if(window->decorated) {
+    style |= WS_CAPTION;
 
-      if(window->resizable) {
-		    style |= WS_MAXIMIZEBOX | WS_THICKFRAME | WS_MINIMIZEBOX;
-	    }
-	  } else {
-      style |= WS_POPUP;   
+    if(window->resizable) {
+      style |= WS_MAXIMIZEBOX | WS_THICKFRAME | WS_MINIMIZEBOX;
     }
+  } else {
+    style |= WS_POPUP;   
   }
 
 	return(style);
@@ -491,7 +486,7 @@ static DWORD __xkWin32GetWindowExStyle(const XkWindow window) {
 
 	DWORD style = WS_EX_APPWINDOW;
 
-  if(window->fullscreen || window->floating) {
+  if(window->floating) {
     style |= WS_EX_TOPMOST;
   }
 
@@ -563,7 +558,7 @@ static XkMod __xkWin32GetKeyMod() {
   return(mod);
 }
 
-static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, const XkInt32 yHot, const XkBool icon) {
+static HICON __xkWin32CreateIcon(const XkWindowIcon* pIcon, const XkInt32 xHot, const XkInt32 yHot, const XkBool8 icon) {
   xkAssert(pIcon);
 
 	XkUInt8* pTarget = NULL;
@@ -875,7 +870,7 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
   case WM_KEYUP:
   case WM_SYSKEYDOWN:
   case WM_SYSKEYUP: {
-    XkAction action = (HIWORD(lParam) & KF_UP) ? XK_RELEASE : XK_PRESS;
+    XkAction action = (HIWORD(lParam) & KF_UP) ? XK_ACTION_RELEASE : XK_ACTION_PRESS;
     XkMod mod = __xkWin32GetKeyMod();
 
     int scancode = (HIWORD(lParam) & (KF_EXTENDED | 0xff));
@@ -912,13 +907,13 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
       break;
     }
 
-    if (action == XK_RELEASE && wParam == VK_SHIFT) {
+    if (action == XK_ACTION_RELEASE && wParam == VK_SHIFT) {
       __xkInputWindowKey(window, XK_KEY_LEFT_SHIFT, action, mod);
       __xkInputWindowKey(window, XK_KEY_RIGHT_SHIFT, action, mod);
     }
     else if (wParam == VK_SNAPSHOT) {
-      __xkInputWindowKey(window, key, XK_PRESS, mod);
-      __xkInputWindowKey(window, key, XK_RELEASE, mod);
+      __xkInputWindowKey(window, key, XK_ACTION_PRESS, mod);
+      __xkInputWindowKey(window, key, XK_ACTION_RELEASE, mod);
     }
     else {
       __xkInputWindowKey(window, key, action, mod);
@@ -928,32 +923,32 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
   }
 
   case WM_LBUTTONDOWN: {
-    __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_PRESS, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_ACTION_PRESS, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_LBUTTONUP: {
-    __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_RELEASE, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, XK_BUTTON_LEFT, XK_ACTION_RELEASE, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_RBUTTONDOWN: {
-    __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_PRESS, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_ACTION_PRESS, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_RBUTTONUP: {
-    __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_RELEASE, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, XK_BUTTON_RIGHT, XK_ACTION_RELEASE, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_MBUTTONDOWN: {
-    __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_PRESS, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_ACTION_PRESS, __xkWin32GetKeyMod());
     break;
   }
 
   case WM_MBUTTONUP: {
-    __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_RELEASE, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, XK_BUTTON_MIDDLE, XK_ACTION_RELEASE, __xkWin32GetKeyMod());
     break;
   }
 
@@ -979,7 +974,7 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
       button = XK_BUTTON_6;
     }
 
-    __xkInputWindowButton(window, button, XK_PRESS, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, button, XK_ACTION_PRESS, __xkWin32GetKeyMod());
 
     break;
   }
@@ -1007,7 +1002,7 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
       button = XK_BUTTON_6;
     }
 
-    __xkInputWindowButton(window, button, XK_PRESS, __xkWin32GetKeyMod());
+    __xkInputWindowButton(window, button, XK_ACTION_PRESS, __xkWin32GetKeyMod());
 
     break;
   }
@@ -1081,7 +1076,7 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
     XkSize yoff;
     MINMAXINFO* mmi = (MINMAXINFO*)lParam;
 
-    if (window->fullscreen) {
+    if(window->fullscreen) {
       break;
     }
 

@@ -22,7 +22,7 @@ typedef struct XkApplication_T {
 	XkWindow window;
 	XkRenderer renderer;
 
-	XkBool exit;
+	XkBool8 exit;
 }	XkApplication;
 
 /* ########## EXTERN SECTION ########## */

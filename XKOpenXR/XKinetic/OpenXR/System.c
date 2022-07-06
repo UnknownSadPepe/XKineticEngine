@@ -6,7 +6,7 @@
 const XrEnvironmentBlendMode _xkOpenXREnvironmentBlendMode = XR_ENVIRONMENT_BLEND_MODE_OPAQUE;
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-static XkBool __xkOpenXRPickEnvironmentBlendMode();
+static XkBool8 __xkOpenXRPickEnvironmentBlendMode();
 
 XkResult __xkOpenXRInitializeSystem() {
   XkResult result = XK_SUCCESS;
@@ -33,8 +33,8 @@ _catch:
   return(result);
 }
 
-XkBool __xkOpenXRCheckEnvironmentBlendModeSupport() {
-  XkBool result = XK_TRUE;
+XkBool8 __xkOpenXRCheckEnvironmentBlendModeSupport() {
+  XkBool8 result = XK_TRUE;
 
   uint32_t environmentBlendModeCount = 0;
   xrEnumerateEnvironmentBlendModes(_xkOpenXRContext.xrInstance, _xkOpenXRContext.xrSystemId, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, 0, &environmentBlendModeCount, XR_NULL_HANDLE);
@@ -54,7 +54,7 @@ XkBool __xkOpenXRCheckEnvironmentBlendModeSupport() {
 
   xrEnumerateEnvironmentBlendModes(_xkOpenXRContext.xrInstance, _xkOpenXRContext.xrSystemId, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, environmentBlendModeCount, XR_NULL_HANDLE, xrAvailableEnvironmentBlendModes);
 
-	XkBool availableBlendModeFind = XK_FALSE;
+	XkBool8 availableBlendModeFind = XK_FALSE;
 
   for(uint32_t i = 0; i < environmentBlendModeCount; i++) {
     if(xrAvailableEnvironmentBlendModes == _xkOpenXREnvironmentBlendMode) {

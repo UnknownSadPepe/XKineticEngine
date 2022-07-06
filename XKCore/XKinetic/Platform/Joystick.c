@@ -1,53 +1,78 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Joystick.h"
+#include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
-void __xkInputJoystickEvent(XkJoystick j, const XkJoystickEvent event) {
-	if(_xkPlatform.joysticks[j].callbacks.event) {
-		_xkPlatform.joysticks[j].callbacks.event(j, event);
+void __xkInputJoystickEvent(XkJoystickId jid, const XkJoystickEvent event) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+
+	if(_xkPlatform.joysticks[jid].callbacks.event) {
+		_xkPlatform.joysticks[jid].callbacks.event(jid, event);
 	}
 }
 
-void __xkInputJoystickAxis(XkJoystick j, const XkJoystickAxis axis, const XkFloat32 value) {
-	if(_xkPlatform.joysticks[j].callbacks.axis) {
-		_xkPlatform.joysticks[j].callbacks.axis(j, axis, value);
+void __xkInputJoystickAxis(XkJoystickId jid, const XkGamepadAxis axis, const XkFloat32 value) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+
+	if(_xkPlatform.joysticks[jid].callbacks.axis) {
+		_xkPlatform.joysticks[jid].callbacks.axis(jid, axis, value);
 	}
 }
 
-void __xkInputJoystickButton(XkJoystick j, const XkJoystickButton button, const XkAction action) {
-	if(_xkPlatform.joysticks[j].callbacks.button) {
-		_xkPlatform.joysticks[j].callbacks.button(j, button, action);
+void __xkInputJoystickButton(XkJoystickId jid, const XkGamepadButton button, const XkAction action) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+
+	if(_xkPlatform.joysticks[jid].callbacks.button) {
+		_xkPlatform.joysticks[jid].callbacks.button(jid, button, action);
 	}
 }
 
-void __xkInputJoystickHat(XkJoystick j, const XkJoystickHat hat, const XkAction action) {
-	if(_xkPlatform.joysticks[j].callbacks.hat) {
-		_xkPlatform.joysticks[j].callbacks.hat(j, hat, action);
+void __xkInputJoystickHat(XkJoystickId jid, const XkGamepadHat hat, const XkAction action) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+
+	if(_xkPlatform.joysticks[jid].callbacks.hat) {
+		_xkPlatform.joysticks[jid].callbacks.hat(jid, hat, action);
 	}
 }
 
-void xkSetJoystickEventCallback(XkJoystick j, const XkJoystickEventPfn pfnCallback) {
-	_xkPlatform.joysticks[j].callbacks.event = pfnCallback;	
+void xkSetJoystickEventCallback(XkJoystickId jid, const XkJoystickEventPfn pfnCallback) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+	xkAssert(pfnCallback);
+
+	_xkPlatform.joysticks[jid].callbacks.event = pfnCallback;	
 }
 
-void xkSetJoystickAxisCallback(XkJoystick j, const XkJoystickAxisPfn pfnCallback) {
-	_xkPlatform.joysticks[j].callbacks.axis = pfnCallback;	
+void xkSetJoystickAxisCallback(XkJoystickId jid, const XkGamepadAxisPfn pfnCallback) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+	xkAssert(pfnCallback);
+
+	_xkPlatform.joysticks[jid].callbacks.axis = pfnCallback;	
 }
 
-void xkSetJoystickButtonCallback(XkJoystick j, const XkJoystickButtonPfn pfnCallback) {
-	_xkPlatform.joysticks[j].callbacks.button = pfnCallback;	
+void xkSetJoystickButtonCallback(XkJoystickId jid, const XkGamepadButtonPfn pfnCallback) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+	xkAssert(pfnCallback);
+
+	_xkPlatform.joysticks[jid].callbacks.button = pfnCallback;	
 }
 
-void xkSetJoystickHatCallback(XkJoystick j, const XkJoystickHatPfn pfnCallback) {
-	_xkPlatform.joysticks[j].callbacks.hat = pfnCallback;	
+void xkSetJoystickHatCallback(XkJoystickId jid, const XkGamepadHatPfn pfnCallback) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+	xkAssert(pfnCallback);
+
+	_xkPlatform.joysticks[jid].callbacks.hat = pfnCallback;	
 }
 
-XkBool xkJoystickGamepad(XkJoystick j) {
+XkBool8 xkJoystickGamepad(XkJoystickId jid) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+
 	return(XK_FALSE);
 }
 
-XkString xkJoystickName(XkJoystick j) {
+XkString xkJoystickName(XkJoystickId jid) {
+	xkAssert(jid > XK_JOYSTICK_1 && jid <= XK_JOYSTICK_16);
+	
 	return(XK_NULL_HANDLE);
 }
 

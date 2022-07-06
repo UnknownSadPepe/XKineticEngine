@@ -20,9 +20,9 @@ XkResult xkLoadModule(XkModule* pModule, const XkString path) {
 
 	XkModule module = *pModule;
 
-	module->unix.handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
+	module->posix.handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
 	if(!(*pModule)) {
-		__xkErrorHandle("Unix: Failed to load module");
+		__xkErrorHandle("Posix: Failed to load module");
 		result = XK_ERROR_MODULE_NOT_PRESENT;
 		goto _catch;
 	}
@@ -34,7 +34,7 @@ _catch:
 void xkUnloadModule(XkModule module) {
 	xkAssert(module);
 
-	dlclose(module->unix.handle);
+	dlclose(module->posix.handle);
 
 	xkFreeMemory(module);
 }
@@ -45,9 +45,9 @@ XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkString name, XkModule mo
 
 	XkResult result = XK_SUCCESS;
 
-	*pPfnProc = (XkProcPfn)dlsym(module->unix.handle, name);
+	*pPfnProc = (XkProcPfn)dlsym(module->posix.handle, name);
 	if(!(*pPfnProc)) {
-		__xkErrorHandle("Unix: Failed to get module symbol");
+		__xkErrorHandle("Posix: Failed to get module symbol");
 		result = XK_ERROR_MODULE_SYMBOL_NOT_PRESENT;
 		goto _catch;
 	}

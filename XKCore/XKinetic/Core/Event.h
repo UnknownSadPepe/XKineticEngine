@@ -134,9 +134,9 @@ typedef enum XkKey_T {
 } XkKey;
 
 typedef enum XkAction_T {
-	XK_RELEASE 	= 0,
-	XK_PRESS 		= 1,
-	XK_REPEAT 	= 2
+	XK_ACTION_RELEASE 	= 0,
+	XK_ACTION_PRESS 		= 1,
+	XK_ACTION_REPEAT 		= 2
 } XkAction;
 
 typedef enum XkMod_T {
@@ -161,15 +161,59 @@ typedef enum XkButton_T {
 } XkButton;
 
 typedef enum XkCursorMode_T {
-	XK_CURSOR_NORMAL =   0,
-	XK_CURSOR_HIDDEN =   1,
-	XK_CURSOR_DISABLED = 2
+	XK_CURSOR_NORMAL 		= 0,
+	XK_CURSOR_HIDDEN 		= 1,
+	XK_CURSOR_DISABLED 	= 2
 } XkCursorMode;
 
-/* ########## FUNCTIONS SECTION ########## */
-extern XKCORE_API void 				xkPollEvents();
-extern XKCORE_API void 				xkWaitEvents();
-extern XKCORE_API void 				xkWaitEventsTimeout(XkFloat64);
+typedef enum XkJoystickEvent_T {
+	XK_JOYSTICK_DISCONNECTED 	= 0,
+	XK_JOYSTICK_CONNECTED 		= 1,
+} XkJoystickEvent;
+
+typedef enum XkGamepadAxis_T {
+	XK_GAMEPAD_AXIS_LEFT_X        = 0,
+	XK_GAMEPAD_AXIS_LEFT_Y        = 1,
+	XK_GAMEPAD_AXIS_RIGHT_X       = 2,
+	XK_GAMEPAD_AXIS_RIGHT_Y       = 3,
+	XK_GAMEPAD_AXIS_LEFT_TRIGGER  = 4,
+	XK_GAMEPAD_AXIS_RIGHT_TRIGGER = 5
+} XkGamepadAxis;
+
+typedef enum XkGamepadButton_T {
+	XK_GAMEPAD_BUTTON_A               = 0,
+	XK_GAMEPAD_BUTTON_B               = 1,
+	XK_GAMEPAD_BUTTON_X               = 2,
+	XK_GAMEPAD_BUTTON_Y               = 3,
+	XK_GAMEPAD_BUTTON_LEFT_BUMPER     = 4,
+	XK_GAMEPAD_BUTTON_RIGHT_BUMPER    = 5,
+	XK_GAMEPAD_BUTTON_BACK            = 6,
+	XK_GAMEPAD_BUTTON_START           = 7,
+	XK_GAMEPAD_BUTTON_GUIDE           = 8,
+	XK_GAMEPAD_BUTTON_LEFT_THUMB      = 9,
+	XK_GAMEPAD_BUTTON_RIGHT_THUMB     = 10,
+	XK_GAMEPAD_BUTTON_DPAD_UP         = 11,
+	XK_GAMEPAD_BUTTON_DPAD_RIGHT      = 12,
+	XK_GAMEPAD_BUTTON_DPAD_DOWN       = 13,
+	XK_GAMEPAD_BUTTON_DPAD_LEFT       = 14,
+
+	XK_GAMEPAD_BUTTON_CROSS       		= XK_GAMEPAD_BUTTON_A,
+	XK_GAMEPAD_BUTTON_CIRCLE      		= XK_GAMEPAD_BUTTON_B,
+	XK_GAMEPAD_BUTTON_SQUARE      		= XK_GAMEPAD_BUTTON_X,
+	XK_GAMEPAD_BUTTON_TRIANGLE    		= XK_GAMEPAD_BUTTON_Y
+} XkGamepadButton;
+
+typedef enum XkGamepadHat_T {
+	XK_GAMEPAD_HAT_CENTERED           = 0,
+	XK_GAMEPAD_HAT_UP                 = 1,
+	XK_GAMEPAD_HAT_RIGHT              = 2,
+	XK_GAMEPAD_HAT_DOWN               = 4,
+	XK_GAMEPAD_HAT_LEFT               = 8,
+	XK_GAMEPAD_HAT_RIGHT_UP           = (XK_GAMEPAD_HAT_RIGHT | XK_GAMEPAD_HAT_UP),
+	XK_GAMEPAD_HAT_RIGHT_DOWN         = (XK_GAMEPAD_HAT_RIGHT | XK_GAMEPAD_HAT_DOWN),
+	XK_GAMEPAD_HAT_LEFT_UP            = (XK_GAMEPAD_HAT_LEFT  | XK_GAMEPAD_HAT_UP),
+	XK_GAMEPAD_HAT_LEFT_DOWN          = (XK_GAMEPAD_HAT_LEFT  | XK_GAMEPAD_HAT_DOWN)
+} XkGamepadHat;
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus

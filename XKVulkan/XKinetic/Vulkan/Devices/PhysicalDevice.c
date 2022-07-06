@@ -10,11 +10,11 @@ const char* _xkVulkanDeviceExtensions[] = {
 const uint32_t _xkVulkanDeviceExtensionCount = 1;
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-static XkBool             __xkVulkanCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice);
-static XkBool             __xkVulkanFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const, const VkPhysicalDevice, const VkSurfaceKHR);
-static uint32_t           __xkVulkanScorePhysicalDevice(const VkPhysicalDevice);
-static XkBool             __xkVulkanPhysicalDeviceSuitable(const VkPhysicalDevice, const VkSurfaceKHR);
-static VkPhysicalDevice   __xkVulkanChoosePhysicalDevice(const VkPhysicalDevice*, const uint32_t);
+static XkBool8              __xkVulkanCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice);
+static XkBool8              __xkVulkanFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const, const VkPhysicalDevice, const VkSurfaceKHR);
+static uint32_t             __xkVulkanScorePhysicalDevice(const VkPhysicalDevice);
+static XkBool8              __xkVulkanPhysicalDeviceSuitable(const VkPhysicalDevice, const VkSurfaceKHR);
+static VkPhysicalDevice     __xkVulkanChoosePhysicalDevice(const VkPhysicalDevice*, const uint32_t);
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult __xkVulkanPickPhysicalDevice() {
@@ -60,10 +60,10 @@ _catch:
   return(result);
 }
 
-static XkBool __xkVulkanCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice vkPhysicalDevice) {
+static XkBool8 __xkVulkanCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDevice vkPhysicalDevice) {
   xkAssert(vkPhysicalDevice);
 
-  XkBool result = XK_TRUE; 
+  XkBool8 result = XK_TRUE; 
 
   uint32_t availableExtensionPropertiesCount = 0;
   vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, VK_NULL_HANDLE, &availableExtensionPropertiesCount, VK_NULL_HANDLE);
@@ -87,7 +87,7 @@ static XkBool __xkVulkanCheckPhysicalDeviceExtensionsSupport(const VkPhysicalDev
 
   const char* requiredExtension = XK_NULL_HANDLE;
 
-  XkBool availableExtensionFind = XK_FALSE;
+  XkBool8 availableExtensionFind = XK_FALSE;
 
   for(uint32_t i = 0; i < _xkVulkanDeviceExtensionCount; i++) {
     requiredExtension = _xkVulkanDeviceExtensions[i];
@@ -116,12 +116,12 @@ _catch:
   return(result);
 }
 
-static XkBool __xkVulkanFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const pFamilyIndices, const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
+static XkBool8 __xkVulkanFindQueueFamilyIndices(__XkVkQueueFamilyIndices* const pFamilyIndices, const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
   xkAssert(pFamilyIndices);
   xkAssert(vkPhysicalDevice);
   xkAssert(vkSurface);
 
-  XkBool result = XK_TRUE; 
+  XkBool8 result = XK_TRUE; 
 
   uint32_t queueFamilyPropertiesCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyPropertiesCount, VK_NULL_HANDLE);
@@ -204,20 +204,20 @@ static uint32_t __xkVulkanScorePhysicalDevice(const VkPhysicalDevice vkPhysicalD
   return(result);
 }
 
-static XkBool __xkVulkanPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
+static XkBool8 __xkVulkanPhysicalDeviceSuitable(const VkPhysicalDevice vkPhysicalDevice, const VkSurfaceKHR vkSurface) {
   xkAssert(vkPhysicalDevice);
   xkAssert(vkSurface);
 
-  XkBool result = XK_TRUE; 
+  XkBool8 result = XK_TRUE; 
 
   __XkVkQueueFamilyIndices familyIndices;
-  XkBool queueFamiliesSupport = __xkVulkanFindQueueFamilyIndices(&familyIndices, vkPhysicalDevice, vkSurface);
+  XkBool8 queueFamiliesSupport = __xkVulkanFindQueueFamilyIndices(&familyIndices, vkPhysicalDevice, vkSurface);
   if(!queueFamiliesSupport) {
     result = XK_FALSE;
     goto _catch;
   }
 
-  XkBool extensionsSupport = __xkVulkanCheckPhysicalDeviceExtensionsSupport(vkPhysicalDevice);
+  XkBool8 extensionsSupport = __xkVulkanCheckPhysicalDeviceExtensionsSupport(vkPhysicalDevice);
   if(!extensionsSupport) {
     result = XK_FALSE;
     goto _catch;

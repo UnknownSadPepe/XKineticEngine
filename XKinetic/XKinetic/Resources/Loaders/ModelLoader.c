@@ -7,7 +7,7 @@
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkModelLoader_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
   XkChar path[XK_MODEL_LOADER_PATH_MAX_SIZE];
 } __XkModelLoader;

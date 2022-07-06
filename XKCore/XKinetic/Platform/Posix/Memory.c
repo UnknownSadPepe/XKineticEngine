@@ -26,7 +26,7 @@ XkHandle xkAllocateMemory(const XkSize size) {
 
 	XkHandle memory = mmap(0, alignSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if(!memory) {
-		__xkErrorHandle("Unix: Failed to allocate memory");
+		__xkErrorHandle("Posix: Failed to allocate memory");
 		return(XK_NULL_HANDLE);
 	}
 
@@ -52,7 +52,7 @@ XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
 
 	XkHandle newMemory = mremap(pHeader, pHeader->size, alignSize, 0, MREMAP_FIXED);
 	if(!newMemory) {
-		__xkErrorHandle("Unix: Failed to reallocate memory");
+		__xkErrorHandle("Posix: Failed to reallocate memory");
 		return(XK_NULL_HANDLE);
 	}
 

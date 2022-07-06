@@ -39,8 +39,8 @@ void xkTerminateJoystick() {
 	_xkPlatform.dinput.initialized = XK_FALSE;
 }
 
-XkResult xkJoystickPresent(XkJoystick j) {
-	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
+XkResult xkJoystickPresent(XkJoystickId jid) {
+	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
 
 	XkResult result = XK_SUCCESS;
 
@@ -51,6 +51,19 @@ _catch:
 }
 
 XkString xkJoystickMappingName(XkJoystick j) {
-	xkAssert(j >= XK_JOYSTICK_1 && j < XK_JOYSTICK_16);
+	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
+
 	return("Windows");
+}
+
+void xkPollJoystickEvents() {
+	/// TODO: Implementation.
+}
+
+void xkWaitJoystickEvents() {
+	/// TODO: Implementation.
+}
+
+void xkWaitTimeoutJoystickEvents(const XkFloat64 timeout) {
+	/// TODO: Implementation.
 }

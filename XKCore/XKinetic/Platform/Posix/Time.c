@@ -8,5 +8,6 @@
 XkSize xkGetTime() {
 	struct timeval tmv;
 	gettimeofday(&tmv, NULL);
+	
 	return((XkSize)tmv.tv_sec);
 }

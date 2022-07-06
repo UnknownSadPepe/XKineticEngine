@@ -34,8 +34,8 @@ extern XKCORE_API XkHandle 	xkDynamicArrayGet(XkDynamicArray, const XkSize);
 extern XKCORE_API void 			__xkDynamicArraySet(XkDynamicArray, const XkSize, XkHandle);
 
 /* ########## FUNCTIONS MACROS SECTION ########## */
-#define 										xkCreateDynamicArray(array, type) __xkCreateDynamicArray(array, XK_DYNAMIC_ARRAY_DEFAULT_CAPACITY, sizeof(type))
-#define 										xkCreateDynamicArrayCapacity(array, capacity, type) __xkCreateDynamicArray(array, capacity, sizeof(type))
+#define xkCreateDynamicArray(array, type) __xkCreateDynamicArray(array, XK_DYNAMIC_ARRAY_DEFAULT_CAPACITY, sizeof(type))
+#define xkCreateDynamicArrayCapacity(array, capacity, type) __xkCreateDynamicArray(array, capacity, sizeof(type))
 
 #define xkDynamicArrayPush(array, value)		\
 {																						\

@@ -7,7 +7,7 @@
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkShaderLoader_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
   XkChar path[XK_SHADER_LOADER_PATH_MAX_SIZE];
 } __XkShaderLoader;

@@ -26,8 +26,8 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	
 	XkThread thread = *pThread;
 
-	thread->pthread.stack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
-	if(!thread->pthread.stack) {
+	thread->stack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
+	if(!thread->stack) {
 		__xkErrorHandle("Unix: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
@@ -36,9 +36,9 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 
-	pthread_attr_setstack(&attr, thread->pthread.stack, XK_UNIX_THREAD_STACK_SIZE);
+	pthread_attr_setstack(&attr, thread->stack, XK_UNIX_THREAD_STACK_SIZE);
 
-	if(pthread_create(&thread->pthread.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
+	if(pthread_create(&thread->posix.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
 		__xkErrorHandle("Unix: Failed to create thread!");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
@@ -53,9 +53,9 @@ _catch:
 void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 	xkAssert(thread);
 
-	pthread_join(thread->pthread.handle, (void**)ppResult);
+	pthread_join(thread->posix.handle, (void**)ppResult);
 
-	xkFreeMemory(thread->pthread.stack);
+	xkFreeMemory(thread->stack);
 
 	xkFreeMemory(thread);
 }
@@ -63,9 +63,9 @@ void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 void xkDetachThread(XkThread thread) {
 	xkAssert(thread);
 
-	pthread_detach(thread->pthread.handle);
+	pthread_detach(thread->posix.handle);
 
-	xkFreeMemory(thread->pthread.stack);
+	xkFreeMemory(thread->stack);
 
 	xkFreeMemory(thread);
 }
@@ -77,9 +77,9 @@ void xkExitThread(void) {
 void xkKillThread(XkThread thread) {
 	xkAssert(thread);
 
-	pthread_kill(thread->pthread.handle, 0);
+	pthread_kill(thread->posix.handle, 0);
 
-	xkFreeMemory(thread->pthread.stack);
+	xkFreeMemory(thread->stack);
 
 	xkFreeMemory(thread);
 }
@@ -103,7 +103,7 @@ XkResult xkCreateMutex(XkMutex* pMutex) {
 	
 	XkMutex mutex = *pMutex;
 
-	if(pthread_mutex_init(&mutex->pthread.handle, NULL) != 0) {
+	if(pthread_mutex_init(&mutex->posix.handle, NULL) != 0) {
 		__xkErrorHandle("Unix: Failed to create mutex");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
@@ -116,7 +116,7 @@ _catch:
 void xkDestroyMutex(XkMutex mutex) {
 	xkAssert(mutex);
 
-	pthread_mutex_destroy(&mutex->pthread.handle);
+	pthread_mutex_destroy(&mutex->posix.handle);
 
 	xkFreeMemory(mutex);
 }
@@ -124,11 +124,11 @@ void xkDestroyMutex(XkMutex mutex) {
 void xkLockMutex(XkMutex mutex) {
 	xkAssert(mutex);
 
-	pthread_mutex_lock(&mutex->pthread.handle);
+	pthread_mutex_lock(&mutex->posix.handle);
 }
 
 void xkUnlockMutex(XkMutex mutex) {
 	xkAssert(mutex);
 
-	pthread_mutex_unlock(&mutex->pthread.handle);
+	pthread_mutex_unlock(&mutex->posix.handle);
 }

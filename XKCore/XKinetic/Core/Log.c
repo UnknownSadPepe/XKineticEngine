@@ -23,7 +23,7 @@ typedef enum XkLogType_T {
 }	XkLogType;
 
 typedef struct __XkLogger_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
 	XkFile file;
 } __XkLogger;

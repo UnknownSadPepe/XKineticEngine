@@ -18,10 +18,10 @@
 #include "XKinetic/XKCore.h"
 #if defined(XK_LINUX)
 	#define XR_USE_PLATFORM_WAYLAND
-#elif defined(XK_WIN64)
+#elif defined(XK_WINDOWS)
 	#include <windows.h>
 	#define XR_USE_PLATFORM_WIN32
-#endif // XK_LINUX || XK_WIN64
+#endif // XK_LINUX || XK_WINDOWS
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 
@@ -38,7 +38,7 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkXRContext_T {
-	XkBool 																	initialized;
+	XkBool8 																	initialized;
 
 	XrInstance 															xrInstance;
 #if defined(XKOPENXR_DEBUG)

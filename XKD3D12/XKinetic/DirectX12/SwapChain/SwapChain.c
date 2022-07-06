@@ -3,7 +3,7 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
-static XkBool __xkD3D12CheckTearingSupport(void);
+static XkBool8 __xkD3D12CheckTearingSupport(void);
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult __xkDXGICreateSwapChain(IDXGISwapChain4** ppDXGISwapChain4, ID3D12CommandQueue* pD3D12CommandQueue, const UINT bufferCount, XkWindow window) {
@@ -68,7 +68,7 @@ void __xkDXGIDestroySwapChain(IDXGISwapChain4* pDXGISwapChain) {
 	IDXGISwapChain_Release(pDXGISwapChain);
 }
 
-static XkBool __xkD3D12CheckTearingSupport(void) {
+static XkBool8 __xkD3D12CheckTearingSupport(void) {
 	IDXGIFactory5* dxgiFactory5 = NULL;
 
 	BOOL allowTearing = FALSE;

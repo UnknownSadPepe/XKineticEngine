@@ -30,9 +30,9 @@ XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
 	if(flag & XK_FILE_FLAG_AP_BIT) flags |= O_APPEND;
 	if(flag & XK_FILE_FLAG_CR_BIT) flags |= O_CREAT;
 
-	file->unix.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if(file->unix.handle <= 0) {
-		__xkErrorHandle("Unix: Failed to open file");
+	file->posix.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if(file->posix.handle <= 0) {
+		__xkErrorHandle("Posix: Failed to open file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -61,9 +61,9 @@ XkResult xkOpenAsyncFile(XkFile* pFile, const XkString name, const XkFileFlag fl
 	if(flag & XK_FILE_FLAG_AP_BIT) flags |= O_APPEND;
 	if(flag & XK_FILE_FLAG_CR_BIT) flags |= O_CREAT;
 
-	file->unix.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if(file->unix.handle <= 0) {
-		__xkErrorHandle("Unix: Failed to open async file");
+	file->posix.handle = open(name, flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if(file->posix.handle <= 0) {
+		__xkErrorHandle("Posix: Failed to open async file");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -75,7 +75,7 @@ _catch:
 void xkCloseFile(XkFile file) {
 	xkAssert(file);
 
-	close(file->unix.handle);
+	close(file->posix.handle);
 
 	xkFreeMemory(file);
 }
@@ -84,7 +84,7 @@ XkSize xkFileSize(XkFile file) {
 	xkAssert(file);
 
 	struct stat stat;
-	fstat(file->unix.handle, &stat);
+	fstat(file->posix.handle, &stat);
 
 	return((XkSize)stat.st_size);
 }
@@ -111,7 +111,7 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 		case XK_FILE_SEEK_END: whence = SEEK_END; break;
 	}
 
-	size_t size = lseek(file->unix.handle, (long)offset, whence);
+	size_t size = lseek(file->posix.handle, (long)offset, whence);
 
 	return((XkSize)size);
 }
@@ -119,13 +119,13 @@ XkSize xkSeekFile(XkFile file, const XkInt32 offset, const XkFileSeek seek) {
 void xkWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	xkAssert(file);
 
-	write(file->unix.handle, buffer, size);
+	write(file->posix.handle, buffer, size);
 }
 
 void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 	xkAssert(file);
 
-	read(file->unix.handle, buffer, size);
+	read(file->posix.handle, buffer, size);
 }
 
 void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {

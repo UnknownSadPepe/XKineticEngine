@@ -48,7 +48,7 @@ typedef XkResult(*XkCreateRendererTexturePfn)(XkHandle*, const XkSize, const XkS
 typedef void(*XkDestroyRendererTexturePfn)(XkHandle);
 
 typedef struct __XkRendererContext_T {
-	XkBool initialized;
+	XkBool8 initialized;
 
 	struct {
 		XkInitializeRendererPfn					initializeRenderer;

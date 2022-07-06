@@ -14,7 +14,6 @@ extern XKCORE_API void __xkAssertion(const XkString, const XkString, const XkInt
 #endif // XK_DEBUG
 
 #define xkStaticAssert(expr) 			_Static_assert(expr);
-//#define xkStaticAssert(expr, msg) _Static_assert(expr, msg);
 
 /* ########## FUNCTIONS MACROS SECTION ########## */
 #ifdef XK_DEBUG
