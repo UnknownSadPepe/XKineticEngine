@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult xkOpenFile(XkFile* pFile, const XkString name, const XkFileFlag flag) {
@@ -130,10 +131,78 @@ void xkReadFile(XkFile file, XkString buffer, const XkSize size) {
 
 void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 	xkAssert(file);
-	/// TODO: Implementation.
+
+	struct aiocb* aio = XK_NULL_HANDLE;
+	aio = xkAllocateMemory(sizeof(struct aiocb));
+	if(!aio) {
+		__xkErrorHandle("Posix: Failed to allocate async file buffer");	
+	}
+
+	aio->aio_buf 		= (void*)buffer;
+	aio->aio_fildes = file->posix.handle;
+	aio->aio_nbytes = size;
+	aio->aio_offset = 0;
+
+	if(aio_write(aio) < 0) {
+		__xkErrorHandle("Posix: Failed to write async file buffer");	
+		goto _free;
+	}
+
+	file->posix.aio = aio;
+
+_catch:
+	return;
+
+_free:
+	if(aio) {
+		xkFreeMemory(aio);		
+	}
+
+	goto _catch;
 }
 
 void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
 	xkAssert(file);
-	/// TODO: Implementation.
+
+	struct aiocb* aio = XK_NULL_HANDLE;
+	aio = xkAllocateMemory(sizeof(struct aiocb));
+	if(!aio) {
+		__xkErrorHandle("Posix: Failed to allocate async file buffer");	
+		goto _catch;
+	}
+
+	memset(aio, 0, sizeof(struct aiocb));
+
+	aio->aio_buf 		= (void*)buffer;
+	aio->aio_fildes = file->posix.handle;
+	aio->aio_nbytes = size;
+	aio->aio_offset = 0;
+
+	if(aio_read(aio) < 0) {
+		__xkErrorHandle("Posix: Failed to read async file buffer");	
+		goto _free;
+	}
+
+	file->posix.aio = aio;
+
+_catch:
+	return;
+
+_free:
+	if(aio) {
+		xkFreeMemory(aio);		
+	}
+
+	goto _catch;
+}
+
+void xkWaitAsyncFile(XkFile file) {
+	xkAssert(file);
+
+	/// NOTE: Wait.
+	while(aio_error(file->posix.aio) == EINPROGRESS) {}
+
+	if(aio_return(file->posix.aio) < 0) {
+		__xkErrorHandle("Posix: Failed to wait async file");		
+	}
 }

@@ -3,6 +3,8 @@
 #include "XKinetic/Application.h"
 #include "XKinetic/Platform/Joystick.h"
 
+#include "XKinetic/Platform/File.h"
+
 #include "XKinetic/Resources/Loaders/ImageLoader.h"
 
 /* ########## GLOBAL VARIABLES SECTION ########## */
@@ -306,6 +308,21 @@ _catch:
 }
 
 void xkTerminateApplication(void) {
+	XkFile asyncFile;
+	xkOpenAsyncFile(&asyncFile, "AsyncFile.txt", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
+	
+	XkChar* buffer = xkAllocateMemory(1024 * sizeof(XkChar));
+
+	memset(buffer, 'F', 1024 * sizeof(XkChar));
+
+	xkAsyncWriteFile(asyncFile, buffer, 1024 * sizeof(XkChar));
+
+	xkWaitAsyncFile(asyncFile);
+	
+	xkCloseFile(asyncFile);
+
+	xkFreeMemory(buffer);
+
 	xkUnloadImage(&cursorConfig);
 
 	xkUnloadImage(&iconConfig);

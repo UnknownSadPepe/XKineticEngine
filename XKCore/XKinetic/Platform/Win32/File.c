@@ -157,16 +157,6 @@ void xkAsyncWriteFile(XkFile file, const XkString buffer, const XkSize size) {
 
 	WriteFile(file->win32.handle, buffer, size, NULL, &file->win32.overlapped);
 
-	if(WaitForSingleObject(file->win32.overlapped.hEvent, INFINITE) != WAIT_OBJECT_0) {
-		__xkErrorHandle("Win32: Failed to wait async file event");
-		return;
-	}
-
-	if(!ResetEvent(file->win32.overlapped.hEvent)) {
-		__xkErrorHandle("Win32: Failed to reset async file event");
-		return;
-	}
-
 	file->win32.overlapped.Offset += (DWORD)size;
 }
 
@@ -174,11 +164,15 @@ void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
 	xkAssert(file);
 	/// TODO: impementation.
 
-	BOOL readed = ReadFile(file->win32.handle, buffer, size, NULL, &file->win32.overlapped);
+	ReadFile(file->win32.handle, buffer, size, NULL, &file->win32.overlapped);
+}
+
+void xkWaitAsyncFile(XkFile file) {
+	xkAssert(file);
 
 	WaitForSingleObject(file->win32.overlapped.hEvent, INFINITE);
 
 	if(!ResetEvent(file->win32.overlapped.hEvent)) {
 		__xkErrorHandle("Win32: Failed to reset async file event");
-	}
+	}	
 }

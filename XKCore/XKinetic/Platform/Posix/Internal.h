@@ -2,6 +2,7 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include <pthread.h>
+#include <aio.h>
 #include "XKinetic/XKCore.h"
 
 /// NOTE: For using in cpp programs.
@@ -11,7 +12,9 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkPosixFile_T {
-	int handle;
+	int 					handle;
+
+	struct aiocb* aio;
 } __XkPosixFile;
 
 typedef struct __XkPosixThread_T {

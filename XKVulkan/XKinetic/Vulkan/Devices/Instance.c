@@ -60,7 +60,7 @@ XkResult __xkVulkanCreateInstance() {
   vkApplicationInfo.pNext             = VK_NULL_HANDLE;
   vkApplicationInfo.pEngineName       = "XKineticEngine";
   vkApplicationInfo.engineVersion     = VK_MAKE_VERSION(0, 0, 1);
-  vkApplicationInfo.apiVersion        = VK_API_VERSION_1_1;
+  vkApplicationInfo.apiVersion        = VK_API_VERSION_1_3;
 
 #ifdef XKVULKAN_DEBUG
   VkDebugUtilsMessengerCreateInfoEXT vkDebugUtilsMessengerCreateInfo;
