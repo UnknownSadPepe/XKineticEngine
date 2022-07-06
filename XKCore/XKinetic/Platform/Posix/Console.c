@@ -111,7 +111,7 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 	}
 
 	XkChar fmtBuffer[XK_CONSOLE_BUFFER_SIZE];
-	const XkSize fmtSize = xkStringNFormat(fmtBuffer, XK_CONSOLE_BUFFER_SIZE, "%s%s%s\n", pColor, buffer, XK_POSIX_COLOR_RESET);
+	const XkSize fmtSize = xkStringNFormat(fmtBuffer, XK_CONSOLE_BUFFER_SIZE, "%s%s%s", pColor, buffer, XK_POSIX_COLOR_RESET);
 
 	write(stream, fmtBuffer, fmtSize);
 }

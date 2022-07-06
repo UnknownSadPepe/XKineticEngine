@@ -120,7 +120,7 @@ static void __xkWindowButton(XkWindow window, const XkButton button, const XkAct
 static void __xkWindowCursor(XkWindow window, XkFloat64 x, XkFloat64 y) {
 	xkAssert(window);
 
-	//xkLogNotice("cursor x: %f y: %f", x, y);
+	xkLogNotice("cursor x: %f y: %f", x, y);
 }
 
 static void __xkWindowCursorEnter(XkWindow window, XkBool8 entered) {

@@ -44,7 +44,7 @@ endif()
 target_compile_definitions(XKCore PRIVATE __XKCORE_BUILD__)
 
 if(CMAKE_BUILD_TYPE EQUAL "Debug")
-  target_compile_definitions(XKCore PRIVATE __XKCORE_DEBUG__)
+  target_compile_definitions(XKCore PUBLIC __XKCORE_DEBUG__)
 endif()
 
 # Generate Wayland headers.

@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
-set(CMAKE_C_FLAGS "-std=c11")
+set(CMAKE_C_FLAGS "-std=c2x")
 add_definitions("-Wall -Wextra -Wno-unused-parameter")
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 

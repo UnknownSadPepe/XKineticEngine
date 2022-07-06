@@ -107,10 +107,20 @@ extern XKCORE_API struct wl_display* 	__xkWaylandGetDisplay();
 extern XKCORE_API struct wl_surface* 	__xkWaylandGetSurface(const XkWindow);
 #endif // XK_WINDOWS
 
-extern XK_EXPORT void 								__xkErrorHandler(const XkString pFormat, ...);
+extern XK_EXPORT void 								__xkErrorHandler(const XkString, ...);
+extern XK_EXPORT void 								__xkWarningHandler(const XkString, ...);
+#if defined(XKCORE_DEBUG)
+	extern XK_EXPORT void 							__xkDebugHandler(const XkString, ...);
+#endif // XKCORE_DEBUG
 
 /* ########## FUNCTIONS HELPERS MACROS SECTION ########## */
-#define 															__xkErrorHandle(message) __xkErrorHandler("%s %s %d", message, __FILE__, __LINE__)
+#define 															__xkErrorHandle(message) 		__xkErrorHandler("%s %s %d", message, __FILE__, __LINE__)
+#define 															__xkWarningHandle(message) 	__xkWarningHandler("%s %s %d", message, __FILE__, __LINE__)
+#if defined(XKCORE_DEBUG)
+	#define 														__xkDebugHandle(message) 		__xkDebugHandler("%s %s %d", message, __FILE__, __LINE__)
+#else
+	#define 														__xkDebugHandle(message)
+#endif // XKCORE_DEBUG
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus
