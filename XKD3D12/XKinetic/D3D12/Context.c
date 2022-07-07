@@ -1,6 +1,6 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
-#include "XKinetic/DirectX12/Renderer.h"
+#include "XKinetic/D3D12/Internal.h"
+#include "XKinetic/D3D12/Renderer.h"
 
 /* ########## GLOBAL VARIABLES SECTION ########## */
 __XkD3D12Context _xkD3D12Context;
@@ -9,11 +9,12 @@ __XkD3D12Context _xkD3D12Context;
 XkString   __xkD3D12GetResultString(HRESULT hResult) {
   /// TODO: Implementation
   switch(hResult) {
-    default:          return("unknown DirectX12 error");
+    case ERROR_SUCCESS:             return("D3D12 Success");
+    default:                        return("unknown D3D12 error");
   }
 }
 
-XkResult xkD3D12InitializeContext(void) {
+XkResult xkD3D12InitializeContext() {
   XkResult result = XK_SUCCESS;
 
   if(_xkD3D12Context.initialized) {
@@ -65,7 +66,7 @@ _catch:
   return(result);
 }
 
-void xkD3D12TerminateContext(void) {
+void xkD3D12TerminateContext() {
   if(!_xkD3D12Context.initialized) {
     return;
   }

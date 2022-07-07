@@ -11,7 +11,7 @@ XkResult __xkVulkanCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
   XkResult result = XK_SUCCESS;
 
 #if defined(XK_LINUX)
-  VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo 	= {};
+  VkWaylandSurfaceCreateInfoKHR vkWaylandSurfaceCreateInfo 	= {0};
 	vkWaylandSurfaceCreateInfo.sType 													= VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
 	vkWaylandSurfaceCreateInfo.pNext 													= VK_NULL_HANDLE;
 	vkWaylandSurfaceCreateInfo.flags 													= 0;
@@ -25,7 +25,7 @@ XkResult __xkVulkanCreateSurface(VkSurfaceKHR* pVkSurface, XkWindow window) {
 		goto _catch;
 	}  
 #elif defined(XK_WINDOWS)
-  VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo 				= {};
+  VkWin32SurfaceCreateInfoKHR vkWin32SurfaceCreateInfo 				= {0};
 	vkWin32SurfaceCreateInfo.sType 															= VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	vkWin32SurfaceCreateInfo.pNext 															= VK_NULL_HANDLE;
 	vkWin32SurfaceCreateInfo.flags 															= 0;

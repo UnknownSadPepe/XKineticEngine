@@ -262,7 +262,7 @@ void xkVulkanBeginRenderer(XkVulkanRenderer renderer) {
 
 	VkFramebuffer vkFrameBuffer = renderer->vkFrameBuffers[renderer->imageIndex];
 
-  VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {};
+  VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {0};
   vkCommandBufferBeginInfo.sType              			= VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   vkCommandBufferBeginInfo.pNext              			= VK_NULL_HANDLE;
   vkCommandBufferBeginInfo.flags              			= 0;
@@ -274,7 +274,7 @@ void xkVulkanBeginRenderer(XkVulkanRenderer renderer) {
     goto _catch;
   }
 
-	VkRenderPassBeginInfo vkRenderPassBeginInfo = {};
+	VkRenderPassBeginInfo vkRenderPassBeginInfo = {0};
   vkRenderPassBeginInfo.sType 								= VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	vkRenderPassBeginInfo.pNext 								= VK_NULL_HANDLE;
 	vkRenderPassBeginInfo.renderPass 						= renderer->vkRenderPass;
@@ -414,7 +414,7 @@ void xkVulkanBindVertexBuffer(XkVulkanBuffer buffer, XkVulkanRenderer renderer) 
 	VkCommandBuffer vkCommandBuffer = renderer->vkCommandBuffers[renderer->frameIndex];
 
   VkBuffer vkVertexBuffers[] = {buffer->vkBuffer};
-  VkDeviceSize vkOffsets[] = {};
+  VkDeviceSize vkOffsets[] = {0};
   vkCmdBindVertexBuffers(vkCommandBuffer, 0, 1, vkVertexBuffers, vkOffsets);
 }
 
@@ -448,7 +448,7 @@ XkResult xkVulkanCreateTexture(XkVulkanTexture* pTexture, const XkSize width, co
 	/// TODO: Implementation for miplevels.
 	uint32_t mipLevels = 1; 
 
-	VkExtent3D vkExtent 	= {};
+	VkExtent3D vkExtent 	= {0};
 	vkExtent.width 				= (uint32_t)width;
 	vkExtent.height 			= (uint32_t)height;
 	vkExtent.depth 				= 1;

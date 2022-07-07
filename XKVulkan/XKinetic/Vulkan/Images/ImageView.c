@@ -10,7 +10,7 @@ XkResult __xkVulkanCreateImageView(VkImageView* const pVkImageView, VkImage vkIm
 
   XkResult result = XK_SUCCESS;
 
-	VkImageViewCreateInfo vkImageViewCreateInfo             = {};
+	VkImageViewCreateInfo vkImageViewCreateInfo             = {0};
 	vkImageViewCreateInfo.sType                             = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   vkImageViewCreateInfo.pNext                             = VK_NULL_HANDLE;
   vkImageViewCreateInfo.flags                             = 0;

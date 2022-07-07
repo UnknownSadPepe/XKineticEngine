@@ -24,7 +24,7 @@ XkResult __xkOpenXRCreateAction(XrAction* pXrAction, XkString name, XkString loc
 
 	XkResult result = XK_SUCCESS;
 
-	XrActionCreateInfo xrActionCreateInfo 	= {};
+	XrActionCreateInfo xrActionCreateInfo 	= {0};
 	xrActionCreateInfo.type 								= XR_TYPE_ACTION_CREATE_INFO;
 	xrActionCreateInfo.next 								= XR_NULL_HANDLE;
 	xkCopyString(xrActionCreateInfo.actionName, name);

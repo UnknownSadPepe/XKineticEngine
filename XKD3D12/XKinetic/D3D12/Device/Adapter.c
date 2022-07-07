@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 const D3D_FEATURE_LEVEL   _xkD3DMinimumDeviceFeatureLevel = {D3D_FEATURE_LEVEL_12_0};
@@ -37,7 +37,7 @@ static D3D_FEATURE_LEVEL __xkDXGIAdapter4GetMaximumFeatureLevel(IDXGIAdapter4* d
 
   D3D_FEATURE_LEVEL d3dFeatureLevel = (D3D_FEATURE_LEVEL)0;
 
-  D3D12_FEATURE_DATA_FEATURE_LEVELS d3d12FeatureLevelInfo   = {};
+  D3D12_FEATURE_DATA_FEATURE_LEVELS d3d12FeatureLevelInfo   = {0};
   d3d12FeatureLevelInfo.NumFeatureLevels                    = _xkD3DDeviceFeatureLevelCount;
   d3d12FeatureLevelInfo.pFeatureLevelsRequested             = _xkD3DDeviceFeatureLevels;
 
@@ -49,7 +49,7 @@ static D3D_FEATURE_LEVEL __xkDXGIAdapter4GetMaximumFeatureLevel(IDXGIAdapter4* d
 
   ID3D12Device_CheckFeatureSupport(d3d12Device, D3D12_FEATURE_FEATURE_LEVELS, &d3d12FeatureLevelInfo, sizeof(D3D12_FEATURE_DATA_FEATURE_LEVELS));
 
-  d3dFeatureLevel = d3d12FeatureLevelInfo.MaxSupportedFeatureLevel
+  d3dFeatureLevel = d3d12FeatureLevelInfo.MaxSupportedFeatureLevel;
 
   return(d3dFeatureLevel);
 }

@@ -8,35 +8,35 @@
 XkResult xkInitializeJoystick() {
 	XkResult result = XK_SUCCESS;
 
-	if(_xkPlatform.dinput.initialized) {
+	if(_xkPlatform.windows.dinput.initialized) {
 		return;
 	}
 
-	HRESULT hResult = DirectInput8Create(_xkPlatform.win32.instance, DIRECTINPUT_VERSION, &IID_IDirectInput8W, (void**)&_xkPlatform.win32.dinput, NULL);
+	HRESULT hResult = DirectInput8Create(_xkPlatform.windows.winapi.instance, DIRECTINPUT_VERSION, &IID_IDirectInput8W, (void**)&_xkPlatform.windows.dinput.dInput, NULL);
 	if(FAILED(hResult))  {
 		result = XK_ERROR_UNKNOWN;
-		_glfwInputError("DirectInput: Failed to create interface");
+		__xkErrorHandler("DirectInput: Failed to create interface");
 		goto _catch;
 	}
 
-	_xkPlatform.dinput.initialized = XK_TRUE;
+	_xkPlatform.windows.dinput.initialized = XK_TRUE;
 
 _catch:
 	return(result);
 }
 
 void xkTerminateJoystick() {
-	if(!_xkPlatform.dinput.initialized) {
+	if(!_xkPlatform.windows.dinput.initialized) {
 		return;
 	}
 
-	if(_xkPlatform.win32.dinput) {
-		IDirectInput8_Release(_xkPlatform.win32.dinput);
+	if(_xkPlatform.windows.dinput.dInput) {
+		IDirectInput8_Release(_xkPlatform.windows.dinput.dInput);
 
-		_xkPlatform.win32.dinput = NULL;
+		_xkPlatform.windows.dinput.dInput = NULL;
 	}
 
-	_xkPlatform.dinput.initialized = XK_FALSE;
+	_xkPlatform.windows.dinput.initialized = XK_FALSE;
 }
 
 XkResult xkJoystickPresent(XkJoystickId jid) {

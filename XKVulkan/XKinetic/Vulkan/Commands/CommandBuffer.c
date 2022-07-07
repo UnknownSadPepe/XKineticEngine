@@ -8,7 +8,7 @@ XkResult __xkVulkanCreateCommandBuffer(VkCommandBuffer* pVkCommandBuffer, const 
 
   XkResult result = XK_SUCCESS;
 
-	VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {};
+	VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {0};
   vkCommandBufferAllocateInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   vkCommandBufferAllocateInfo.pNext                       = VK_NULL_HANDLE;
 	vkCommandBufferAllocateInfo.commandPool                 = _xkVulkanContext.vkCommandPool;

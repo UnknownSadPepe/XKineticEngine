@@ -33,7 +33,7 @@ typedef union {
 } XkDVec3;
 
 XK_INLINE XKMATH_API XkVec3 xkVec3Add(const XkVec3 a, const XkVec3 b) {
-	XkVec3 vec = {};
+	XkVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_add_ps(a.avx, b.avx);
 #else
@@ -46,7 +46,7 @@ XK_INLINE XKMATH_API XkVec3 xkVec3Add(const XkVec3 a, const XkVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec3 xkDVec3Add(const XkDVec3 a, const XkDVec3 b) {
-	XkDVec3 vec = {};
+	XkDVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_add_pd(a.avx, b.avx);
 #else
@@ -59,7 +59,7 @@ XK_INLINE XKMATH_API XkDVec3 xkDVec3Add(const XkDVec3 a, const XkDVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkVec3 xkVec3Sub(const XkVec3 a, const XkVec3 b) {
-	XkVec3 vec = {};
+	XkVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_sub_ps(a.avx, b.avx);
 #else
@@ -72,7 +72,7 @@ XK_INLINE XKMATH_API XkVec3 xkVec3Sub(const XkVec3 a, const XkVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec3 xkDVec3Sub(const XkDVec3 a, const XkDVec3 b) {
-	XkDVec3 vec = {};
+	XkDVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_sub_pd(a.avx, b.avx);
 #else
@@ -85,7 +85,7 @@ XK_INLINE XKMATH_API XkDVec3 xkDVec3Sub(const XkDVec3 a, const XkDVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkVec3 xkVec3Mul(const XkVec3 a, const XkVec3 b) {
-	XkVec3 vec = {};
+	XkVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_mul_ps(a.avx, b.avx);
 #else
@@ -98,7 +98,7 @@ XK_INLINE XKMATH_API XkVec3 xkVec3Mul(const XkVec3 a, const XkVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec3 xkDVec3Mul(const XkDVec3 a, const XkDVec3 b) {
-	XkDVec3 vec = {};
+	XkDVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_mul_pd(a.avx, b.avx);
 #else
@@ -111,7 +111,7 @@ XK_INLINE XKMATH_API XkDVec3 xkDVec3Mul(const XkDVec3 a, const XkDVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkVec3 xkVec3Div(const XkVec3 a, const XkVec3 b) {
-	XkVec3 vec = {};
+	XkVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_div_ps(a.avx, b.avx);
 #else
@@ -124,7 +124,7 @@ XK_INLINE XKMATH_API XkVec3 xkVec3Div(const XkVec3 a, const XkVec3 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec3 xkDVec3Div(const XkDVec3 a, const XkDVec3 b) {
-	XkDVec3 vec = {};
+	XkDVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_div_pd(a.avx, b.avx);
 #else
@@ -140,9 +140,9 @@ XK_INLINE XKMATH_API XkBool8 xkVec3Compare(const XkVec3 a, const XkVec3 b) {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	/// TODO: Implementation.
 #else
-	if(xkAbs(a.x - b.x) > XK_FLOAT32_EPSILON) return(XK_FALSE);
-  if(xkAbs(a.y - b.y) > XK_FLOAT32_EPSILON) return(XK_FALSE);
-	if(xkAbs(a.z - b.z) > XK_FLOAT32_EPSILON) return(XK_FALSE);
+	if(xkFAbs(a.x - b.x) > XK_FLOAT32_EPSILON) return(XK_FALSE);
+  if(xkFAbs(a.y - b.y) > XK_FLOAT32_EPSILON) return(XK_FALSE);
+	if(xkFAbs(a.z - b.z) > XK_FLOAT32_EPSILON) return(XK_FALSE);
 #endif // __XKMATH_AVX__ || __XKMATH_AVX2__
 
 	return(XK_TRUE);
@@ -152,9 +152,9 @@ XK_INLINE XKMATH_API XkBool8 xkDVec3Compare(const XkDVec3 a, const XkDVec3 b) {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	/// TODO: Implementation.
 #else
-	if(xkAbs(a.x - b.x) > XK_FLOAT64_EPSILON) return(XK_FALSE);
-  if(xkAbs(a.y - b.y) > XK_FLOAT64_EPSILON) return(XK_FALSE);
-	if(xkAbs(a.z - b.z) > XK_FLOAT64_EPSILON) return(XK_FALSE);
+	if(xkDAbs(a.x - b.x) > XK_FLOAT64_EPSILON) return(XK_FALSE);
+  if(xkDAbs(a.y - b.y) > XK_FLOAT64_EPSILON) return(XK_FALSE);
+	if(xkDAbs(a.z - b.z) > XK_FLOAT64_EPSILON) return(XK_FALSE);
 #endif // __XKMATH_AVX__ || __XKMATH_AVX2__
 
 	return(XK_TRUE);
@@ -169,7 +169,7 @@ XK_INLINE XKMATH_API XkFloat64 xkDVec3Length(const XkDVec3 a) {
 }
 
 XK_INLINE XKMATH_API XkVec3 xkVec3Normalize(const XkVec3 a) {
-	XkVec3 vec = {};
+	XkVec3 vec = {0};
 
 	const XkFloat32 length = xkVec3Length(a);
 
@@ -188,7 +188,7 @@ XK_INLINE XKMATH_API XkVec3 xkVec3Normalize(const XkVec3 a) {
 }
 
 XK_INLINE XKMATH_API XkDVec3 xkDVec3Normalize(const XkDVec3 a) {
-	XkDVec3 vec = {};
+	XkDVec3 vec = {0};
 
 	const XkFloat64 length = xkDVec3Length(a);
 

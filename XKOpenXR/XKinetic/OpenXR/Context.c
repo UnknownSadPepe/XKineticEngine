@@ -65,35 +65,35 @@ XkResult xkOpenXRInitializeContext(void) {
   }
 
   {
-    XrActionSuggestedBinding xrLeftPlaceActionBinding     = {};
+    XrActionSuggestedBinding xrLeftPlaceActionBinding     = {0};
     xrLeftPlaceActionBinding.action                       = _xkOpenXRContext.xrPlaceAction;
     xrLeftPlaceActionBinding.binding                      = __xkOpenXRGetPath("/user/hand/left/input/select/click");
 
-    XrActionSuggestedBinding xrRightPlaceActionBinding     = {};
+    XrActionSuggestedBinding xrRightPlaceActionBinding     = {0};
     xrRightPlaceActionBinding.action                       = _xkOpenXRContext.xrPlaceAction;
     xrRightPlaceActionBinding.binding                      = __xkOpenXRGetPath("/user/hand/right/input/select/click");
 
-    XrActionSuggestedBinding xrLeftPoseActionBinding      = {};
+    XrActionSuggestedBinding xrLeftPoseActionBinding      = {0};
     xrLeftPlaceActionBinding.action                       = _xkOpenXRContext.xrPoseAction;
     xrLeftPlaceActionBinding.binding                      = __xkOpenXRGetPath("/user/hand/left/input/grip/pose");
 
-    XrActionSuggestedBinding xrRightPoseActionBinding     = {};
+    XrActionSuggestedBinding xrRightPoseActionBinding     = {0};
     xrRightPlaceActionBinding.action                      = _xkOpenXRContext.xrPoseAction;
     xrRightPlaceActionBinding.binding                     = __xkOpenXRGetPath("/user/hand/right/input/grip/pose");
 
-    XrActionSuggestedBinding xrLeftVibrateActionBinding   = {};
+    XrActionSuggestedBinding xrLeftVibrateActionBinding   = {0};
     xrLeftPlaceActionBinding.action                       = _xkOpenXRContext.xrPoseAction;
     xrLeftPlaceActionBinding.binding                      = __xkOpenXRGetPath("/user/hand/left/output/haptic");
 
-    XrActionSuggestedBinding xrRightVibrateActionBinding  = {};
+    XrActionSuggestedBinding xrRightVibrateActionBinding  = {0};
     xrRightPlaceActionBinding.action                      = _xkOpenXRContext.xrPoseAction;
     xrRightPlaceActionBinding.binding                     = __xkOpenXRGetPath("/user/hand/right/output/haptic");
 
-    XrActionSuggestedBinding xrLeftExitActionBinding      = {};
+    XrActionSuggestedBinding xrLeftExitActionBinding      = {0};
     xrLeftPlaceActionBinding.action                       = _xkOpenXRContext.xrPoseAction;
     xrLeftPlaceActionBinding.binding                      = __xkOpenXRGetPath("/user/hand/left/input/menu/click");
 
-    XrActionSuggestedBinding xrRightExitActionBinding     = {};
+    XrActionSuggestedBinding xrRightExitActionBinding     = {0};
     xrRightPlaceActionBinding.action                      = _xkOpenXRContext.xrPoseAction;
     xrRightPlaceActionBinding.binding                     = __xkOpenXRGetPath("/user/hand/right/input/menu/click");
 

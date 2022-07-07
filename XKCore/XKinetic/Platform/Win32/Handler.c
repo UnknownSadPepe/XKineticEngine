@@ -9,9 +9,9 @@
 
 /* ########## FUNCTIONS SECTION ########## */
 void __xkErrorHandler(const XkString format, ...) {
-	XkChar buffer[XK_HANDLER_BUFFER_SIZE] = {};
+	XkChar buffer[XK_HANDLER_BUFFER_SIZE];
 
-	xkArgs args;
+	XkArgs args;
 	xkStartArgs(args, format);
 	xkStringNFFormat(buffer, XK_HANDLER_BUFFER_SIZE, format, args);
 	xkEndArgs(args);
@@ -20,9 +20,9 @@ void __xkErrorHandler(const XkString format, ...) {
 }
 
 void __xkWarningHandler(const XkString format, ...) {
-	XkChar buffer[XK_HANDLER_BUFFER_SIZE] = {};
+	XkChar buffer[XK_HANDLER_BUFFER_SIZE];
 
-	xkArgs args;
+	XkArgs args;
 	xkStartArgs(args, format);
 	xkStringNFFormat(buffer, XK_HANDLER_BUFFER_SIZE, format, args);
 	xkEndArgs(args);
@@ -32,9 +32,9 @@ void __xkWarningHandler(const XkString format, ...) {
 
 #if defined(XKCORE_DEBUG)
 void __xkDebugHandler(const XkString format, ...) {
-	XkChar buffer[XK_HANDLER_BUFFER_SIZE] = {};
+	XkChar buffer[XK_HANDLER_BUFFER_SIZE];
 
-	xkArgs args;
+	XkArgs args;
 	xkStartArgs(args, format);
 	xkStringNFFormat(buffer, XK_HANDLER_BUFFER_SIZE, format, args);
 	xkEndArgs(args);

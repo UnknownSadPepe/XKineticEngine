@@ -7,7 +7,7 @@ XkResult __xkOpenXRCreateSession() {
   XkResult result = XK_SUCCESS;
 
 #if defined(XK_XRVULKAN)
-  XrGraphicsBindingVulkanKHR xrGraphicsBindingVulkan  = {};
+  XrGraphicsBindingVulkanKHR xrGraphicsBindingVulkan  = {0};
   xrGraphicsBindingVulkan.type                        = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR;
   xrGraphicsBindingVulkan.next                        = XR_NULL_HANDLE; 
   xrGraphicsBindingVulkan.instance                    = /*TOOD: implementation*/;
@@ -16,14 +16,14 @@ XkResult __xkOpenXRCreateSession() {
   xrGraphicsBindingVulkan.queueFamilyIndex            = /*TOOD: implementation*/;
   xrGraphicsBindingVulkan.queueIndex                  = /*TOOD: implementation*/; 
 #elif defined(XK_XRDIRECTX12)
-  XrGraphicsBindingD3D12KHR xrGraphicsBindingD3D12    = {};
+  XrGraphicsBindingD3D12KHR xrGraphicsBindingD3D12    = {0};
   xrGraphicsBindingD3D12.type                         = XR_TYPE_GRAPHICS_BINDING_D3D12_KHR;
   xrGraphicsBindingD3D12.next                         = XR_NULL_HANDLE;
   //xrGraphicsBindingD3D12.device                       = /*TOOD: implementation*/;
   //xrGraphicsBindingD3D12.queue                        = /*TOOD: implementation*/;
 #endif // XK_XRVULKAN || XK_XRDIRECTX12
 
-  XrSessionCreateInfo xrSessionInfo   = {};
+  XrSessionCreateInfo xrSessionInfo   = {0};
   xrSessionInfo.type                  = XR_TYPE_SESSION_CREATE_INFO;
 #if defined(XK_XRVULKAN)
   xrSessionInfo.next                  = &xrGraphicsBindingVulkan;

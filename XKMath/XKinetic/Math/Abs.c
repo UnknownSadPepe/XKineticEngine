@@ -15,3 +15,11 @@ XkFloat64 xkDAbs(const XkFloat64 x) {
 	u.i &= -1ULL/2;
 	return u.f;
 }
+
+XkInt32 xkIAbs(const XkInt32 x) {
+	return(x > 0 ? x : -x);
+}
+
+XkInt64 xkLIAbs(const XkInt64 x) {
+	return(x > 0 ? x : -x);
+}

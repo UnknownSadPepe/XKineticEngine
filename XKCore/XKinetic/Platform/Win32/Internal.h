@@ -2,6 +2,7 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include <windows.h>
+#include <windowsx.h>
 #include <dinput.h>
 #include <xinput.h>
 #include "XKinetic/XKCore.h"
@@ -27,13 +28,15 @@ typedef struct __XkWin32Thread_T {
 } __XkWin32Thread;
 
 typedef struct __XkWin32Mutex_T {
-	struct winapi {
+	struct {
 		CRITICAL_SECTION handle;
-	}
+	} winapi;
 } __XkWin32Mutex;
 
 typedef struct __XkWin32Window_T {
 	struct {
+		XkBool8		fullscreen;
+
 		XkSize 		minWidth;
 		XkSize 		minHeight;
 		XkSize 		maxWidth;
@@ -49,14 +52,14 @@ typedef struct __XkWin32Window_T {
 	} winapi;
 } __XkWin32Window;
 
-typedef struct __XkWin32JoystickObject_T {
+typedef struct __XkDInputJoystickObject_T {
 	int	offset;
 	int	type;
-} __XkWin32JoystickObject;
+} __XkDInputJoystickObject;
 
 typedef struct __XkWin32Joystick_T {
 	struct {
-		__XkWin32JoystickObject*  	objects;
+		__XkDInputJoystickObject*		objects;
 		int                     		objectCount;
 		IDirectInputDevice8W*   		diDevice;
 	} dinput;
@@ -73,11 +76,15 @@ typedef struct __XkWin32Module_T {
 
 typedef struct __XkWin32Platform_T {
 	struct {
+		XkBool8						initialized;
+
 		HINSTANCE 				instance;
 	} winapi;
 
 	struct {
-		IDirectInput8W 		handle;
+		XkBool8						initialized;
+
+		IDirectInput8W* 	dInput;
 	} dinput;
 } __XkWin32Platform;
 

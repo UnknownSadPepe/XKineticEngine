@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
 
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
-set(CMAKE_C_FLAGS "-std=c2x")
-add_definitions("-Wall -Wextra -Wno-unused-parameter")
-set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_FLAGS "-std=c17")
+add_definitions("-Wall")
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -36,7 +36,7 @@ add_subdirectory(XKCore)
 add_subdirectory(XKMath)
 
 if(UNIX AND NOT APPLE OR WIN32)
-  add_subdirectory(XKVulkan)
+  #add_subdirectory(XKVulkan)
 endif()
 
 if(WIN32)

@@ -8,7 +8,7 @@ XkResult __xkVulkanCreateSemaphore(VkSemaphore* pVkSemaphore) {
 
   XkResult result = XK_SUCCESS;
 
-  VkSemaphoreCreateInfo vkSemaphoreCreateInfo = {};
+  VkSemaphoreCreateInfo vkSemaphoreCreateInfo = {0};
   vkSemaphoreCreateInfo.sType                 = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
   vkSemaphoreCreateInfo.pNext                 = VK_NULL_HANDLE;
   vkSemaphoreCreateInfo.flags                 = 0;

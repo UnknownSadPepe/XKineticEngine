@@ -6,6 +6,8 @@
 #endif // _WIN32_WINNT < 0x0501
 #include <windows.h>
 #include "XKinetic/XKCore.h"
+#include "XKinetic/Platform/Internal.h"
+#include "XKinetic/Platform/Memory.h"
 
 /* ########## FUNCTIONS SECTION ########## */
 extern XkResult __xkEntry(const XkSize, const XkString*);

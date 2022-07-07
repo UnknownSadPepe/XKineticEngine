@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
@@ -11,7 +11,7 @@ XkResult __xkD3D12CreateFence(ID3D12Fence** ppD3D12Fence) {
 	HRESULT hResult = ID3D12Device_CreateFence(_xkD3D12Context.d3d12Device8, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence1, ppD3D12Fence);
 	if (FAILED(hResult)) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("DirectX12: Failed to create fence: %s", __xkD3D12ResultString(hResult));
+		xkLogError("DirectX12: Failed to create fence: %s", __xkD3D12GetResultString(hResult));
 		goto _catch;
 	}
 

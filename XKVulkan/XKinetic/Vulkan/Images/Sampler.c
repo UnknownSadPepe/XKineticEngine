@@ -9,7 +9,7 @@ XkResult __xkVulkanCreateSampler(VkSampler* pVkSampler, const VkFilter vkFilter,
 
   XkResult result = XK_SUCCESS;
 
-  VkSamplerCreateInfo vkSamplerCreateInfo       = {};
+  VkSamplerCreateInfo vkSamplerCreateInfo       = {0};
 	vkSamplerCreateInfo.sType                     = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   vkSamplerCreateInfo.pNext                     = VK_NULL_HANDLE;
   vkSamplerCreateInfo.flags                     = 0;

@@ -10,7 +10,7 @@ XkResult __xkVulkanCreateShader(VkShaderModule* pVkShaderModule, const uint32_t*
 
   XkResult result = XK_SUCCESS;
 
-  VkShaderModuleCreateInfo vkShaderModuleCreateInfo = {};
+  VkShaderModuleCreateInfo vkShaderModuleCreateInfo = {0};
   vkShaderModuleCreateInfo.sType                    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   vkShaderModuleCreateInfo.pNext                    = VK_NULL_HANDLE;
   vkShaderModuleCreateInfo.flags                    = 0;

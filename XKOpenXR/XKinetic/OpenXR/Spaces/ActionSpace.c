@@ -10,7 +10,7 @@ XkResult __xkOpenXRCreateActionSpace(XrSpace* pXrSpace, XrAction xrAction, XrPat
 
   XkResult result = XK_SUCCESS;
 
-  XrActionSpaceCreateInfo xrActionSpaceInfo   = {};
+  XrActionSpaceCreateInfo xrActionSpaceInfo   = {0};
   xrActionSpaceInfo.type                      = XR_TYPE_ACTION_SPACE_CREATE_INFO;
   xrActionSpaceInfo.next                      = XR_NULL_HANDLE;
   xrActionSpaceInfo.action                    = xrAction;

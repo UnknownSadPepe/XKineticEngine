@@ -1,5 +1,6 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Renderer/Internal.h"
+#include "XKinetic/Renderer/Renderer.h"
 #include "XKinetic/Platform/Module.h"
 #include "XKinetic/Core/Assert.h"
 
@@ -41,8 +42,8 @@ __XkRendererContext _xkRendererContext;
 #endif // XK_LINUX || XK_WINDOWS
 
 #if defined(XK_WINDOWS)
-	#define XKVULKAN_INITIALIZE_RENDERER		"xkD3D12InitializeRenderer"
-	#define XKVULKAN_TERMINATE_RENDERER			"xkD3D12TerminateRenderer"
+	#define XKD3D12_INITIALIZE_RENDERER			"xkD3D12InitializeRenderer"
+	#define XKD3D12_TERMINATE_RENDERER			"xkD3D12TerminateRenderer"
 	#define XKD3D12_CREATE_RENDERER					"xkD3D12CreateRenderer"
 	#define XKD3D12_DESTROY_RENDERER				"xkD3D12DestroyRenderer"
 	#define XKD3D12_CLEAR_COLOR_RENDERER		"xkD3D12ClearColorRenderer"

@@ -30,7 +30,7 @@ const char* _xkVulkanInstanceLayers[] = {
 
 const uint32_t _xkVulkanInstanceLayerCount = 1;
 #else
-const char* _xkVulkanInstanceLayers[] = {};
+const char* _xkVulkanInstanceLayers[] = {0};
 
 const uint32_t _xkVulkanInstanceLayerCount = 0;
 #endif // XKVULKAN_DEBUG
@@ -55,7 +55,7 @@ XkResult __xkVulkanCreateInstance() {
     goto _catch;   
   }
 
-  VkApplicationInfo vkApplicationInfo = {};
+  VkApplicationInfo vkApplicationInfo = {0};
   vkApplicationInfo.sType             = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   vkApplicationInfo.pNext             = VK_NULL_HANDLE;
   vkApplicationInfo.pEngineName       = "XKineticEngine";
@@ -67,7 +67,7 @@ XkResult __xkVulkanCreateInstance() {
   __xkVulkanPopulateDebugMessengerCreateInfo(&vkDebugUtilsMessengerCreateInfo);
 #endif // XKVULKAN_DEBUG
 
-  VkInstanceCreateInfo vkInstanceCreateInfo     = {};
+  VkInstanceCreateInfo vkInstanceCreateInfo     = {0};
   vkInstanceCreateInfo.sType                    = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 #ifdef XKVULKAN_DEBUG
   vkInstanceCreateInfo.pNext                    = (VkDebugUtilsMessengerCreateInfoEXT*)&vkDebugUtilsMessengerCreateInfo;

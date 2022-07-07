@@ -8,7 +8,7 @@
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include <d3dcompiler.h>
-#include "XKinetic/XKDirectX12.h"
+#include "XKinetic/XKD3D12.h"
 #include "XKinetic/Core/Minimal.h"
 #include "XKinetic/Platform/Window.h"
 
@@ -22,6 +22,8 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkD3D12Context_T {
+	XkBool8											initialized;
+
 	IDXGIFactory7*							dxgiFactory7;
 	IDXGIAdapter4*							dxgiAdapter4;
  	D3D_FEATURE_LEVEL						d3dDeviceMaximumFeatureLevel;

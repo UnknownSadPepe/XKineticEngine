@@ -10,7 +10,7 @@ XkResult __xkOpenXRProfileBindings(const uint32_t countBinding, XrActionSuggeste
 
   XkResult result = XK_SUCCESS;
 
-  XrInteractionProfileSuggestedBinding xrProfileBindings  = {};
+  XrInteractionProfileSuggestedBinding xrProfileBindings  = {0};
   xrProfileBindings.type                                  = XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING;
   xrProfileBindings.next                                  = XR_NULL_HANDLE;
   xrProfileBindings.interactionProfile                    = xrInteractionProfile;;

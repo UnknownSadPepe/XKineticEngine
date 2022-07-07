@@ -6,7 +6,7 @@
 XkResult __xkOpenXRCreateReferenceSpace() {
   XkResult result = XK_SUCCESS;
 
-  XrReferenceSpaceCreateInfo xrReferenceSpaceInfo   = {};
+  XrReferenceSpaceCreateInfo xrReferenceSpaceInfo   = {0};
   xrReferenceSpaceInfo.type                         = XR_TYPE_REFERENCE_SPACE_CREATE_INFO;
   xrReferenceSpaceInfo.next                         = XR_NULL_HANDLE;
   xrReferenceSpaceInfo.referenceSpaceType           = XR_REFERENCE_SPACE_TYPE_LOCAL;

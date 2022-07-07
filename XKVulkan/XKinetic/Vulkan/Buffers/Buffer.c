@@ -9,7 +9,7 @@ XkResult __xkVulkanCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const
 
   XkResult result = XK_SUCCESS;
 
-  VkBufferCreateInfo vkBufferCreateInfo       = {};
+  VkBufferCreateInfo vkBufferCreateInfo       = {0};
   vkBufferCreateInfo.sType                    = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   vkBufferCreateInfo.pNext                    = VK_NULL_HANDLE;
   vkBufferCreateInfo.flags                    = 0;
@@ -31,7 +31,7 @@ XkResult __xkVulkanCreateBuffer(VkBuffer* const pVkBuffer, VkDeviceMemory* const
 	VkMemoryRequirements vkMemoryRequirements;
 	vkGetBufferMemoryRequirements(_xkVulkanContext.vkLogicalDevice, vkBuffer, &vkMemoryRequirements);
 
-  VkMemoryAllocateInfo vkMemoryAllocateInfo = {};
+  VkMemoryAllocateInfo vkMemoryAllocateInfo = {0};
 	vkMemoryAllocateInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   vkMemoryAllocateInfo.pNext                = VK_NULL_HANDLE;
 	vkMemoryAllocateInfo.allocationSize       = vkMemoryRequirements.size;

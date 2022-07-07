@@ -28,7 +28,7 @@ const char* _xkOpenXRInstanceLayers[] = {
 
 const uint32_t _xkOpenXRInstanceLayerCount = 1;
 #else
-const char* _xkOpenXRInstanceLayers[] = {};
+const char* _xkOpenXRInstanceLayers[] = {0};
 
 const uint32_t _xkOpenXRInstanceLayerCount = 0;
 #endif // XKOPENXR_DEBUG
@@ -58,12 +58,12 @@ XkResult __xkOpenXRCreateInstance() {
   __xkOpenXRPopulateDebugMessengerCreateInfo(&xrDebugUtilsMessengerCreateInfo);
 #endif // XKOPENXR_DEBUG
 
-	XrApplicationInfo xrApplicationInfo 		= {};
+	XrApplicationInfo xrApplicationInfo 		= {0};
 	xkCopyString(xrApplicationInfo.engineName, "XKineticEngine");
 	xrApplicationInfo.engineVersion 				= XR_MAKE_VERSION(0, 0, 1);
 	xrApplicationInfo.apiVersion 						= XR_VERSION_1_0;
 
-	XrInstanceCreateInfo xrInstanceCreateInfo 	= {};
+	XrInstanceCreateInfo xrInstanceCreateInfo 	= {0};
 	xrInstanceCreateInfo.type 									= XR_TYPE_INSTANCE_CREATE_INFO;
 #ifdef XKOPENXR_DEBUG
   xrInstanceCreateInfo.next                   = (XrDebugUtilsMessengerCreateInfoEXT*)&xrDebugUtilsMessengerCreateInfo;

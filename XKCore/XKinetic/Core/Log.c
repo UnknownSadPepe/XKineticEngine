@@ -118,7 +118,7 @@ void __xkLog(const XkLogType type, const XkString format, XkArgs args) {
 	}
 
 	static const XkString typeBuffer[] = {"FTL", "ERR", "WRG", "TRC", "INF", "NTC", "DBG"};
-	XkChar logBuffer[XK_LOG_BUFFER_SIZE] = {};
+	XkChar logBuffer[XK_LOG_BUFFER_SIZE] ={0};
 
 	XkConsoleHandle stream = type <= XK_LOG_TYPE_ERROR ? XK_CONSOLE_STDERR : XK_CONSOLE_STDOUT;
 

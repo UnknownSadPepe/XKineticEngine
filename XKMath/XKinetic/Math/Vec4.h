@@ -31,7 +31,7 @@ typedef union {
 } XkDVec4;
 
 XK_INLINE XKMATH_API XkVec4 xkVec4Add(const XkVec4 a, const XkVec4 b) {
-	XkVec4 vec = {};
+	XkVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_add_ps(a.avx, b.avx);
 #else
@@ -45,7 +45,7 @@ XK_INLINE XKMATH_API XkVec4 xkVec4Add(const XkVec4 a, const XkVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec4 xkDVec4Add(const XkDVec4 a, const XkDVec4 b) {
-	XkDVec4 vec = {};
+	XkDVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_add_pd(a.avx, b.avx);
 #else
@@ -59,7 +59,7 @@ XK_INLINE XKMATH_API XkDVec4 xkDVec4Add(const XkDVec4 a, const XkDVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkVec4 xkVec4Sub(const XkVec4 a, const XkVec4 b) {
-	XkVec4 vec = {};
+	XkVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_sub_ps(a.avx, b.avx);
 #else
@@ -73,7 +73,7 @@ XK_INLINE XKMATH_API XkVec4 xkVec4Sub(const XkVec4 a, const XkVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec4 xkDVec4Sub(const XkDVec4 a, const XkDVec4 b) {
-	XkDVec4 vec = {};
+	XkDVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_sub_pd(a.avx, b.avx);
 #else
@@ -87,7 +87,7 @@ XK_INLINE XKMATH_API XkDVec4 xkDVec4Sub(const XkDVec4 a, const XkDVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkVec4 xkVec4Mul(const XkVec4 a, const XkVec4 b) {
-	XkVec4 vec = {};
+	XkVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_mul_ps(a.avx, b.avx);
 #else
@@ -101,7 +101,7 @@ XK_INLINE XKMATH_API XkVec4 xkVec4Mul(const XkVec4 a, const XkVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec4 xkDVec4Mul(const XkDVec4 a, const XkDVec4 b) {
-	XkDVec4 vec = {};
+	XkDVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_mul_pd(a.avx, b.avx);
 #else
@@ -115,7 +115,7 @@ XK_INLINE XKMATH_API XkDVec4 xkDVec4Mul(const XkDVec4 a, const XkDVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkVec4 xkVec4Div(const XkVec4 a, const XkVec4 b) {
-	XkVec4 vec = {};
+	XkVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm_div_ps(a.avx, b.avx);
 #else
@@ -129,7 +129,7 @@ XK_INLINE XKMATH_API XkVec4 xkVec4Div(const XkVec4 a, const XkVec4 b) {
 }
 
 XK_INLINE XKMATH_API XkDVec4 xkDVec4Div(const XkDVec4 a, const XkDVec4 b) {
-	XkDVec4 vec = {};
+	XkDVec4 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	vec.avx = _mm256_div_pd(a.avx, b.avx);
 #else
@@ -177,7 +177,7 @@ XK_INLINE XKMATH_API XkFloat64 xkDVec4Length(const XkDVec4 a) {
 }
 
 XK_INLINE XKMATH_API XkVec4 xkVec4Normalize(const XkVec4 a) {
-	XkVec4 vec = {};
+	XkVec4 vec = {0};
 
 	const XkFloat32 length = xkVec4Length(a);
 
@@ -197,7 +197,7 @@ XK_INLINE XKMATH_API XkVec4 xkVec4Normalize(const XkVec4 a) {
 }
 
 XK_INLINE XKMATH_API XkDVec4 xkDVec4Normalize(const XkDVec4 a) {
-	XkDVec4 vec = {};
+	XkDVec4 vec = {0};
 
 	const XkFloat64 length = xkDVec4Length(a);
 

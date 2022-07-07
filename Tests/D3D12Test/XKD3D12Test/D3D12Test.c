@@ -77,7 +77,7 @@ void xkTerminateApplication() {
 
 	xkDestroyWindow(_xkApplication.window);
 
-	xkTeminateRenderer();
+	xkTerminateRenderer();
 
 	xkTerminateWindow();
 

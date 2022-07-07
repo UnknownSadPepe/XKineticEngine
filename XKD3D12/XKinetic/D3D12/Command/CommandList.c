@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
@@ -12,7 +12,7 @@ XkResult __xkD3D12CreateCommandList(ID3D12GraphicsCommandList6** ppD3D12CommandL
 	HRESULT hResult = ID3D12Device8_CreateCommandList(_xkD3D12Context.d3d12Device8, 0, d3d12Type, pD3D12CommandAllocator, NULL, &IID_ID3D12CommandList, ppD3D12CommandList);
 	if (FAILED(hResult)) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("DirectX12: Failed to create command list: %s", __xkD3D12ResultString(hResult));
+		xkLogError("DirectX12: Failed to create command list: %s", __xkD3D12GetResultString(hResult));
 		goto _catch;
 	}
 

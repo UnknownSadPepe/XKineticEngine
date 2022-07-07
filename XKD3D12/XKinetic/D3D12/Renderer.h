@@ -16,7 +16,7 @@ typedef struct XkD3D12Renderer_T* 	XkD3D12Renderer;
 
 typedef struct XkD3D12Buffer_T* 		XkD3D12Buffer;
 
-typedef struct XkD3D12Texture2d_T* 	XkD3D12Texture2d;
+typedef struct XkD3D12Texture_T* 	XkD3D12Texture;
 
 /* ########## FUNCTIONS SECTION ########## */
 extern XKD3D12_API XkResult 	xkD3D12InitializeContext();
@@ -50,8 +50,8 @@ extern XKD3D12_API void 			xkD3D12MapBuffer(XkD3D12Buffer, const XkHandle);
 extern XKD3D12_API void 			xkD3D12BindVertexBuffer(XkD3D12Buffer, XkD3D12Renderer);
 extern XKD3D12_API void 			xkD3D12BindIndexBuffer(XkD3D12Buffer, XkD3D12Renderer);
 
-extern XKD3D12_API XkResult 	xkD3D12CreateTexture2d(XkD3D12Texture2d*, const XkSize, const XkSize, const XkHandle);
-extern XKD3D12_API void 			xkD3D12DestroyTexture2d(XkD3D12Texture2d);
+extern XKD3D12_API XkResult 	xkD3D12CreateTexture2d(XkD3D12Texture*, const XkSize, const XkSize, const XkHandle);
+extern XKD3D12_API void 			xkD3D12DestroyTexture2d(XkD3D12Texture);
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus

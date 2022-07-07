@@ -1,13 +1,13 @@
-set(DIRECTX12_TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/Tests/DirectX12Test)
+set(D3D12_TEST_SRC_DIR ${PROJECT_SOURCE_DIR}/Tests/D3D12Test)
 
-file(GLOB_RECURSE DIRECTX12_TEST_SRC ${DIRECTX12_TEST_SRC_DIR}/*.c)
+file(GLOB_RECURSE D3D12_TEST_SRC ${D3D12_TEST_SRC_DIR}/*.c)
 
 if(WIN32)
-  add_executable(XKDirectX12Test WIN32 ${DIRECTX12_TEST_SRC})
+  add_executable(XKD3D12Test WIN32 ${D3D12_TEST_SRC})
 else()
-  add_executable(XKDirectX12Test ${DIRECTX12_TEST_SRC})
+  add_executable(XKD3D12Test ${D3D12_TEST_SRC})
 endif()
 
-target_include_directories(XKDirectX12Test PRIVATE ${DIRECTX12_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
+target_include_directories(XKD3D12Test PRIVATE ${D3D12_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
 
-target_link_libraries(XKDirectX12Test PRIVATE XKCore XKMath XKinetic)
+target_link_libraries(XKD3D12Test PRIVATE XKCore XKMath XKinetic)

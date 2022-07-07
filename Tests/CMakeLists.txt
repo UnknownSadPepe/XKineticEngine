@@ -11,7 +11,7 @@ if(XKVULKAN_TEST)
 endif()
 
 if(WIN32)
-	if(XKDIRECTX12_TEST)
+	if(XKD3D12_TEST)
 		add_subdirectory(D3D12Test)
 	endif()
 endif()

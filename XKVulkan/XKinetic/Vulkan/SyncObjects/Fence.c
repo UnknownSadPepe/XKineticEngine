@@ -8,7 +8,7 @@ XkResult __xkVulkanCreateFence(VkFence* pVkFence) {
 
   XkResult result = XK_SUCCESS;
 
-  VkFenceCreateInfo vkFenceCreateInfo = {};
+  VkFenceCreateInfo vkFenceCreateInfo = {0};
   vkFenceCreateInfo.sType             = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
   vkFenceCreateInfo.pNext             = VK_NULL_HANDLE;
   vkFenceCreateInfo.flags             = VK_FENCE_CREATE_SIGNALED_BIT;

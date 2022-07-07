@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
@@ -22,7 +22,7 @@ XkResult __xkDXGICreateSwapChain(IDXGISwapChain4** ppDXGISwapChain4, ID3D12Comma
 
 	IDXGISwapChain1* dxgiSwapChain1 = NULL;
 
-	DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainInfo = {};
+	DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainInfo ={0};
 	dxgiSwapChainInfo.Width									= width;
 	dxgiSwapChainInfo.Height								= height;
 	dxgiSwapChainInfo.Format								= DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -39,7 +39,7 @@ XkResult __xkDXGICreateSwapChain(IDXGISwapChain4** ppDXGISwapChain4, ID3D12Comma
 	HRESULT hResult = IDXGIFactory7_CreateSwapChainForHwnd(_xkD3D12Context.dxgiFactory7, (IUnknown*)pD3D12CommandQueue, hWnd, &dxgiSwapChainInfo, NULL, NULL, &dxgiSwapChain1);
 	if(FAILED(hResult)) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("DirectX12: Failed to create swap chain: %s", __xkD3D12ResultString(hResult));
+		xkLogError("DirectX12: Failed to create swap chain: %s", __xkD3D12GetResultString(hResult));
 		goto _catch;
 	}
 
@@ -47,14 +47,14 @@ XkResult __xkDXGICreateSwapChain(IDXGISwapChain4** ppDXGISwapChain4, ID3D12Comma
 	hResult = IDXGIFactory7_MakeWindowAssociation(_xkD3D12Context.dxgiFactory7, hWnd, DXGI_MWA_NO_ALT_ENTER);
 	if(FAILED(hResult)) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("DirectX12: Failed to make window association: %s", __xkD3D12ResultString(hResult));
+		xkLogError("DirectX12: Failed to make window association: %s", __xkD3D12GetResultString(hResult));
 		goto _catch;
 	}
 
 	hResult = IDXGISwapChain1_QueryInterface(dxgiSwapChain1 , &IID_IDXGISwapChain4, ppDXGISwapChain4);
 	if (FAILED(hResult)) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("DirectX12: Failed to query swapchain4 interface: %s", __xkD3D12ResultString(hResult));
+		xkLogError("DirectX12: Failed to query swapchain4 interface: %s", __xkD3D12GetResultString(hResult));
 		goto _catch;
 	}
 

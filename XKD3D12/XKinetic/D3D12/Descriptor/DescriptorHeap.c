@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
@@ -9,7 +9,7 @@ XkResult __xkD3D12CreateDescriptorHeap(ID3D12DescriptorHeap** ppD3D12DescriptorH
 
 	XkResult result = XK_SUCCESS;
 
-	D3D12_DESCRIPTOR_HEAP_DESC d3d12DescriptorHeapInfo	= {};
+	D3D12_DESCRIPTOR_HEAP_DESC d3d12DescriptorHeapInfo	={0};
 	d3d12DescriptorHeapInfo.Type												= d3d12Type;
 	d3d12DescriptorHeapInfo.NumDescriptors							= descriptorCount;
 	d3d12DescriptorHeapInfo.Flags												= D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -18,7 +18,7 @@ XkResult __xkD3D12CreateDescriptorHeap(ID3D12DescriptorHeap** ppD3D12DescriptorH
 	HRESULT hResult = ID3D12Device8_CreateDescriptorHeap(_xkD3D12Context.d3d12Device8, &d3d12DescriptorHeapInfo, &IID_ID3D12DescriptorHeap, ppD3D12DescriptorHeap);
 	if(FAILED(hResult)) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("DirectX12: Failed to create descriptor heap: %s", __xkD3D12ResultString(hResult));
+		xkLogError("DirectX12: Failed to create descriptor heap: %s", __xkD3D12GetResultString(hResult));
 		goto _catch;
 	}
 

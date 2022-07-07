@@ -7,7 +7,7 @@
 	#if defined(__ANDROID__)
 		#define XK_ANDROID
 	#endif // __ANDROID__
-#elif defined(WIN64)
+#elif defined(__WIN32__) || defined(_WIN32) || defined(WIN32) || defined(__WIN64__) || defined(_WIN64) || defined(WIN64)
 	#define XK_WINDOWS
 #elif __APPLE__
 	#define XK_APPLE
@@ -76,6 +76,10 @@
 	(__GNUC__ || __clang__ || __TINYC__) 
 	|| (_MSC_VER || __MINGW32__ || __MINGW64__)
 */
+
+#define C11 201112L
+#define C17 201710L
+#define C23 202312L
 
 #define XK_CDECL 		__cdecl
 #define XK_FASTCALL __fastcall

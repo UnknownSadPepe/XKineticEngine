@@ -10,13 +10,13 @@
 /* ########## GLOBAL VARIABLES SECTION ########## */
 XkApplication _xkApplication;
 
-static XkImageConfig iconConfig 			= {};
-static XkImageConfig smallIconConfig 	= {};
-static XkImageConfig cursorConfig 		= {};
+static XkImageConfig iconConfig 			={0};
+static XkImageConfig smallIconConfig 	={0};
+static XkImageConfig cursorConfig 		={0};
 
-static XkWindowIcon icon 				= {};
-static XkWindowIcon smallIcon 	= {};
-static XkWindowIcon cursorIcon 	= {};
+static XkWindowIcon icon 				={0};
+static XkWindowIcon smallIcon 	={0};
+static XkWindowIcon cursorIcon 	={0};
 
 /* ########## FUNCTIONS SECTION ########## */
 static void __xkWindowShow(XkWindow window, const XkWindowShow show) {
@@ -245,7 +245,7 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		}
 	}
 
-	result = xkInitializeImageLoader("../../");
+	result = xkInitializeImageLoader("");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to initialize image loader: %d", result);
 		goto _catch;
@@ -274,16 +274,19 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 	result = xkLoadImage(&iconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window icon");
+		goto _catch;
 	}
 
 	result = xkLoadImage(&smallIconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window small icon");	
+		goto _catch;
 	}
 
 	result = xkLoadImage(&cursorConfig, "XKineticCursor.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window cursor");
+		goto _catch;
 	}
 
 	icon.width				= iconConfig.width;
@@ -308,21 +311,6 @@ _catch:
 }
 
 void xkTerminateApplication(void) {
-	XkFile asyncFile;
-	xkOpenAsyncFile(&asyncFile, "AsyncFile.txt", XK_FILE_FLAG_WO_BIT | XK_FILE_FLAG_CR_BIT);
-	
-	XkChar* buffer = xkAllocateMemory(1024 * sizeof(XkChar));
-
-	memset(buffer, 'F', 1024 * sizeof(XkChar));
-
-	xkAsyncWriteFile(asyncFile, buffer, 1024 * sizeof(XkChar));
-
-	xkWaitAsyncFile(asyncFile);
-	
-	xkCloseFile(asyncFile);
-
-	xkFreeMemory(buffer);
-
 	xkUnloadImage(&cursorConfig);
 
 	xkUnloadImage(&iconConfig);

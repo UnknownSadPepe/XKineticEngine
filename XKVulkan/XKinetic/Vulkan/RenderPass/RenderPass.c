@@ -14,7 +14,7 @@ XkResult __xkVulkanCreateRenderPass(VkRenderPass* pVkRenderPass, VkAttachmentDes
 
   XkResult result = XK_SUCCESS;
 
-  VkRenderPassCreateInfo vkRenderPassCreateInfo = {};
+  VkRenderPassCreateInfo vkRenderPassCreateInfo = {0};
   vkRenderPassCreateInfo.sType                  = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   vkRenderPassCreateInfo.pNext                  = VK_NULL_HANDLE;
   vkRenderPassCreateInfo.flags                  = 0;

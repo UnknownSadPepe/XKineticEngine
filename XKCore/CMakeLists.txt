@@ -31,7 +31,7 @@ elseif(WIN32)
 	target_sources(XKCore PRIVATE ${WIN32_SRC})
 endif()
 
-target_include_directories(XKCore PRIVATE ${CORE_SRC_DIR})
+target_include_directories(XKCore PRIVATE ${CORE_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKMath)
 
 if(WIN32)
 	target_include_directories(XKCore PRIVATE  ${PROJECT_SOURCE_DIR}/External/mingw)
@@ -98,9 +98,10 @@ if(UNIX AND NOT APPLE)
 
 	target_link_libraries(XKCore PRIVATE wayland-client wayland-cursor xkbcommon)
 endif()
+target_link_libraries(XKCore PRIVATE XKMath)   
 
 if(WIN32)
-  target_link_libraries(XKCore PRIVATE user32 gdi32)   
+  target_link_libraries(XKCore PRIVATE user32 gdi32 dxguid Dinput8)   
 endif()
 
 if(UNIX AND NOT APPLE)

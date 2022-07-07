@@ -30,8 +30,8 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	}
 
 	// Create Win32 thread.
-	thread->win32.handle = CreateThread(NULL, XK_WINDOWS_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->stack, 0, &thread->win32.id);
-	if(!thread->win32.handle) {
+	thread->windows.winapi.handle = CreateThread(NULL, XK_WINDOWS_THREAD_STACK_SIZE, (LPTHREAD_START_ROUTINE)pfnRoutine, thread->stack, 0, &thread->windows.winapi.id);
+	if(!thread->windows.winapi.handle) {
 		__xkErrorHandle("Win32: Failed to create thread");
 		result = XK_ERROR_UNKNOWN;
 		goto _free;
@@ -51,9 +51,9 @@ _free:
 void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 	xkAssert(thread);
 
-	WaitForSingleObject(thread->win32.handle, INFINITE);
+	WaitForSingleObject(thread->windows.winapi.handle, INFINITE);
 
-	CloseHandle(thread->win32.handle);
+	CloseHandle(thread->windows.winapi.handle);
 
 	xkFreeMemory(thread->stack);
 
@@ -63,9 +63,9 @@ void xkJoinThread(XkThread thread, XkInt32** const ppResult) {
 void xkDetachThread(XkThread thread) {
 	xkAssert(thread);
 
-	TerminateThread(thread->win32.handle, (DWORD)0);
+	TerminateThread(thread->windows.winapi.handle, (DWORD)0);
 
-	CloseHandle(thread->win32.handle);
+	CloseHandle(thread->windows.winapi.handle);
 
 	xkFreeMemory(thread->stack);
 
@@ -79,9 +79,9 @@ void xkExitThread() {
 void xkKillThread(XkThread thread) {
 	xkAssert(thread);
 
-	TerminateThread(thread->win32.handle, (DWORD)0);
+	TerminateThread(thread->windows.winapi.handle, (DWORD)0);
 
-	CloseHandle(thread->win32.handle);
+	CloseHandle(thread->windows.winapi.handle);
 
 	xkFreeMemory(thread->stack);
 
@@ -109,7 +109,7 @@ XkResult xkCreateMutex(XkMutex* pMutex) {
 	XkMutex mutex = *pMutex;
 
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
-	InitializeCriticalSection(&mutex->win32.handle);
+	InitializeCriticalSection(&mutex->windows.winapi.handle);
 
 _catch:
 	return(result);
@@ -126,7 +126,7 @@ void xkDestroyMutex(XkMutex mutex) {
 	xkAssert(mutex);
 
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
-	DeleteCriticalSection(&mutex->win32.handle);
+	DeleteCriticalSection(&mutex->windows.winapi.handle);
 
 	// Free mutex.
 	xkFreeMemory(mutex);
@@ -136,12 +136,12 @@ void xkLockMutex(XkMutex mutex) {
 	xkAssert(mutex);
 
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
-	EnterCriticalSection(&mutex->win32.handle);
+	EnterCriticalSection(&mutex->windows.winapi.handle);
 }
 
 void xkUnlockMutex(XkMutex mutex) {
 	xkAssert(mutex);
 
 	/// NOTE: I using a critical section insted of mutex due to performance and not the need to support number of precesses.
-	LeaveCriticalSection(&mutex->win32.handle);
+	LeaveCriticalSection(&mutex->windows.winapi.handle);
 }

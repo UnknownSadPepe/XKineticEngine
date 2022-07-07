@@ -29,7 +29,7 @@ XkSize xkTimeStringFormat(XkTime* const pTime, XkString buffer, const XkSize siz
 	xkAssert(size > 0);
 	xkAssert(format);
 
-	struct tm t 	= {};
+	struct tm t 	={0};
 	t.tm_sec 			= (int)pTime->second;
 	t.tm_min			= (int)pTime->minute;
 	t.tm_hour 		= (int)pTime->hour;

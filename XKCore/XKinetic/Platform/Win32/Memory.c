@@ -43,7 +43,7 @@ XkHandle xkReallocateMemory(const XkHandle memory, const XkSize size) {
 }
 
 void xkFreeMemory(const XkHandle memory) {
-	xkAsserts(memory);
+	xkAssert(memory);
 
 	HeapFree(GetProcessHeap(), 0, memory);
 }

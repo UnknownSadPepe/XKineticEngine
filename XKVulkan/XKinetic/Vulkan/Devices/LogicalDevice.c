@@ -10,7 +10,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
 
   uint32_t queueCreateInfoCount = 0;
 
-  VkDeviceQueueCreateInfo vkQueueCreateInfos[4] = {};
+  VkDeviceQueueCreateInfo vkQueueCreateInfos[4] = {0};
 
   // Template Vulkan queue families.
   uint32_t graphicsQueueFamily = _xkVulkanContext.queueFamilyIndices.graphics;
@@ -19,7 +19,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
   uint32_t computeQueueFamily = _xkVulkanContext.queueFamilyIndices.compute;
 
   if(_xkVulkanContext.queueFamilyIndices.supportedQueues & VK_QUEUE_GRAPHICS_BIT) {
-		VkDeviceQueueCreateInfo vkGraphicsQueueCreateInfo = {};
+		VkDeviceQueueCreateInfo vkGraphicsQueueCreateInfo = {0};
     vkGraphicsQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     vkGraphicsQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
     vkGraphicsQueueCreateInfo.flags                   = 0;
@@ -35,7 +35,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
 	}
 
   if(_xkVulkanContext.queueFamilyIndices.supportPresentQueue && presentQueueFamily != graphicsQueueFamily) {
-		VkDeviceQueueCreateInfo vkPresentQueueCreateInfo = {};
+		VkDeviceQueueCreateInfo vkPresentQueueCreateInfo = {0};
     vkPresentQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     vkPresentQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
     vkPresentQueueCreateInfo.flags                   = 0;
@@ -51,7 +51,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
   }
 
 	if(_xkVulkanContext.queueFamilyIndices.supportedQueues & VK_QUEUE_TRANSFER_BIT && transferQueueFamily != graphicsQueueFamily && transferQueueFamily != presentQueueFamily) {
-		VkDeviceQueueCreateInfo vkTransferQueueCreateInfo = {};
+		VkDeviceQueueCreateInfo vkTransferQueueCreateInfo = {0};
     vkTransferQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     vkTransferQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
     vkTransferQueueCreateInfo.flags                   = 0;
@@ -67,7 +67,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
 	}
 
 	if(_xkVulkanContext.queueFamilyIndices.supportedQueues & VK_QUEUE_COMPUTE_BIT && computeQueueFamily != graphicsQueueFamily && computeQueueFamily != presentQueueFamily && computeQueueFamily != transferQueueFamily) {
-		VkDeviceQueueCreateInfo vkComputeQueueCreateInfo = {};
+		VkDeviceQueueCreateInfo vkComputeQueueCreateInfo = {0};
     vkComputeQueueCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     vkComputeQueueCreateInfo.pNext                   = VK_NULL_HANDLE;
     vkComputeQueueCreateInfo.flags                   = 0;
@@ -87,7 +87,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
   _xkVulkanContext.queueFamilyIndices.transfer = transferQueueFamily;
   _xkVulkanContext.queueFamilyIndices.compute = computeQueueFamily;
 
-  VkPhysicalDeviceFeatures vkEnabledDeviceFeatures = {};
+  VkPhysicalDeviceFeatures vkEnabledDeviceFeatures = {0};
 
 	// Enable sample rate shading filtering if supported.
 	if(_xkVulkanContext.vkDeviceFeatures.sampleRateShading) {
@@ -171,7 +171,7 @@ XkResult __xkVulkanCreateLogicalDevice() {
 		xkLogWarning("Vulkan: Selected GPU does not support multi viewports");
   }
 
-  VkDeviceCreateInfo vkDeviceCreateInfo         = {};
+  VkDeviceCreateInfo vkDeviceCreateInfo         = {0};
   vkDeviceCreateInfo.sType                      = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   vkDeviceCreateInfo.pNext                      = VK_NULL_HANDLE;
   vkDeviceCreateInfo.flags                      = 0;
@@ -226,7 +226,7 @@ XkResult __xkVulkanBeginSingleCommands(VkCommandBuffer* pVkCommandBuffer) {
 
   XkResult result = XK_SUCCESS;
 
-  VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {};
+  VkCommandBufferAllocateInfo vkCommandBufferAllocateInfo = {0};
   vkCommandBufferAllocateInfo.sType                       = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
   vkCommandBufferAllocateInfo.pNext                       = VK_NULL_HANDLE;
   vkCommandBufferAllocateInfo.commandPool                 = _xkVulkanContext.vkCommandPool;
@@ -242,7 +242,7 @@ XkResult __xkVulkanBeginSingleCommands(VkCommandBuffer* pVkCommandBuffer) {
 
   VkCommandBuffer vkCommandBuffer = *pVkCommandBuffer;
 
-  VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {};
+  VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {0};
   vkCommandBufferBeginInfo.sType                    = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   vkCommandBufferBeginInfo.pNext                    = VK_NULL_HANDLE;
   vkCommandBufferBeginInfo.flags                    = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
@@ -272,7 +272,7 @@ XkResult __xkVulkanEndSingleCommands(VkCommandBuffer vkCommandBuffer) {
     goto _catch;
   }  
 
-  VkSubmitInfo vkSubmitInfo           = {};
+  VkSubmitInfo vkSubmitInfo           = {0};
   vkSubmitInfo.sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO;
   vkSubmitInfo.pNext                  = VK_NULL_HANDLE;
   vkSubmitInfo.waitSemaphoreCount     = 0;
@@ -317,7 +317,7 @@ XkResult __xkVulkanCopyBuffer(VkBuffer vkDstBuffer, const VkBuffer vkSrcBuffer, 
     goto _catch;   
   }
 
-  VkBufferCopy vkBufferCopyInfo = {};
+  VkBufferCopy vkBufferCopyInfo = {0};
   vkBufferCopyInfo.srcOffset    = 0;
   vkBufferCopyInfo.dstOffset    = 0;
   vkBufferCopyInfo.size         = vkSize;
@@ -372,7 +372,7 @@ XkResult __xkVulkanTransitionImageLayout(VkImage vkImage, const VkFormat vkForma
   VkPipelineStageFlags vkSrcStage;
   VkPipelineStageFlags vkDstStage;
 
-  VkImageMemoryBarrier vkImageMemoryBarrier                 = {};
+  VkImageMemoryBarrier vkImageMemoryBarrier                 = {0};
   vkImageMemoryBarrier.sType =                              VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
   vkImageMemoryBarrier.pNext =                              VK_NULL_HANDLE;
   if(vkOldLayout == VK_IMAGE_LAYOUT_UNDEFINED && vkNewLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
@@ -428,7 +428,7 @@ XkResult __xkVulkanCopyBufferToImage(VkBuffer vkBuffer, VkImage vkImage, const V
     goto _catch;   
   }
 
-  VkBufferImageCopy vkImageCopyInfo                 = {};
+  VkBufferImageCopy vkImageCopyInfo                 = {0};
   vkImageCopyInfo.bufferOffset                      = 0;
   vkImageCopyInfo.bufferRowLength                   = 0;
   vkImageCopyInfo.bufferImageHeight                 = 0;

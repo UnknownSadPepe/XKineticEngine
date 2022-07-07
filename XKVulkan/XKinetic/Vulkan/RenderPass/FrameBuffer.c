@@ -11,7 +11,7 @@ XkResult __xkVulkanCreateFrameBuffer(VkFramebuffer* pVkFrameBuffer, VkRenderPass
 
   XkResult result = XK_SUCCESS;
 
-  VkFramebufferCreateInfo vkFrameBufferCreateInfo = {};
+  VkFramebufferCreateInfo vkFrameBufferCreateInfo = {0};
   vkFrameBufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
   vkFrameBufferCreateInfo.pNext                   = VK_NULL_HANDLE;
   vkFrameBufferCreateInfo.flags                   = 0;

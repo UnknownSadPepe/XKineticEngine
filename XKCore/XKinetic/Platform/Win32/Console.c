@@ -29,7 +29,7 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const X
 }
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {
-	CONSOLE_SCREEN_BUFFER_INFO CBI = {};
+	CONSOLE_SCREEN_BUFFER_INFO CBI = {0};
 
 	HANDLE stream = INVALID_HANDLE_VALUE;
 	switch(handle) {
@@ -94,8 +94,7 @@ void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor co
 
 	SetConsoleTextAttribute(stream, attribute);
 
-	LPDWORD numberWritten = 0;
-	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
+	WriteConsoleA(stream, buffer, (DWORD)size, NULL, NULL);
 
 	SetConsoleTextAttribute(stream, CBI.wAttributes);
 }
@@ -104,6 +103,5 @@ void xkReadConsole(XkString buffer, const XkSize size) {
 	HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
 	if(stdin == INVALID_HANDLE_VALUE) return;
 
-	DWORD numberReaden;
-	ReadConsoleA(stdin, buffer, (DWORD)size, &numberReaden, NULL);
+	ReadConsoleA(stdin, buffer, (DWORD)size, NULL, NULL);
 }

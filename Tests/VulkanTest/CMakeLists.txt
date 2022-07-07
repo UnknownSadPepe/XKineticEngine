@@ -8,6 +8,6 @@ else()
   add_executable(XKVulkanTest ${VULKAN_TEST_SRC})
 endif()
 
-target_include_directories(XKVulkanTest PUBLIC ${VULKAN_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
+target_include_directories(XKVulkanTest PRIVATE ${VULKAN_TEST_SRC_DIR} ${PROJECT_SOURCE_DIR}/XKCore ${PROJECT_SOURCE_DIR}/XKMath ${PROJECT_SOURCE_DIR}/XKinetic)
 
-target_link_libraries(XKVulkanTest XKCore XKMath XKinetic)
+target_link_libraries(XKVulkanTest PRIVATE XKCore XKMath XKinetic)

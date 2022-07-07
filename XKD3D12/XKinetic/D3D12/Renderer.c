@@ -1,8 +1,8 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Renderer/External.h"
 #include "XKinetic/Core/Assert.h"
-#include "XKinetic/DirectX12/Renderer.h"
+#include "XKinetic/D3D12/Renderer.h"
 
 /* ########## TYPES SECTION ########## */
 struct XkD3D12Renderer_T {

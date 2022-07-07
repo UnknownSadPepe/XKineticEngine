@@ -34,7 +34,7 @@ XkResult __xkVulkanCreateSwapChain(VkSwapchainKHR* pVkSwapChain, VkSurfaceKHR vk
     _xkVulkanContext.queueFamilyIndices.present
   };
   
-  VkSwapchainCreateInfoKHR vkSwapChainCreateInfo  = {};
+  VkSwapchainCreateInfoKHR vkSwapChainCreateInfo  = {0};
   vkSwapChainCreateInfo.sType                     = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
   vkSwapChainCreateInfo.pNext                     = VK_NULL_HANDLE;
   vkSwapChainCreateInfo.flags                     = 0;
@@ -120,7 +120,7 @@ static VkSurfaceFormatKHR __xkVKChooseSurfaceFormat(VkSurfaceKHR vkSurface, cons
 
   vkGetPhysicalDeviceSurfaceFormatsKHR(_xkVulkanContext.vkPhysicalDevice, vkSurface, &surfaceFormatCount, vkSurfaceFormats);
 
-  VkSurfaceFormatKHR vkAvailableSurfaceFormat = {};
+  VkSurfaceFormatKHR vkAvailableSurfaceFormat = {0};
 
   for(uint32_t i = 0; i < surfaceFormatCount; i++) {
     vkAvailableSurfaceFormat = vkSurfaceFormats[i];

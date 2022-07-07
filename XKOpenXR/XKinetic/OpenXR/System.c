@@ -11,7 +11,7 @@ static XkBool8 __xkOpenXRPickEnvironmentBlendMode();
 XkResult __xkOpenXRInitializeSystem() {
   XkResult result = XK_SUCCESS;
 
-  XrSystemGetInfo xrSystemInfo    = {};
+  XrSystemGetInfo xrSystemInfo    = {0};
   xrSystemInfo.type               = XR_TYPE_SYSTEM_GET_INFO;
   xrSystemInfo.next               = XR_NULL_HANDLE;
   xrSystemInfo.formFactor         = XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;

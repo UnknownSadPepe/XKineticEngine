@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
@@ -14,7 +14,7 @@ XkResult __xkDXGICreateFactory(void) {
   HRESULT hResult = CreateDXGIFactory2(factoryFlags, &IID_IDXGIFactory7, &_xkD3D12Context.dxgiFactory7);
   if(FAILED(hResult)) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("DXGI: Failed to create factory2: %s", __xkD3D12ResultString(hResult));
+    xkLogError("DXGI: Failed to create factory2: %s", __xkD3D12GetResultString(hResult));
     goto _catch;
   }
 

@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
@@ -10,7 +10,7 @@ XkResult __xkD3D12QueryDebugDeviceInterface(void) {
   HRESULT hResult = ID3D12DebugDevice2_QueryInterface(_xkD3D12Context.d3d12Device8, &IID_ID3D12DebugDevice2, &_xkD3D12Context.d3d12DebugDevice2);
   if (FAILED(hResult)) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("DirectX12: Failed to query debug device interface: %s", __xkD3D12ResultString(hResult));
+    xkLogError("DirectX12: Failed to query debug device interface: %s", __xkD3D12GetResultString(hResult));
     goto _catch;
   }
 

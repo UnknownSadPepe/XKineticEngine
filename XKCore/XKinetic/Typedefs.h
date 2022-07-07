@@ -4,15 +4,15 @@
 
 /* ########## MACROS SECTION ########## */
 #define XK_HANDLE_MIN 		(0)
-#if defined(__LP64__) || defined(__LLP64__)
+#if defined(__LP64__) || defined(__LLP64__) || defined(_WIN64)
 	#define XK_HANDLE_MAX 	(0xffffffffffffffffu)
-#elif defined(__ILP32__) || (__LP32__)
+#elif defined(__ILP32__) || (__LP32__) || defined(_WIN32)
 	#define XK_HANDLE_MAX 	(0xffffffffu)
 #endif // (__LP64__ || __LLP64__) || (__ILP32__ || __LP32__)
 
-#if defined(__LP64__) || defined(__LLP64__)
+#if defined(__LP64__) || defined(__LLP64__) || defined(_WIN64)
 	#define XK_HANDLE_WIDTH (64)
-#elif defined(__ILP32__) || (__LP32__)
+#elif defined(__ILP32__) || (__LP32__) || defined(_WIN32)
 	#define XK_HANDLE_WIDTH (32
 #endif // (__LP64__ || __LLP64__) || (__ILP32__ || __LP32__)
 
@@ -106,16 +106,16 @@
 	#define XK_WCHAR_MAX 		(0xffffffffu)
 #endif // __LLP64__ ||
 
-#if defined(__LLP64__) || defined(__LP32__)
+#if defined(__LLP64__) || defined(__LP32__) || defined(_WIN32) || defined(_WIN64)
 	#define XK_WCHAR_WIDTH (16)
 #elif defined(__ILP32__) || defined(__LP64__)
 	#define XK_WCHAR_WIDTH (32)
 #endif // __LLP64__ ||
 
 #define XK_SIZE_MIN 0
-#if defined(__LP32__)
+#if defined(__LP32__)  || defined(_WIN32) 
 	#define XK_SIZE_MAX 		(0xffff)
-#elif defined(__ILP32__) || defined(__LLP64__)
+#elif defined(__ILP32__) || defined(__LLP64__) || defined(_WIN64)
 	#define XK_SIZE_MAX 		(0xffffffffu)
 #elif defined(__LP64__)
 	#define XK_SIZE_MAX 		(0xffffffffffffffffu)
@@ -123,7 +123,7 @@
 
 #if defined(__LP32__)
 	#define XK_SIZE_WIDTH 	(16)
-#elif defined(__ILP32__) || defined(__LLP64__)
+#elif defined(__ILP32__) || defined(__LLP64__) || defined(_WIN64) || defined(_WIN32)
 	#define XK_SIZE_WIDTH 	(32)
 #elif defined(__LP64__)
 	#define XK_SIZE_WIDTH 	(64)
@@ -135,8 +135,7 @@ extern "C" {
 #endif // __cplusplus
 
 /* ########## TYPES SECTION ########## */
-typedef enum XkResult_T
-{
+typedef enum XkResult_T {
 	XK_SUCCESS													= 0,
 	XK_ERROR_BAD_ALLOCATE								= -1,
 	XK_ERROR_MODULE_NOT_PRESENT 				= -2,
@@ -150,55 +149,55 @@ typedef enum XkResult_T
 
 typedef void* XkHandle;
 
-xkStaticAssert((sizeof(XkHandle) * 8) == XK_HANDLE_WIDTH);
+static_assert((sizeof(XkHandle) * 8) == XK_HANDLE_WIDTH, "");
 
 typedef _Bool XkBool8;
 
 xkStaticAssert((sizeof(XkBool8) * 8) == XK_BOOL8_WIDTH);
 
-#if defined(__LP32__)
-	typedef unsigned long int XkBool832;
-#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__)
-	typedef unsigned int XkBool832;
+#if defined(__LP32__) || defined(_WIN32)
+	typedef unsigned long int XkBool32;
+#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__) || defined(_WIN64)
+	typedef unsigned int XkBool32;
 #endif // __LP32__ || (__ILP32__ || __LP64__ || __LLP64__)
 
-xkStaticAssert((sizeof(XkBool832) * 8) == XK_BOOL32_WIDTH);
+xkStaticAssert((sizeof(XkBool32) * 8) == XK_BOOL32_WIDTH);
 
-#if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__)
+#if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__) || defined(_WIN32) || defined(_WIN64) 
 	typedef signed char XkInt8;
 #endif // __ILP32__ || __LP32__ || __LLP64__ || __LP64__
 
 xkStaticAssert((sizeof(XkInt8) * 8) == XK_INT8_WIDTH);
 
-#if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__)
+#if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__) || defined(_WIN32) || defined(_WIN64) 
 	typedef unsigned char XkUInt8;
 #endif // __ILP32__ || __LP32__ || __LLP64__ || __LP64__
 
 xkStaticAssert((sizeof(XkUInt8) * 8) == XK_UINT8_WIDTH);
 
-#if defined(__LP32__) || defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__)
+#if defined(__LP32__) || defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__) || defined(_WIN32) || defined(_WIN64) 
 	typedef signed short int  XkInt16;
 #endif // __LP32__ || __ILP32__ || __LP64__ || __LLP64__
 
 xkStaticAssert((sizeof(XkInt16) * 8) == XK_INT16_WIDTH);
 
-#if defined(__LP32__) || defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__)
+#if defined(__LP32__) || defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__) || defined(_WIN32) || defined(_WIN64) 
 	typedef unsigned short int XkUInt16;
 #endif // __LP32__ || __ILP32__ || __LP64__ || __LLP64__
 
 xkStaticAssert((sizeof(XkUInt16) * 8) == XK_UINT16_WIDTH);
 
-#if defined(__LP32__)
+#if defined(__LP32__) || defined(_WIN32)
 	typedef signed long int XkInt32;
-#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__)
+#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__) || defined(_WIN64) 
 	typedef signed int XkInt32;
 #endif // __LP32__ || (__ILP32__ || __LP64__ || __LLP64__)
 
 xkStaticAssert((sizeof(XkInt32) * 8) == XK_INT32_WIDTH);
 
-#if defined(__LP32__)
+#if defined(__LP32__) || defined(_WIN32)
 	typedef unsigned long int XkUInt32;
-#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__)
+#elif defined(__ILP32__) || defined(__LP64__) || defined(__LLP64__) || defined(_WIN64) 
 	typedef unsigned int XkUInt32;
 #endif // __LP32__ || (__ILP32__ || __LP64__ || __LLP64__)
 
@@ -206,7 +205,7 @@ xkStaticAssert((sizeof(XkUInt32) * 8) == XK_UINT32_WIDTH);
 
 #if defined(__LP64__)
 	typedef signed long int XkInt64;
-#elif defined(__LP32__) || defined(__ILP32__) || defined(__LLP64__)
+#elif defined(__LP32__) || defined(__ILP32__) || defined(__LLP64__) || defined(_WIN32)  || defined(_WIN64)
 	typedef signed long long int XkInt64;
 #endif // __LP64__ || (__LP32__ || __ILP32__ || __LLP64__)
 
@@ -214,7 +213,7 @@ xkStaticAssert((sizeof(XkInt64) * 8) == XK_INT64_WIDTH);
 
 #if defined(__LP64__)
 	typedef unsigned long int XkUInt64;
-#elif defined(__LP32__) || defined(__ILP32__) || defined(__LLP64__)
+#elif defined(__LP32__) || defined(__ILP32__) || defined(__LLP64__) || defined(_WIN32)  || defined(_WIN64)
 	typedef unsigned long long int XkUInt64;
 #endif // __LP64__ || (__LP32__ || __ILP32__ || __LLP64__)
 
@@ -228,9 +227,9 @@ typedef double XkFloat64;
 
 xkStaticAssert((sizeof(XkFloat64) * 8) == XK_FLOAT64_WIDTH);
 
-#if defined(__LP32__)
+#if defined(__LP32__) || defined(_WIN32)
 	typedef unsigned int XkSize;
-#elif defined(__ILP32__) || defined(__LLP64__)
+#elif defined(__ILP32__) || defined(__LLP64__) || defined(_WIN64)
 	typedef unsigned int XkSize;
 #elif defined(__LP64__)
 	typedef unsigned long int XkSize;
@@ -238,7 +237,7 @@ xkStaticAssert((sizeof(XkFloat64) * 8) == XK_FLOAT64_WIDTH);
 
 xkStaticAssert((sizeof(XkSize) * 8) == XK_SIZE_WIDTH);
 
-#if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__)
+#if defined(__ILP32__) || defined(__LP32__) || defined(__LLP64__) || defined(__LP64__) || defined(_WIN32)  || defined(_WIN64)
 	typedef char XkChar;
 #endif // __ILP32__ || __LP32__ || __LLP64__ || __LP64__
 
@@ -256,7 +255,7 @@ typedef XkUInt32 XkChar32;
 
 xkStaticAssert((sizeof(XkChar32) * 8) == XK_CHAR32_WIDTH);
 
-#if defined(__LLP64__) || defined(__LP32__)
+#if defined(__LLP64__) || defined(__LP32__)  || defined(_WIN32)  || defined(_WIN64)
 	typedef unsigned short int XkWChar;
 #elif defined(__ILP32__) || defined(__LP64__)
 	typedef unsigned int XkWChar;
@@ -281,3 +280,13 @@ typedef XkWChar* XkWString;
 
 /* ########## TYPES MACROS SECTION ########## */
 #define XK_NULL_HANDLE 		((XkHandle)0)
+
+#define XK_INT8_C(x)    (x)
+#define XK_INT16_C(x)   (x)
+#define XK_INT32_C(x)   (x)
+#define XK_INT64_C(x)   (x ## LL)
+
+#define XK_UINT8_C(x)   (x)
+#define XK_UINT16_C(x)  (x)
+#define XK_UINT32_C(x)  (x ## U)
+#define XK_UINT64_C(x)  (x ## ULL)

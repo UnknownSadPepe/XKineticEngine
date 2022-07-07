@@ -10,7 +10,7 @@ XkResult __xkVulkanCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pV
 
   XkResult result = XK_SUCCESS;
 
-	VkImageCreateInfo vkImageCreateInfo       = {};
+	VkImageCreateInfo vkImageCreateInfo       = {0};
   vkImageCreateInfo.sType                   = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   vkImageCreateInfo.pNext                   = VK_NULL_HANDLE;
 	vkImageCreateInfo.flags                   = 0;
@@ -39,7 +39,7 @@ XkResult __xkVulkanCreateImage(VkImage* const pVkImage, VkDeviceMemory* const pV
 	VkMemoryRequirements vkMemoryRequirements;
 	vkGetImageMemoryRequirements(_xkVulkanContext.vkLogicalDevice, *pVkImage, &vkMemoryRequirements);
 
-  VkMemoryAllocateInfo vkMemoryAllocateInfo = {};
+  VkMemoryAllocateInfo vkMemoryAllocateInfo = {0};
 	vkMemoryAllocateInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   vkMemoryAllocateInfo.pNext                = VK_NULL_HANDLE;
 	vkMemoryAllocateInfo.allocationSize       = vkMemoryRequirements.size;

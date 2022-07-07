@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/DirectX12/Internal.h"
+#include "XKinetic/D3D12/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
@@ -9,7 +9,7 @@ XkResult __xkD3D12CreateDevice(void) {
   HRESULT hResult = D3D12CreateDevice((IUnknown*)_xkD3D12Context.dxgiAdapter4, _xkD3D12Context.d3dDeviceMaximumFeatureLevel, &IID_ID3D12Device8, &_xkD3D12Context.d3d12Device8);
   if(FAILED(hResult)) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("DirectX12: Failed to create device: %s", __xkD3D12ResultString(hResult));
+    xkLogError("DirectX12: Failed to create device: %s", __xkD3D12GetResultString(hResult));
     goto _catch;
   }
 

@@ -17,8 +17,8 @@ XkResult xkLoadModule(XkModule* pModule, const XkString path) {
 
 	XkModule module = *pModule;
 
-	module->win32.handle = LoadLibraryA(path);
-	if(module->win32.handle == NULL) {
+	module->windows.winapi.handle = LoadLibraryA(path);
+	if(module->windows.winapi.handle == NULL) {
 		__xkErrorHandle("Win32: Failed to load module");
 		result = XK_ERROR_MODULE_NOT_PRESENT;
 		goto _free;
@@ -38,7 +38,7 @@ _free:
 void xkUnloadModule(XkModule module) {
 	xkAssert(module);
 
-	FreeLibrary(module->win32.handle);
+	FreeLibrary(module->windows.winapi.handle);
 
 	xkFreeMemory(module);
 }
@@ -49,7 +49,7 @@ XkResult xkGetModuleSymbol(XkProcPfn* pPfnProc, const XkString name, XkModule mo
 
 	XkResult result = XK_SUCCESS;
 
-	*pPfnProc = (XkProcPfn)GetProcAddress(module->win32.handle, name);
+	*pPfnProc = (XkProcPfn)GetProcAddress(module->windows.winapi.handle, name);
 	if(*pPfnProc == NULL) {
 		__xkErrorHandle("Win32: Failed to get module symbol");
 		result = XK_ERROR_MODULE_SYMBOL_NOT_PRESENT;
