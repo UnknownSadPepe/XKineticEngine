@@ -90,7 +90,7 @@ struct XkModule_T {
 typedef struct __XkPlatform_T {
 	XkInt16			keycodes[512];
 
-	XkJoystick	joysticks[XK_JOYSTICK_16 + 1];
+	XkJoystick	joysticks[XK_JOYSTICK_ID_16 + 1];
 
 	XK_PLATFORM;
 } __XkPlatform;

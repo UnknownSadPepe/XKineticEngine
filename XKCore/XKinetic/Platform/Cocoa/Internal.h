@@ -10,22 +10,31 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef struct __XkCocoaWindow_T {
+typedef struct __XkAppleWindow_T {
+	struct {
+		/// TODO: Implementation.
+	} cocoa;
 	/// TODO: Implementation.
-} __XkCocoaWindow;
+} __XkAppleWindow;
 
-typedef struct __XkCocoaJoystick_T {
+typedef struct __XkAppleJoystick_T {
+	struct {
+		/// TODO: Implementation.
+	} cocoa;
 	/// TODO: Implementation.
-} __XkCocoaJoystick;
+} __XkAppleJoystick;
 
-typedef struct __XkCocoaPlatform_T {
+typedef struct __XkApplePlatform_T {
+	struct {
+		/// TODO: Implementation.
+	} cocoa;
 	/// TODO: Implementation.
-} __XkCocoaPlatform;
+} __XkApplePlatform;
 
 /* ########## TYPES MACROS SECTION ########## */
-#define XK_PLATFORM_WINDOW 		__XkCocoaWindow 		cocoa
-#define XK_PLATFORM_JOYSTICK 	__XkCocoaJoystick 	cocoa
-#define XK_PLATFORM 					__XkCocoaPlatform 	cocoa
+#define XK_PLATFORM_WINDOW 		__XkAppleWindow 		apple
+#define XK_PLATFORM_JOYSTICK 	__XkAppleJoystick 	apple
+#define XK_PLATFORM 					__XkApplePlatform 	apple
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus

@@ -86,6 +86,10 @@ typedef struct __XkWin32Platform_T {
 
 		IDirectInput8W* 	dInput;
 	} dinput;
+
+	struct {
+		XkBool8 					initialized;
+	} xinput;
 } __XkWin32Platform;
 
 /* ########## TYPES MACROS SECTION ########## */

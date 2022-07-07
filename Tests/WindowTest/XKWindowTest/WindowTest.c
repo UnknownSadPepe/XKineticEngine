@@ -182,7 +182,7 @@ static void __xkWindowDropFile(XkWindow window, const XkSize count, const XkStri
 }
 
 static void __xkJoystickEvent(XkJoystickId jid, const XkJoystickEvent event) {
-	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
+	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
 	if(event == XK_JOYSTICK_CONNECTED) {
 		xkLogNotice("joystick%d disconnected", jid);
@@ -191,20 +191,20 @@ static void __xkJoystickEvent(XkJoystickId jid, const XkJoystickEvent event) {
 	}
 }
 
-static void __xkJoystickAxis(XkJoystickId jid, const XkGamepadAxis axis, const XkFloat32 value) {
-	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
+static void __xkGamepadAxis(XkJoystickId jid, const XkGamepadAxis axis, const XkFloat32 value) {
+	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
 	xkLogNotice("joystick%d axis: %d: value: %d", jid, axis, value);
 }
 
-static void __xkJoystickButton(XkJoystickId jid, const XkGamepadButton button, const XkAction action) {
-	xkAssert(jid >= XK_JOYSTICK_1 && jid< XK_JOYSTICK_16);
+static void __xkGamepadButton(XkJoystickId jid, const XkGamepadButton button, const XkAction action) {
+	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid< XK_JOYSTICK_ID_16);
 
 	xkLogNotice("joystick%d button: %d: action: %d", jid, button, action);
 }
 
-static void __xkJoystickHat(XkJoystickId jid, const XkGamepadHat hat, const XkAction action) {
-	xkAssert(jid >= XK_JOYSTICK_1 && jid < XK_JOYSTICK_16);
+static void __xkGamepadHat(XkJoystickId jid, const XkGamepadHat hat, const XkAction action) {
+	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
 	xkLogNotice("joystick%d hat: %d: action: %d", jid, hat, action);
 }
@@ -236,12 +236,27 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
-	for(XkJoystickId jid = XK_JOYSTICK_1; jid <= XK_JOYSTICK_16; jid++) {
+	for(XkJoystickId jid = XK_JOYSTICK_ID_1; jid <= XK_JOYSTICK_ID_16; jid++) {
 		if(xkJoystickPresent(jid)) {
 			xkSetJoystickEventCallback(jid, __xkJoystickEvent);
-			xkSetJoystickAxisCallback(jid, __xkJoystickAxis);
-			xkSetJoystickButtonCallback(jid, __xkJoystickButton);
-			xkSetJoystickHatCallback(jid, __xkJoystickHat);
+
+			XkJoystickType type = xkJoystickGetType(jid);
+
+			if(type == XK_JOYSTICK_TYPE_GAMEPAD) {
+				xkLogInfo("Found %d gamepad", jid);
+
+				xkSetGamepadAxisCallback(jid, __xkGamepadAxis);
+				xkSetGamepadButtonCallback(jid, __xkGamepadButton);
+				xkSetGamepadHatCallback(jid, __xkGamepadHat);
+			} else if (type == XK_JOYSTICK_TYPE_WHEEL) {
+				xkLogInfo("Found %d whell", jid);
+			} else if (type == XK_JOYSTICK_TYPE_ARCADE_STICK) {
+				xkLogInfo("Found %d arcade stick", jid);
+			} else if (type == XK_JOYSTICK_TYPE_FLIGHT_STICK) {
+				xkLogInfo("Found %d flight stick", jid);
+			} 
+		} else {
+			xkLogInfo("Not found %d joystick", jid);
 		}
 	}
 

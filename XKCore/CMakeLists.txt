@@ -101,7 +101,7 @@ endif()
 target_link_libraries(XKCore PRIVATE XKMath)   
 
 if(WIN32)
-  target_link_libraries(XKCore PRIVATE user32 gdi32 dxguid Dinput8)   
+  target_link_libraries(XKCore PRIVATE user32 gdi32 dxguid Dinput8 xinput9_1_0)   
 endif()
 
 if(UNIX AND NOT APPLE)
