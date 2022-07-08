@@ -17,7 +17,7 @@ static void __xkWindowSize(XkWindow window, XkSize width, XkSize height) {
 	xkAssert(width > 0);
 	xkAssert(height > 0);
 
-	xkResizeRenderer(_xkApplication.renderer, width, height);
+	//xkResizeRenderer(_xkApplication.renderer, width, height);
 }
 
 XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
@@ -50,7 +50,7 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
 	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
 
-	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
+	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_MAXIMIZED);
 
 	result = xkInitializeRenderer(XK_RENDERER_API_VULKAN);
 	if(result != XK_SUCCESS) {

@@ -19,8 +19,8 @@ typedef struct XkVulkanBuffer_T* XkVulkanBuffer;
 typedef struct XkVulkanTexture_T* XkVulkanTexture;
 
 /* ########## FUNCTIONS SECTION ########## */
-extern XKVULKAN_API XkResult 	xkVulkanInitialize();
-extern XKVULKAN_API void			xkVulkanTerminate();
+extern XKVULKAN_API XkResult 	xkVulkanInitializeRenderer();
+extern XKVULKAN_API void			xkVulkanTerminateRenderer();
 
 extern XKVULKAN_API XkResult 	xkVulkanCreateRenderer(XkVulkanRenderer*, const XkWindow, const XkRendererHint);
 extern XKVULKAN_API void 			xkVulkanDestroyRenderer(XkVulkanRenderer);

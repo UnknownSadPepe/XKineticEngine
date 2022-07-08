@@ -103,7 +103,7 @@ void xkLogNotice(const XkString format, ...) {
 	xkEndArgs(args);
 }
 
-#if defined(XK_DEBUG)
+#if defined(XKCORE_DEBUG)
 void xkLogDebug(const XkString format, ...) {
 	XkArgs args;
 	xkStartArgs(args, format);

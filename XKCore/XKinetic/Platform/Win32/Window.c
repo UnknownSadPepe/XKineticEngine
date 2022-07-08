@@ -160,6 +160,9 @@ XkResult xkCreateWindow(XkWindow* pWindow, const XkString title, const XkSize wi
     __xkWarningHandle("Wayland: Null window title");
   }
 
+  window->windows.winapi.width    = width;
+  window->windows.winapi.height   = height;
+
   DWORD style   = __xkWin32GetWindowStyle(window);
   DWORD exStyle = __xkWin32GetWindowExStyle(window);
 
@@ -1069,15 +1072,17 @@ static LRESULT CALLBACK __xkWin32WindowProc(HWND hWindow, UINT message, WPARAM w
     const int width = LOWORD(lParam);
     const int height = HIWORD(lParam);
 
-    if (wParam == SIZE_MINIMIZED) {
+    if(wParam == SIZE_MINIMIZED) {
       __xkInputWindowShow(window, XK_WINDOW_SHOW_MINIMIZED);
     }
 
-    if (wParam == SIZE_MAXIMIZED) {
+    if(wParam == SIZE_MAXIMIZED) {
       __xkInputWindowShow(window, XK_WINDOW_SHOW_MAXIMIZED);
     }
 
-    __xkInputWindowSize(window, width, height);
+    if((width != 0 && height != 0) && ((width != window->windows.winapi.width) || (height != window->windows.winapi.height))) {
+      __xkInputWindowSize(window, width, height);
+    }
 
     break;
   }

@@ -1,6 +1,7 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Module.h"
+#include "XKinetic/Platform/Memory.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */

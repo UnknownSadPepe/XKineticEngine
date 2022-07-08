@@ -69,16 +69,38 @@ struct XkWindow_T {
 	XK_PLATFORM_WINDOW;
 };
 
-typedef struct XkJoystick_T {
-	XkJoystickId 		id;
-	XkBool8 				connected;
+typedef struct __XkJoystickMapElement_T {
+	XkUInt8 type;
+	XkUInt8 index;
+	XkInt8	axisScale;
+	XkInt8	axisOffset;
+} __XkJoystickMapElement;
 
-	struct {
-		XkJoystickEventPfn 	event;
-		XkGamepadAxisPfn 	axis;
-		XkGamepadButtonPfn button;
-		XkGamepadHatPfn 		hat;
-	} callbacks;
+typedef struct __XkJoystickMapping_T {
+	char										name[128];
+	char										guid[33];
+	__XkJoystickMapElement	buttins[8];
+	__XkJoystickMapElement	axes[8];
+} __XkJoystickMapping;
+
+typedef struct XkJoystick_T {
+	XkJoystickId 					id;
+	XkBool8 							connected;
+	XkBool8								allocated;
+
+	XkFloat32*						axis;
+	XkSize								axisCount;
+	
+	XkUInt8*							buttons;
+	XkSize								buttonCount;
+
+	XkUInt8*							hats;
+	XkSize								hatCount;
+
+	__XkJoystickMapping*	mapping;
+
+	char									name[128];
+	char									guid[33];
 
 	XK_PLATFORM_JOYSTICK;
 } XkJoystick;
@@ -91,6 +113,14 @@ typedef struct __XkPlatform_T {
 	XkInt16			keycodes[512];
 
 	XkJoystick	joysticks[XK_JOYSTICK_ID_16 + 1];
+
+	struct {
+		XkJoystickEventPfn 	event;
+		XkGamepadAxisPfn 		axis;
+		XkGamepadButtonPfn	button;
+		XkGamepadHatPfn 		hat;
+	} joystickCallbacks;
+
 
 	XK_PLATFORM;
 } __XkPlatform;
@@ -112,6 +142,9 @@ extern XK_EXPORT void 								__xkWarningHandler(const XkString, ...);
 #if defined(XKCORE_DEBUG)
 	extern XK_EXPORT void 							__xkDebugHandler(const XkString, ...);
 #endif // XKCORE_DEBUG
+
+extern XK_EXPORT XkJoystick*					__xkAllocateJoystick(XkString, XkString, const XkSize, const XkSize, const XkSize);
+extern XK_EXPORT void									__xkFreeJoystick(XkJoystick*);
 
 /* ########## FUNCTIONS HELPERS MACROS SECTION ########## */
 #define 															__xkErrorHandle(message) 		__xkErrorHandler("%s %s %d", message, __FILE__, __LINE__)

@@ -185,7 +185,7 @@ static void __xkJoystickEvent(XkJoystickId jid, const XkJoystickEvent event) {
 	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
 	if(event == XK_JOYSTICK_CONNECTED) {
-		xkLogNotice("joystick%d disconnected", jid);
+		xkLogNotice("joystick%d: %s connected", jid, xkJoystickGetName(jid));
 	} else if(event == XK_JOYSTICK_DISCONNECTED) {
 		xkLogNotice("joystick%d disconnected", jid);
 	}
@@ -194,19 +194,19 @@ static void __xkJoystickEvent(XkJoystickId jid, const XkJoystickEvent event) {
 static void __xkGamepadAxis(XkJoystickId jid, const XkGamepadAxis axis, const XkFloat32 value) {
 	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
-	xkLogNotice("joystick%d axis: %d: value: %d", jid, axis, value);
+	xkLogNotice("joystick%d axis: %d: value: %F", jid, axis, value);
 }
 
 static void __xkGamepadButton(XkJoystickId jid, const XkGamepadButton button, const XkAction action) {
 	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid< XK_JOYSTICK_ID_16);
 
-	xkLogNotice("joystick%d button: %d: action: %d", jid, button, action);
+	//xkLogNotice("joystick%d button: %d: action: %d", jid, button, action);
 }
 
 static void __xkGamepadHat(XkJoystickId jid, const XkGamepadHat hat, const XkAction action) {
 	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
-	xkLogNotice("joystick%d hat: %d: action: %d", jid, hat, action);
+	//xkLogNotice("joystick%d hat: %d: action: %d", jid, hat, action);
 }
 
 XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
@@ -230,35 +230,21 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
+	xkSetJoystickEventCallback(__xkJoystickEvent);
+
+	xkSetGamepadAxisCallback(__xkGamepadAxis);
+	xkSetGamepadButtonCallback(__xkGamepadButton);
+	xkSetGamepadHatCallback(__xkGamepadHat);
+
 	result = xkInitializeJoystick();
 	if(result != XK_SUCCESS) {
 		xkLogFatal("Failed to initialize joystick: %d", result);
 		goto _catch;
 	}
 
-	for(XkJoystickId jid = XK_JOYSTICK_ID_1; jid <= XK_JOYSTICK_ID_16; jid++) {
-		if(xkJoystickPresent(jid)) {
-			xkSetJoystickEventCallback(jid, __xkJoystickEvent);
-
-			XkJoystickType type = xkJoystickGetType(jid);
-
-			if(type == XK_JOYSTICK_TYPE_GAMEPAD) {
-				xkLogInfo("Found %d gamepad", jid);
-
-				xkSetGamepadAxisCallback(jid, __xkGamepadAxis);
-				xkSetGamepadButtonCallback(jid, __xkGamepadButton);
-				xkSetGamepadHatCallback(jid, __xkGamepadHat);
-			} else if (type == XK_JOYSTICK_TYPE_WHEEL) {
-				xkLogInfo("Found %d whell", jid);
-			} else if (type == XK_JOYSTICK_TYPE_ARCADE_STICK) {
-				xkLogInfo("Found %d arcade stick", jid);
-			} else if (type == XK_JOYSTICK_TYPE_FLIGHT_STICK) {
-				xkLogInfo("Found %d flight stick", jid);
-			} 
-		} else {
-			xkLogInfo("Not found %d joystick", jid);
-		}
-	}
+	//for(XkJoystickId jid = XK_JOYSTICK_ID_1; jid <= XK_JOYSTICK_ID_16; jid++) {
+		xkJoystickPresent(XK_JOYSTICK_ID_1);
+	//}
 
 	result = xkInitializeImageLoader("");
 	if(result != XK_SUCCESS) {
@@ -272,20 +258,20 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 		goto _catch;
 	}
 
-	xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
-	xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
-	xkSetWindowButtonCallback(_xkApplication.window, __xkWindowButton);
-	xkSetWindowCursorCallback(_xkApplication.window, __xkWindowCursor);
-	xkSetWindowCursorEnterCallback(_xkApplication.window, __xkWindowCursorEnter);
-	xkSetWindowScrollCallback(_xkApplication.window, __xkWindowScroll);
+	//xkSetWindowShowCallback(_xkApplication.window, __xkWindowShow);
+	//xkSetWindowKeyCallback(_xkApplication.window, __xkWindowKey);
+	//xkSetWindowButtonCallback(_xkApplication.window, __xkWindowButton);
+	//xkSetWindowCursorCallback(_xkApplication.window, __xkWindowCursor);
+	//xkSetWindowCursorEnterCallback(_xkApplication.window, __xkWindowCursorEnter);
+	//xkSetWindowScrollCallback(_xkApplication.window, __xkWindowScroll);
 	xkSetWindowCloseCallback(_xkApplication.window, __xkWindowClose);
-	xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
-	xkSetWindowPositionCallback(_xkApplication.window, __xkWindowPosition);
-	xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
-	xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
+	//xkSetWindowSizeCallback(_xkApplication.window, __xkWindowSize);
+	//xkSetWindowPositionCallback(_xkApplication.window, __xkWindowPosition);
+	//xkSetWindowFocusCallback(_xkApplication.window, __xkWindowFocus);
+	//xkSetWindowDropFileCallback(_xkApplication.window, __xkWindowDropFile);
 
 	xkShowWindow(_xkApplication.window, XK_WINDOW_SHOW_DEFAULT);
-
+/*
 	result = xkLoadImage(&iconConfig, "XKineticIcon.png");
 	if(result != XK_SUCCESS) {
 		xkLogError("Failed to load window icon");
@@ -320,7 +306,7 @@ XkResult xkInitializeApplication(const XkSize argc, const XkString* argv) {
 	cursorIcon.pixels 			= cursorConfig.pixels;
 
 	xkSetWindowCursor(_xkApplication.window, &cursorIcon);
-
+	*/
 _catch:
 	return(result);
 }

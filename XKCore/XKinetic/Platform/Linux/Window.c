@@ -1297,7 +1297,7 @@ static void __xkXDGToplevelConfigure(void* data, struct xdg_toplevel* xdgTopleve
     }
   }
 
-	if((width != 0 && height != 0) && (resizing || ((XkSize)width != window->linux.wayland.width && (XkSize)height != window->linux.wayland.height))) {
+	if((width != 0 && height != 0) && (resizing || ((XkSize)width != window->linux.wayland.width || (XkSize)height != window->linux.wayland.height))) {
 		window->linux.wayland.width = (XkSize)width;
 		window->linux.wayland.height = (XkSize)height;
 

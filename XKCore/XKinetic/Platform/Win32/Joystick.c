@@ -2,6 +2,7 @@
 #include "XKinetic/Platform/Internal.h"
 #include "XKinetic/Platform/Joystick.h"
 #include "XKinetic/Platform/Memory.h"
+#include "XKinetic/Core/String.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## MACROS SECTION ########## */
@@ -14,6 +15,50 @@
 #define XK_POLL_AXES			1
 #define XK_POLL_BUTTONS		2
 #define XK_POLL_ALL				(XK_POLL_AXES | XK_POLL_BUTTONS)
+
+#ifndef XINPUT_CAPS_WIRELESS
+	#define XINPUT_CAPS_WIRELESS 0x0002
+#endif // XINPUT_CAPS_WIRELESS
+
+#ifndef XINPUT_CAPS_WIRELESS
+	#define XINPUT_CAPS_WIRELESS 0x0002
+#endif // XINPUT_CAPS_WIRELESS
+
+#ifndef XINPUT_DEVSUBTYPE_WHEEL
+	#define XINPUT_DEVSUBTYPE_WHEEL 0x02
+#endif // XINPUT_DEVSUBTYPE_WHEEL
+
+#ifndef XINPUT_DEVSUBTYPE_ARCADE_STICK
+	#define XINPUT_DEVSUBTYPE_ARCADE_STICK 0x03
+#endif // XINPUT_DEVSUBTYPE_ARCADE_STICK
+
+#ifndef XINPUT_DEVSUBTYPE_FLIGHT_STICK
+	#define XINPUT_DEVSUBTYPE_FLIGHT_STICK 0x04
+#endif // XINPUT_DEVSUBTYPE_FLIGHT_STICK
+
+#ifndef XINPUT_DEVSUBTYPE_DANCE_PAD
+	#define XINPUT_DEVSUBTYPE_DANCE_PAD 0x05
+#endif // XINPUT_DEVSUBTYPE_DANCE_PAD
+
+#ifndef XINPUT_DEVSUBTYPE_GUITAR
+	#define XINPUT_DEVSUBTYPE_GUITAR 0x06
+#endif // XINPUT_DEVSUBTYPE_GUITAR
+
+#ifndef XINPUT_DEVSUBTYPE_DRUM_KIT
+	#define XINPUT_DEVSUBTYPE_DRUM_KIT 0x08
+#endif // XINPUT_DEVSUBTYPE_DRUM_KIT
+
+#ifndef XINPUT_DEVSUBTYPE_ARCADE_PAD
+	#define XINPUT_DEVSUBTYPE_ARCADE_PAD 0x13
+#endif // XINPUT_DEVSUBTYPE_ARCADE_PAD
+
+#ifndef XUSER_MAX_COUNT
+	#define XUSER_MAX_COUNT 4
+#endif // XUSER_MAX_COUNT
+
+#ifndef DIDFT_OPTIONAL
+	#define DIDFT_OPTIONAL 0x80000000
+#endif // DIDFT_OPTIONAL
 
 typedef struct __xkDInputObject_T {
 	IDirectInputDevice8W*				diDevice;
@@ -69,7 +114,7 @@ static DIOBJECTDATAFORMAT _xkDInputObjectDataFormats[] = {
 	{NULL,DIJOFS_BUTTON(28),DIDFT_BUTTON | DIDFT_OPTIONAL | DIDFT_ANYINSTANCE,0},
 	{NULL,DIJOFS_BUTTON(29),DIDFT_BUTTON | DIDFT_OPTIONAL | DIDFT_ANYINSTANCE,0},
 	{NULL,DIJOFS_BUTTON(30),DIDFT_BUTTON | DIDFT_OPTIONAL | DIDFT_ANYINSTANCE,0},
-	{NULL,DIJOFS_BUTTON(31),DIDFT_BUTTON | DIDFT_OPTIONAL | DIDFT_ANYINSTANCE,0},
+	{NULL,DIJOFS_BUTTON(31),DIDFT_BUTTON | DIDFT_OPTIONAL | DIDFT_ANYINSTANCE,0}
 };
 
 
@@ -99,6 +144,8 @@ static BOOL			__xkDInputDeviceObjectCallback(const DIDEVICEOBJECTINSTANCEW*, voi
 static XkInt32	__xkDInputCompareJoystickObjects(const void*, const void*);
 
 static XkBool8	__xkXInputSupport(const GUID*);
+
+static XkString __xkXInputGetDeviceDescription(const XINPUT_CAPABILITIES*);
 
 /* ########## FUNCTIONS SECTION ########## */
 XkResult xkInitializeJoystick() {
@@ -152,6 +199,15 @@ XkResult xkJoystickPresent(XkJoystickId jid) {
 
 	/// TODO: Implementation.
 
+	XkJoystick* pJoystick = &_xkPlatform.joysticks[jid];
+	XkBool8 present = __xkWin32PollJoystick(pJoystick, XK_POLL_PRESENCE);
+	if(present) {
+		goto _catch;
+	} else {
+		result = XK_ERROR_UNKNOWN;
+		goto _catch;
+	}
+
 _catch:
 	return(result);
 }
@@ -163,13 +219,19 @@ void xkJoystickVibrarion(XkJoystickId jid, const XkFloat32 right, const XkFloat3
 	/// TODO: Implementation.		
 }
 
-XkString xkJoystickMappingName(XkJoystick jid) {
+XkString xkJoystickGetMappingName(XkJoystick jid) {
 	xkAssert(jid >= XK_JOYSTICK_ID_1 && jid < XK_JOYSTICK_ID_16);
 
 	return("Windows");
 }
 
 void xkPollJoystickEvents() {
+	for(XkJoystickId jid = XK_JOYSTICK_ID_1; jid <= XK_JOYSTICK_ID_16; jid++) {
+		XkJoystick* pJoystick = &_xkPlatform.joysticks[jid];
+		if(pJoystick->connected) {
+			__xkWin32PollJoystick(pJoystick, XK_POLL_ALL);
+		}
+	}
 	/// TODO: Implementation.
 }
 
@@ -211,17 +273,16 @@ static void __xkXInputDetectJoystickConnection() {
 			continue;
 		}
 
-		XINPUT_CAPABILITIES xInputCapabilities = {0};
-		if(XInputGetCapabilities(index, 0, &xInputCapabilities) != ERROR_SUCCESS) {
+		XINPUT_CAPABILITIES xiCapabilities = {0};
+		if(XInputGetCapabilities(index, 0, &xiCapabilities) != ERROR_SUCCESS) {
 			continue;
 		}
 
 		// Generate a joystick GUID.
 		char guid[33];
-		xkStringFormat(guid, "78696e707574%02x000000000000000000", xInputCapabilities.SubType & 0xFF);
+		xkStringFormat(guid, "78696e707574%02x000000000000000000", xiCapabilities.SubType & 0xFF);
 
-		/// TODO: Allocate joystick.
-		XkJoystick* pJoystick = XK_NULL_HANDLE;
+		XkJoystick* pJoystick = __xkAllocateJoystick(__xkXInputGetDeviceDescription(&xiCapabilities), guid, 6, 10, 1);
 		if(!pJoystick) {
 			continue;
 		}
@@ -271,27 +332,27 @@ static XkBool8 __xkDInputPollJoystick(XkJoystick* const pJoystick, const XkInt32
 		goto _catch;
 	}
 
-	XkGamepadAxis axis = 0; 
-	XkGamepadButton button = 0;
-	XkGamepadHat hat = 0;
+	XkInt32 axisi = 0; 
+	XkInt32 buttoni = 0;
+	XkInt32 hati = 0;
 	for(XkSize i = 0; i < pJoystick->windows.dinput.objectCount; i++) {
-		const void* data = &diState + pJoystick->windows.dinput.objects[i].offset;
+		const void* data = (XkInt8*)&diState + pJoystick->windows.dinput.objects[i].offset;
 
 		switch(pJoystick->windows.dinput.objects[i].type) {
 			case XK_TYPE_AXIS:
 			case XK_TYPE_SLIDER: {
 				// BOO!
-				const XkFloat32 value = (*((LONG*) data) = 0.5f) / 32767.5f;
-				__xkInputGamepadAxis(pJoystick->id, axis, value);
-				++axis;
+				const XkFloat32 value = (*((LONG*)data) + 0.5f) / 32767.5f;
+				__xkInputGamepadAxis(pJoystick->id, axisi, value);
+				++axisi;
 				break;
 			}
 
 			case XK_TYPE_BUTTON: {
 				// BOO!
-				const XkAction action = (*((BYTE*) data) & 0x80) != 0;
-				__xkInputGamepadButton(pJoystick->id, button, action);
-				++button;
+				const XkAction value = (*((BYTE*)data) & 0x80) != 0;
+				__xkInputGamepadButton(pJoystick->id, buttoni, value);
+				++buttoni;
 				break;
 			}
 
@@ -313,8 +374,9 @@ static XkBool8 __xkDInputPollJoystick(XkJoystick* const pJoystick, const XkInt32
 				if(statei < 0 ||  statei > 8) {
 					statei = 8;
 				}
-				__xkInputGamepadHat(pJoystick->id, hat, states[statei]);
-				++hat;
+
+				__xkInputGamepadHat(pJoystick->id, hati, states[statei]);
+				++hati;
 				break;
 			}
 		}
@@ -416,7 +478,7 @@ static void __xkWin32CloseJoystick(XkJoystick* const pJoystick) {
 		IDirectInputDevice8_Release(pJoystick->windows.dinput.diDevice);
 	}
 
-	/// TODO: Free joystick.
+	__xkFreeJoystick(pJoystick);
 }
 
 static BOOL __xkDInputDeviceCallback(const DIDEVICEINSTANCE* diDeviceInstance, void* data) {
@@ -498,29 +560,32 @@ static BOOL __xkDInputDeviceCallback(const DIDEVICEINSTANCE* diDeviceInstance, v
 
 	qsort(object.objects, object.objectCount, sizeof(__XkDInputJoystickObject), __xkDInputCompareJoystickObjects);
 
-	XkChar guid[32];
+	CHAR name[255];
+	if (!WideCharToMultiByte(CP_UTF8, 0, diDeviceInstance->tszInstanceName, -1, name, sizeof(name), NULL, NULL)) {
+		__xkErrorHandle("DirectInput: Failed to convert device name to UTF-8");
+		result = DIENUM_STOP;
+		goto _free;
+	}
+
+	XkChar guid[33];
 	if(xkCompareMemory(&diDeviceInstance->guidProduct.Data4[2], "PIDVID", 6) == 1) {
-		xkStringFormat(guid, "03000000%02x%02x0000%02x%02x000000000000",
+		xkStringNFormat(guid, 33, "03000000%02x%02x0000%02x%02x000000000000",
                 	(XkUInt8)diDeviceInstance->guidProduct.Data1,
                 	(XkUInt8)(diDeviceInstance->guidProduct.Data1 >> 8),
                 	(XkUInt8)(diDeviceInstance->guidProduct.Data1 >> 16),
                 	(XkUInt8)(diDeviceInstance->guidProduct.Data1 >> 24));
 	} else {
-		CHAR name[255];
-		if(!WideCharToMultiByte(CP_UTF8, 0, diDeviceInstance->tszInstanceName, -1, name, sizeof(name), NULL, NULL)) {
-			__xkErrorHandle("DirectInput: Failed to convert device name to UTF-8");
-			result = DIENUM_STOP;
-			goto _free;				
-		}
-
-		xkStringFormat(guid, "05000000%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x00",
+		xkStringNFormat(guid, 33, "05000000%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x00",
                 	name[0], name[1], name[2], name[3],
                 	name[4], name[5], name[6], name[7],
                 	name[8], name[9], name[10]);
 	}
 
-	/// TODO: Allocate joystick.
-	XkJoystick* pJoystick = XK_NULL_HANDLE;
+	XkJoystick* pJoystick = __xkAllocateJoystick(name, 
+																							guid, 
+																							object.axisCount + object.sliderCount,
+																							object.buttonCount,
+																							object.povCount);
 	if(!pJoystick) {
 		result = DIENUM_STOP;
 		goto _free;		
@@ -552,7 +617,66 @@ _free:
 }
 
 static BOOL __xkDInputDeviceObjectCallback(const DIDEVICEOBJECTINSTANCEW* diDeviceObjectInstance, void* data) {
+	BOOL result = DIENUM_CONTINUE;
 
+	__xkDInputObject* object = (__xkDInputObject*)data;
+	__XkDInputJoystickObject* joystickObject = &object->objects[object->objectCount];
+
+	if(DIDFT_GETTYPE(diDeviceObjectInstance->dwType) & DIDFT_AXIS) {
+		if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_Slider, sizeof(GUID) == 1)) {
+			joystickObject->offset = DIJOFS_SLIDER(object->sliderCount);
+		} else if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_XAxis, sizeof(GUID)) == 1) {
+			joystickObject->offset = DIJOFS_X;
+		} else if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_YAxis, sizeof(GUID)) == 1) {
+			joystickObject->offset = DIJOFS_Y;
+		} else if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_ZAxis, sizeof(GUID)) == 1) {
+			joystickObject->offset = DIJOFS_Z;
+		} else if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_RxAxis, sizeof(GUID)) == 1) {
+			joystickObject->offset = DIJOFS_RX;
+		} else if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_RyAxis, sizeof(GUID)) == 1) {
+			joystickObject->offset = DIJOFS_RY;
+		} else if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_RzAxis, sizeof(GUID)) == 1) {
+			joystickObject->offset = DIJOFS_RZ;
+		} else {
+			result = DIENUM_CONTINUE;
+			goto _catch;
+		}
+
+		DIPROPRANGE diPropRange					= {0};
+		diPropRange.diph.dwSize					= sizeof(DIPROPRANGE);
+		diPropRange.diph.dwHeaderSize		= sizeof(DIPROPHEADER);
+		diPropRange.diph.dwObj					= diDeviceObjectInstance->dwType;
+		diPropRange.diph.dwHow					= DIPH_BYID;
+		diPropRange.lMin								= -32768;
+		diPropRange.lMax								= 32767;
+
+		HRESULT hResult = IDirectInputDevice8_SetProperty(object->diDevice, DIPROP_RANGE, &diPropRange.diph);
+		if(FAILED(hResult)) {
+			result = DIENUM_CONTINUE;
+			goto _catch;
+		}
+
+		if(xkCompareMemory(&diDeviceObjectInstance->guidType, &GUID_Slider, sizeof(GUID)) == 1) {
+			joystickObject->type = XK_TYPE_SLIDER;
+			++object->sliderCount;
+		} else {
+			joystickObject->type = XK_TYPE_AXIS;
+			++object->axisCount;
+		}
+	} else if(DIDFT_GETTYPE(diDeviceObjectInstance->dwType) & DIDFT_BUTTON) {
+		joystickObject->offset = DIJOFS_BUTTON(object->buttonCount);
+		joystickObject->type = XK_TYPE_BUTTON;
+		++object->buttonCount;
+	} else if (DIDFT_GETTYPE(diDeviceObjectInstance->dwType) & DIDFT_POV) {
+		joystickObject->offset = DIJOFS_POV(object->povCount);
+		joystickObject->type = XK_TYPE_POV;
+		++object->povCount;
+	}
+
+	++object->objectCount;
+
+_catch:
+	return(result);
 }
 
 static XkInt32	__xkDInputCompareJoystickObjects(const void* first, const void* second) {
@@ -624,4 +748,23 @@ _catch:
 	}
 
 	return(result);
+}
+
+static XkString __xkXInputGetDeviceDescription(const XINPUT_CAPABILITIES* xiCapabilities) {
+	switch (xiCapabilities->SubType) {
+		case XINPUT_DEVTYPE_GAMEPAD: {
+			if (xiCapabilities->Flags & XINPUT_CAPS_WIRELESS) {
+				return("Wireless Xbox Controller");
+			} else {
+				return("Xbox Controller");
+			}
+		}
+
+		case XINPUT_DEVSUBTYPE_WHEEL: return("XInput Wheel");
+
+		case XINPUT_DEVSUBTYPE_ARCADE_STICK: return("XInput Arcade Stick");
+		case XINPUT_DEVSUBTYPE_FLIGHT_STICK: return("XInput Flight Stick");
+
+		default: return("Unknown XInput Device");
+	}
 }

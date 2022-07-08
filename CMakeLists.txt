@@ -36,7 +36,7 @@ add_subdirectory(XKCore)
 add_subdirectory(XKMath)
 
 if(UNIX AND NOT APPLE OR WIN32)
-  #add_subdirectory(XKVulkan)
+  add_subdirectory(XKVulkan)
 endif()
 
 if(WIN32)

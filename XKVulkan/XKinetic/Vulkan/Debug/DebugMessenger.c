@@ -21,7 +21,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL __xkVulkanMessageCallback(VkDebugUtilsMess
 void __xkVulkanPopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT* pVkDebugMessengerCreateInfo) {
   xkAssert(pVkDebugMessengerCreateInfo);
 
-  *pVkDebugMessengerCreateInfo                      = (VkDebugUtilsMessengerCreateInfoEXT){};
+  *pVkDebugMessengerCreateInfo                      = (VkDebugUtilsMessengerCreateInfoEXT){0};
   pVkDebugMessengerCreateInfo->sType                = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   pVkDebugMessengerCreateInfo->pNext                = VK_NULL_HANDLE;
   pVkDebugMessengerCreateInfo->flags                = 0;

@@ -3,6 +3,7 @@
 /* ########## INCLUDE SECTION ########## */
 #include <windows.h>
 #include <windowsx.h>
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <xinput.h>
 #include "XKinetic/XKCore.h"
@@ -37,6 +38,9 @@ typedef struct __XkWin32Window_T {
 	struct {
 		XkBool8		fullscreen;
 
+		XkSize 		width;
+		XkSize 		height;
+
 		XkSize 		minWidth;
 		XkSize 		minHeight;
 		XkSize 		maxWidth;
@@ -44,7 +48,7 @@ typedef struct __XkWin32Window_T {
 
 		HWND			handle;
 
-  	XkBool8 		cursorTracked;
+		XkBool8 		cursorTracked;
 
 		HICON 		hBigIcon;
 		HICON 		hSmallIcon;
