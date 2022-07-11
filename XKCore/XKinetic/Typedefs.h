@@ -281,12 +281,28 @@ typedef XkWChar* XkWString;
 /* ########## TYPES MACROS SECTION ########## */
 #define XK_NULL_HANDLE 		((XkHandle)0)
 
-#define XK_INT8_C(x)    (x)
-#define XK_INT16_C(x)   (x)
-#define XK_INT32_C(x)   (x)
-#define XK_INT64_C(x)   (x ## LL)
+#define XK_INT8_C(x)    (XkInt8)(x)
+#define XK_INT16_C(x)   (XkInt16)(x)
+#define XK_INT32_C(x)   (XkInt32)(x)
+#define XK_INT64_C(x)   (XkInt64)(x ## LL)
 
-#define XK_UINT8_C(x)   (x)
-#define XK_UINT16_C(x)  (x)
-#define XK_UINT32_C(x)  (x ## U)
-#define XK_UINT64_C(x)  (x ## ULL)
+#define XK_UINT8_C(x)   (XkUint8)(x)
+#define XK_UINT16_C(x)  (XkUint16)(x)
+#define XK_UINT32_C(x)  (XkUint32)(x ## U)
+#define XK_UINT64_C(x)  (XkUInt64)(x ## ULL)
+
+#define XK_FLOAT32_C(x)	(XkFloat32)(x ## F)
+#define XK_FLOAT64_C(x)	(XkFloat32)(x)
+
+#define XK_CHAR_C(x)		(XkChar)(x)
+#define XK_CHAR8_C(x)		(XkChar8)(u8 ## x)
+#define XK_CHAR16_C(x)	(XkChar16)(u ## x)
+#define XK_CHAR32_C(x)	(XkChar32)(U ## x)
+#define XK_WCHAR_C(x)		(XkWChar)(L ## x)
+
+#define XK_STRING_C(x)		(XkString)(x)
+#define XK_STRING8_C(x)		(XkString8)(u8 ## x)
+#define XK_STRING16_C(x)	(XkString16)(u ## x)
+#define XK_STRING32_C(x)	(XkString32)(U ## x)
+#define XK_WSTRING_C(x)		(XkWString)(L ## x)
+

@@ -1,9 +1,12 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/Math/Math.h"
+#include "XKinetic/Math/Internal.h"
 
-XkFloat32 xkFFMod(const XkFloat32 x, const XkFloat32 y) {
+/* ########## FUNCTIONS SECTION ########## */
+XkFloat32 xkFModF(const XkFloat32 x, XkFloat32* pIntegral) {
 	return(0.0f);
 }
 
-XkFloat64 xkDFMod(const XkFloat64 x, const XkFloat64 y) {
+XkFloat64 xkDModF(const XkFloat64 x, XkFloat64* pIntegral) {
 	return(0.0);
 }

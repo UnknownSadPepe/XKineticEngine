@@ -171,7 +171,7 @@ void xkAsyncReadFile(XkFile file, XkString buffer, const XkSize size) {
 		goto _catch;
 	}
 
-	memset(aio, 0, sizeof(struct aiocb));
+	xkZeroMemory(aio, sizeof(struct aiocb));
 
 	aio->aio_buf 		= (void*)buffer;
 	aio->aio_fildes = file->posix.handle;

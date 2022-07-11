@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKMath.h"
 #include "XKinetic/Math/Math.h"
 
@@ -8,7 +9,8 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef union {
+/* ########## TYPES SECTION ########## */
+typedef union XkVec3_T {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	__m128 avx;
 #endif // __XKMATH_AVX__ || __XKMATH_AVX2__
@@ -20,7 +22,7 @@ typedef union {
 	XkFloat32 handle[3];
 } XkVec3;
 
-typedef union {
+typedef union XkDVec3_T {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	__m256d avx;
 #endif // __XKMATH_AVX__ || __XKMATH_AVX2__
@@ -32,6 +34,7 @@ typedef union {
 	XkFloat64 handle[3];
 } XkDVec3;
 
+/* ########## FUNCTIONS SECTION ########## */
 XK_INLINE XKMATH_API XkVec3 xkVec3Add(const XkVec3 a, const XkVec3 b) {
 	XkVec3 vec = {0};
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)

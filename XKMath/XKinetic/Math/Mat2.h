@@ -1,5 +1,6 @@
 #pragma once
 
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKMath.h"
 #include "XKinetic/Math/Math.h"
 
@@ -8,6 +9,7 @@
 extern "C" {
 #endif // __cplusplus
 
+/* ########## TYPES SECTION ########## */
 typedef union {
 #if defined(__XKMATH_AVX__) || defined(__XKMATH_AVX2__)
 	__m128 avx[2];
@@ -55,6 +57,8 @@ typedef union {
 
 	XkFloat64 handle[2][4];
 } XkDMat2x4;
+
+/* ########## FUNCTIONS SECTION ########## */
 
 /// NOTE: For using in cpp programs.
 #ifdef __cplusplus
