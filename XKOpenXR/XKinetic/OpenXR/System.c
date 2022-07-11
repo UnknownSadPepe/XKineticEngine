@@ -1,5 +1,5 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/OpenXR/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## GLOBAL VARIABLES SECTION ########## */
@@ -23,7 +23,7 @@ XkResult __xkOpenXRInitializeSystem() {
     goto _catch;
   }
 
-  if(!__xkOpenXRCheckEnvironmentBlendModeSupport()) {
+  if(!__xkOpenXRPickEnvironmentBlendMode()) {
     result = XK_ERROR_UNKNOWN;
 		xkLogError("OpenXR: Environment blend mode doesn't support");
     goto _catch; 
@@ -33,7 +33,7 @@ _catch:
   return(result);
 }
 
-XkBool8 __xkOpenXRCheckEnvironmentBlendModeSupport() {
+XkBool8 __xkOpenXRPickEnvironmentBlendMode() {
   XkBool8 result = XK_TRUE;
 
   uint32_t environmentBlendModeCount = 0;
@@ -57,7 +57,7 @@ XkBool8 __xkOpenXRCheckEnvironmentBlendModeSupport() {
 	XkBool8 availableBlendModeFind = XK_FALSE;
 
   for(uint32_t i = 0; i < environmentBlendModeCount; i++) {
-    if(xrAvailableEnvironmentBlendModes == _xkOpenXREnvironmentBlendMode) {
+    if(xrAvailableEnvironmentBlendModes[i] == _xkOpenXREnvironmentBlendMode) {
       availableBlendModeFind = XK_TRUE;
       break;
     }

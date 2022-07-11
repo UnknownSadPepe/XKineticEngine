@@ -2,7 +2,7 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKCore.h"
-#if defined(XK_POSIX)
+#if defined(XK_UNIX)
 	#include "XKinetic/Platform/Posix/Entry.h"
 #elif defined(XK_WINDOWS)
 	#include "XKinetic/Platform/Win32/Entry.h"

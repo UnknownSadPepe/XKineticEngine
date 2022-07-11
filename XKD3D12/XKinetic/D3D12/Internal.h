@@ -34,6 +34,8 @@ typedef struct __XkD3D12Context_T {
 #endif // XKDIRECTX12_DEBUG
 	ID3D12InfoQueue*						d3d12InfoQueue;
 	ID3D12Device8*							d3d12Device8;
+
+	ID3D12CommandQueue*					d3d12CommandQueue;
 } __XkD3D12Context;
 
 /* ########## EXTERN SECTION ########## */

@@ -5,7 +5,7 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## MACROS SECTION ########## */
-#define XK_UNIX_THREAD_STACK_SIZE (1024 * 1024)
+#define XK_POSIX_THREAD_STACK_SIZE (1024 * 1024)
 
 #define _GNU_SOURCE
 #include <signal.h>
@@ -26,9 +26,9 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	
 	XkThread thread = *pThread;
 
-	thread->stack = xkAllocateMemory(XK_UNIX_THREAD_STACK_SIZE);
+	thread->stack = xkAllocateMemory(XK_POSIX_THREAD_STACK_SIZE);
 	if(!thread->stack) {
-		__xkErrorHandle("Unix: Failed to allocate thread stack memory");
+		__xkErrorHandle("Posix: Failed to allocate thread stack memory");
 		result = XK_ERROR_BAD_ALLOCATE;
 		goto _catch;
 	}
@@ -36,10 +36,10 @@ XkResult xkCreateThread(XkThread* pThread, const XkThreadRoutinePfn pfnRoutine) 
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 
-	pthread_attr_setstack(&attr, thread->stack, XK_UNIX_THREAD_STACK_SIZE);
+	pthread_attr_setstack(&attr, thread->stack, XK_POSIX_THREAD_STACK_SIZE);
 
 	if(pthread_create(&thread->posix.handle, &attr, (void*(*)(void*))pfnRoutine, NULL) != 0) {
-		__xkErrorHandle("Unix: Failed to create thread!");
+		__xkErrorHandle("Posix: Failed to create thread!");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}
@@ -104,7 +104,7 @@ XkResult xkCreateMutex(XkMutex* pMutex) {
 	XkMutex mutex = *pMutex;
 
 	if(pthread_mutex_init(&mutex->posix.handle, NULL) != 0) {
-		__xkErrorHandle("Unix: Failed to create mutex");
+		__xkErrorHandle("Posix: Failed to create mutex");
 		result = XK_ERROR_UNKNOWN;
 		goto _catch;
 	}

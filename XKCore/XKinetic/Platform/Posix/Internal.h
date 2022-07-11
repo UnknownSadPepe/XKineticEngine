@@ -2,6 +2,7 @@
 
 /* ########## INCLUDE SECTION ########## */
 #include <pthread.h>
+#define _GNU_SOURCE
 #include <aio.h>
 #include "XKinetic/XKCore.h"
 

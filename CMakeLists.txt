@@ -1,14 +1,12 @@
-cmake_minimum_required(VERSION 3.21 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 project(XKinetic VERSION 0.0.1 LANGUAGES C)
 
 set(CMAKE_C_FLAGS "-std=c17")
 add_definitions("-Wall")
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
-
-set(CMAKE_GENERATOR_PLATFORM x64)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -26,10 +24,8 @@ set(BUILD_DIR ${CMAKE_SOURCE_DIR}/Target/${CMAKE_BUILD_TYPE})
 set(EXECUTABLE_OUTPUT_PATH ${BUILD_DIR})
 set(LIBRARY_OUTPUT_PATH ${BUILD_DIR})
 
-if(WIN32)
-  set(CMAKE_SHADER_LIBRARY_PREFIX "")
-  set(CMAKE_STATIC_LIBRARY_PREFIX "")
-endif()
+set(CMAKE_SHADER_LIBRARY_PREFIX "")
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
 
 add_subdirectory(XKCore)
 
@@ -43,7 +39,7 @@ if(WIN32)
   add_subdirectory(XKD3D12)
 endif()
 
-#add_subdirectory(XKOpenXR)
+add_subdirectory(XKOpenXR)
 
 add_subdirectory(XKinetic)
 

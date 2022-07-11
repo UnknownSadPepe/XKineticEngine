@@ -35,9 +35,6 @@
 
 #if defined(__unix__)
 	#define XK_UNIX
-
-	/// TODO: Remove XK_POSIX from here.
-	#define XK_POSIX
 #endif // __unix__
 
 #if defined(_POSIX_VERSION)
@@ -45,29 +42,51 @@
 #endif // _POSIX_VERSION
 
 #if defined(__GNUC__) || defined(__clang__) || defined(__TINYC__)
-	#define XK_EXPORT __attribute__((visibility("default")))
+	#define XK_EXPORT		__attribute__((visibility("default")))
 	#define XK_IMPORT
-#elif defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
-	#define XK_EXPORT __declspec(dllexport)
-	#define XK_IMPORT __declspec(dllimport)
-#else
-	#error Unknown compiler
-#endif /* 
-	(__GNUC__ || __clang__ || __TINYC__) 
-	|| (_MSC_VER || __MINGW32__ || __MINGW64__)
-*/
 
-#if defined(__GNUC__) || defined(__clang__) || defined(__TINYC__)
+	//#define XK_EXPORT __attribute__((dllexport))
+	//#define XK_IMPORT __attribute__((dllimport))
+
 	#define XK_INLINE __attribute__((always_inline)) inline
 	#define XK_NOINLINE __attribute__((noinline))
 	#define XK_CLEANUP(function) __attribute__((cleanup(function)))
 
+	#define XK_FASTCALL __attribute__((fastcall))
+	#define XK_CDECL __attribute__((cdecl))
+	#define XK_STDCALL __attribute__((stdcall))
+
+	#define XK_PURE __attribute__((pure))
+	
+	#define XK_NONULL __attribute__((nonull))
+
+	#define XK_VISIBILITY_DEFAULT		__attribute__((visibility("default")))
+	#define XK_VISIBILITY_HIDDEN		__attribute__((visibility("hidden")))
+	#define XK_VISIBILITY_PROTECTED	__attribute__((visibility("protected")))
+	#define XK_VISIBILITY_INTERNAL	__attribute__((visibility("internal")))
+
 	#define __xkBreak() __builtin_trap()
 #elif defined(_MSC_VER) || defined(__MINGW32__) || defined(__MINGW64__)
+	#define XK_EXPORT __declspec(dllexport)
+	#define XK_IMPORT __declspec(dllimport)
+
 	#include <intrin.h>
 	#define XK_INLINE __forceinline
 	#define XK_NOINLINE __declspec(noinline)
 	#define XK_CLEANUP(function) __attribute__((cleanup(function)))
+
+	#define XK_FASTCALL __fastcall
+	#define XK_CDECL 		__cdecl
+	#define XK_STDCALL 	__stdcall
+
+	#define XK_PURE __attribute__((pure))
+	
+	#define XK_NONULL __attribute__((nonull))
+
+	#define XK_VISIBILITY_DEFAULT		__attribute__((visibility("default")))
+	#define XK_VISIBILITY_HIDDEN		__attribute__((visibility("hidden")))
+	#define XK_VISIBILITY_PROTECTED	__attribute__((visibility("protected")))
+	#define XK_VISIBILITY_INTERNAL	__attribute__((visibility("internal")))
 
 	#define __xkBreak() __debugbreak()
 #else 
@@ -81,6 +100,3 @@
 #define C17 201710L
 #define C23 202312L
 
-#define XK_CDECL 		__cdecl
-#define XK_FASTCALL __fastcall
-#define XK_STDCALL 	__stdcall

@@ -1,7 +1,11 @@
+/* ########## INCLUDE SECTION ########## */
 #include "XKinetic/OpenXR/Internal.h"
+#include "XKinetic/OpenXR/Interface.h"
 
+/* ########## GLOBAL VARIABLES SECTION ########## */
 __XkXRContext _xkOpenXRContext;
 
+/* ########## FUNCTIONS SECTION ########## */
 XkString __xkOpenXRGetResultString(const XrResult xrResult) {
   switch(xrResult) {
     case XR_SUCCESS:                        return "Success";
@@ -9,14 +13,14 @@ XkString __xkOpenXRGetResultString(const XrResult xrResult) {
   };
 }
 
-XkResult xkOpenXRInitializeContext(void) {
+XkResult xkOpenXRInitializeContext(const XkRendererApi api) {
   XkResult result = XK_SUCCESS;
 
   if(_xkOpenXRContext.initialized) {
     goto _catch;
   }
 
-  result = __xkOpenXRCreateInstance();
+  result = __xkOpenXRCreateInstance(api);
   if(result != XK_SUCCESS) {
     xkLogError("Failed to create OpenXR instance: %d", result);
     result = XK_ERROR_INITIALIZE_FAILED;

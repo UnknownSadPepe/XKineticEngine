@@ -24,8 +24,7 @@ void xkWriteConsole(const XkConsoleHandle handle, const XkString buffer, const X
 		default: return;
 	}
 
-	LPDWORD numberWritten = 0;
-	WriteConsoleA(stream, buffer, (DWORD)size, numberWritten, 0);
+	WriteConsoleA(stream, buffer, (DWORD)size, NULL, NULL);
 }
 
 void xkWriteConsoleColored(const XkConsoleHandle handle, const XkConsoleColor color, const XkString buffer, const XkSize size) {

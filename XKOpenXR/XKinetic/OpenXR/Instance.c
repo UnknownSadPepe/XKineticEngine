@@ -3,24 +3,6 @@
 #include "XKinetic/Core/Assert.h"
 
 /* ########## GLOBAL VARIABLES SECTION ########## */
-const char* _xkOpenXRInstanceExtensions[] = {
-#if defined(XKOPENXR_VULKAN)
-	XR_KHR_VULKAN_ENABLE_EXTENSION_NAME
-#elif defined(XKOPENXR_DIRECTX12)
-	XR_KHR_D3D12_ENABLE_EXTENSION_NAME
-#endif // XKOPENXR_VULKAN || XKOPENXR_DIRECTX12
-
-#ifdef XKOPENXR_DEBUG
-	XR_EXT_DEBUG_UTILS_EXTENSION_NAME
-#endif // XKOPENXR_DEBUG
-};
-
-#ifdef XKOPENXR_DEBUG
-const uint32_t _xkOpenXRInstanceExtensionCount = 3;
-#else
-const uint32_t _xkOpenXRInstanceExtensionCount = 2;
-#endif // XKOPENXR_DEBUG
-
 #ifdef XKOPENXR_DEBUG
 const char* _xkOpenXRInstanceLayers[] = {
 	"XR_APILAYER_LUNARG_core_validation"
@@ -34,22 +16,24 @@ const uint32_t _xkOpenXRInstanceLayerCount = 0;
 #endif // XKOPENXR_DEBUG
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-static XkBool8 __xkOpenXRCheckInstanceExtensionsSupport();
-static XkBool8 __xkOpenXRCheckInstanceLayersSupport();
+static XkBool8			__xkOpenXRCheckInstanceExtensionsSupport();
+static XkBool8			__xkOpenXRCheckInstanceLayersSupport();
+
+static char** __xkOpenXRGetInstanceExtensions(uint32_t* const);
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult __xkOpenXRCreateInstance() {
+XkResult __xkOpenXRCreateInstance(const XkRendererApi api) {
 	XkResult result = XK_SUCCESS;
 
 	if (!__xkOpenXRCheckInstanceExtensionsSupport()) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("OpenXR: instance extensions doesn't support");
+		xkLogError("OpenXR: Instance extensions doesn't support");
 		goto _catch;
 	}
 
 	if (!__xkOpenXRCheckInstanceLayersSupport()) {
 		result = XK_ERROR_UNKNOWN;
-		xkLogError("OpenXR: instance layers doesn't support");
+		xkLogError("OpenXR: Instance layers doesn't support");
 		goto _catch;
 	}
 
@@ -62,6 +46,14 @@ XkResult __xkOpenXRCreateInstance() {
 	xkCopyString(xrApplicationInfo.engineName, "XKineticEngine");
 	xrApplicationInfo.engineVersion 				= XR_MAKE_VERSION(0, 0, 1);
 	xrApplicationInfo.apiVersion 						= XR_VERSION_1_0;
+
+	uint32_t extensionCount = 0;
+	char** extensions = __xkOpenXRGetInstanceExtensions(&extensionCount);
+	if(extensionCount <= 0) {
+		result = XK_ERROR_UNKNOWN;
+		xkLogError("OpenXR: Failed to get instance extensions");
+		goto _catch;
+	}
 
 	XrInstanceCreateInfo xrInstanceCreateInfo 	= {0};
 	xrInstanceCreateInfo.type 									= XR_TYPE_INSTANCE_CREATE_INFO;
@@ -85,6 +77,13 @@ XkResult __xkOpenXRCreateInstance() {
 	}
 
 _catch:
+	if(extensions) {
+		for(XkSize i = 0; i < extensionCount; i++) {
+			xkFreeMemory(extensions[i]);
+		}
+		xkFreeMemory(extensions);
+	}
+
 	return(result);
 }
 
@@ -202,4 +201,93 @@ _catch:
 	}
 
 	return(result);
+}
+
+const char* _xkOpenXRInstanceExtensions[] = {
+#if defined(XKOPENXR_VULKAN)
+	XR_KHR_VULKAN_ENABLE_EXTENSION_NAME
+#elif defined(XKOPENXR_DIRECTX12)
+	XR_KHR_D3D12_ENABLE_EXTENSION_NAME
+#endif // XKOPENXR_VULKAN || XKOPENXR_DIRECTX12
+
+#ifdef XKOPENXR_DEBUG
+	XR_EXT_DEBUG_UTILS_EXTENSION_NAME
+#endif // XKOPENXR_DEBUG
+};
+
+#ifdef XKOPENXR_DEBUG
+const uint32_t _xkOpenXRInstanceExtensionCount = 2;
+#else
+const uint32_t _xkOpenXRInstanceExtensionCount = 1;
+#endif // XKOPENXR_DEBUG
+
+static char** __xkOpenXRGetInstanceExtensions(uint32_t* const pCount) {
+	char** extensions = XK_NULL_HANDLE;
+	uint32_t count = 0;
+
+	if(_xkOpenXRContext.api == XK_RENDERER_API_VULKAN) {
+		++count;
+	} else if(_xkOpenXRContext.api == XK_RENDERER_API_D3D12) {
+		++count;
+	}
+
+#ifdef XKOPENXR_DEBUG
+	++count;
+#endif // XKOPENXR_DEBUG
+
+	extensions = xkAllocateMemory(sizeof(char*) * count);
+	if(!extensions) {
+		extensions = XK_NULL_HANDLE;
+		xkLogError("OpenXR: Failed to allocate instance extensions");
+		goto _catch;
+	}
+
+#if defined(XK_LINUX) || defined(XK_WINDOWS)
+	if(_xkOpenXRContext.api == XK_RENDERER_API_VULKAN) {
+		extensions[0] = xkAllocateMemory(sizeof(XR_KHR_VULKAN_ENABLE_EXTENSION_NAME));
+		if(!extensions[0]) {
+			extensions[0] = XK_NULL_HANDLE;
+			xkLogError("OpenXR: Failed to allocate instance Vulkan extension");
+			goto _free;
+		}
+		xkCopyString(extensions[0], XR_KHR_VULKAN_ENABLE_EXTENSION_NAME);
+	}
+#endif // XK_LINUX || XK_WINDOWS
+
+#if defined(XK_WINDOWS)
+	if(_xkOpenXRContext.api == XK_RENDERER_API_D3D12) {
+		extensions[0] = xkAllocateMemory(sizeof(XR_KHR_D3D12_ENABLE_EXTENSION_NAME));
+		if(!extensions[0]) {
+			extensions[0] = XK_NULL_HANDLE;
+			xkLogError("OpenXR: Failed to allocate instance DirectX12 extension");
+			goto _free;
+		}
+		xkCopyString(extensions[0], XR_KHR_D3D12_ENABLE_EXTENSION_NAME);
+	}
+#endif // XK_WINDOWS
+
+#ifdef XKOPENXR_DEBUG
+		extensions[1] = xkAllocateMemory(sizeof(XR_EXT_DEBUG_UTILS_EXTENSION_NAME));
+		if(!extensions[1]) {
+			extensions[1] = XK_NULL_HANDLE;
+			xkLogError("OpenXR: Failed to allocate instance debug utils extension");
+			goto _free;
+		}
+		xkCopyString(extensions[1], XR_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif // XKOPENXR_DEBUG
+
+	*pCount = count;
+
+_catch:
+	return(extensions);
+
+_free:
+	if(extensions) {
+		for(uint32_t i = 0; i < count; i++) {
+			if(extensions[i]) {
+				xkFreeMemory(extensions[i]);
+			}
+		}
+		xkFreeMemory(extensions);
+	}
 }

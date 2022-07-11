@@ -7,7 +7,6 @@
 #include <xkbcommon/xkbcommon-compose.h>
 #include <linux/limits.h>
 #include <linux/input.h>
-#include "XKinetic/Platform/Unix/Internal.h"
 #include "XKinetic/Platform/Posix/Internal.h"
 #include "XKinetic/XKCore.h"
 

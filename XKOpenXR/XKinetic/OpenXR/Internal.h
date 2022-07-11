@@ -3,14 +3,14 @@
 /* ########## INCLUDE SECTION ########## */
 #include "XKinetic/XKOpenXR.h"
 
-#if defined(__XKOPENXR_VULKAN__)
+#if defined(XK_LINUX) || defined(XK_WINDOWS)
 	#define XKOPENXR_VULKAN
 	#define XR_USE_GRAPHICS_API_VULKAN
 	#include <vulkan/vulkan.h>
 #endif // __XK_XRVULKAN__
 
-#if defined(__XKOPENXR_DIRECTX12__)
-	#define XKOPENXR_DIRECTX12
+#if defined(XK_WINDOWS)
+	#define XKOPENXR_D3D12
 	#define XR_USE_GRAPHICS_API_D3D12
 	#include <d3d12.h>
 #endif // __XK_XRDIRECTX12__
@@ -25,6 +25,7 @@
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 
+#include "XKinetic/Renderer/External.h"
 #include "XKinetic/Core/Minimal.h"
 	
 /* ########## MACROS SECTION ########## */
@@ -38,7 +39,9 @@ extern "C" {
 
 /* ########## TYPES SECTION ########## */
 typedef struct __XkXRContext_T {
-	XkBool8 																	initialized;
+	XkBool8 																initialized;
+
+	XkRendererApi														api;
 
 	XrInstance 															xrInstance;
 #if defined(XKOPENXR_DEBUG)
@@ -54,7 +57,6 @@ typedef struct __XkXRContext_T {
 	XrAction 																xrPoseAction;
 	XrAction 																xrVibrateAction;
 	XrAction 																xrExitAction;
-	XrInteractionProfileSuggestedBinding 		xrProfileBindings;
 
 	XrSession																xrSession;
 
@@ -77,10 +79,7 @@ extern __XkXRContext 									_xkOpenXRContext;
 /* ########## FUNCTIONS SECTION ########## */
 extern XK_EXPORT XkString 		__xkOpenXRGetResultString(XrResult); 
 
-extern XK_EXPORT XkResult 		__xkOpenXRInitializeContext();
-extern XK_EXPORT void 				__xkOpenXRTerminateContext();
-
-extern XK_EXPORT XkResult 		__xkOpenXRCreateInstance();
+extern XK_EXPORT XkResult 		__xkOpenXRCreateInstance(const XkRendererApi);
 extern XK_EXPORT void 				__xkOpenXRDestroyInstance();
 
 #if defined(XKOPENXR_DEBUG)
@@ -104,11 +103,19 @@ extern XK_EXPORT void 				__xkOpenXRDestroySession();
 extern XK_EXPORT XkResult 		__xkOpenXRCreateReferenceSpace();
 extern XK_EXPORT void 				__xkOpenXRDestroyReferenceSpace();
 
-extern XK_EXPORT XkResult 		__xkOpenXRCreateActionSpace(XrSpace*);
+extern XK_EXPORT XkResult 		__xkOpenXRCreateActionSpace(XrSpace*, XrAction, XrPath);
 extern XK_EXPORT void 				__xkOpenXRDestroyActionSpace(XrSpace);
 
-extern XK_EXPORT XkResult 		__xkOpenXRCreateSwapChain();
-extern XK_EXPORT void 				__xkOpenXRDestroySwapChain();
+extern XK_EXPORT XkResult			__xkOpenXRCreateSwapChain(XrSwapchain*,	
+																												XrSwapchainImageBaseHeader*,
+																												const XrSwapchainCreateFlags, 
+																												const XrSwapchainUsageFlags, 
+																												const int64_t, 
+																												const uint32_t, 
+																												const uint32_t, 
+																												const uint32_t, 
+																												const uint32_t);
+extern XK_EXPORT void 				__xkOpenXRDestroySwapChain(XrSwapchain);
 
 /* ########## HELPER FUNCTIONS SECTION ########## */
 #ifdef XKVULKAN_DEBUG

@@ -20,7 +20,7 @@ XkResult __xkOpenXRCreateActionSpace(XrSpace* pXrSpace, XrAction xrAction, XrPat
   XrResult xrResult = xrCreateActionSpace(_xkOpenXRContext.xrSession, &xrActionSpaceInfo, pXrSpace);
   if(xrResult != XR_SUCCESS) {
     result = XK_ERROR_UNKNOWN;
-    xkLogError("Failed to create OpenXR action space: %s", __xkOpenXRGetResultString(xrResult));
+    xkLogError("OpenXR: Failed to create action space: %s", __xkOpenXRGetResultString(xrResult));
     goto _catch;
   }
 

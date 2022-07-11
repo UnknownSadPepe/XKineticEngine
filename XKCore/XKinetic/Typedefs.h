@@ -149,7 +149,7 @@ typedef enum XkResult_T {
 
 typedef void* XkHandle;
 
-static_assert((sizeof(XkHandle) * 8) == XK_HANDLE_WIDTH, "");
+xkStaticAssert((sizeof(XkHandle) * 8) == XK_HANDLE_WIDTH);
 
 typedef _Bool XkBool8;
 

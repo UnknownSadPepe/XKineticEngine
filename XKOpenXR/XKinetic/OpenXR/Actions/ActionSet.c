@@ -8,9 +8,9 @@ XkResult __xkOpenXRCreateActionSet(XrActionSet* pXrActionSet, XkString name, XkS
 
 	XkResult result = XK_SUCCESS;
 
-	XrActionSetCreateInfo xrActionSetCreateInfo = {0};
-	xrActionSetCreateInfo.type = XR_TYPE_ACTION_SET_CREATE_INFO;
-	xrActionSetCreateInfo.next = XR_NULL_HANDLE;
+	XrActionSetCreateInfo xrActionSetCreateInfo		= {0};
+	xrActionSetCreateInfo.type										= XR_TYPE_ACTION_SET_CREATE_INFO;
+	xrActionSetCreateInfo.next										= XR_NULL_HANDLE;
 	xkCopyString(xrActionSetCreateInfo.actionSetName, name);
 	xkCopyString(xrActionSetCreateInfo.localizedActionSetName, localizedName);
 

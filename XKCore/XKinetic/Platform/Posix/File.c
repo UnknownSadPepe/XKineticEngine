@@ -199,7 +199,7 @@ _free:
 void xkWaitAsyncFile(XkFile file) {
 	xkAssert(file);
 
-	/// NOTE: Wait.
+	/// NOTE: Wait until end of writing or reading.
 	while(aio_error(file->posix.aio) == EINPROGRESS) {}
 
 	if(aio_return(file->posix.aio) < 0) {

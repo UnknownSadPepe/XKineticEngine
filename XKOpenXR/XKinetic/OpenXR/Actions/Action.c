@@ -30,7 +30,7 @@ XkResult __xkOpenXRCreateAction(XrAction* pXrAction, XkString name, XkString loc
 	xkCopyString(xrActionCreateInfo.actionName, name);
 	xrActionCreateInfo.actionType						= xrActionType;
 	xrActionCreateInfo.countSubactionPaths	= countSubactionPath;
-	xrActionCreateInfo.subactionPaths 			= subactionPaths;
+	xrActionCreateInfo.subactionPaths 			= xrSubactionPaths;
 	xkCopyString(xrActionCreateInfo.localizedActionName, localizedName);
 
 	XrResult xrResult = xrCreateAction(xrActionSet, &xrActionCreateInfo, pXrAction);

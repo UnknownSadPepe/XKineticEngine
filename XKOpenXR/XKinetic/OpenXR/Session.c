@@ -1,35 +1,50 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/OpenXR/Internal.h"
 #include "XKinetic/Core/Assert.h"
+#if defined(XK_LINUX) || defined(XK_WINDOWS)
+	#include "XKinetic/Vulkan/Internal.h"
+#endif // XK_LINUX || XK_WINDOWS
+
+#if defined(XK_WINDOWS)
+	#include "XKinetic/D3D12/Internal.h"
+#endif // XK_WINDOWS
 
 /* ########## FUNCTIONS DECLARATIONS SECTION ########## */
-XkResult __xkOpenXRCreateSession() {
+XkResult __xkOpenXRCreateSession(const XkRendererApi api) {
   XkResult result = XK_SUCCESS;
 
-#if defined(XK_XRVULKAN)
-  XrGraphicsBindingVulkanKHR xrGraphicsBindingVulkan  = {0};
-  xrGraphicsBindingVulkan.type                        = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR;
-  xrGraphicsBindingVulkan.next                        = XR_NULL_HANDLE; 
-  xrGraphicsBindingVulkan.instance                    = /*TOOD: implementation*/;
-  xrGraphicsBindingVulkan.physicalDevice              = /*TOOD: implementation*/;
-  xrGraphicsBindingVulkan.device                      = /*TOOD: implementation*/;
-  xrGraphicsBindingVulkan.queueFamilyIndex            = /*TOOD: implementation*/;
-  xrGraphicsBindingVulkan.queueIndex                  = /*TOOD: implementation*/; 
-#elif defined(XK_XRDIRECTX12)
-  XrGraphicsBindingD3D12KHR xrGraphicsBindingD3D12    = {0};
-  xrGraphicsBindingD3D12.type                         = XR_TYPE_GRAPHICS_BINDING_D3D12_KHR;
-  xrGraphicsBindingD3D12.next                         = XR_NULL_HANDLE;
-  //xrGraphicsBindingD3D12.device                       = /*TOOD: implementation*/;
-  //xrGraphicsBindingD3D12.queue                        = /*TOOD: implementation*/;
-#endif // XK_XRVULKAN || XK_XRDIRECTX12
+	void* next = XR_NULL_HANDLE;
+
+#if defined(XK_LINUX) || defined(XK_WINDOWS)
+	XrGraphicsBindingVulkanKHR xrGraphicsBindingVulkan  = {0};
+	if(api == XK_RENDERER_API_VULKAN) {
+		next = &xrGraphicsBindingVulkan;
+
+		xrGraphicsBindingVulkan.type                        = XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR;
+		xrGraphicsBindingVulkan.next                        = XR_NULL_HANDLE; 
+		xrGraphicsBindingVulkan.instance                    = _xkVulkanContext.vkInstance;
+		xrGraphicsBindingVulkan.physicalDevice              = _xkVulkanContext.vkPhysicalDevice;
+		xrGraphicsBindingVulkan.device                      = _xkVulkanContext.vkLogicalDevice;
+		xrGraphicsBindingVulkan.queueFamilyIndex            = _xkVulkanContext.queueFamilyIndices.graphics;
+		xrGraphicsBindingVulkan.queueIndex                  = 0; 
+	}
+#endif // XK_LINUX || XK_WINDOWS
+
+#if defined(XK_WINDOWS)
+	XrGraphicsBindingD3D12KHR xrGraphicsBindingD3D12    = {0};	
+	if(api == XK_RENDERER_API_D3D12) {
+		next = &xrGraphicsBindingD3D12;
+
+		xrGraphicsBindingD3D12.type                         = XR_TYPE_GRAPHICS_BINDING_D3D12_KHR;
+		xrGraphicsBindingD3D12.next                         = XR_NULL_HANDLE;
+		xrGraphicsBindingD3D12.device                       = _xkD3D12Context.d3d12Device8;
+		xrGraphicsBindingD3D12.queue                        = _xkD3D12Context.d3d12CommandQueue;
+	}
+#endif // XK_WINDOWS
 
   XrSessionCreateInfo xrSessionInfo   = {0};
   xrSessionInfo.type                  = XR_TYPE_SESSION_CREATE_INFO;
-#if defined(XK_XRVULKAN)
-  xrSessionInfo.next                  = &xrGraphicsBindingVulkan;
-#elif defined(XK_XRDIRECTX12)
-  xrSessionInfo.next                  = &xrGraphicsBindingD3D12;
-#endif // XK_XRVULKAN || XK_XRDIRECTX12
+  xrSessionInfo.next                  = next;
   xrSessionInfo.createFlags           = 0;
   xrSessionInfo.systemId              = _xkOpenXRContext.xrSystemId;
 

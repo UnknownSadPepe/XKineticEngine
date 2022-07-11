@@ -1,9 +1,9 @@
 /* ########## INCLUDE SECTION ########## */
-#include "XKinetic/Vulkan/Internal.h"
+#include "XKinetic/OpenXR/Internal.h"
 #include "XKinetic/Core/Assert.h"
 
 /* ########## FUNCTIONS SECTION ########## */
-XkResult __xkOpenXRProfileBindings(const uint32_t countBinding, XrActionSuggestedBinding* xrBindings, XrPath xrInteractionProfile) {
+XkResult __xkOpenXRProfileBindings(const uint32_t bindingCount, XrActionSuggestedBinding* xrBindings, XrPath xrInteractionProfile) {
   xkAssert(xrBindings);
   xkAssert(countBinding > 0);
   xkAssert(xrInteractionProfile);
@@ -15,9 +15,9 @@ XkResult __xkOpenXRProfileBindings(const uint32_t countBinding, XrActionSuggeste
   xrProfileBindings.next                                  = XR_NULL_HANDLE;
   xrProfileBindings.interactionProfile                    = xrInteractionProfile;;
   xrProfileBindings.suggestedBindings                     = xrBindings;
-  xrProfileBindings.countSuggestedBindings                = xrBindings;
+  xrProfileBindings.countSuggestedBindings                = bindingCount;
 
-  XrResult xrResult = xrSuggestInteractionProfileBindings(_xkOpenXRContext.xrInstance, &_xkOpenXRContext.xrProfileBindings);
+  XrResult xrResult = xrSuggestInteractionProfileBindings(_xkOpenXRContext.xrInstance, &xrProfileBindings);
   if(result != XK_SUCCESS) {
     xkLogError("OpenXR: Failed to suggest interaction profile bindings: %s", __xkOpenXRGetResultString(xrResult));
     result = XK_ERROR_INITIALIZE_FAILED;

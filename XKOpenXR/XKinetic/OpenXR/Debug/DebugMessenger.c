@@ -21,14 +21,14 @@ XrBool32 __xkOpenXRMessageCallback(XrDebugUtilsMessageSeverityFlagsEXT xrSeverit
 void __xkOpenXRPopulateDebugMessengerCreateInfo(XrDebugUtilsMessengerCreateInfoEXT* pXrDebugMessengerCreateInfo) {
   xkAssert(pXrDebugMessengerCreateInfo);
 
-  *pXrDebugMessengerCreateInfo                      = (XrDebugUtilsMessengerCreateInfoEXT){};
-  pXrDebugMessengerCreateInfo->sType                = XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-  pXrDebugMessengerCreateInfo->pNext                = XR_NULL_HANDLE;
-  pXrDebugMessengerCreateInfo->flags                = 0;
-  pXrDebugMessengerCreateInfo->messageSeverity      = XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-  pXrDebugMessengerCreateInfo->messageType          = XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
-  pXrDebugMessengerCreateInfo->pfnUserCallback      = __xkOpenXRMessageCallback;
-  pXrDebugMessengerCreateInfo->pUserData            = XR_NULL_HANDLE;
+  *pXrDebugMessengerCreateInfo                  = (XrDebugUtilsMessengerCreateInfoEXT){};
+  pXrDebugMessengerCreateInfo->sType            = XR_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+  pXrDebugMessengerCreateInfo->pNext            = XR_NULL_HANDLE;
+  pXrDebugMessengerCreateInfo->flags            = 0;
+  pXrDebugMessengerCreateInfo->messageSeverity  = XR_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+  pXrDebugMessengerCreateInfo->messageType      = XR_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+  pXrDebugMessengerCreateInfo->pfnUserCallback  = __xkOpenXRMessageCallback;
+  pXrDebugMessengerCreateInfo->pUserData        = XR_NULL_HANDLE;
 }
 
 XkResult __xkOpenXRCreateDebugMessenger() {

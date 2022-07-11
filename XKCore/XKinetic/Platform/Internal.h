@@ -7,7 +7,7 @@
 #endif // XK_POSIX
 
 #if defined(XK_UNIX)
-	#include "XKinetic/Platform/Unix/Internal.h"
+	//#include "XKinetic/Platform/Unix/Internal.h"
 #endif // XK_POSIX
 
 #if defined(XK_LINUX)
